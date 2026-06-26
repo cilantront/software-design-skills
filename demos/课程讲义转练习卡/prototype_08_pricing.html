@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原型08 - 付费套餐</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #F5F7FA; color: #333; }
+        .navbar { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+        .navbar .logo { font-size: 18px; font-weight: 600; color: #4096FF; display: flex; align-items: center; gap: 8px; }
+        .navbar .logo-icon { width: 28px; height: 28px; background: #4096FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
+        .navbar .nav-links { display: flex; gap: 24px; margin-left: 40px; }
+        .navbar .nav-links a { color: #666; text-decoration: none; font-size: 14px; }
+        .navbar .nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .btn-primary { background: #4096FF; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn-secondary { background: #fff; color: #666; border: 1px solid #D9D9D9; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .quota-badge { background: #F0F5FF; color: #4096FF; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: #E6F4FF; display: flex; align-items: center; justify-content: center; color: #4096FF; font-size: 14px; }
+
+        .main { margin-top: 56px; padding: 40px 24px; }
+        .proto-banner { background: #FFF7E6; border: 1px dashed #FA8C16; padding: 8px 16px; border-radius: 6px; margin-bottom: 24px; font-size: 13px; color: #D46B08; max-width: 1000px; margin-left: auto; margin-right: auto; }
+
+        /* Pricing Header */
+        .pricing-header { text-align: center; margin-bottom: 40px; max-width: 1000px; margin-left: auto; margin-right: auto; }
+        .pricing-header h1 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+        .pricing-header p { font-size: 15px; color: #999; }
+
+        /* Pricing Cards */
+        .pricing-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto 48px; }
+        .pricing-card { background: #fff; border-radius: 12px; padding: 32px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 2px solid #F0F0F0; text-align: center; position: relative; transition: all 0.3s; }
+        .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        .pricing-card.recommended { border-color: #4096FF; }
+        .pricing-card .rec-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #4096FF; color: #fff; padding: 4px 16px; border-radius: 12px; font-size: 12px; }
+        .pricing-card .plan-icon { font-size: 36px; margin-bottom: 12px; }
+        .pricing-card .plan-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .pricing-card .plan-desc { font-size: 13px; color: #999; margin-bottom: 16px; }
+        .pricing-card .plan-price { margin-bottom: 20px; }
+        .pricing-card .plan-price .amount { font-size: 36px; font-weight: 700; color: #4096FF; }
+        .pricing-card .plan-price .amount small { font-size: 14px; font-weight: 400; }
+        .pricing-card .plan-price .period { font-size: 13px; color: #999; }
+        .pricing-card .plan-features { text-align: left; margin-bottom: 24px; }
+        .pricing-card .plan-features li { padding: 6px 0; font-size: 14px; list-style: none; display: flex; align-items: center; gap: 8px; }
+        .pricing-card .plan-features li::before { content: '✓'; color: #52C41A; font-weight: bold; }
+        .pricing-card .plan-features li.disabled { color: #BFBFBF; }
+        .pricing-card .plan-features li.disabled::before { content: '✗'; color: #D9D9D9; }
+        .pricing-card .plan-btn { width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; }
+        .pricing-card .plan-btn.primary { background: #4096FF; color: #fff; border: none; }
+        .pricing-card .plan-btn.primary:hover { background: #1677FF; }
+        .pricing-card .plan-btn.secondary { background: #fff; color: #4096FF; border: 1px solid #4096FF; }
+        .pricing-card .plan-btn.secondary:hover { background: #F0F5FF; }
+        .pricing-card .plan-btn.current { background: #F5F5F5; color: #999; border: none; cursor: default; }
+        .save-tag { display: inline-block; background: #F6FFED; color: #52C41A; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 4px; }
+
+        /* Comparison Table */
+        .comparison { max-width: 1000px; margin: 0 auto; }
+        .comparison h2 { text-align: center; font-size: 20px; font-weight: 500; margin-bottom: 24px; }
+        .comparison table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .comparison th { background: #FAFAFA; padding: 12px 16px; font-size: 14px; font-weight: 500; text-align: center; border-bottom: 1px solid #F0F0F0; }
+        .comparison th:first-child { text-align: left; }
+        .comparison td { padding: 12px 16px; font-size: 14px; text-align: center; border-bottom: 1px solid #F5F5F5; }
+        .comparison td:first-child { text-align: left; color: #666; }
+        .comparison .check { color: #52C41A; font-weight: bold; }
+        .comparison .cross { color: #D9D9D9; }
+        .comparison .highlight { background: #F0F5FF; }
+
+        /* FAQ */
+        .faq { max-width: 800px; margin: 48px auto 0; }
+        .faq h2 { text-align: center; font-size: 20px; font-weight: 500; margin-bottom: 24px; }
+        .faq-item { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+        .faq-item h4 { font-size: 14px; font-weight: 500; margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .faq-item h4::before { content: 'Q'; background: #4096FF; color: #fff; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        .faq-item p { font-size: 13px; color: #666; line-height: 1.8; padding-left: 28px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><div class="logo-icon">📋</div> 课程讲义转练习卡</div>
+        <div class="nav-links">
+            <a href="prototype_01_dashboard.html">工作台</a>
+            <a href="prototype_06_manage.html">练习卡管理</a>
+            <a href="#">题库管理</a>
+        </div>
+        <div class="nav-right">
+            <span class="quota-badge">剩余配额: 3次</span>
+            <div class="avatar">张</div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="proto-banner">
+            🎨 UI原型 — 付费套餐页 | 来源：<a href="prototype_01_dashboard.html">工作台</a> · <a href="prototype_06_manage.html">练习卡管理</a>
+        </div>
+
+        <div class="pricing-header">
+            <h1>💎 选择适合你的方案</h1>
+            <p>灵活付费，按需使用，随时升级或降级</p>
+        </div>
+
+        <!-- 定价卡片 -->
+        <div class="pricing-cards">
+            <!-- 按量付费 -->
+            <div class="pricing-card">
+                <div class="plan-icon">💰</div>
+                <div class="plan-name">按量付费</div>
+                <div class="plan-desc">适合低频使用的个人讲师</div>
+                <div class="plan-price">
+                    <span class="amount">¥9<small>/份</small></span>
+                    <div class="period">按课件生成次数计费</div>
+                </div>
+                <ul class="plan-features">
+                    <li>AI智能出题</li>
+                    <li>基础导出（小程序/PDF）</li>
+                    <li>购买次数无使用期限</li>
+                    <li class="disabled">批量课件处理</li>
+                    <li class="disabled">品牌模板</li>
+                    <li class="disabled">飞书/Notion同步</li>
+                </ul>
+                <button class="plan-btn secondary">购买配额</button>
+            </div>
+
+            <!-- 订阅月付 -->
+            <div class="pricing-card recommended">
+                <span class="rec-badge">⭐ 推荐</span>
+                <div class="plan-icon">🚀</div>
+                <div class="plan-name">订阅月付</div>
+                <div class="plan-desc">适合高频使用的讲师和教研组</div>
+                <div class="plan-price">
+                    <span class="amount">¥49<small>/月</small></span>
+                    <div class="period">按月订阅，随时取消</div>
+                </div>
+                <ul class="plan-features">
+                    <li>无限量课件生成</li>
+                    <li>全部导出格式</li>
+                    <li>批量课件处理</li>
+                    <li>品牌模板定制</li>
+                    <li>题库管理</li>
+                    <li>飞书/Notion同步</li>
+                </ul>
+                <button class="plan-btn primary">立即订阅</button>
+            </div>
+
+            <!-- 订阅年付 -->
+            <div class="pricing-card">
+                <div class="plan-icon">👑</div>
+                <div class="plan-name">订阅年付</div>
+                <div class="plan-desc">年付享8折优惠</div>
+                <div class="plan-price">
+                    <span class="amount">¥468<small>/年</small></span>
+                    <div class="period">相当于 ¥39/月 <span class="save-tag">省20%</span></div>
+                </div>
+                <ul class="plan-features">
+                    <li>月付全部功能</li>
+                    <li>年付8折优惠</li>
+                    <li>优先技术支持</li>
+                    <li>新功能优先体验</li>
+                    <li>专属客服通道</li>
+                    <li>发票支持</li>
+                </ul>
+                <button class="plan-btn primary">立即订阅</button>
+            </div>
+        </div>
+
+        <!-- 功能对比表 -->
+        <div class="comparison">
+            <h2>📊 功能对比详情</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>功能</th>
+                        <th>免费版</th>
+                        <th>按量付费</th>
+                        <th class="highlight">订阅版</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>AI生成配额</td>
+                        <td>3次</td>
+                        <td>按次购买</td>
+                        <td class="highlight"><strong>无限量</strong></td>
+                    </tr>
+                    <tr>
+                        <td>练习卡存储</td>
+                        <td>20个</td>
+                        <td>20个</td>
+                        <td class="highlight"><strong>无限量</strong></td>
+                    </tr>
+                    <tr>
+                        <td>文件上传</td>
+                        <td>10份/月</td>
+                        <td>不限</td>
+                        <td class="highlight"><strong>无限量</strong></td>
+                    </tr>
+                    <tr>
+                        <td>小程序练习页导出</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>PDF题册导出</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>批量课件处理</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>品牌模板</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>题库管理</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>飞书/Notion同步</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>学员数据分析</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq">
+            <h2>❓ 常见问题</h2>
+            <div class="faq-item">
+                <h4>免费试用有什么限制？</h4>
+                <p>新用户注册即赠3次免费生成配额，可以体验全部核心功能（文件上传、AI出题、基础导出）。免费账号最多保存20个练习卡。</p>
+            </div>
+            <div class="faq-item">
+                <h4>按量付费和订阅版有什么区别？</h4>
+                <p>按量付费适合偶尔使用的用户，购买次数无使用期限；订阅版适合高频使用，提供无限量生成、批量处理、品牌模板等高级功能。</p>
+            </div>
+            <div class="faq-item">
+                <h4>订阅到期后数据会丢失吗？</h4>
+                <p>不会。订阅到期后，已创建的练习卡可以继续使用和导出，但无法新建练习卡。高级功能（批量、品牌模板、题库管理）暂停使用，续费后恢复。</p>
+            </div>
+            <div class="faq-item">
+                <h4>支持哪些支付方式？</h4>
+                <p>支持微信支付和支付宝。订阅版支持开具电子发票。</p>
+            </div>
+            <div class="faq-item">
+                <h4>可以退款吗？</h4>
+                <p>按量付费购买的配额支持退款（未使用部分）。订阅版订阅后7天内支持无理由退款。</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

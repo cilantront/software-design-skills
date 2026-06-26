@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>钥匙门禁借还留痕器 - WEB管理后台全站点原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    color: #333;
+  }
+
+  /* Navigation */
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: 220px;
+    background: #001529;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-logo .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: #1890ff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .sidebar-logo .logo-text {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .sidebar-menu {
+    flex: 1;
+    padding: 12px 0;
+    overflow-y: auto;
+  }
+  .menu-group-title {
+    padding: 8px 16px 4px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    color: rgba(255,255,255,0.65);
+    cursor: pointer;
+    font-size: 13px;
+    gap: 10px;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .menu-item:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.05);
+  }
+  .menu-item.active {
+    color: #fff;
+    background: #1890ff;
+    border-radius: 0;
+  }
+  .menu-item .mi-icon {
+    width: 16px;
+    text-align: center;
+    font-size: 14px;
+  }
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+  }
+  .sidebar-footer .org-badge {
+    background: #1890ff;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* Main content */
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .top-bar {
+    height: 48px;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .top-bar .breadcrumb {
+    font-size: 13px;
+    color: #666;
+  }
+  .top-bar .breadcrumb span { color: #333; font-weight: 500; }
+  .top-bar .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #333;
+  }
+  .top-bar .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #1890ff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .top-bar .notify-bell {
+    position: relative;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .top-bar .notify-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #f5222d;
+    color: #fff;
+    font-size: 10px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .page-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  /* Pages */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Dashboard */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .stat-card .stat-label {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 8px;
+  }
+  .stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+  .stat-card .stat-change {
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  .stat-change.up { color: #52c41a; }
+  .stat-change.down { color: #f5222d; }
+
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 16px;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+  .card-action {
+    font-size: 12px;
+    color: #1890ff;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  /* Chart placeholder */
+  .chart-placeholder {
+    height: 200px;
+    background: linear-gradient(135deg, #f0f7ff, #e8f4fd);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-line {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    right: 30px;
+    height: 140px;
+  }
+  .chart-svg { width: 100%; height: 100%; }
+
+  /* Overdue list in dashboard */
+  .overdue-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .overdue-table th {
+    text-align: left;
+    font-size: 12px;
+    color: #999;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .overdue-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .overdue-tag {
+    background: #fff1f0;
+    color: #cf1322;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .btn-sm {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary { background: #1890ff; color: #fff; }
+  .btn-danger { background: #ff4d4f; color: #fff; }
+  .btn-default { background: #fff; color: #333; border: 1px solid #d9d9d9; }
+
+  /* Items page */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .toolbar-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .search-box {
+    width: 240px;
+    height: 32px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  .select-box {
+    height: 32px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-size: 13px;
+    background: #fff;
+    min-width: 100px;
+  }
+  .btn {
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-main { background: #1890ff; color: #fff; }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .data-table th {
+    text-align: left;
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    padding: 12px 16px;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .data-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .data-table tr:hover { background: #f9f9f9; }
+  .data-table .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  .status-dot.available { background: #52c41a; }
+  .status-dot.borrowed { background: #1890ff; }
+  .status-dot.disabled { background: #d9d9d9; }
+  .table-action {
+    color: #1890ff;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 12px;
+    text-decoration: none;
+  }
+  .pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #666;
+  }
+  .page-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #fff;
+    font-size: 12px;
+  }
+  .page-btn.active { border-color: #1890ff; color: #1890ff; }
+
+  /* Members page */
+  .role-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .role-tag.admin { background: #e6f7ff; color: #1890ff; }
+  .role-tag.manager { background: #f6ffed; color: #52c41a; }
+  .role-tag.user { background: #f5f5f5; color: #666; }
+
+  /* Rules page */
+  .form-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 16px;
+  }
+  .form-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .form-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .form-label {
+    width: 140px;
+    font-size: 13px;
+    color: #333;
+    text-align: right;
+    padding-right: 16px;
+    line-height: 32px;
+    flex-shrink: 0;
+  }
+  .form-label .required { color: #ff4d4f; margin-right: 4px; }
+  .form-control {
+    flex: 1;
+  }
+  .input {
+    width: 300px;
+    height: 32px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  .switch-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .switch {
+    width: 40px;
+    height: 22px;
+    background: #1890ff;
+    border-radius: 11px;
+    position: relative;
+    cursor: pointer;
+  }
+  .switch.off { background: #d9d9d9; }
+  .switch::after {
+    content: '';
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .switch.off::after { right: auto; left: 2px; }
+  .switch-label { font-size: 13px; color: #333; }
+  .switch-desc { font-size: 11px; color: #999; margin-top: 4px; }
+  .form-hint { font-size: 11px; color: #999; margin-top: 4px; }
+
+  /* Subscription page */
+  .plan-card {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .plan-item {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    border: 2px solid #f0f0f0;
+    text-align: center;
+  }
+  .plan-item.current { border-color: #1890ff; }
+  .plan-item .plan-name { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 8px; }
+  .plan-item .plan-price { font-size: 28px; font-weight: 700; color: #1890ff; margin-bottom: 4px; }
+  .plan-item .plan-unit { font-size: 12px; color: #999; margin-bottom: 16px; }
+  .plan-item .plan-features { text-align: left; margin-bottom: 16px; }
+  .plan-item .plan-feature { font-size: 12px; color: #666; padding: 4px 0; display: flex; align-items: center; gap: 6px; }
+  .plan-item .plan-feature::before { content: '✓'; color: #52c41a; font-weight: 600; }
+
+  .usage-bar-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .usage-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .usage-label {
+    width: 120px;
+    font-size: 13px;
+    color: #333;
+  }
+  .usage-bar {
+    flex: 1;
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 12px;
+  }
+  .usage-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: #1890ff;
+  }
+  .usage-fill.warning { background: #faad14; }
+  .usage-fill.danger { background: #ff4d4f; }
+  .usage-text { font-size: 12px; color: #666; width: 100px; text-align: right; }
+
+  /* Report page */
+  .report-filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .date-range {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+  .date-input {
+    height: 32px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-size: 12px;
+    width: 120px;
+  }
+  .tab-bar-top {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .tab-top-item {
+    padding: 10px 20px;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tab-top-item.active {
+    color: #1890ff;
+    border-bottom-color: #1890ff;
+    font-weight: 600;
+  }
+
+  .rank-list { list-style: none; }
+  .rank-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 12px;
+  }
+  .rank-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f0f0f0;
+    color: #666;
+  }
+  .rank-num.top1 { background: #fff1f0; color: #cf1322; }
+  .rank-num.top2 { background: #fff7e6; color: #d46b08; }
+  .rank-num.top3 { background: #f6ffed; color: #389e0d; }
+  .rank-name { flex: 1; font-size: 13px; }
+  .rank-value { font-size: 14px; font-weight: 600; color: #1890ff; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* Login page */
+  .login-page-full {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #001529, #003a70);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-page-full.active { display: flex; }
+  .login-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .login-box .login-logo {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+  .login-box h2 {
+    font-size: 20px;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+  .login-box .login-desc {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 30px;
+  }
+  .login-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .login-tab {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    text-align: center;
+  }
+  .login-tab.active {
+    color: #1890ff;
+    border-bottom-color: #1890ff;
+  }
+  .login-input {
+    width: 100%;
+    height: 40px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .login-btn {
+    width: 100%;
+    height: 40px;
+    background: #1890ff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .wx-qr-placeholder {
+    width: 180px;
+    height: 180px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 48px;
+    border: 2px dashed #d9d9d9;
+  }
+  .login-tip-text { font-size: 12px; color: #999; }
+
+  /* Add item page */
+  .add-item-form {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    max-width: 600px;
+  }
+  .photo-upload-area {
+    width: 120px;
+    height: 120px;
+    border: 2px dashed #d9d9d9;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #999;
+    font-size: 12px;
+    gap: 6px;
+  }
+  .photo-upload-area .upload-icon { font-size: 24px; }
+  .qrcode-preview {
+    width: 120px;
+    height: 120px;
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+  }
+
+  /* Item detail page */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .detail-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .detail-card .detail-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .info-item { font-size: 13px; }
+  .info-item .ii-label { color: #999; margin-bottom: 2px; }
+  .info-item .ii-value { color: #333; font-weight: 500; }
+
+  .timeline-detail {
+    position: relative;
+    padding-left: 20px;
+  }
+  .timeline-detail::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: #e8e8e8;
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1890ff;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #1890ff;
+  }
+  .tl-item .tl-time { font-size: 11px; color: #999; }
+  .tl-item .tl-desc { font-size: 13px; color: #333; margin-top: 2px; }
+  .tl-item .tl-meta { font-size: 11px; color: #bbb; margin-top: 2px; }
+
+  /* Export page */
+  .export-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .export-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    border: 2px solid #f0f0f0;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .export-card:hover { border-color: #1890ff; }
+  .export-card.selected { border-color: #1890ff; background: #f0f7ff; }
+  .export-card .ec-icon { font-size: 32px; margin-bottom: 10px; }
+  .export-card .ec-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .export-card .ec-desc { font-size: 11px; color: #999; }
+
+  /* Notice edit page */
+  .editor-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .editor-pane { }
+  .editor-pane .pane-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .editor-textarea {
+    width: 100%;
+    height: 300px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    resize: none;
+    line-height: 1.6;
+  }
+  .preview-pane {
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    padding: 12px;
+    height: 300px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #333;
+  }
+  .preview-pane ol { padding-left: 20px; }
+</style>
+</head>
+<body>
+
+<!-- Login Page (overlay) -->
+<div class="login-page-full active" id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">🔑</div>
+    <h2>钥匙门禁借还留痕器</h2>
+    <p class="login-desc">管理后台 · 组织管理员专用</p>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="switchLoginTab(this, 'wechat')">微信扫码</div>
+      <div class="login-tab" onclick="switchLoginTab(this, 'account')">账号登录</div>
+    </div>
+    <div id="wechatLogin">
+      <div class="wx-qr-placeholder">📱</div>
+      <p class="login-tip-text">请使用微信扫描二维码登录</p>
+    </div>
+    <div id="accountLogin" style="display:none;">
+      <input class="login-input" type="text" placeholder="请输入手机号">
+      <input class="login-input" type="password" placeholder="请输入密码">
+      <button class="login-btn" onclick="doLogin()">登 录</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main App Layout -->
+<div class="app-layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🔑</div>
+      <div class="logo-text">钥匙借还留痕器</div>
+    </div>
+    <div class="sidebar-menu">
+      <div class="menu-group-title">数据</div>
+      <a class="menu-item active" onclick="showPage('dashboard', this)">
+        <span class="mi-icon">📊</span>
+        <span>总览看板</span>
+      </a>
+      <a class="menu-item" onclick="showPage('reports', this)">
+        <span class="mi-icon">📈</span>
+        <span>数据报表</span>
+      </a>
+      <a class="menu-item" onclick="showPage('export', this)">
+        <span class="mi-icon">📤</span>
+        <span>数据导出</span>
+      </a>
+
+      <div class="menu-group-title">管理</div>
+      <a class="menu-item" onclick="showPage('items', this)">
+        <span class="mi-icon">📦</span>
+        <span>物品管理</span>
+      </a>
+      <a class="menu-item" onclick="showPage('members', this)">
+        <span class="mi-icon">👥</span>
+        <span>成员管理</span>
+      </a>
+
+      <div class="menu-group-title">设置</div>
+      <a class="menu-item" onclick="showPage('rules', this)">
+        <span class="mi-icon">⚙️</span>
+        <span>借用规则</span>
+      </a>
+      <a class="menu-item" onclick="showPage('notice', this)">
+        <span class="mi-icon">📝</span>
+        <span>借用须知</span>
+      </a>
+      <a class="menu-item" onclick="showPage('subscribe', this)">
+        <span class="mi-icon">💳</span>
+        <span>订阅管理</span>
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <span class="org-badge">物业</span>
+      <span>阳光花园物业</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-area">
+    <div class="top-bar">
+      <div class="breadcrumb">
+        首页 / <span id="currentPageName">总览看板</span>
+      </div>
+      <div class="user-info">
+        <div class="notify-bell">
+          🔔
+          <div class="notify-badge">3</div>
+        </div>
+        <div class="user-avatar">李</div>
+        <span>李经理</span>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- Page: Dashboard -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">物品总数</div>
+            <div class="stat-value">48</div>
+            <div class="stat-change up">较上月 +3</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">当前可借用</div>
+            <div class="stat-value" style="color:#52c41a;">35</div>
+            <div class="stat-change">可用率 72.9%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">当前已借出</div>
+            <div class="stat-value" style="color:#1890ff;">11</div>
+            <div class="stat-change up">较昨日 +2</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">超期未还</div>
+            <div class="stat-value" style="color:#ff4d4f;">2</div>
+            <div class="stat-change down">需立即处理</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">借用趋势（近30天）</div>
+            <a class="card-action" onclick="showPage('reports', document.querySelectorAll('.menu-item')[1])">查看详情 →</a>
+          </div>
+          <div class="chart-placeholder">
+            <svg class="chart-svg" viewBox="0 0 400 140">
+              <polyline points="10,100 40,80 70,90 100,60 130,70 160,40 190,50 220,30 250,45 280,25 310,35 340,20 370,30 390,15"
+                fill="none" stroke="#1890ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="10,100 40,80 70,90 100,60 130,70 160,40 190,50 220,30 250,45 280,25 310,35 340,20 370,30 390,15"
+                fill="url(#chartGrad)" stroke="none" opacity="0.1" transform="translate(0,0)"/>
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1890ff"/>
+                  <stop offset="100%" stop-color="#1890ff" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="130" x2="400" y2="130" stroke="#f0f0f0" stroke-width="1"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⚠️ 超期预警</div>
+            <a class="card-action">一键催还全部</a>
+          </div>
+          <table class="overdue-table">
+            <thead>
+              <tr>
+                <th>物品名称</th>
+                <th>借用人</th>
+                <th>借出时间</th>
+                <th>超期天数</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>🪪 2F会议室门禁卡</td>
+                <td>李明</td>
+                <td>2026-06-21 09:00</td>
+                <td><span class="overdue-tag">超期5天</span></td>
+                <td><button class="btn-sm btn-danger">催还</button></td>
+              </tr>
+              <tr>
+                <td>🔑 配电房钥匙</td>
+                <td>王强</td>
+                <td>2026-06-25 14:00</td>
+                <td><span class="overdue-tag">超期1天</span></td>
+                <td><button class="btn-sm btn-danger">催还</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Page: Items -->
+      <div class="page" id="page-items">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search-box" type="text" placeholder="搜索物品名称/编号">
+            <select class="select-box">
+              <option>全部类型</option>
+              <option>钥匙</option>
+              <option>门禁卡</option>
+              <option>工牌</option>
+            </select>
+            <select class="select-box">
+              <option>全部状态</option>
+              <option>可借用</option>
+              <option>已借出</option>
+              <option>已停用</option>
+            </select>
+          </div>
+          <div>
+            <button class="btn btn-default" onclick="showPage('addItem', document.querySelectorAll('.menu-item')[3])">📥 批量导入</button>
+            <button class="btn btn-main" onclick="showPage('addItem', document.querySelectorAll('.menu-item')[3])">+ 新增物品</button>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>物品名称</th>
+              <th>类型</th>
+              <th>编号</th>
+              <th>存放位置</th>
+              <th>状态</th>
+              <th>当前借用人</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🔑 A栋配电房钥匙</td>
+              <td>钥匙</td>
+              <td>KY-000012</td>
+              <td>一楼工具柜</td>
+              <td><span class="status-dot available"></span>可借用</td>
+              <td>-</td>
+              <td><a class="table-action" onclick="showPage('itemDetail', null)">详情</a><a class="table-action">二维码</a></td>
+            </tr>
+            <tr>
+              <td>🔑 B栋水泵房钥匙</td>
+              <td>钥匙</td>
+              <td>KY-000086</td>
+              <td>一楼工具柜</td>
+              <td><span class="status-dot borrowed"></span>已借出</td>
+              <td>张建国</td>
+              <td><a class="table-action" onclick="showPage('itemDetail', null)">详情</a><a class="table-action">二维码</a></td>
+            </tr>
+            <tr>
+              <td>🪪 3楼会议室门禁卡</td>
+              <td>门禁卡</td>
+              <td>MJ-000003</td>
+              <td>前台抽屉</td>
+              <td><span class="status-dot borrowed"></span>已借出</td>
+              <td>李明 (超期)</td>
+              <td><a class="table-action" onclick="showPage('itemDetail', null)">详情</a><a class="table-action">二维码</a></td>
+            </tr>
+            <tr>
+              <td>🪪 地下车库门禁卡</td>
+              <td>门禁卡</td>
+              <td>MJ-000015</td>
+              <td>前台抽屉</td>
+              <td><span class="status-dot available"></span>可借用</td>
+              <td>-</td>
+              <td><a class="table-action" onclick="showPage('itemDetail', null)">详情</a><a class="table-action">二维码</a></td>
+            </tr>
+            <tr>
+              <td>🔑 服务器机柜钥匙</td>
+              <td>钥匙</td>
+              <td>KY-000042</td>
+              <td>IT办公室</td>
+              <td><span class="status-dot borrowed"></span>已借出</td>
+              <td>王强</td>
+              <td><a class="table-action" onclick="showPage('itemDetail', null)">详情</a><a class="table-action">二维码</a></td>
+            </tr>
+            <tr>
+              <td>🔧 电梯机房钥匙</td>
+              <td>钥匙</td>
+              <td>KY-000007</td>
+              <td>一楼工具柜</td>
+              <td><span class="status-dot disabled"></span>已停用</td>
+              <td>-</td>
+              <td><a class="table-action" onclick="showPage('itemDetail', null)">详情</a><a class="table-action">二维码</a></td>
+            </tr>
+            <tr>
+              <td>🪪 访客临时工牌</td>
+              <td>工牌</td>
+              <td>GP-000001</td>
+              <td>前台</td>
+              <td><span class="status-dot available"></span>可借用</td>
+              <td>-</td>
+              <td><a class="table-action" onclick="showPage('itemDetail', null)">详情</a><a class="table-action">二维码</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <span>共 48 条</span>
+          <div style="flex:1;"></div>
+          <div class="page-btn">‹</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">›</div>
+        </div>
+      </div>
+
+      <!-- Page: Add Item -->
+      <div class="page" id="page-addItem">
+        <div style="margin-bottom:16px;">
+          <a class="table-action" onclick="showPage('items', document.querySelectorAll('.menu-item')[3])">← 返回物品列表</a>
+        </div>
+        <div class="add-item-form">
+          <div class="form-title">新增物品</div>
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span>物品名称</div>
+            <div class="form-control">
+              <input class="input" type="text" placeholder="请输入物品名称">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span>物品类型</div>
+            <div class="form-control">
+              <select class="select-box" style="width:300px;">
+                <option>请选择类型</option>
+                <option>钥匙</option>
+                <option>门禁卡</option>
+                <option>工牌</option>
+                <option>遥控器</option>
+                <option>其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">物品编号</div>
+            <div class="form-control">
+              <input class="input" type="text" placeholder="留空自动生成" value="KY-000049">
+              <div class="form-hint">格式：类型缩写+6位数字，如KY-000049</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">存放位置</div>
+            <div class="form-control">
+              <input class="input" type="text" placeholder="如：一楼工具柜、前台抽屉">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">物品照片</div>
+            <div class="form-control">
+              <div class="photo-upload-area">
+                <div class="upload-icon">📷</div>
+                <div>点击上传</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">二维码预览</div>
+            <div class="form-control">
+              <div class="qrcode-preview">⊞</div>
+              <div class="form-hint" style="margin-top:8px;">录入完成后自动生成专属二维码</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">备注说明</div>
+            <div class="form-control">
+              <textarea class="input" style="height:60px;width:300px;padding:8px;resize:none;" placeholder="可选填写备注信息"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px;padding-left:140px;">
+            <button class="btn btn-main">确认新增</button>
+            <button class="btn btn-default">取消</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page: Item Detail -->
+      <div class="page" id="page-itemDetail">
+        <div style="margin-bottom:16px;">
+          <a class="table-action" onclick="showPage('items', document.querySelectorAll('.menu-item')[3])">← 返回物品列表</a>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-card">
+            <div class="detail-title">基本信息</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="ii-label">物品名称</div>
+                <div class="ii-value">A栋配电房钥匙</div>
+              </div>
+              <div class="info-item">
+                <div class="ii-label">物品编号</div>
+                <div class="ii-value">KY-000012</div>
+              </div>
+              <div class="info-item">
+                <div class="ii-label">物品类型</div>
+                <div class="ii-value">钥匙</div>
+              </div>
+              <div class="info-item">
+                <div class="ii-label">存放位置</div>
+                <div class="ii-value">一楼工具柜</div>
+              </div>
+              <div class="info-item">
+                <div class="ii-label">当前状态</div>
+                <div class="ii-value" style="color:#52c41a;">● 可借用</div>
+              </div>
+              <div class="info-item">
+                <div class="ii-label">录入时间</div>
+                <div class="ii-value">2026-01-15</div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-title">二维码</div>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div class="qrcode-preview" style="width:100px;height:100px;font-size:40px;">⊞</div>
+              <div>
+                <button class="btn btn-default" style="margin-bottom:8px;">📥 下载二维码</button>
+                <button class="btn btn-default">🖨 批量打印</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card" style="margin-bottom:16px;">
+          <div class="detail-title">借用历史（时间线）</div>
+          <div class="timeline-detail">
+            <div class="tl-item">
+              <div class="tl-time">2026-06-26 08:30 ~ 17:30</div>
+              <div class="tl-desc">张建国 借用并归还（状态正常）</div>
+              <div class="tl-meta">借用事由：配电房定期巡检</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-time">2026-06-20 09:00 ~ 12:00</div>
+              <div class="tl-desc">王强 借用并归还（状态正常）</div>
+              <div class="tl-meta">借用事由：配电房线路检修</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-time">2026-06-15 14:00 ~ 06-16 10:00</div>
+              <div class="tl-desc">赵六 借用并归还（状态异常：钥匙弯曲）</div>
+              <div class="tl-meta">已生成异常记录，通知管理员</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-time">2026-06-01 10:00 ~ 11:30</div>
+              <div class="tl-desc">张建国 借用并归还（状态正常）</div>
+              <div class="tl-meta">借用事由：配电房设备维护</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page: Members -->
+      <div class="page" id="page-members">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search-box" type="text" placeholder="搜索姓名/手机号">
+            <select class="select-box">
+              <option>全部角色</option>
+              <option>组织管理员</option>
+              <option>日常管理员</option>
+              <option>借用人</option>
+            </select>
+          </div>
+          <div>
+            <button class="btn btn-default">📤 导出成员</button>
+            <button class="btn btn-main">+ 邀请成员</button>
+          </div>
+        </div>
+
+        <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:6px;padding:10px 16px;margin-bottom:16px;font-size:13px;color:#389e0d;">
+          🔗 组织邀请码：<strong style="letter-spacing:2px;font-size:15px;">A8K3M2</strong>
+          <button class="btn-sm btn-default" style="margin-left:12px;">复制</button>
+          <button class="btn-sm btn-default" style="margin-left:6px;">重置</button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>手机号</th>
+              <th>角色</th>
+              <th>加入时间</th>
+              <th>借用次数</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>李经理</strong></td>
+              <td>138****8001</td>
+              <td><span class="role-tag admin">组织管理员</span></td>
+              <td>2026-01-01</td>
+              <td>12</td>
+              <td><a class="table-action">编辑</a></td>
+            </tr>
+            <tr>
+              <td>张建国</td>
+              <td>139****5678</td>
+              <td><span class="role-tag manager">日常管理员</span></td>
+              <td>2026-01-15</td>
+              <td>45</td>
+              <td><a class="table-action">编辑</a><a class="table-action">调整角色</a></td>
+            </tr>
+            <tr>
+              <td>王强</td>
+              <td>137****2345</td>
+              <td><span class="role-tag user">借用人</span></td>
+              <td>2026-02-20</td>
+              <td>23</td>
+              <td><a class="table-action">编辑</a><a class="table-action">调整角色</a><a class="table-action" style="color:#ff4d4f;">移除</a></td>
+            </tr>
+            <tr>
+              <td>李明</td>
+              <td>136****9012</td>
+              <td><span class="role-tag user">借用人</span></td>
+              <td>2026-03-10</td>
+              <td>8</td>
+              <td><a class="table-action">编辑</a><a class="table-action">调整角色</a><a class="table-action" style="color:#ff4d4f;">移除</a></td>
+            </tr>
+            <tr>
+              <td>赵六</td>
+              <td>135****6789</td>
+              <td><span class="role-tag user">借用人</span></td>
+              <td>2026-04-05</td>
+              <td>5</td>
+              <td><a class="table-action">编辑</a><a class="table-action">调整角色</a><a class="table-action" style="color:#ff4d4f;">移除</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <span>共 5 条</span>
+          <div style="flex:1;"></div>
+          <div class="page-btn active">1</div>
+        </div>
+      </div>
+
+      <!-- Page: Rules -->
+      <div class="page" id="page-rules">
+        <div class="form-section">
+          <div class="form-title">借用时长设置</div>
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span>默认借用时长</div>
+            <div class="form-control">
+              <select class="select-box" style="width:200px;">
+                <option>24小时</option>
+                <option>1小时</option>
+                <option>4小时</option>
+                <option>3天</option>
+                <option>7天</option>
+              </select>
+              <div class="form-hint">借用人发起借用时默认填入此时长，可手动修改</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span>最大借用时长</div>
+            <div class="form-control">
+              <select class="select-box" style="width:200px;">
+                <option>7天</option>
+                <option>14天</option>
+                <option>30天</option>
+              </select>
+              <div class="form-hint">借用人不可超出该时长，超出需管理员手动延期</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-title">自助操作开关</div>
+          <div class="form-row">
+            <div class="form-label">允许自助借用</div>
+            <div class="form-control">
+              <div class="switch-container">
+                <div class="switch" onclick="this.classList.toggle('off')"></div>
+                <span class="switch-label">已开启</span>
+              </div>
+              <div class="switch-desc">开启后，借用人可在管理员不在场时自行扫码借用</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">允许自助归还</div>
+            <div class="form-control">
+              <div class="switch-container">
+                <div class="switch off" onclick="this.classList.toggle('off')"></div>
+                <span class="switch-label">未开启</span>
+              </div>
+              <div class="switch-desc">开启后，借用人可拍照自助归还，等待管理员确认</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-title">超期提醒策略</div>
+          <div class="form-row">
+            <div class="form-label">即将到期提醒</div>
+            <div class="form-control">
+              <select class="select-box" style="width:200px;">
+                <option>提前1天</option>
+                <option>提前2天</option>
+                <option>提前半天</option>
+              </select>
+              <div class="form-hint">在预计归还时间前发送提醒</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">超期第1级</div>
+            <div class="form-control">
+              <div style="display:flex;gap:10px;align-items:center;">
+                <span style="font-size:13px;">超期</span>
+                <input class="input" type="number" value="1" style="width:60px;text-align:center;">
+                <span style="font-size:13px;">天</span>
+                <span style="font-size:13px;margin-left:10px;">通知：</span>
+                <span style="font-size:12px;background:#e6f7ff;padding:2px 8px;border-radius:4px;color:#1890ff;">借用人</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">超期第2级</div>
+            <div class="form-control">
+              <div style="display:flex;gap:10px;align-items:center;">
+                <span style="font-size:13px;">超期</span>
+                <input class="input" type="number" value="3" style="width:60px;text-align:center;">
+                <span style="font-size:13px;">天</span>
+                <span style="font-size:13px;margin-left:10px;">通知：</span>
+                <span style="font-size:12px;background:#e6f7ff;padding:2px 8px;border-radius:4px;color:#1890ff;">借用人</span>
+                <span style="font-size:12px;background:#f6ffed;padding:2px 8px;border-radius:4px;color:#52c41a;">管理员</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">超期第3级</div>
+            <div class="form-control">
+              <div style="display:flex;gap:10px;align-items:center;">
+                <span style="font-size:13px;">超期</span>
+                <input class="input" type="number" value="7" style="width:60px;text-align:center;">
+                <span style="font-size:13px;">天</span>
+                <span style="font-size:13px;margin-left:10px;">通知：</span>
+                <span style="font-size:12px;background:#e6f7ff;padding:2px 8px;border-radius:4px;color:#1890ff;">借用人</span>
+                <span style="font-size:12px;background:#f6ffed;padding:2px 8px;border-radius:4px;color:#52c41a;">管理员</span>
+                <span style="font-size:12px;background:#fff1f0;padding:2px 8px;border-radius:4px;color:#cf1322;">组织管理员</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding-left:140px;">
+          <button class="btn btn-main">保存设置</button>
+        </div>
+      </div>
+
+      <!-- Page: Notice Edit -->
+      <div class="page" id="page-notice">
+        <div class="form-section" style="margin-bottom:16px;">
+          <div class="form-title">借用须知编辑</div>
+          <div style="margin-bottom:12px;font-size:13px;color:#666;">
+            编辑借用须知内容（支持Markdown格式），借用人借用时需阅读并签名确认。
+          </div>
+          <div class="form-row">
+            <div class="form-label">适用物品类型</div>
+            <div class="form-control">
+              <select class="select-box" style="width:200px;">
+                <option>全部类型</option>
+                <option>钥匙</option>
+                <option>门禁卡</option>
+              </select>
+              <div class="form-hint">可按物品类型设置不同的须知内容</div>
+            </div>
+          </div>
+        </div>
+        <div class="editor-container">
+          <div class="editor-pane">
+            <div class="pane-title">✏️ 编辑区 (Markdown)</div>
+            <textarea class="editor-textarea">## 借用须知
+
+1. 请妥善保管借用物品，如有损坏需照价赔偿
+2. 请在规定时间内归还，超期将通知管理员
+3. 借用期间不得转借他人
+4. 归还时需确保物品完好
+5. 如发现物品异常，请立即联系管理员
+
+**特别提醒：**
+- 钥匙类物品请勿私自配匙
+- 门禁卡请勿弯折或靠近强磁物品</textarea>
+          </div>
+          <div class="editor-pane">
+            <div class="pane-title">👁 预览</div>
+            <div class="preview-pane">
+              <h3 style="margin-bottom:10px;">借用须知</h3>
+              <ol>
+                <li>请妥善保管借用物品，如有损坏需照价赔偿</li>
+                <li>请在规定时间内归还，超期将通知管理员</li>
+                <li>借用期间不得转借他人</li>
+                <li>归还时需确保物品完好</li>
+                <li>如发现物品异常，请立即联系管理员</li>
+              </ol>
+              <p style="margin-top:12px;"><strong>特别提醒：</strong></p>
+              <ul style="padding-left:20px;">
+                <li>钥匙类物品请勿私自配匙</li>
+                <li>门禁卡请勿弯折或靠近强磁物品</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-main">保存须知</button>
+        </div>
+      </div>
+
+      <!-- Page: Reports -->
+      <div class="page" id="page-reports">
+        <div class="tab-bar-top">
+          <div class="tab-top-item active">借用统计</div>
+          <div class="tab-top-item">高频排行</div>
+        </div>
+
+        <div class="report-filters">
+          <div class="date-range">
+            <span style="font-size:13px;">时间范围：</span>
+            <input class="date-input" type="date" value="2026-06-01">
+            <span>~</span>
+            <input class="date-input" type="date" value="2026-06-26">
+          </div>
+          <select class="select-box">
+            <option>全部类型</option>
+            <option>钥匙</option>
+            <option>门禁卡</option>
+          </select>
+          <button class="btn btn-default">🔄 刷新</button>
+        </div>
+
+        <div class="stats-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom:16px;">
+          <div class="stat-card">
+            <div class="stat-label">本月借用次数</div>
+            <div class="stat-value">156</div>
+            <div class="stat-change up">较上月 +18%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">平均借用时长</div>
+            <div class="stat-value">6.2<span style="font-size:14px;color:#999;">小时</span></div>
+            <div class="stat-change down">较上月 -5%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">超期率</div>
+            <div class="stat-value" style="color:#ff4d4f;">3.2<span style="font-size:14px;">%</span></div>
+            <div class="stat-change up">较上月 -1.1%</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">借用趋势</div>
+            </div>
+            <div class="chart-placeholder" style="height:160px;">
+              <svg class="chart-svg" viewBox="0 0 300 120">
+                <rect x="20" y="20" width="16" height="80" fill="#1890ff" opacity="0.7" rx="2"/>
+                <rect x="50" y="35" width="16" height="65" fill="#1890ff" opacity="0.7" rx="2"/>
+                <rect x="80" y="10" width="16" height="90" fill="#1890ff" opacity="0.7" rx="2"/>
+                <rect x="110" y="40" width="16" height="60" fill="#1890ff" opacity="0.7" rx="2"/>
+                <rect x="140" y="25" width="16" height="75" fill="#1890ff" opacity="0.7" rx="2"/>
+                <rect x="170" y="45" width="16" height="55" fill="#1890ff" opacity="0.7" rx="2"/>
+                <rect x="200" y="15" width="16" height="85" fill="#1890ff" opacity="0.7" rx="2"/>
+                <rect x="230" y="30" width="16" height="70" fill="#1890ff" opacity="0.7" rx="2"/>
+                <rect x="260" y="50" width="16" height="50" fill="#1890ff" opacity="0.7" rx="2"/>
+                <line x1="0" y1="110" x2="300" y2="110" stroke="#f0f0f0"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">按类型分布</div>
+            </div>
+            <div style="padding:20px 0;">
+              <div style="display:flex;align-items:center;margin-bottom:12px;">
+                <span style="width:60px;font-size:13px;">钥匙</span>
+                <div style="flex:1;height:20px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin:0 10px;">
+                  <div style="width:65%;height:100%;background:#1890ff;border-radius:4px;"></div>
+                </div>
+                <span style="font-size:13px;font-weight:600;">65%</span>
+              </div>
+              <div style="display:flex;align-items:center;margin-bottom:12px;">
+                <span style="width:60px;font-size:13px;">门禁卡</span>
+                <div style="flex:1;height:20px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin:0 10px;">
+                  <div style="width:25%;height:100%;background:#52c41a;border-radius:4px;"></div>
+                </div>
+                <span style="font-size:13px;font-weight:600;">25%</span>
+              </div>
+              <div style="display:flex;align-items:center;">
+                <span style="width:60px;font-size:13px;">工牌</span>
+                <div style="flex:1;height:20px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin:0 10px;">
+                  <div style="width:10%;height:100%;background:#faad14;border-radius:4px;"></div>
+                </div>
+                <span style="font-size:13px;font-weight:600;">10%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page: Export -->
+      <div class="page" id="page-export">
+        <div class="export-options">
+          <div class="export-card selected">
+            <div class="ec-icon">📊</div>
+            <div class="ec-title">借用记录导出</div>
+            <div class="ec-desc">导出Excel格式的完整借用记录</div>
+          </div>
+          <div class="export-card">
+            <div class="ec-icon">⚠️</div>
+            <div class="ec-title">超期记录导出</div>
+            <div class="ec-desc">单独导出超期未还记录</div>
+          </div>
+          <div class="export-card">
+            <div class="ec-icon">📄</div>
+            <div class="ec-title">责任报告 (PDF)</div>
+            <div class="ec-desc">生成综合责任报告用于交接/举证</div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-title">导出筛选条件</div>
+          <div class="form-row">
+            <div class="form-label">时间范围</div>
+            <div class="form-control">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input class="date-input" type="date" value="2026-06-01">
+                <span>~</span>
+                <input class="date-input" type="date" value="2026-06-26">
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">借用人</div>
+            <div class="form-control">
+              <select class="select-box" style="width:200px;">
+                <option>全部借用人</option>
+                <option>张建国</option>
+                <option>王强</option>
+                <option>李明</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">物品类型</div>
+            <div class="form-control">
+              <select class="select-box" style="width:200px;">
+                <option>全部类型</option>
+                <option>钥匙</option>
+                <option>门禁卡</option>
+                <option>工牌</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">包含记录</div>
+            <div class="form-control">
+              <div style="display:flex;gap:16px;">
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                  <input type="checkbox" checked> 正常记录
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                  <input type="checkbox" checked> 超期记录
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                  <input type="checkbox" checked> 异常记录
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#f0f7ff;border:1px solid #bae7ff;border-radius:6px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#096dd9;">
+          📊 根据筛选条件，预计导出 <strong>156</strong> 条记录
+        </div>
+
+        <button class="btn btn-main" style="height:36px;font-size:14px;">📥 开始导出 Excel</button>
+      </div>
+
+      <!-- Page: Subscribe -->
+      <div class="page" id="page-subscribe">
+        <div class="plan-card">
+          <div class="plan-item">
+            <div class="plan-name">基础版</div>
+            <div class="plan-price">¥199</div>
+            <div class="plan-unit">/年/组织</div>
+            <div class="plan-features">
+              <div class="plan-feature">最多50个物品</div>
+              <div class="plan-feature">最多100个成员</div>
+              <div class="plan-feature">借用记录保留1年</div>
+              <div class="plan-feature">基础数据报表</div>
+            </div>
+            <button class="btn btn-default" style="width:100%;">当前方案</button>
+          </div>
+          <div class="plan-item current">
+            <div class="plan-name" style="color:#1890ff;">专业版 ⭐</div>
+            <div class="plan-price">¥399</div>
+            <div class="plan-unit">/年/组织</div>
+            <div class="plan-features">
+              <div class="plan-feature">最多500个物品</div>
+              <div class="plan-feature">最多500个成员</div>
+              <div class="plan-feature">借用记录保留3年</div>
+              <div class="plan-feature">高级数据报表与导出</div>
+              <div class="plan-feature">责任报告PDF生成</div>
+              <div class="plan-feature">自定义超期策略</div>
+            </div>
+            <button class="btn btn-main" style="width:100%;">续费</button>
+          </div>
+          <div class="plan-item">
+            <div class="plan-name">企业版</div>
+            <div class="plan-price">定制</div>
+            <div class="plan-unit">联系销售</div>
+            <div class="plan-features">
+              <div class="plan-feature">物品数量不限</div>
+              <div class="plan-feature">成员数量不限</div>
+              <div class="plan-feature">记录永久保留</div>
+              <div class="plan-feature">API接口对接</div>
+              <div class="plan-feature">专属客服支持</div>
+            </div>
+            <button class="btn btn-default" style="width:100%;">联系我们</button>
+          </div>
+        </div>
+
+        <div class="usage-bar-container">
+          <div style="font-size:15px;font-weight:600;margin-bottom:16px;">使用情况</div>
+          <div class="usage-row">
+            <div class="usage-label">物品数量</div>
+            <div class="usage-bar">
+              <div class="usage-fill" style="width:9.6%;"></div>
+            </div>
+            <div class="usage-text">48 / 500</div>
+          </div>
+          <div class="usage-row">
+            <div class="usage-label">成员数量</div>
+            <div class="usage-bar">
+              <div class="usage-fill" style="width:1%;"></div>
+            </div>
+            <div class="usage-text">5 / 500</div>
+          </div>
+          <div class="usage-row">
+            <div class="usage-label">存储空间</div>
+            <div class="usage-bar">
+              <div class="usage-fill warning" style="width:35%;"></div>
+            </div>
+            <div class="usage-text">350MB / 1GB</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <div class="card-header">
+            <div class="card-title">订阅信息</div>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="ii-label">当前套餐</div>
+              <div class="ii-value" style="color:#1890ff;">专业版</div>
+            </div>
+            <div class="info-item">
+              <div class="ii-label">到期日期</div>
+              <div class="ii-value">2027-06-26</div>
+            </div>
+            <div class="info-item">
+              <div class="ii-label">剩余天数</div>
+              <div class="ii-value">365天</div>
+            </div>
+            <div class="info-item">
+              <div class="ii-label">支付方式</div>
+              <div class="ii-value">微信支付</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <button class="btn btn-main">续费</button>
+            <button class="btn btn-default">申请发票</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const pageNames = {
+  'dashboard': '总览看板',
+  'items': '物品管理',
+  'addItem': '新增物品',
+  'itemDetail': '物品详情',
+  'members': '成员管理',
+  'rules': '借用规则',
+  'notice': '借用须知',
+  'reports': '数据报表',
+  'export': '数据导出',
+  'subscribe': '订阅管理'
+};
+
+function showPage(pageId, menuItem) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Show target page
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+  // Update breadcrumb
+  document.getElementById('currentPageName').textContent = pageNames[pageId] || pageId;
+  // Update menu active state
+  if (menuItem) {
+    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+    menuItem.classList.add('active');
+  }
+}
+
+function switchLoginTab(el, type) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (type === 'wechat') {
+    document.getElementById('wechatLogin').style.display = 'block';
+    document.getElementById('accountLogin').style.display = 'none';
+  } else {
+    document.getElementById('wechatLogin').style.display = 'none';
+    document.getElementById('accountLogin').style.display = 'block';
+  }
+}
+
+function doLogin() {
+  document.getElementById('loginPage').classList.remove('active');
+}
+</script>
+
+</body>
+</html>

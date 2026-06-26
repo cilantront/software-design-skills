@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保险产品管理 - Product Admin Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; padding: 20px; }
+.admin-frame { width: 1100px; background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); overflow: hidden; }
+.page-header { padding: 16px 24px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.page-title { font-size: 18px; font-weight: 600; }
+.btn { height: 32px; padding: 0 16px; border-radius: 4px; border: 1px solid #d9d9d9; background: #fff; font-size: 13px; cursor: pointer; }
+.btn-primary { background: #FF8C42; color: #fff; border-color: #FF8C42; }
+.filter-bar { padding: 16px 24px; display: flex; gap: 12px; border-bottom: 1px solid #f0f0f0; }
+.filter-input { height: 32px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 240px; }
+.filter-select { height: 32px; padding: 0 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; background: #fff; }
+.step-form { padding: 24px; display: none; }
+.step-form.active { display: block; }
+.step-bar { display: flex; align-items: center; margin-bottom: 30px; }
+.step-item { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.step-circle { width: 32px; height: 32px; border-radius: 50%; background: #e0e0e0; color: #999; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.step-circle.done { background: #FF8C42; color: #fff; }
+.step-circle.active { background: #FF6B35; color: #fff; box-shadow: 0 0 0 4px rgba(255,107,53,0.2); }
+.step-label { font-size: 12px; color: #666; margin-top: 6px; }
+.step-line { position: absolute; top: 16px; left: 50%; width: 100%; height: 2px; background: #e0e0e0; z-index: 0; }
+.form-section { margin-bottom: 24px; }
+.section-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+.form-row { display: flex; align-items: center; margin-bottom: 16px; }
+.form-label { width: 120px; font-size: 13px; color: #666; }
+.form-label .required { color: #ff4444; }
+.form-input { flex: 1; height: 36px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+.form-textarea { flex: 1; min-height: 80px; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; resize: vertical; }
+.upload-area { flex: 1; height: 80px; border: 2px dashed #d9d9d9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; cursor: pointer; }
+.product-list { padding: 24px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #fafafa; text-align: left; padding: 12px; color: #666; font-weight: 500; border-bottom: 1px solid #f0f0f0; }
+td { padding: 12px; border-bottom: 1px solid #f5f5f5; color: #333; }
+.status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.status-badge.pending { background: #FFF3E0; color: #FF8C42; }
+.status-badge.active { background: #E8F5E9; color: #4CAF50; }
+.status-badge.inactive { background: #f5f5f5; color: #999; }
+.action-link { color: #FF8C42; cursor: pointer; margin-right: 12px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="admin-frame">
+  <div class="page-header">
+    <span class="page-title">🛡️ 保险产品管理</span>
+    <button class="btn btn-primary">+ 新增产品</button>
+  </div>
+  <div class="filter-bar">
+    <input class="filter-input" placeholder="搜索产品名称/保险公司">
+    <select class="filter-select"><option>全部状态</option><option>待审核</option><option>已上架</option><option>已下架</option></select>
+    <select class="filter-select"><option>全部类型</option><option>门诊险</option><option>住院险</option><option>综合险</option><option>意外险</option></select>
+    <button class="btn btn-primary">查询</button>
+  </div>
+  <div class="product-list">
+    <table>
+      <tr><th>产品ID</th><th>产品名称</th><th>保险公司</th><th>类型</th><th>保额</th><th>状态</th><th>更新时间</th><th>操作</th></tr>
+      <tr><td>P001</td><td>众安宠物综合医保</td><td>众安保险</td><td>综合险</td><td>6万</td><td><span class="status-badge active">已上架</span></td><td>2026-06-20</td><td><span class="action-link">编辑</span><span class="action-link">下架</span><span class="action-link">历史</span></td></tr>
+      <tr><td>P002</td><td>平安萌宠保</td><td>平安财险</td><td>综合险</td><td>5万</td><td><span class="status-badge active">已上架</span></td><td>2026-06-18</td><td><span class="action-link">编辑</span><span class="action-link">下架</span><span class="action-link">历史</span></td></tr>
+      <tr><td>P003</td><td>太平洋宠乐保</td><td>太平洋财险</td><td>门诊+住院</td><td>8万</td><td><span class="status-badge active">已上架</span></td><td>2026-06-15</td><td><span class="action-link">编辑</span><span class="action-link">下架</span><span class="action-link">历史</span></td></tr>
+      <tr><td>P004</td><td>人保宠物医疗险</td><td>人保财险</td><td>住院险</td><td>10万</td><td><span class="status-badge pending">待审核</span></td><td>2026-06-25</td><td><span class="action-link">审核</span><span class="action-link">详情</span></td></tr>
+      <tr><td>P005</td><td>泰康在线宠物保</td><td>泰康在线</td><td>意外险</td><td>3万</td><td><span class="status-badge inactive">已下架</span></td><td>2026-06-10</td><td><span class="action-link">编辑</span><span class="action-link">上架</span></td></tr>
+    </table>
+  </div>
+</div>
+</body>
+</html>

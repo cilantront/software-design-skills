@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预测补货 — 预约制门店耗材预测补货</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; }
+        .app-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 220px; background: #001529; color: #fff; position: fixed; height: 100vh; overflow-y: auto; }
+        .sidebar-logo { padding: 20px 16px; font-size: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
+        .sidebar-logo .icon { width: 28px; height: 28px; background: #1890ff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .nav-section { padding: 12px 0; }
+        .nav-item { padding: 10px 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.65); }
+        .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+        .nav-item.active { color: #fff; background: #1890ff; }
+        .nav-item .badge { background: #ff4d4f; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 10px; margin-left: auto; }
+        .main-content { flex: 1; margin-left: 220px; }
+        .header { background: #fff; padding: 16px 24px; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 18px; font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .user-info { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .avatar { width: 32px; height: 32px; background: #1890ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
+        .content-area { padding: 24px; }
+
+        .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+        .card-header h2 { font-size: 15px; font-weight: 600; }
+
+        /* Overview Cards */
+        .overview-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .overview-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
+        .overview-card::after { content: ''; position: absolute; top: 0; right: 0; width: 80px; height: 80px; border-radius: 50%; opacity: 0.1; }
+        .overview-card.blue::after { background: #1890ff; }
+        .overview-card.red::after { background: #ff4d4f; }
+        .overview-card.green::after { background: #52c41a; }
+        .overview-card.orange::after { background: #fa8c16; }
+        .overview-card .label { font-size: 13px; color: #888; margin-bottom: 8px; }
+        .overview-card .value { font-size: 28px; font-weight: 700; }
+        .overview-card .value.blue { color: #1890ff; }
+        .overview-card .value.red { color: #ff4d4f; }
+        .overview-card .value.green { color: #52c41a; }
+        .overview-card .value.orange { color: #fa8c16; }
+        .overview-card .sub { font-size: 12px; color: #999; margin-top: 4px; }
+
+        /* Forecast Section */
+        .forecast-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+        .forecast-header h2 { font-size: 15px; font-weight: 600; }
+        .forecast-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #999; }
+        .forecast-meta .refresh-time { background: #f5f5f5; padding: 4px 10px; border-radius: 4px; }
+
+        /* Bar Chart */
+        .chart-area { padding: 20px; }
+        .chart-container { display: flex; flex-direction: column; gap: 12px; }
+        .chart-row { display: flex; align-items: center; gap: 12px; }
+        .chart-label { width: 140px; font-size: 13px; text-align: right; flex-shrink: 0; }
+        .chart-bars { flex: 1; display: flex; align-items: center; gap: 4px; height: 28px; }
+        .bar-stock { height: 100%; border-radius: 4px; background: #52c41a; position: relative; min-width: 2px; transition: width 0.5s; }
+        .bar-consume { height: 100%; border-radius: 4px; background: #faad14; position: relative; min-width: 2px; transition: width 0.5s; }
+        .bar-gap { height: 100%; border-radius: 4px; background: #ff4d4f; position: relative; min-width: 2px; transition: width 0.5s; }
+        .chart-value { width: 60px; font-size: 12px; color: #666; flex-shrink: 0; }
+        .chart-legend { display: flex; gap: 20px; justify-content: center; padding: 12px 0 0; font-size: 12px; color: #666; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #666; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+        .data-table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+        .data-table tr:hover { background: #f5f8ff; }
+        .data-table tr.gap-row { background: #fff2f0; }
+        .data-table tr.gap-row:hover { background: #ffebe8; }
+
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 2px 10px; border-radius: 12px; }
+        .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .status-green { background: #f6ffed; color: #52c41a; }
+        .status-green .dot { background: #52c41a; }
+        .status-red { background: #fff2f0; color: #ff4d4f; }
+        .status-red .dot { background: #ff4d4f; }
+
+        .gap-value { color: #ff4d4f; font-weight: 700; }
+        .sufficient-value { color: #52c41a; }
+
+        /* Urgency Badge */
+        .urgency-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .urgency-high { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+        .urgency-medium { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+        .urgency-low { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+
+        /* Buttons */
+        .btn { padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { border-color: #1890ff; color: #1890ff; }
+        .btn-primary { background: #1890ff; color: #fff; border-color: #1890ff; }
+        .btn-primary:hover { background: #40a9ff; }
+        .btn-success { background: #52c41a; color: #fff; border-color: #52c41a; }
+        .btn-success:hover { background: #73d13d; }
+        .btn-danger { background: #ff4d4f; color: #fff; border-color: #ff4d4f; }
+        .btn-danger:hover { background: #ff7875; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+        /* Action Bar */
+        .action-bar { padding: 16px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; background: #fafcff; }
+        .action-info { font-size: 13px; color: #666; }
+        .action-info strong { color: #ff4d4f; }
+        .action-btns { display: flex; gap: 10px; }
+
+        /* Restock List */
+        .restock-section { margin-top: 24px; }
+
+        /* Toast */
+        .toast { position: fixed; top: 24px; right: 24px; background: #fff; border-radius: 8px; padding: 14px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 2000; display: none; align-items: center; gap: 10px; font-size: 14px; border-left: 4px solid #52c41a; }
+        .toast.show { display: flex; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Tabs */
+        .tab-bar { display: flex; gap: 0; border-bottom: 1px solid #f0f0f0; }
+        .tab-item { padding: 12px 20px; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-item.active { color: #1890ff; border-bottom-color: #1890ff; font-weight: 600; }
+        .tab-item:hover { color: #1890ff; }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><div class="icon">📦</div>耗材预测补货</div>
+            <nav class="nav-section">
+                <div class="nav-item">📋 库存管理</div>
+                <div class="nav-item">📥 耗材入库</div>
+                <div class="nav-item">📅 预约录入</div>
+                <div class="nav-item active">📊 预测补货</div>
+                <div class="nav-item">⏰ 临期管理</div>
+                <div class="nav-item">🔔 提醒中心 <span class="badge">5</span></div>
+                <div class="nav-item">⚙️ 系统设置</div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h1>预测补货</h1>
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="avatar">张</div>
+                        <span>张店长 · 口腔诊所</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Overview -->
+                <div class="overview-row">
+                    <div class="overview-card blue">
+                        <div class="label">预测周期</div>
+                        <div class="value blue">7 天</div>
+                        <div class="sub">2026-06-24 至 2026-06-30</div>
+                    </div>
+                    <div class="overview-card red">
+                        <div class="label">需补货耗材</div>
+                        <div class="value red">4 种</div>
+                        <div class="sub">存在缺口需采购</div>
+                    </div>
+                    <div class="overview-card green">
+                        <div class="label">库存充足</div>
+                        <div class="value green">8 种</div>
+                        <div class="sub">可满足未来需求</div>
+                    </div>
+                    <div class="overview-card orange">
+                        <div class="label">最紧急断货</div>
+                        <div class="value orange">2 天</div>
+                        <div class="sub">口腔检查镜预计 6/25 断货</div>
+                    </div>
+                </div>
+
+                <!-- Forecast Chart -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="forecast-header">
+                        <h2>7 天耗材缺口预测（可视化）</h2>
+                        <div class="forecast-meta">
+                            <span class="refresh-time">预测时间：2026-06-24 09:30</span>
+                            <button class="btn btn-sm btn-primary" onclick="refreshForecast()">🔄 刷新预测</button>
+                        </div>
+                    </div>
+                    <div class="chart-area">
+                        <div class="chart-container">
+                            <div class="chart-row">
+                                <div class="chart-label">一次性手套</div>
+                                <div class="chart-bars" style="max-width: 400px;">
+                                    <div class="bar-stock" style="width:62%;background:#52c41a" title="当前库存 25盒"></div>
+                                    <div class="bar-consume" style="width:45%;background:#faad14" title="预计消耗 18盒"></div>
+                                </div>
+                                <div class="chart-value sufficient-value">充足 ✓</div>
+                            </div>
+                            <div class="chart-row">
+                                <div class="chart-label">麻醉剂（阿替卡因）</div>
+                                <div class="chart-bars" style="max-width: 400px;">
+                                    <div class="bar-stock" style="width:25%;background:#52c41a" title="当前库存 8支"></div>
+                                    <div class="bar-consume" style="width:72%;background:#faad14" title="预计消耗 23支"></div>
+                                    <div class="bar-gap" style="width:38%;background:#ff4d4f" title="缺口 15支"></div>
+                                </div>
+                                <div class="chart-value gap-value">缺口 15</div>
+                            </div>
+                            <div class="chart-row">
+                                <div class="chart-label">光固化树脂</div>
+                                <div class="chart-bars" style="max-width: 400px;">
+                                    <div class="bar-stock" style="width:30%;background:#52c41a" title="当前库存 5盒"></div>
+                                    <div class="bar-consume" style="width:40%;background:#faad14" title="预计消耗 6.5盒"></div>
+                                    <div class="bar-gap" style="width:10%;background:#ff4d4f" title="缺口 1.5盒"></div>
+                                </div>
+                                <div class="chart-value gap-value">缺口 2</div>
+                            </div>
+                            <div class="chart-row">
+                                <div class="chart-label">口腔检查镜</div>
+                                <div class="chart-bars" style="max-width: 400px;">
+                                    <div class="bar-stock" style="width:0%;background:#52c41a" title="当前库存 0个"></div>
+                                    <div class="bar-consume" style="width:92%;background:#faad14" title="预计消耗 37个"></div>
+                                    <div class="bar-gap" style="width:92%;background:#ff4d4f" title="缺口 37个"></div>
+                                </div>
+                                <div class="chart-value gap-value">缺口 37</div>
+                            </div>
+                            <div class="chart-row">
+                                <div class="chart-label">医用口罩</div>
+                                <div class="chart-bars" style="max-width: 400px;">
+                                    <div class="bar-stock" style="width:0%;background:#52c41a" title="当前库存 0盒"></div>
+                                    <div class="bar-consume" style="width:75%;background:#faad14" title="预计消耗 37盒"></div>
+                                    <div class="bar-gap" style="width:75%;background:#ff4d4f" title="缺口 37盒"></div>
+                                </div>
+                                <div class="chart-value gap-value">缺口 37</div>
+                            </div>
+                            <div class="chart-row">
+                                <div class="chart-label">一次性注射器</div>
+                                <div class="chart-bars" style="max-width: 400px;">
+                                    <div class="bar-stock" style="width:90%;background:#52c41a" title="当前库存 120支"></div>
+                                    <div class="bar-consume" style="width:5%;background:#faad14" title="预计消耗 6支"></div>
+                                </div>
+                                <div class="chart-value sufficient-value">充足 ✓</div>
+                            </div>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item"><div class="legend-dot" style="background:#52c41a"></div>当前库存</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:#faad14"></div>预计消耗</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:#ff4d4f"></div>缺口量</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gap Detail Table -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="forecast-header">
+                        <h2>缺口明细（按紧急程度排序）</h2>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>排序</th>
+                                    <th>耗材名称</th>
+                                    <th>规格</th>
+                                    <th>当前库存</th>
+                                    <th>预计消耗量</th>
+                                    <th>缺口量</th>
+                                    <th>库存状态</th>
+                                    <th>预计断货日</th>
+                                    <th>紧急程度</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="gap-row">
+                                    <td>1</td>
+                                    <td><strong>口腔检查镜</strong></td>
+                                    <td>独立包装 / 个</td>
+                                    <td>0 个</td>
+                                    <td>37 个</td>
+                                    <td><span class="gap-value">37 个</span></td>
+                                    <td><span class="status-badge status-red"><span class="dot"></span>缺货</span></td>
+                                    <td>已断货</td>
+                                    <td><span class="urgency-badge urgency-high">🔴 紧急</span></td>
+                                </tr>
+                                <tr class="gap-row">
+                                    <td>2</td>
+                                    <td><strong>医用口罩</strong></td>
+                                    <td>外科级 / 50只装</td>
+                                    <td>0 盒</td>
+                                    <td>37 只</td>
+                                    <td><span class="gap-value">1 盒</span></td>
+                                    <td><span class="status-badge status-red"><span class="dot"></span>缺货</span></td>
+                                    <td>已断货</td>
+                                    <td><span class="urgency-badge urgency-high">🔴 紧急</span></td>
+                                </tr>
+                                <tr class="gap-row">
+                                    <td>3</td>
+                                    <td><strong>麻醉剂（阿替卡因）</strong></td>
+                                    <td>1.7ml / 支</td>
+                                    <td>8 支</td>
+                                    <td>23 支</td>
+                                    <td><span class="gap-value">15 支</span></td>
+                                    <td><span class="status-badge status-red"><span class="dot"></span>不足</span></td>
+                                    <td>6月26日</td>
+                                    <td><span class="urgency-badge urgency-high">🔴 紧急</span></td>
+                                </tr>
+                                <tr class="gap-row">
+                                    <td>4</td>
+                                    <td><strong>光固化树脂</strong></td>
+                                    <td>A2色 / 4g装</td>
+                                    <td>5 盒</td>
+                                    <td>6.5 盒</td>
+                                    <td><span class="gap-value">2 盒</span></td>
+                                    <td><span class="status-badge status-red"><span class="dot"></span>不足</span></td>
+                                    <td>6月29日</td>
+                                    <td><span class="urgency-badge urgency-medium">🟡 一般</span></td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>一次性手套</td>
+                                    <td>中号 / 100只装</td>
+                                    <td>25 盒</td>
+                                    <td>18 盒</td>
+                                    <td><span class="sufficient-value">— 充足</span></td>
+                                    <td><span class="status-badge status-green"><span class="dot"></span>充足</span></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>一次性注射器</td>
+                                    <td>5ml / 支</td>
+                                    <td>120 支</td>
+                                    <td>6 支</td>
+                                    <td><span class="sufficient-value">— 充足</span></td>
+                                    <td><span class="status-badge status-green"><span class="dot"></span>充足</span></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Restock List -->
+                <div class="card restock-section">
+                    <div class="forecast-header">
+                        <h2>📋 补货清单</h2>
+                        <span style="font-size:12px;color:#999;">清单编号：RS-20260624-001 · 生成时间：2026-06-24 09:30</span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>耗材名称</th>
+                                    <th>规格</th>
+                                    <th>缺口数量</th>
+                                    <th>建议采购量</th>
+                                    <th>紧急程度</th>
+                                    <th>建议到货日期</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>口腔检查镜</strong></td>
+                                    <td>独立包装 / 个</td>
+                                    <td><span class="gap-value">37 个</span></td>
+                                    <td>50 个</td>
+                                    <td><span class="urgency-badge urgency-high">紧急</span></td>
+                                    <td>2026-06-25</td>
+                                    <td><button class="btn btn-sm">调整</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>医用口罩</strong></td>
+                                    <td>外科级 / 50只装</td>
+                                    <td><span class="gap-value">1 盒</span></td>
+                                    <td>5 盒</td>
+                                    <td><span class="urgency-badge urgency-high">紧急</span></td>
+                                    <td>2026-06-25</td>
+                                    <td><button class="btn btn-sm">调整</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>麻醉剂（阿替卡因）</strong></td>
+                                    <td>1.7ml / 支</td>
+                                    <td><span class="gap-value">15 支</span></td>
+                                    <td>20 支</td>
+                                    <td><span class="urgency-badge urgency-high">紧急</span></td>
+                                    <td>2026-06-25</td>
+                                    <td><button class="btn btn-sm">调整</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>光固化树脂</strong></td>
+                                    <td>A2色 / 4g装</td>
+                                    <td><span class="gap-value">2 盒</span></td>
+                                    <td>5 盒</td>
+                                    <td><span class="urgency-badge urgency-medium">一般</span></td>
+                                    <td>2026-06-28</td>
+                                    <td><button class="btn btn-sm">调整</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="action-bar">
+                        <div class="action-info">
+                            共 <strong>4</strong> 种耗材需补货 · 建议采购总金额以实际供应商报价为准
+                        </div>
+                        <div class="action-btns">
+                            <button class="btn" onclick="showToast('补货清单已确认')">✅ 确认清单</button>
+                            <button class="btn btn-success" onclick="exportList()">📥 导出 Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function refreshForecast() {
+            showToast('预测数据已刷新');
+        }
+        function exportList() {
+            showToast('补货清单已导出：补货清单_口腔诊所_20260624.xlsx');
+        }
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

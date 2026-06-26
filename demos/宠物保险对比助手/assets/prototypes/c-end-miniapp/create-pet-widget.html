@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>创建宠物档案 - Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+.phone-frame { width: 375px; height: 750px; background: #fff; border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden; border: 8px solid #1a1a1a; }
+.status-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #333; font-size: 12px; }
+.nav-bar { height: 50px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+.nav-back { font-size: 20px; cursor: pointer; margin-right: 12px; }
+.nav-title { font-size: 17px; font-weight: 600; }
+.step-bar { display: flex; align-items: center; padding: 16px 30px; }
+.step { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.step-dot { width: 24px; height: 24px; border-radius: 50%; background: #FF8C42; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.step-dot.inactive { background: #e0e0e0; }
+.step-label { font-size: 11px; color: #FF8C42; margin-top: 4px; }
+.step-label.inactive { color: #999; }
+.step-line { flex: 1; height: 2px; background: #FF8C42; margin: 0 8px; margin-bottom: 18px; }
+.step-line.inactive { background: #e0e0e0; }
+.form-area { padding: 16px 20px; flex: 1; overflow-y: auto; }
+.form-section { margin-bottom: 20px; }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #333; }
+.species-row { display: flex; gap: 10px; margin-bottom: 16px; }
+.species-btn { flex: 1; height: 60px; border-radius: 12px; border: 2px solid #e0e0e0; background: #fff; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.species-btn.active { border-color: #FF8C42; background: #FFF5EE; }
+.species-btn span:first-child { font-size: 22px; }
+.form-row { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid #f5f5f5; }
+.form-label { width: 80px; font-size: 14px; color: #666; }
+.form-value { flex: 1; font-size: 14px; color: #333; }
+.form-value input { border: none; outline: none; font-size: 14px; width: 100%; }
+.form-value .placeholder { color: #ccc; }
+.required { color: #ff4444; margin-right: 2px; }
+.photo-area { display: flex; gap: 12px; margin-top: 12px; }
+.photo-box { width: 80px; height: 80px; border-radius: 12px; border: 2px dashed #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+.photo-box.add { border-color: #FF8C42; color: #FF8C42; font-size: 12px; }
+.photo-box.preview { border-style: solid; border-color: #e0e0e0; background: #f9f9f9; font-size: 30px; }
+.bottom-btn { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 20px 30px; background: #fff; }
+.btn-primary { width: 100%; height: 48px; background: #FF8C42; border-radius: 24px; border: none; color: #fff; font-size: 16px; font-weight: 500; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="status-bar"><span>9:41</span><span>📶 📡 🔋</span></div>
+  <div class="nav-bar"><span class="nav-back">‹</span><span class="nav-title">创建宠物档案</span></div>
+  <div class="step-bar">
+    <div class="step"><div class="step-dot">1</div><div class="step-label">种类</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-dot">2</div><div class="step-label">品种</div></div>
+    <div class="step-line inactive"></div>
+    <div class="step"><div class="step-dot inactive">3</div><div class="step-label inactive">信息</div></div>
+    <div class="step-line inactive"></div>
+    <div class="step"><div class="step-dot inactive">4</div><div class="step-label inactive">照片</div></div>
+  </div>
+  <div class="form-area">
+    <div class="form-section">
+      <div class="section-title">选择宠物种类</div>
+      <div class="species-row">
+        <button class="species-btn active"><span>🐱</span><span>猫咪</span></button>
+        <button class="species-btn"><span>🐶</span><span>狗狗</span></button>
+        <button class="species-btn"><span>🐰</span><span>其他</span></button>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="section-title">基础信息</div>
+      <div class="form-row"><span class="form-label"><span class="required">*</span>名称</span><div class="form-value"><input placeholder="给TA起个名字吧" value="小橘"></div></div>
+      <div class="form-row"><span class="form-label"><span class="required">*</span>品种</span><div class="form-value">中华田园猫 ›</div></div>
+      <div class="form-row"><span class="form-label"><span class="required">*</span>性别</span><div class="form-value">♂ 公 ›</div></div>
+      <div class="form-row"><span class="form-label"><span class="required">*</span>年龄</span><div class="form-value">2024-03-15 (2岁3个月) ›</div></div>
+      <div class="form-row"><span class="form-label">体重</span><div class="form-value"><input placeholder="请输入体重(kg)" value="4.5"></div></div>
+      <div class="form-row"><span class="form-label"><span class="required">*</span>绝育</span><div class="form-value">已绝育 ›</div></div>
+    </div>
+    <div class="form-section">
+      <div class="section-title">宠物照片</div>
+      <div class="photo-area">
+        <div class="photo-box preview">🐱</div>
+        <div class="photo-box preview">📷</div>
+        <div class="photo-box add"><span>+</span><span>添加</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-btn"><button class="btn-primary">下一步</button></div>
+</div>
+</body>
+</html>

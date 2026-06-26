@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原型05 - 题目预览与编辑</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #F5F7FA; color: #333; }
+        .navbar { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+        .navbar .logo { font-size: 18px; font-weight: 600; color: #4096FF; display: flex; align-items: center; gap: 8px; }
+        .navbar .logo-icon { width: 28px; height: 28px; background: #4096FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
+        .navbar .nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .btn-primary { background: #4096FF; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn-primary:hover { background: #1677FF; }
+        .btn-secondary { background: #fff; color: #666; border: 1px solid #D9D9D9; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn-lg { padding: 12px 28px; font-size: 15px; }
+        .btn-danger { background: #FF4D4F; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+        .quota-badge { background: #F0F5FF; color: #4096FF; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: #E6F4FF; display: flex; align-items: center; justify-content: center; color: #4096FF; font-size: 14px; }
+
+        .main { margin-top: 56px; padding: 24px; max-width: 1000px; margin-left: auto; margin-right: auto; }
+        .proto-banner { background: #FFF7E6; border: 1px dashed #FA8C16; padding: 8px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; color: #D46B08; }
+
+        /* Stepper */
+        .stepper { display: flex; align-items: center; justify-content: center; margin-bottom: 28px; }
+        .step-item { display: flex; align-items: center; gap: 8px; }
+        .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; }
+        .step-circle.active { background: #4096FF; color: #fff; }
+        .step-circle.done { background: #52C41A; color: #fff; }
+        .step-circle.pending { background: #F0F0F0; color: #999; }
+        .step-label { font-size: 13px; }
+        .step-label.active { color: #4096FF; font-weight: 500; }
+        .step-label.done { color: #52C41A; }
+        .step-label.pending { color: #999; }
+        .step-line { width: 60px; height: 2px; margin: 0 8px; }
+        .step-line.done { background: #52C41A; }
+        .step-line.pending { background: #F0F0F0; }
+
+        /* Filter Bar */
+        .filter-bar { background: #fff; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); flex-wrap: wrap; }
+        .filter-tabs { display: flex; gap: 4px; }
+        .filter-tab { padding: 4px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; color: #666; background: none; border: none; }
+        .filter-tab:hover { background: #F5F7FA; }
+        .filter-tab.active { background: #E6F4FF; color: #4096FF; }
+        .filter-tab .count { font-size: 11px; background: #F0F0F0; padding: 1px 4px; border-radius: 8px; margin-left: 4px; }
+        .filter-tab.active .count { background: #BAE0FF; }
+        .filter-divider { width: 1px; height: 20px; background: #F0F0F0; }
+        .filter-diff { display: flex; gap: 4px; }
+        .filter-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+        .filter-right select { padding: 4px 8px; border: 1px solid #D9D9D9; border-radius: 4px; font-size: 12px; }
+
+        /* Question Card */
+        .question-card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #F0F0F0; transition: all 0.2s; }
+        .question-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .question-card.editing { border-color: #4096FF; box-shadow: 0 0 0 2px rgba(64,150,255,0.1); }
+
+        .q-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .q-number { font-size: 14px; font-weight: 600; color: #333; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .tag-choice { background: #E6F4FF; color: #4096FF; }
+        .tag-tf { background: #F6FFED; color: #52C41A; }
+        .tag-easy { background: #F6FFED; color: #52C41A; }
+        .tag-medium { background: #FFFBE6; color: #FAAD14; }
+        .tag-hard { background: #FFF1F0; color: #FF4D4F; }
+        .q-actions { margin-left: auto; display: flex; gap: 6px; }
+        .q-actions button { background: none; border: 1px solid #F0F0F0; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; color: #666; }
+        .q-actions button:hover { border-color: #4096FF; color: #4096FF; }
+        .q-actions button.danger:hover { border-color: #FF4D4F; color: #FF4D4F; }
+
+        .q-content { font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+        .q-options { margin-bottom: 12px; padding-left: 8px; }
+        .q-option { padding: 4px 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .q-option.correct { color: #52C41A; font-weight: 500; }
+        .q-option .opt-label { width: 20px; height: 20px; border: 1px solid #D9D9D9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .q-option.correct .opt-label { background: #52C41A; color: #fff; border-color: #52C41A; }
+
+        .q-answer { font-size: 13px; color: #52C41A; margin-bottom: 8px; }
+        .q-answer strong { font-weight: 500; }
+
+        .q-explanation { background: #FAFAFA; border-radius: 6px; padding: 12px; font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 8px; display: none; }
+        .q-explanation.show { display: block; }
+        .q-explanation-toggle { font-size: 13px; color: #4096FF; cursor: pointer; background: none; border: none; padding: 0; }
+        .q-explanation-toggle:hover { text-decoration: underline; }
+
+        .q-kp { font-size: 12px; color: #999; margin-top: 8px; }
+        .q-kp span { background: #F5F5F5; padding: 2px 6px; border-radius: 3px; }
+
+        /* Edit Mode */
+        .edit-area { display: none; }
+        .edit-area.show { display: block; }
+        .edit-area textarea { width: 100%; border: 1px solid #D9D9D9; border-radius: 6px; padding: 10px; font-size: 14px; resize: vertical; min-height: 60px; font-family: inherit; }
+        .edit-area textarea:focus { border-color: #4096FF; outline: none; }
+        .edit-area .edit-actions { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; }
+
+        /* Save Card Form */
+        .save-form { background: #F0F5FF; border: 1px solid #BAE0FF; border-radius: 8px; padding: 20px; margin-top: 20px; }
+        .save-form h3 { font-size: 15px; font-weight: 500; margin-bottom: 16px; }
+        .form-row { display: flex; gap: 16px; margin-bottom: 12px; }
+        .form-field { flex: 1; }
+        .form-field label { display: block; font-size: 13px; color: #666; margin-bottom: 4px; }
+        .form-field label .required { color: #FF4D4F; }
+        .form-field input { width: 100%; padding: 8px 12px; border: 1px solid #D9D9D9; border-radius: 6px; font-size: 14px; }
+        .form-field input:focus { border-color: #4096FF; outline: none; }
+
+        /* Actions */
+        .actions { display: flex; justify-content: center; gap: 16px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><div class="logo-icon">📋</div> 课程讲义转练习卡</div>
+        <div class="nav-right">
+            <span class="quota-badge">剩余配额: 3次</span>
+            <div class="avatar">张</div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="proto-banner">
+            🎨 UI原型 — Step 4: 题目预览与编辑 | 上一步：<a href="prototype_04_config.html">出题配置</a> | 下一步：保存练习卡
+        </div>
+
+        <!-- 步骤条 -->
+        <div class="stepper">
+            <div class="step-item"><div class="step-circle done">✓</div><span class="step-label done">上传讲义</span></div>
+            <div class="step-line done"></div>
+            <div class="step-item"><div class="step-circle done">✓</div><span class="step-label done">确认知识点</span></div>
+            <div class="step-line done"></div>
+            <div class="step-item"><div class="step-circle done">✓</div><span class="step-label done">出题配置</span></div>
+            <div class="step-line done"></div>
+            <div class="step-item"><div class="step-circle active">4</div><span class="step-label active">预览题目</span></div>
+            <div class="step-line pending"></div>
+            <div class="step-item"><div class="step-circle pending">5</div><span class="step-label pending">完成</span></div>
+        </div>
+
+        <!-- 筛选工具栏 -->
+        <div class="filter-bar">
+            <div class="filter-tabs">
+                <button class="filter-tab active">全部 <span class="count">5</span></button>
+                <button class="filter-tab">选择题 <span class="count">3</span></button>
+                <button class="filter-tab">判断题 <span class="count">2</span></button>
+                <button class="filter-tab">简答题 <span class="count">0</span></button>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-diff">
+                <button class="filter-tab">简单</button>
+                <button class="filter-tab active">中等</button>
+                <button class="filter-tab">困难</button>
+            </div>
+            <div class="filter-right">
+                <input type="checkbox" style="accent-color: #4096FF;"> <span style="font-size: 12px; color: #666;">全选</span>
+                <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">批量操作 ▼</button>
+            </div>
+        </div>
+
+        <!-- 题目卡片 1 - 选择题 -->
+        <div class="question-card">
+            <div class="q-header">
+                <span class="q-number">#1</span>
+                <span class="tag tag-choice">选择题</span>
+                <span class="tag tag-medium">中等</span>
+                <div class="q-actions">
+                    <button onclick="toggleEdit(this)">✏️ 编辑</button>
+                    <button>🔄 重新生成</button>
+                    <button class="danger">🗑️ 删除</button>
+                </div>
+            </div>
+            <div class="q-content">以下哪项不属于项目管理的五大过程组？</div>
+            <div class="q-options">
+                <div class="q-option"><span class="opt-label">A</span> 启动</div>
+                <div class="q-option"><span class="opt-label">B</span> 规划</div>
+                <div class="q-option"><span class="opt-label">C</span> 执行</div>
+                <div class="q-option correct"><span class="opt-label">D</span> 运营 ✓</div>
+            </div>
+            <div class="q-answer"><strong>正确答案：D</strong></div>
+            <button class="q-explanation-toggle" onclick="toggleExplanation(this)">▶ 查看答案解析</button>
+            <div class="q-explanation">
+                项目管理的五大过程组包括：启动、规划、执行、监控、收尾。运营属于日常持续性活动，不属于项目管理过程组。项目是临时性的工作，而运营是持续重复的活动。
+            </div>
+            <div class="q-kp">📌 关联知识点：<span>项目管理五大过程组</span></div>
+
+            <!-- 编辑区域（默认隐藏） -->
+            <div class="edit-area">
+                <textarea>以下哪项不属于项目管理的五大过程组？</textarea>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <input type="text" value="A. 启动" style="flex:1; padding: 6px 10px; border: 1px solid #D9D9D9; border-radius: 4px; font-size: 13px;">
+                    <input type="text" value="B. 规划" style="flex:1; padding: 6px 10px; border: 1px solid #D9D9D9; border-radius: 4px; font-size: 13px;">
+                    <input type="text" value="C. 执行" style="flex:1; padding: 6px 10px; border: 1px solid #D9D9D9; border-radius: 4px; font-size: 13px;">
+                    <input type="text" value="D. 运营" style="flex:1; padding: 6px 10px; border: 1px solid #D9D9D9; border-radius: 4px; font-size: 13px;">
+                </div>
+                <div class="edit-actions">
+                    <button class="btn-secondary" style="padding: 4px 12px; font-size: 12px;">取消</button>
+                    <button class="btn-primary" style="padding: 4px 12px; font-size: 12px;">保存修改</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 题目卡片 2 - 选择题 -->
+        <div class="question-card">
+            <div class="q-header">
+                <span class="q-number">#2</span>
+                <span class="tag tag-choice">选择题</span>
+                <span class="tag tag-medium">中等</span>
+                <div class="q-actions">
+                    <button>✏️ 编辑</button>
+                    <button>🔄 重新生成</button>
+                    <button class="danger">🗑️ 删除</button>
+                </div>
+            </div>
+            <div class="q-content">项目管理的"铁三角"约束不包括以下哪项？</div>
+            <div class="q-options">
+                <div class="q-option"><span class="opt-label">A</span> 范围</div>
+                <div class="q-option correct"><span class="opt-label">B</span> 质量 ✓</div>
+                <div class="q-option"><span class="opt-label">C</span> 时间</div>
+                <div class="q-option"><span class="opt-label">D</span> 成本</div>
+            </div>
+            <div class="q-answer"><strong>正确答案：B</strong></div>
+            <button class="q-explanation-toggle" onclick="toggleExplanation(this)">▶ 查看答案解析</button>
+            <div class="q-explanation">
+                项目管理的铁三角（三重约束）包括：范围、时间、成本。质量虽然重要，但不属于传统的铁三角约束，而是受三者影响的结果。
+            </div>
+            <div class="q-kp">📌 关联知识点：<span>项目管理的价值</span></div>
+        </div>
+
+        <!-- 题目卡片 3 - 选择题 -->
+        <div class="question-card">
+            <div class="q-header">
+                <span class="q-number">#3</span>
+                <span class="tag tag-choice">选择题</span>
+                <span class="tag tag-medium">中等</span>
+                <div class="q-actions">
+                    <button>✏️ 编辑</button>
+                    <button>🔄 重新生成</button>
+                    <button class="danger">🗑️ 删除</button>
+                </div>
+            </div>
+            <div class="q-content">以下哪个文档正式授权项目的存在？</div>
+            <div class="q-options">
+                <div class="q-option correct"><span class="opt-label">A</span> 项目章程 ✓</div>
+                <div class="q-option"><span class="opt-label">B</span> 项目管理计划</div>
+                <div class="q-option"><span class="opt-label">C</span> 范围说明书</div>
+                <div class="q-option"><span class="opt-label">D</span> 商业论证</div>
+            </div>
+            <div class="q-answer"><strong>正确答案：A</strong></div>
+            <button class="q-explanation-toggle" onclick="toggleExplanation(this)">▶ 查看答案解析</button>
+            <div class="q-explanation">
+                项目章程是正式授权项目存在的文件，由项目发起人签发。它赋予项目经理使用组织资源的权力。
+            </div>
+            <div class="q-kp">📌 关联知识点：<span>项目的定义与特征</span></div>
+        </div>
+
+        <!-- 题目卡片 4 - 判断题 -->
+        <div class="question-card">
+            <div class="q-header">
+                <span class="q-number">#4</span>
+                <span class="tag tag-tf">判断题</span>
+                <span class="tag tag-medium">中等</span>
+                <div class="q-actions">
+                    <button>✏️ 编辑</button>
+                    <button>🔄 重新生成</button>
+                    <button class="danger">🗑️ 删除</button>
+                </div>
+            </div>
+            <div class="q-content">项目的临时性意味着项目的持续时间一定很短。</div>
+            <div class="q-answer" style="margin-top: 8px;"><strong>正确答案：错</strong></div>
+            <button class="q-explanation-toggle" onclick="toggleExplanation(this)">▶ 查看答案解析</button>
+            <div class="q-explanation">
+                项目的临时性是指每个项目都有明确的起点和终点，但并不意味着持续时间短。一个项目可能持续数月甚至数年。临时性强调的是"有终点"而非"短暂"。
+            </div>
+            <div class="q-kp">📌 关联知识点：<span>项目的生命周期</span></div>
+        </div>
+
+        <!-- 题目卡片 5 - 判断题 -->
+        <div class="question-card">
+            <div class="q-header">
+                <span class="q-number">#5</span>
+                <span class="tag tag-tf">判断题</span>
+                <span class="tag tag-medium">中等</span>
+                <div class="q-actions">
+                    <button>✏️ 编辑</button>
+                    <button>🔄 重新生成</button>
+                    <button class="danger">🗑️ 删除</button>
+                </div>
+            </div>
+            <div class="q-content">项目与日常运营的共同特征是都具有重复性。</div>
+            <div class="q-answer" style="margin-top: 8px;"><strong>正确答案：错</strong></div>
+            <button class="q-explanation-toggle" onclick="toggleExplanation(this)">▶ 查看答案解析</button>
+            <div class="q-explanation">
+                项目具有独特性，每个项目的产出都是独特的；而日常运营才具有重复性。项目与运营的本质区别在于：项目是临时的、独特的，运营是持续的、重复的。
+            </div>
+            <div class="q-kp">📌 关联知识点：<span>项目的定义与特征</span></div>
+        </div>
+
+        <!-- 保存练习卡表单 -->
+        <div class="save-form">
+            <h3>💾 保存为练习卡</h3>
+            <div class="form-row">
+                <div class="form-field">
+                    <label><span class="required">*</span> 练习卡名称</label>
+                    <input type="text" value="项目管理第1课-练习卡">
+                </div>
+                <div class="form-field">
+                    <label>所属课程</label>
+                    <input type="text" value="项目管理">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>所属章节</label>
+                    <input type="text" value="第一章 项目管理概述">
+                </div>
+                <div class="form-field">
+                    <label>描述</label>
+                    <input type="text" value="项目管理概述章节的配套练习">
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="actions">
+            <button class="btn-secondary btn-lg" onclick="location.href='prototype_04_config.html'">← 返回配置</button>
+            <button class="btn-primary btn-lg" onclick="location.href='prototype_06_manage.html'">💾 保存为练习卡</button>
+        </div>
+    </main>
+
+    <script>
+        // 展开/折叠解析
+        function toggleExplanation(btn) {
+            const exp = btn.nextElementSibling;
+            if (exp.classList.contains('show')) {
+                exp.classList.remove('show');
+                btn.textContent = '▶ 查看答案解析';
+            } else {
+                exp.classList.add('show');
+                btn.textContent = '▼ 收起解析';
+            }
+        }
+
+        // 编辑切换
+        function toggleEdit(btn) {
+            const card = btn.closest('.question-card');
+            const editArea = card.querySelector('.edit-area');
+            editArea.classList.toggle('show');
+            card.classList.toggle('editing');
+        }
+
+        // 筛选标签切换
+        document.querySelectorAll('.filter-tabs .filter-tab, .filter-diff .filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const siblings = this.parentElement.querySelectorAll('.filter-tab');
+                siblings.forEach(s => s.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

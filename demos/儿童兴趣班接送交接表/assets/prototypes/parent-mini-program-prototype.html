@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家长端小程序 - 全站点原型</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .prototype-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .prototype-subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .phone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .phone-frame {
+            background: #fff;
+            border-radius: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .phone-header {
+            background: #07c160;
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .phone-header-title {
+            font-weight: 500;
+        }
+
+        .phone-content {
+            height: 600px;
+            overflow-y: auto;
+            background: #f8f8f8;
+        }
+
+        .page-title {
+            background: #fff;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        /* Login Page */
+        .login-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        .login-btn {
+            width: 100%;
+            max-width: 280px;
+            padding: 15px;
+            background: #07c160;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(7,193,96,0.3);
+        }
+
+        .login-agreement {
+            margin-top: 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* Home Page */
+        .home-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 20px;
+        }
+
+        .home-child-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .home-child-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-right: 15px;
+        }
+
+        .home-child-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .home-child-status {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .home-quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            background: #fff;
+            margin: -20px 15px 15px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .home-action-item {
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .home-action-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 8px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .home-action-text {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .home-section {
+            background: #fff;
+            margin: 15px;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .home-section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .home-record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .home-record-item:last-child {
+            border-bottom: none;
+        }
+
+        .home-record-info {
+            flex: 1;
+        }
+
+        .home-record-type {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .home-record-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .home-record-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .status-arrived {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-left {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        /* Notice Page */
+        .notice-list {
+            background: #fff;
+        }
+
+        .notice-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .notice-item:hover {
+            background: #f8f8f8;
+        }
+
+        .notice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .notice-type {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .type-arrive {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .type-leave {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .type-exception {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .notice-time {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .notice-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .notice-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Record Page */
+        .record-filter {
+            background: #fff;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .record-date-picker {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .record-date-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .record-list {
+            background: #fff;
+        }
+
+        .record-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .record-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .record-item-type {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .record-item-details {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        /* Auth Page */
+        .auth-list {
+            background: #fff;
+        }
+
+        .auth-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .auth-info {
+            flex: 1;
+        }
+
+        .auth-name {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .auth-relationship {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .auth-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .auth-btn-edit {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .auth-btn-delete {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .auth-add-btn {
+            width: calc(100% - 40px);
+            margin: 20px;
+            padding: 15px;
+            background: #07c160;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Leave Page */
+        .leave-form {
+            background: #fff;
+            padding: 20px;
+        }
+
+        .leave-form-item {
+            margin-bottom: 20px;
+        }
+
+        .leave-form-label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .leave-form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .leave-form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .leave-submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #07c160;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Profile Page */
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 15px;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .profile-phone {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .profile-menu {
+            background: #fff;
+            margin-top: 20px;
+        }
+
+        .profile-menu-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .profile-menu-item:hover {
+            background: #f8f8f8;
+        }
+
+        .profile-menu-text {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .profile-menu-arrow {
+            color: #999;
+        }
+
+        .page-label {
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 8px 15px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="prototype-title">家长端小程序 - 全站点原型</h1>
+    <p class="prototype-subtitle">微信小程序 | 家长使用 | 12个核心页面</p>
+
+    <div class="phone-grid">
+        <!-- 1. 登录页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">微信</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">1. 登录页</div>
+            <div class="phone-content">
+                <div class="login-page">
+                    <div class="login-logo">👶</div>
+                    <div class="login-title">接送交接表</div>
+                    <div class="login-subtitle">守护孩子安全每一天</div>
+                    <button class="login-btn">微信授权登录</button>
+                    <div class="login-agreement">
+                        登录即同意《用户协议》和《隐私政策》
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 首页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">首页</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">2. 首页</div>
+            <div class="phone-content">
+                <div class="home-header">
+                    <div class="home-child-info">
+                        <div class="home-child-avatar">👦</div>
+                        <div>
+                            <div class="home-child-name">小明</div>
+                            <div class="home-child-status">✅ 今日已到校 08:25</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="home-quick-actions">
+                    <div class="home-action-item">
+                        <div class="home-action-icon">📋</div>
+                        <div class="home-action-text">接送记录</div>
+                    </div>
+                    <div class="home-action-item">
+                        <div class="home-action-icon">👥</div>
+                        <div class="home-action-text">授权接送人</div>
+                    </div>
+                    <div class="home-action-item">
+                        <div class="home-action-icon">📝</div>
+                        <div class="home-action-text">请假申请</div>
+                    </div>
+                </div>
+                <div class="home-section">
+                    <div class="home-section-title">今日记录</div>
+                    <div class="home-record-item">
+                        <div class="home-record-info">
+                            <div class="home-record-type">到校</div>
+                            <div class="home-record-time">08:25 | 李老师</div>
+                        </div>
+                        <div class="home-record-status status-arrived">已到校</div>
+                    </div>
+                </div>
+                <div class="home-section">
+                    <div class="home-section-title">最新通知</div>
+                    <div class="home-record-item">
+                        <div class="home-record-info">
+                            <div class="home-record-type">孩子已到校</div>
+                            <div class="home-record-time">今天 08:25</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 消息通知页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">消息通知</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">3. 消息通知页</div>
+            <div class="phone-content">
+                <div class="notice-list">
+                    <div class="notice-item">
+                        <div class="notice-header">
+                            <span class="notice-type type-arrive">到校通知</span>
+                            <span class="notice-time">今天 08:25</span>
+                        </div>
+                        <div class="notice-title">孩子已到校</div>
+                        <div class="notice-content">小明已于08:25到校，签到老师：李老师</div>
+                    </div>
+                    <div class="notice-item">
+                        <div class="notice-header">
+                            <span class="notice-type type-leave">离校通知</span>
+                            <span class="notice-time">昨天 17:30</span>
+                        </div>
+                        <div class="notice-title">孩子已被接走</div>
+                        <div class="notice-content">小明已被奶奶接走，交接老师：王老师</div>
+                    </div>
+                    <div class="notice-item">
+                        <div class="notice-header">
+                            <span class="notice-type type-exception">异常通知</span>
+                            <span class="notice-time">2天前 09:15</span>
+                        </div>
+                        <div class="notice-title">孩子未按时到校</div>
+                        <div class="notice-content">小明未在09:00前到校，请及时关注</div>
+                    </div>
+                    <div class="notice-item">
+                        <div class="notice-header">
+                            <span class="notice-type type-arrive">到校通知</span>
+                            <span class="notice-time">3天前 08:20</span>
+                        </div>
+                        <div class="notice-title">孩子已到校</div>
+                        <div class="notice-content">小明已于08:20到校，签到老师：李老师</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 接送记录页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">接送记录</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">4. 接送记录页</div>
+            <div class="phone-content">
+                <div class="record-filter">
+                    <div class="record-date-picker">
+                        <input type="date" class="record-date-input" value="2026-06-26">
+                    </div>
+                </div>
+                <div class="record-list">
+                    <div class="record-item">
+                        <div class="record-item-header">
+                            <div class="record-item-type">🟢 到校</div>
+                            <span class="notice-type type-arrive">已到校</span>
+                        </div>
+                        <div class="record-item-details">
+                            时间：08:25<br>
+                            签到老师：李老师<br>
+                            备注：无
+                        </div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-item-header">
+                            <div class="record-item-type">🔵 离校</div>
+                            <span class="notice-type type-leave">已离校</span>
+                        </div>
+                        <div class="record-item-details">
+                            时间：17:30<br>
+                            接送人：奶奶（王美丽）<br>
+                            交接老师：王老师<br>
+                            备注：无
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 授权接送人页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">授权接送人</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">5. 授权接送人页</div>
+            <div class="phone-content">
+                <div class="auth-list">
+                    <div class="auth-item">
+                        <div class="auth-avatar">👵</div>
+                        <div class="auth-info">
+                            <div class="auth-name">王美丽</div>
+                            <div class="auth-relationship">奶奶 | 138****5678</div>
+                        </div>
+                        <div class="auth-actions">
+                            <button class="auth-btn auth-btn-edit">编辑</button>
+                            <button class="auth-btn auth-btn-delete">删除</button>
+                        </div>
+                    </div>
+                    <div class="auth-item">
+                        <div class="auth-avatar">👨</div>
+                        <div class="auth-info">
+                            <div class="auth-name">张强</div>
+                            <div class="auth-relationship">爸爸 | 139****1234</div>
+                        </div>
+                        <div class="auth-actions">
+                            <button class="auth-btn auth-btn-edit">编辑</button>
+                            <button class="auth-btn auth-btn-delete">删除</button>
+                        </div>
+                    </div>
+                    <div class="auth-item">
+                        <div class="auth-avatar">👩</div>
+                        <div class="auth-info">
+                            <div class="auth-name">李芳</div>
+                            <div class="auth-relationship">妈妈 | 136****9876</div>
+                        </div>
+                        <div class="auth-actions">
+                            <button class="auth-btn auth-btn-edit">编辑</button>
+                            <button class="auth-btn auth-btn-delete">删除</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="auth-add-btn">+ 新增授权接送人</button>
+            </div>
+        </div>
+
+        <!-- 6. 请假申请页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">请假申请</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">6. 请假申请页</div>
+            <div class="phone-content">
+                <div class="leave-form">
+                    <div class="leave-form-item">
+                        <div class="leave-form-label">请假日期</div>
+                        <input type="date" class="leave-form-input" value="2026-06-27">
+                    </div>
+                    <div class="leave-form-item">
+                        <div class="leave-form-label">请假原因</div>
+                        <textarea class="leave-form-textarea" placeholder="请输入请假原因...">孩子身体不适，需要在家休息</textarea>
+                    </div>
+                    <button class="leave-submit-btn">提交请假申请</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 个人中心页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">个人中心</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">7. 个人中心页</div>
+            <div class="phone-content">
+                <div class="profile-header">
+                    <div class="profile-avatar">👩</div>
+                    <div class="profile-name">李芳</div>
+                    <div class="profile-phone">136****9876</div>
+                </div>
+                <div class="profile-menu">
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">我的孩子</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">授权接送人</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">接送记录</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">请假记录</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">消息通知设置</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">关于我们</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

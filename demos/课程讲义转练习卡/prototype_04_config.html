@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原型04 - 出题配置</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #F5F7FA; color: #333; }
+        .navbar { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+        .navbar .logo { font-size: 18px; font-weight: 600; color: #4096FF; display: flex; align-items: center; gap: 8px; }
+        .navbar .logo-icon { width: 28px; height: 28px; background: #4096FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
+        .navbar .nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .btn-primary { background: #4096FF; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn-primary:hover { background: #1677FF; }
+        .btn-secondary { background: #fff; color: #666; border: 1px solid #D9D9D9; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn-lg { padding: 12px 28px; font-size: 15px; }
+        .quota-badge { background: #F0F5FF; color: #4096FF; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: #E6F4FF; display: flex; align-items: center; justify-content: center; color: #4096FF; font-size: 14px; }
+
+        .main { margin-top: 56px; padding: 32px; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .proto-banner { background: #FFF7E6; border: 1px dashed #FA8C16; padding: 8px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; color: #D46B08; }
+
+        /* Stepper */
+        .stepper { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+        .step-item { display: flex; align-items: center; gap: 8px; }
+        .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; }
+        .step-circle.active { background: #4096FF; color: #fff; }
+        .step-circle.done { background: #52C41A; color: #fff; }
+        .step-circle.pending { background: #F0F0F0; color: #999; }
+        .step-label { font-size: 13px; }
+        .step-label.active { color: #4096FF; font-weight: 500; }
+        .step-label.done { color: #52C41A; }
+        .step-label.pending { color: #999; }
+        .step-line { width: 60px; height: 2px; margin: 0 8px; }
+        .step-line.done { background: #52C41A; }
+        .step-line.pending { background: #F0F0F0; }
+
+        /* Config Form */
+        .config-card { background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .config-section { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #F5F5F5; }
+        .config-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .config-section h3 { font-size: 15px; font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .config-section h3 .required { color: #FF4D4F; }
+
+        /* Checkbox & Radio */
+        .check-group { display: flex; gap: 24px; flex-wrap: wrap; }
+        .check-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .check-item input[type="checkbox"], .check-item input[type="radio"] { width: 16px; height: 16px; accent-color: #4096FF; }
+        .check-item label { font-size: 14px; cursor: pointer; }
+
+        /* Number Input */
+        .number-row { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 12px; }
+        .number-field { display: flex; align-items: center; gap: 8px; }
+        .number-field .field-label { font-size: 13px; color: #666; min-width: 60px; }
+        .number-field input[type="number"] { width: 80px; padding: 6px 10px; border: 1px solid #D9D9D9; border-radius: 6px; font-size: 14px; text-align: center; }
+        .number-field input[type="number"]:focus { border-color: #4096FF; outline: none; box-shadow: 0 0 0 2px rgba(64,150,255,0.1); }
+        .number-field .field-unit { font-size: 13px; color: #999; }
+        .number-field .field-range { font-size: 11px; color: #BFBFBF; }
+
+        /* Difficulty */
+        .diff-options { display: flex; gap: 16px; margin-top: 8px; }
+        .diff-option { flex: 1; padding: 12px 16px; border: 1px solid #D9D9D9; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s; }
+        .diff-option:hover { border-color: #4096FF; }
+        .diff-option.selected { border-color: #4096FF; background: #F0F5FF; }
+        .diff-option .diff-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+        .diff-option .diff-desc { font-size: 12px; color: #999; }
+        .diff-option.selected .diff-name { color: #4096FF; }
+
+        /* Scope */
+        .scope-options { margin-top: 8px; }
+        .scope-tree { margin-top: 12px; padding-left: 24px; }
+        .scope-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+        .scope-item input { accent-color: #4096FF; }
+        .scope-item .count { color: #999; font-size: 12px; }
+
+        /* Toggle */
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+        .toggle-row .toggle-label { font-size: 14px; }
+        .toggle-row .toggle-desc { font-size: 12px; color: #999; margin-top: 2px; }
+        .toggle-switch { width: 44px; height: 24px; background: #4096FF; border-radius: 12px; position: relative; cursor: pointer; }
+        .toggle-switch::after { content: ''; width: 20px; height: 20px; background: #fff; border-radius: 50%; position: absolute; top: 2px; right: 2px; }
+        .toggle-switch.off { background: #D9D9D9; }
+        .toggle-switch.off::after { right: auto; left: 2px; }
+
+        /* Summary */
+        .summary-bar { background: #F0F5FF; border: 1px solid #BAE0FF; border-radius: 8px; padding: 16px; margin-top: 24px; text-align: center; }
+        .summary-bar .summary-text { font-size: 14px; color: #333; }
+        .summary-bar .summary-text strong { color: #4096FF; }
+        .summary-bar .summary-quota { font-size: 12px; color: #999; margin-top: 4px; }
+
+        /* Actions */
+        .actions { display: flex; justify-content: center; gap: 16px; margin-top: 32px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><div class="logo-icon">📋</div> 课程讲义转练习卡</div>
+        <div class="nav-right">
+            <span class="quota-badge">剩余配额: 3次</span>
+            <div class="avatar">张</div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="proto-banner">
+            🎨 UI原型 — Step 3: 出题配置 | 上一步：<a href="prototype_03_knowledge.html">确认知识点</a> | 下一步：<a href="prototype_05_preview.html">预览题目</a>
+        </div>
+
+        <!-- 步骤条 -->
+        <div class="stepper">
+            <div class="step-item"><div class="step-circle done">✓</div><span class="step-label done">上传讲义</span></div>
+            <div class="step-line done"></div>
+            <div class="step-item"><div class="step-circle done">✓</div><span class="step-label done">确认知识点</span></div>
+            <div class="step-line done"></div>
+            <div class="step-item"><div class="step-circle active">3</div><span class="step-label active">出题配置</span></div>
+            <div class="step-line pending"></div>
+            <div class="step-item"><div class="step-circle pending">4</div><span class="step-label pending">预览题目</span></div>
+            <div class="step-line pending"></div>
+            <div class="step-item"><div class="step-circle pending">5</div><span class="step-label pending">完成</span></div>
+        </div>
+
+        <!-- 配置表单 -->
+        <div class="config-card">
+            <!-- 题型选择 -->
+            <div class="config-section">
+                <h3><span class="required">*</span> 题型选择（可多选）</h3>
+                <div class="check-group">
+                    <div class="check-item">
+                        <input type="checkbox" id="type_choice" checked>
+                        <label for="type_choice">📝 选择题（单选+多选）</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="type_tf" checked>
+                        <label for="type_tf">✅ 判断题</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="type_sa">
+                        <label for="type_sa">✍️ 简答题</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 题目数量 -->
+            <div class="config-section">
+                <h3><span class="required">*</span> 每种题型数量</h3>
+                <div class="number-row">
+                    <div class="number-field">
+                        <span class="field-label">选择题</span>
+                        <input type="number" value="10" min="1" max="50">
+                        <span class="field-unit">道</span>
+                        <span class="field-range">(1-50)</span>
+                    </div>
+                    <div class="number-field">
+                        <span class="field-label">判断题</span>
+                        <input type="number" value="5" min="1" max="30">
+                        <span class="field-unit">道</span>
+                        <span class="field-range">(1-30)</span>
+                    </div>
+                    <div class="number-field" style="opacity: 0.4;">
+                        <span class="field-label">简答题</span>
+                        <input type="number" value="3" min="1" max="20" disabled>
+                        <span class="field-unit">道</span>
+                        <span class="field-range">(未选择)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 难度等级 -->
+            <div class="config-section">
+                <h3><span class="required">*</span> 难度等级</h3>
+                <div class="diff-options">
+                    <div class="diff-option">
+                        <div class="diff-name">🟢 简单</div>
+                        <div class="diff-desc">基础概念记忆和理解</div>
+                    </div>
+                    <div class="diff-option selected">
+                        <div class="diff-name">🟡 中等</div>
+                        <div class="diff-desc">知识应用和分析</div>
+                    </div>
+                    <div class="diff-option">
+                        <div class="diff-name">🔴 困难</div>
+                        <div class="diff-desc">综合评价和创造性思考</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 出题范围 -->
+            <div class="config-section">
+                <h3>出题范围</h3>
+                <div class="scope-options">
+                    <div class="check-item">
+                        <input type="radio" name="scope" id="scope_all" checked>
+                        <label for="scope_all">全部知识点（25个）</label>
+                    </div>
+                    <div class="check-item" style="margin-top: 8px;">
+                        <input type="radio" name="scope" id="scope_custom">
+                        <label for="scope_custom">指定章节</label>
+                    </div>
+                    <div class="scope-tree">
+                        <div class="scope-item">
+                            <input type="checkbox" checked> <span>第一章 项目管理概述</span> <span class="count">(8个知识点)</span>
+                        </div>
+                        <div class="scope-item">
+                            <input type="checkbox"> <span>第二章 项目整合管理</span> <span class="count">(6个知识点)</span>
+                        </div>
+                        <div class="scope-item">
+                            <input type="checkbox" checked> <span>第三章 项目范围管理</span> <span class="count">(5个知识点)</span>
+                        </div>
+                        <div class="scope-item">
+                            <input type="checkbox" checked> <span>第四章 项目进度管理</span> <span class="count">(6个知识点)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 高级设置 -->
+            <div class="config-section">
+                <h3>高级设置</h3>
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">生成答案解析</div>
+                        <div class="toggle-desc">为每道题生成详细的解题思路和相关知识点引用</div>
+                    </div>
+                    <div class="toggle-switch"></div>
+                </div>
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">去重模式</div>
+                        <div class="toggle-desc">AI避免生成相似或重复的题目</div>
+                    </div>
+                    <div class="toggle-switch off"></div>
+                </div>
+            </div>
+
+            <!-- 预估信息 -->
+            <div class="summary-bar">
+                <div class="summary-text">
+                    预计生成 <strong>15 道题目</strong>（选择题10道 + 判断题5道），消耗 <strong>1 次配额</strong>
+                </div>
+                <div class="summary-quota">当前剩余配额：3次</div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="actions">
+            <button class="btn-secondary btn-lg" onclick="location.href='prototype_03_knowledge.html'">← 上一步</button>
+            <button class="btn-primary btn-lg" onclick="location.href='prototype_05_preview.html'">🚀 开始生成题目</button>
+        </div>
+    </main>
+
+    <script>
+        // 难度选择
+        document.querySelectorAll('.diff-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.diff-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Toggle开关
+        document.querySelectorAll('.toggle-switch').forEach(sw => {
+            sw.addEventListener('click', function() {
+                this.classList.toggle('off');
+            });
+        });
+    </script>
+</body>
+</html>

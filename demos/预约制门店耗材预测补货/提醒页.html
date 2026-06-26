@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提醒中心 — 预约制门店耗材预测补货</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; }
+        .app-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 220px; background: #001529; color: #fff; position: fixed; height: 100vh; overflow-y: auto; }
+        .sidebar-logo { padding: 20px 16px; font-size: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
+        .sidebar-logo .icon { width: 28px; height: 28px; background: #1890ff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .nav-section { padding: 12px 0; }
+        .nav-item { padding: 10px 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.65); }
+        .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+        .nav-item.active { color: #fff; background: #1890ff; }
+        .nav-item .badge { background: #ff4d4f; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 10px; margin-left: auto; }
+        .main-content { flex: 1; margin-left: 220px; }
+        .header { background: #fff; padding: 16px 24px; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 18px; font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .user-info { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .avatar { width: 32px; height: 32px; background: #1890ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
+        .content-area { padding: 24px; }
+
+        .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+        /* Stats Row */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .stat-card .label { font-size: 13px; color: #888; margin-bottom: 8px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; }
+        .stat-card .value.red { color: #ff4d4f; }
+        .stat-card .value.yellow { color: #faad14; }
+        .stat-card .value.blue { color: #1890ff; }
+        .stat-card .value.green { color: #52c41a; }
+        .stat-card .sub { font-size: 12px; color: #999; margin-top: 4px; }
+
+        /* Tab Bar */
+        .tab-bar { display: flex; gap: 0; border-bottom: 1px solid #f0f0f0; background: #fff; border-radius: 8px 8px 0 0; }
+        .tab-item { padding: 14px 24px; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+        .tab-item.active { color: #1890ff; border-bottom-color: #1890ff; font-weight: 600; }
+        .tab-item:hover { color: #1890ff; }
+        .tab-count { background: #f0f0f0; color: #666; font-size: 11px; padding: 1px 8px; border-radius: 10px; font-weight: 600; }
+        .tab-item.active .tab-count { background: #e6f7ff; color: #1890ff; }
+
+        /* Notification List */
+        .notification-list { }
+        .notification-item { display: flex; gap: 16px; padding: 16px 24px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s; position: relative; }
+        .notification-item:hover { background: #f5f8ff; }
+        .notification-item.unread { background: #f0f7ff; }
+        .notification-item.unread::before { content: ''; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: #1890ff; }
+        .notification-item.unread .notif-title { font-weight: 700; }
+
+        .notif-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .notif-icon.low-stock { background: #fff7e6; }
+        .notif-icon.expiring { background: #fff2f0; }
+        .notif-icon.system { background: #e6f7ff; }
+        .notif-icon.success { background: #f6ffed; }
+
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-title { font-size: 14px; color: #333; margin-bottom: 4px; }
+        .notif-desc { font-size: 13px; color: #666; line-height: 1.5; margin-bottom: 6px; }
+        .notif-meta { font-size: 12px; color: #999; display: flex; gap: 16px; }
+
+        .notif-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .btn { padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { border-color: #1890ff; color: #1890ff; }
+        .btn-primary { background: #1890ff; color: #fff; border-color: #1890ff; }
+        .btn-primary:hover { background: #40a9ff; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        .btn-text { border: none; background: transparent; color: #1890ff; padding: 4px 8px; }
+        .btn-text:hover { background: #e6f7ff; }
+
+        /* Toolbar */
+        .toolbar { padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0f0; background: #fff; border-radius: 0 0 8px 8px; margin-bottom: 16px; }
+        .toolbar-left { display: flex; align-items: center; gap: 12px; }
+        .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+        /* Detail Panel */
+        .detail-overlay { position: fixed; top: 0; right: 0; bottom: 0; width: 480px; background: #fff; box-shadow: -4px 0 16px rgba(0,0,0,0.1); z-index: 1000; transform: translateX(100%); transition: transform 0.3s ease; overflow-y: auto; }
+        .detail-overlay.show { transform: translateX(0); }
+        .detail-header { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: #fff; z-index: 1; }
+        .detail-header h3 { font-size: 16px; font-weight: 600; }
+        .detail-close { cursor: pointer; font-size: 20px; color: #999; background: none; border: none; }
+        .detail-body { padding: 24px; }
+
+        .detail-section { margin-bottom: 24px; }
+        .detail-section h4 { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f5f5f5; }
+
+        .detail-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .info-item { }
+        .info-item .info-label { font-size: 12px; color: #999; margin-bottom: 2px; }
+        .info-item .info-value { font-size: 14px; font-weight: 500; }
+
+        .alert-box { padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; display: flex; align-items: flex-start; gap: 10px; }
+        .alert-box.warning { background: #fffbe6; border: 1px solid #ffe58f; color: #ad6800; }
+        .alert-box.danger { background: #fff2f0; border: 1px solid #ffccc7; color: #cf1322; }
+        .alert-box.info { background: #e6f7ff; border: 1px solid #91d5ff; color: #0050b3; }
+        .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+        .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .mini-table th { padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 600; color: #888; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+        .mini-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
+
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 2px 10px; border-radius: 12px; }
+        .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .status-green { background: #f6ffed; color: #52c41a; }
+        .status-green .dot { background: #52c41a; }
+        .status-yellow { background: #fffbe6; color: #faad14; }
+        .status-yellow .dot { background: #faad14; }
+        .status-red { background: #fff2f0; color: #ff4d4f; }
+        .status-red .dot { background: #ff4d4f; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-state p { font-size: 14px; }
+
+        /* Toast */
+        .toast { position: fixed; top: 24px; right: 24px; background: #fff; border-radius: 8px; padding: 14px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 2000; display: none; align-items: center; gap: 10px; font-size: 14px; border-left: 4px solid #52c41a; }
+        .toast.show { display: flex; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><div class="icon">📦</div>耗材预测补货</div>
+            <nav class="nav-section">
+                <div class="nav-item">📋 库存管理</div>
+                <div class="nav-item">📥 耗材入库</div>
+                <div class="nav-item">📅 预约录入</div>
+                <div class="nav-item">📊 预测补货</div>
+                <div class="nav-item">⏰ 临期管理</div>
+                <div class="nav-item active">🔔 提醒中心 <span class="badge">5</span></div>
+                <div class="nav-item">⚙️ 系统设置</div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h1>提醒中心</h1>
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="avatar">王</div>
+                        <span>护士小王 · 口腔诊所</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="label">未读消息</div>
+                        <div class="value red">5</div>
+                        <div class="sub">需要处理</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">低库存预警</div>
+                        <div class="value yellow">3</div>
+                        <div class="sub">耗材低于安全库存</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">临期预警</div>
+                        <div class="value red">2</div>
+                        <div class="sub">批次即将到期</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">今日已读</div>
+                        <div class="value blue">8</div>
+                        <div class="sub">已处理消息</div>
+                    </div>
+                </div>
+
+                <!-- Notification List -->
+                <div class="card">
+                    <div class="tab-bar">
+                        <div class="tab-item active" onclick="switchTab(this)">全部 <span class="tab-count">13</span></div>
+                        <div class="tab-item" onclick="switchTab(this)">低库存预警 <span class="tab-count">3</span></div>
+                        <div class="tab-item" onclick="switchTab(this)">临期预警 <span class="tab-count">2</span></div>
+                        <div class="tab-item" onclick="switchTab(this)">系统通知 <span class="tab-count">8</span></div>
+                    </div>
+                    <div class="toolbar">
+                        <div class="toolbar-left">
+                            <button class="btn btn-text" onclick="markAllRead()">✓ 全部标记已读</button>
+                        </div>
+                        <div class="toolbar-right">
+                            <button class="btn btn-sm" onclick="showToast('已删除已读消息')">🗑️ 清空已读</button>
+                        </div>
+                    </div>
+
+                    <div class="notification-list">
+                        <!-- Unread: Low Stock -->
+                        <div class="notification-item unread" onclick="showDetail('low-stock-1')">
+                            <div class="notif-icon low-stock">⚠️</div>
+                            <div class="notif-content">
+                                <div class="notif-title">低库存预警 — 麻醉剂（阿替卡因）</div>
+                                <div class="notif-desc">麻醉剂（阿替卡因）当前库存 8 支，已低于安全库存 10 支，请及时补货。</div>
+                                <div class="notif-meta">
+                                    <span>📦 低库存预警</span>
+                                    <span>今天 09:30</span>
+                                </div>
+                            </div>
+                            <div class="notif-actions">
+                                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();goToRestock()">去补货</button>
+                            </div>
+                        </div>
+
+                        <!-- Unread: Low Stock -->
+                        <div class="notification-item unread" onclick="showDetail('low-stock-2')">
+                            <div class="notif-icon low-stock">⚠️</div>
+                            <div class="notif-content">
+                                <div class="notif-title">低库存预警 — 口腔检查镜</div>
+                                <div class="notif-desc">口腔检查镜当前库存 0 个，已低于安全库存 20 个，库存已耗尽！</div>
+                                <div class="notif-meta">
+                                    <span>📦 低库存预警</span>
+                                    <span>今天 09:30</span>
+                                </div>
+                            </div>
+                            <div class="notif-actions">
+                                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();goToRestock()">去补货</button>
+                            </div>
+                        </div>
+
+                        <!-- Unread: Expiring -->
+                        <div class="notification-item unread" onclick="showDetail('expiring-1')">
+                            <div class="notif-icon expiring">⏰</div>
+                            <div class="notif-content">
+                                <div class="notif-title">临期预警 — 充填材料（批次 20260301）</div>
+                                <div class="notif-desc">充填材料（光固化树脂）批次 20260301 将于 2026-08-10 到期，剩余 3 盒。未来 7 天有 8 例充填预约，预计可消耗 6.5 盒，临期批次可被正常消耗。</div>
+                                <div class="notif-meta">
+                                    <span>⏰ 临期预警</span>
+                                    <span>今天 08:00</span>
+                                </div>
+                            </div>
+                            <div class="notif-actions">
+                                <button class="btn btn-sm" onclick="event.stopPropagation();showDetail('expiring-1')">查看详情</button>
+                            </div>
+                        </div>
+
+                        <!-- Unread: Expiring -->
+                        <div class="notification-item unread" onclick="showDetail('expiring-2')">
+                            <div class="notif-icon expiring">⏰</div>
+                            <div class="notif-content">
+                                <div class="notif-title">临期预警 — 麻醉剂（批次 MA20251108）</div>
+                                <div class="notif-desc">麻醉剂批次 MA20251108 将于 2026-07-15 到期，剩余 3 支。未来 7 天预计消耗 23 支，临期批次可被完全消耗。建议优先使用该批次。</div>
+                                <div class="notif-meta">
+                                    <span>⏰ 临期预警</span>
+                                    <span>今天 08:00</span>
+                                </div>
+                            </div>
+                            <div class="notif-actions">
+                                <button class="btn btn-sm" onclick="event.stopPropagation();showDetail('expiring-2')">查看详情</button>
+                            </div>
+                        </div>
+
+                        <!-- Unread: Low Stock -->
+                        <div class="notification-item unread" onclick="showDetail('low-stock-3')">
+                            <div class="notif-icon low-stock">⚠️</div>
+                            <div class="notif-content">
+                                <div class="notif-title">低库存预警 — 光固化树脂</div>
+                                <div class="notif-desc">光固化树脂当前库存 5 盒，已低于安全库存阈值。预测未来 7 天消耗 6.5 盒，缺口约 2 盒。</div>
+                                <div class="notif-meta">
+                                    <span>📦 低库存预警</span>
+                                    <span>今天 09:30</span>
+                                </div>
+                            </div>
+                            <div class="notif-actions">
+                                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();goToRestock()">去补货</button>
+                            </div>
+                        </div>
+
+                        <!-- Read: System -->
+                        <div class="notification-item" onclick="showDetail('system-1')">
+                            <div class="notif-icon system">📋</div>
+                            <div class="notif-content">
+                                <div class="notif-title">补货清单已生成</div>
+                                <div class="notif-desc">系统已根据最新预约数据生成补货清单 RS-20260624-001，共 4 种耗材需补货。请审核确认。</div>
+                                <div class="notif-meta">
+                                    <span>📋 系统通知</span>
+                                    <span>今天 09:31</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Read: System -->
+                        <div class="notification-item" onclick="showDetail('system-2')">
+                            <div class="notif-icon success">✅</div>
+                            <div class="notif-content">
+                                <div class="notif-title">入库成功 — 一次性手套（批次 20260315）</div>
+                                <div class="notif-desc">一次性手套入库 15 盒，批次号 20260315，有效期至 2026-12-15，库存已更新。</div>
+                                <div class="notif-meta">
+                                    <span>📋 系统通知</span>
+                                    <span>昨天 14:20</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Read: System -->
+                        <div class="notification-item" onclick="showDetail('system-3')">
+                            <div class="notif-icon system">📋</div>
+                            <div class="notif-content">
+                                <div class="notif-title">每日预测已自动执行</div>
+                                <div class="notif-desc">2026-06-23 每日预测已自动执行完毕，结果已更新。本周预约总量 57 例。</div>
+                                <div class="notif-meta">
+                                    <span>📋 系统通知</span>
+                                    <span>昨天 02:00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Read: System -->
+                        <div class="notification-item">
+                            <div class="notif-icon success">✅</div>
+                            <div class="notif-content">
+                                <div class="notif-title">入库成功 — 麻醉剂（批次 MA20260220）</div>
+                                <div class="notif-desc">麻醉剂入库 5 支，批次号 MA20260220，有效期至 2026-09-30，库存已更新。</div>
+                                <div class="notif-meta">
+                                    <span>📋 系统通知</span>
+                                    <span>2026-02-22</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Read: System -->
+                        <div class="notification-item">
+                            <div class="notif-icon system">📋</div>
+                            <div class="notif-content">
+                                <div class="notif-title">补货清单已导出</div>
+                                <div class="notif-desc">补货清单 RS-20260620-001 已导出为 Excel 文件，请查收。</div>
+                                <div class="notif-meta">
+                                    <span>📋 系统通知</span>
+                                    <span>2026-06-20</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Detail Side Panel -->
+    <div class="detail-overlay" id="detailPanel">
+        <div class="detail-header">
+            <h3 id="detailTitle">预警详情</h3>
+            <button class="detail-close" onclick="closeDetail()">×</button>
+        </div>
+        <div class="detail-body" id="detailBody">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const details = {
+            'low-stock-1': {
+                title: '低库存预警 — 麻醉剂',
+                content: `
+                    <div class="alert-box danger">
+                        <span class="alert-icon">🚨</span>
+                        <div>麻醉剂（阿替卡因）当前库存 <strong>8 支</strong>，低于安全库存 <strong>10 支</strong>。未来 7 天预计消耗 23 支，缺口 <strong>15 支</strong>。</div>
+                    </div>
+                    <div class="detail-section">
+                        <h4>耗材信息</h4>
+                        <div class="detail-info">
+                            <div class="info-item"><div class="info-label">耗材名称</div><div class="info-value">麻醉剂（阿替卡因）</div></div>
+                            <div class="info-item"><div class="info-label">规格</div><div class="info-value">1.7ml / 支</div></div>
+                            <div class="info-item"><div class="info-label">当前库存</div><div class="info-value" style="color:#ff4d4f;">8 支</div></div>
+                            <div class="info-item"><div class="info-label">安全库存</div><div class="info-value">10 支</div></div>
+                            <div class="info-item"><div class="info-label">7天预计消耗</div><div class="info-value">23 支</div></div>
+                            <div class="info-item"><div class="info-label">预测缺口</div><div class="info-value" style="color:#ff4d4f;">15 支</div></div>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <h4>在库批次</h4>
+                        <table class="mini-table">
+                            <thead><tr><th>批次号</th><th>有效期</th><th>剩余</th><th>状态</th></tr></thead>
+                            <tbody>
+                                <tr><td>MA20260220</td><td>2026-09-30</td><td>5 支</td><td><span class="status-badge status-green"><span class="dot"></span>正常</span></td></tr>
+                                <tr><td>MA20251108</td><td>2026-07-15</td><td>3 支</td><td><span class="status-badge status-yellow"><span class="dot"></span>临期</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top:20px;display:flex;gap:10px;">
+                        <button class="btn btn-primary" onclick="goToRestock();closeDetail();">📊 去补货</button>
+                        <button class="btn" onclick="closeDetail();">关闭</button>
+                    </div>
+                `
+            },
+            'expiring-1': {
+                title: '临期预警 — 充填材料',
+                content: `
+                    <div class="alert-box warning">
+                        <span class="alert-icon">⏰</span>
+                        <div>充填材料批次 <strong>20260301</strong> 将于 <strong>2026-08-10</strong> 到期，剩余 <strong>3 盒</strong>。未来 7 天预约消耗预计 6.5 盒，临期批次可被正常消耗。</div>
+                    </div>
+                    <div class="detail-section">
+                        <h4>临期批次信息</h4>
+                        <div class="detail-info">
+                            <div class="info-item"><div class="info-label">耗材名称</div><div class="info-value">光固化树脂</div></div>
+                            <div class="info-item"><div class="info-label">批次号</div><div class="info-value">20260301</div></div>
+                            <div class="info-item"><div class="info-label">有效期</div><div class="info-value" style="color:#faad14;">2026-08-10</div></div>
+                            <div class="info-item"><div class="info-label">剩余天数</div><div class="info-value">47 天</div></div>
+                            <div class="info-item"><div class="info-label">剩余数量</div><div class="info-value">3 盒</div></div>
+                            <div class="info-item"><div class="info-label">7天预计消耗</div><div class="info-value">6.5 盒</div></div>
+                        </div>
+                    </div>
+                    <div class="alert-box info">
+                        <span class="alert-icon">💡</span>
+                        <div><strong>建议：</strong>预约消耗量可覆盖临期库存，建议优先使用该批次。系统已在出库时自动按 FEFO 原则优先扣减此批次。</div>
+                    </div>
+                    <div style="margin-top:20px;"><button class="btn" onclick="closeDetail();">关闭</button></div>
+                `
+            },
+            'expiring-2': {
+                title: '临期预警 — 麻醉剂',
+                content: `
+                    <div class="alert-box warning">
+                        <span class="alert-icon">⏰</span>
+                        <div>麻醉剂批次 <strong>MA20251108</strong> 将于 <strong>2026-07-15</strong> 到期，剩余 <strong>3 支</strong>。未来 7 天预计消耗 23 支，临期批次可被完全消耗。</div>
+                    </div>
+                    <div class="detail-section">
+                        <h4>临期批次信息</h4>
+                        <div class="detail-info">
+                            <div class="info-item"><div class="info-label">耗材名称</div><div class="info-value">麻醉剂（阿替卡因）</div></div>
+                            <div class="info-item"><div class="info-label">批次号</div><div class="info-value">MA20251108</div></div>
+                            <div class="info-item"><div class="info-label">有效期</div><div class="info-value" style="color:#faad14;">2026-07-15</div></div>
+                            <div class="info-item"><div class="info-label">剩余天数</div><div class="info-value">21 天</div></div>
+                            <div class="info-item"><div class="info-label">剩余数量</div><div class="info-value">3 支</div></div>
+                            <div class="info-item"><div class="info-label">7天预计消耗</div><div class="info-value">23 支</div></div>
+                        </div>
+                    </div>
+                    <div class="alert-box info">
+                        <span class="alert-icon">💡</span>
+                        <div><strong>建议：</strong>预约消耗量远大于临期库存，该批次可在到期前完全消耗。出库时将优先使用此批次。</div>
+                    </div>
+                    <div style="margin-top:20px;"><button class="btn" onclick="closeDetail();">关闭</button></div>
+                `
+            }
+        };
+
+        function showDetail(key) {
+            const detail = details[key];
+            if (detail) {
+                document.getElementById('detailTitle').textContent = detail.title;
+                document.getElementById('detailBody').innerHTML = detail.content;
+            } else {
+                document.getElementById('detailTitle').textContent = '消息详情';
+                document.getElementById('detailBody').innerHTML = `
+                    <div class="alert-box info">
+                        <span class="alert-icon">ℹ️</span>
+                        <div>该消息暂无更多详情。</div>
+                    </div>
+                    <div style="margin-top:20px;"><button class="btn" onclick="closeDetail();">关闭</button></div>
+                `;
+            }
+            document.getElementById('detailPanel').classList.add('show');
+        }
+
+        function closeDetail() {
+            document.getElementById('detailPanel').classList.remove('show');
+        }
+
+        function switchTab(el) {
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function markAllRead() {
+            document.querySelectorAll('.notification-item.unread').forEach(item => {
+                item.classList.remove('unread');
+            });
+            showToast('已全部标记为已读');
+        }
+
+        function goToRestock() {
+            showToast('正在跳转到预测补货页面...');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

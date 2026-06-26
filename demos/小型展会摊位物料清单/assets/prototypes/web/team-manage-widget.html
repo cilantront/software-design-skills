@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>团队成员管理 Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; padding: 20px; background: #f5f5f5; }
+h2 { font-size: 16px; margin-bottom: 15px; color: #333; }
+.widget-container { background: #fff; border-radius: 12px; padding: 20px; max-width: 1000px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+.widget-title { font-size: 18px; font-weight: 600; color: #333; }
+.header-actions { display: flex; gap: 10px; }
+.btn { padding: 6px 15px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.btn-default { background: #fff; color: #333; border: 1px solid #d9d9d9; }
+.btn-primary { background: #1890ff; color: #fff; }
+
+.member-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.member-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 15px; transition: all 0.3s; }
+.member-card:hover { border-color: #1890ff; box-shadow: 0 2px 8px rgba(24,144,255,0.15); }
+.member-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.member-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; justify-content: center; align-items: center; color: #fff; font-size: 20px; }
+.member-name { font-size: 15px; font-weight: 600; color: #333; }
+.member-role { font-size: 12px; color: #666; }
+.role-tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-left: 5px; }
+.role-admin { background: #fff7e6; color: #fa8c16; }
+.role-executor { background: #e6f7ff; color: #1890ff; }
+.role-viewer { background: #f0f0f0; color: #666; }
+
+.member-contact { font-size: 11px; color: #999; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+.member-stats { display: flex; justify-content: space-around; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 12px; }
+.stat-item { text-align: center; }
+.stat-num { font-size: 16px; font-weight: 700; color: #1890ff; }
+.stat-label { font-size: 10px; color: #666; margin-top: 3px; }
+
+.member-actions { display: flex; gap: 8px; }
+.action-btn { flex: 1; padding: 6px; background: #f5f5f5; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.action-btn:hover { background: #e5e5e5; }
+.action-btn.danger { color: #f5222d; }
+.action-btn.danger:hover { background: #fff1f0; }
+
+.invite-card { border: 2px dashed #d9d9d9; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 220px; cursor: pointer; transition: all 0.3s; }
+.invite-card:hover { border-color: #1890ff; background: #f0f8ff; }
+.invite-icon { font-size: 40px; color: #1890ff; margin-bottom: 10px; }
+.invite-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 5px; }
+.invite-desc { font-size: 11px; color: #999; text-align: center; }
+
+.invite-methods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; padding: 15px; background: #f8f8f8; border-radius: 6px; }
+.method-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 12px; cursor: pointer; transition: all 0.3s; }
+.method-card:hover { border-color: #1890ff; background: #f0f8ff; }
+.method-icon { font-size: 24px; margin-bottom: 5px; }
+.method-name { font-size: 12px; font-weight: 600; color: #333; }
+.method-desc { font-size: 10px; color: #999; margin-top: 3px; }
+</style>
+</head>
+<body>
+<h2>👥 团队成员管理 Widget（管理后台）</h2>
+<div class="widget-container">
+  <div class="widget-header">
+    <div class="widget-title">团队成员（4人）</div>
+    <div class="header-actions">
+      <select class="btn btn-default">
+        <option>全部角色</option>
+        <option>管理员</option>
+        <option>执行人</option>
+        <option>观察员</option>
+      </select>
+      <button class="btn btn-default">📤 批量邀请</button>
+      <button class="btn btn-primary">+ 添加成员</button>
+    </div>
+  </div>
+
+  <div class="member-grid">
+    <div class="member-card">
+      <div class="member-header">
+        <div class="member-avatar">👨</div>
+        <div>
+          <div class="member-name">张三 <span class="role-tag role-admin">管理员</span></div>
+          <div class="member-role">市场运营经理</div>
+        </div>
+      </div>
+      <div class="member-contact">📱 138****8888 · ✉ zhang@brand.com</div>
+      <div class="member-stats">
+        <div class="stat-item">
+          <div class="stat-num">8</div>
+          <div class="stat-label">负责活动</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">45</div>
+          <div class="stat-label">负责物料</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">98%</div>
+          <div class="stat-label">完整率</div>
+        </div>
+      </div>
+      <div class="member-actions">
+        <button class="action-btn">编辑</button>
+        <button class="action-btn">权限</button>
+        <button class="action-btn">消息</button>
+      </div>
+    </div>
+
+    <div class="member-card">
+      <div class="member-header">
+        <div class="member-avatar">👩</div>
+        <div>
+          <div class="member-name">李四 <span class="role-tag role-executor">执行人</span></div>
+          <div class="member-role">市场专员</div>
+        </div>
+      </div>
+      <div class="member-contact">📱 139****6666 · ✉ li@brand.com</div>
+      <div class="member-stats">
+        <div class="stat-item">
+          <div class="stat-num">6</div>
+          <div class="stat-label">负责活动</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">38</div>
+          <div class="stat-label">负责物料</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">95%</div>
+          <div class="stat-label">完整率</div>
+        </div>
+      </div>
+      <div class="member-actions">
+        <button class="action-btn">编辑</button>
+        <button class="action-btn">权限</button>
+        <button class="action-btn">消息</button>
+      </div>
+    </div>
+
+    <div class="member-card">
+      <div class="member-header">
+        <div class="member-avatar">👨</div>
+        <div>
+          <div class="member-name">王五 <span class="role-tag role-executor">执行人</span></div>
+          <div class="member-role">销售专员</div>
+        </div>
+      </div>
+      <div class="member-contact">📱 137****5555 · ✉ wang@brand.com</div>
+      <div class="member-stats">
+        <div class="stat-item">
+          <div class="stat-num">5</div>
+          <div class="stat-label">负责活动</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">32</div>
+          <div class="stat-label">负责物料</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">93%</div>
+          <div class="stat-label">完整率</div>
+        </div>
+      </div>
+      <div class="member-actions">
+        <button class="action-btn">编辑</button>
+        <button class="action-btn">权限</button>
+        <button class="action-btn">消息</button>
+      </div>
+    </div>
+
+    <div class="member-card">
+      <div class="member-header">
+        <div class="member-avatar">👩</div>
+        <div>
+          <div class="member-name">赵六 <span class="role-tag role-viewer">观察员</span></div>
+          <div class="member-role">志愿者</div>
+        </div>
+      </div>
+      <div class="member-contact">📱 136****3333 · ✉ zhao@brand.com</div>
+      <div class="member-stats">
+        <div class="stat-item">
+          <div class="stat-num">4</div>
+          <div class="stat-label">负责活动</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">25</div>
+          <div class="stat-label">负责物料</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">88%</div>
+          <div class="stat-label">完整率</div>
+        </div>
+      </div>
+      <div class="member-actions">
+        <button class="action-btn">编辑</button>
+        <button class="action-btn">权限</button>
+        <button class="action-btn danger">移除</button>
+      </div>
+    </div>
+
+    <div class="invite-card">
+      <div class="invite-icon">➕</div>
+      <div class="invite-title">邀请新成员</div>
+      <div class="invite-desc">点击选择邀请方式</div>
+    </div>
+  </div>
+
+  <div class="invite-methods">
+    <div class="method-card">
+      <div class="method-icon">💬</div>
+      <div class="method-name">微信邀请</div>
+      <div class="method-desc">生成邀请链接/二维码，分享给朋友</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">📱</div>
+      <div class="method-name">手机号邀请</div>
+      <div class="method-desc">输入手机号，发送邀请短信</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">✉️</div>
+      <div class="method-name">邮件邀请</div>
+      <div class="method-desc">发送邮件邀请（专业版功能）</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">📤</div>
+      <div class="method-name">批量邀请</div>
+      <div class="method-desc">导入 Excel 名单批量邀请</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

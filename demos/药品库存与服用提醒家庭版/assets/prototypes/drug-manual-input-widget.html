@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手动录入药品组件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #ecfeff;
+            color: #164E63;
+            padding: 16px;
+            max-width: 375px;
+            margin: 0 auto;
+        }
+
+        .widget-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0fdfa;
+        }
+
+        .form-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0891b2;
+        }
+
+        .form-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #164E63;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .required {
+            color: #ef4444;
+            margin-left: 2px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #22d3ee;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #ecfeff;
+            color: #164E63;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #0891b2;
+            box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Quantity with unit */
+        .quantity-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .quantity-input {
+            flex: 1;
+        }
+
+        .unit-select {
+            width: 100px;
+        }
+
+        /* Dosage section */
+        .dosage-section {
+            background: #f0fdfa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .dosage-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .dosage-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .dosage-label {
+            min-width: 80px;
+            font-size: 14px;
+            color: #164E63;
+        }
+
+        .frequency-options {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .freq-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #22d3ee;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .freq-btn.active {
+            background: #0891b2;
+            color: white;
+            border-color: #0891b2;
+        }
+
+        .freq-btn:hover:not(.active) {
+            background: #f0fdfa;
+        }
+
+        /* Tips */
+        .input-tip {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #047857;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Validation state */
+        .form-input.error {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="form-header">
+            <div class="form-title">📝 手动添加药品</div>
+            <div class="form-subtitle">请填写药品详细信息</div>
+        </div>
+
+        <form id="drugForm">
+            <!-- Drug Name (Required) -->
+            <div class="form-group">
+                <label class="form-label">
+                    药品名称 <span class="required">*</span>
+                </label>
+                <input type="text" class="form-input" placeholder="请输入药品名称" required>
+            </div>
+
+            <!-- Specification -->
+            <div class="form-group">
+                <label class="form-label">规格</label>
+                <input type="text" class="form-input" placeholder="例如：0.25g × 24粒">
+            </div>
+
+            <!-- Expiry Date -->
+            <div class="form-group">
+                <label class="form-label">有效期至</label>
+                <input type="date" class="form-input">
+                <div class="input-tip">💡 可查看药品包装上的有效期信息</div>
+            </div>
+
+            <!-- Remaining Quantity -->
+            <div class="form-group">
+                <label class="form-label">剩余数量</label>
+                <div class="quantity-group">
+                    <input type="number" class="form-input quantity-input" placeholder="数量" min="0" step="0.5">
+                    <select class="form-select unit-select">
+                        <option value="pills">粒</option>
+                        <option value="tablets">片</option>
+                        <option value="capsules">胶囊</option>
+                        <option value="ml">毫升</option>
+                        <option value="bags">袋</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Dosage Instructions -->
+            <div class="dosage-section">
+                <div class="dosage-row">
+                    <span class="dosage-label">每次用量</span>
+                    <div class="quantity-group" style="flex: 1;">
+                        <input type="number" class="form-input quantity-input" placeholder="剂量" min="0" step="0.5">
+                        <select class="form-select unit-select">
+                            <option value="pills">粒</option>
+                            <option value="tablets">片</option>
+                            <option value="capsules">胶囊</option>
+                            <option value="ml">毫升</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="dosage-row">
+                    <span class="dosage-label">每日次数</span>
+                    <div class="frequency-options">
+                        <button type="button" class="freq-btn">1次</button>
+                        <button type="button" class="freq-btn active">2次</button>
+                        <button type="button" class="freq-btn">3次</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usage Notes -->
+            <div class="form-group">
+                <label class="form-label">服用说明</label>
+                <textarea class="form-textarea" placeholder="例如：饭后服用、温水送服等注意事项"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn">确认添加</button>
+        </form>
+    </div>
+
+    <script>
+        // Frequency selection
+        const freqBtns = document.querySelectorAll('.freq-btn');
+        freqBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                freqBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Form validation and submission
+        document.getElementById('drugForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const drugName = this.querySelector('input[placeholder="请输入药品名称"]').value;
+            if (!drugName.trim()) {
+                alert('请填写药品名称');
+                return;
+            }
+
+            alert('药品已成功添加到库存！');
+        });
+
+        // Real-time validation for required field
+        const drugNameInput = document.querySelector('input[placeholder="请输入药品名称"]');
+        drugNameInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('error');
+                if (!this.nextElementSibling?.classList.contains('error-message')) {
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-message';
+                    errorMsg.textContent = '药品名称不能为空';
+                    this.parentNode.appendChild(errorMsg);
+                }
+            } else {
+                this.classList.remove('error');
+                const errorMsg = this.parentNode.querySelector('.error-message');
+                if (errorMsg) errorMsg.remove();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用药记录组件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #ecfeff;
+            color: #164E63;
+            padding: 16px;
+            max-width: 375px;
+            margin: 0 auto;
+        }
+
+        .widget-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Member Tabs */
+        .member-tabs {
+            display: flex;
+            background: #f0fdfa;
+            border-bottom: 1px solid #e0f2fe;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #0891b2;
+            border-bottom-color: #0891b2;
+            background: white;
+        }
+
+        .tab-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Tab Bar */
+        .tab-bar {
+            display: flex;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #e0f2fe;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-item.active {
+            background: #0891b2;
+            color: white;
+        }
+
+        .tab-item:hover:not(.active) {
+            background: #f0fdfa;
+        }
+
+        /* Calendar Section */
+        .calendar-section {
+            padding: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .month-nav {
+            width: 32px;
+            height: 32px;
+            background: #f0fdfa;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .month-nav:hover {
+            background: #e0f2fe;
+        }
+
+        .current-month {
+            font-size: 18px;
+            font-weight: 600;
+            color: #164E63;
+        }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .weekday-header {
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            padding: 8px 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .day-number {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .day-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        /* Day states */
+        .day-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .day-partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .day-missed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .day-none {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+
+        .day-today {
+            background: #0891b2;
+            color: white;
+            font-weight: 700;
+        }
+
+        .day-today .day-status {
+            background: white;
+        }
+
+        /* Monthly Stats */
+        .monthly-stats {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f0fdfa;
+            border-radius: 8px;
+        }
+
+        .stats-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #164E63;
+            margin-bottom: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .stat-success {
+            color: #16a34a;
+        }
+
+        .stat-partial {
+            color: #f59e0b;
+        }
+
+        .stat-missed {
+            color: #ef4444;
+        }
+
+        /* Day Detail */
+        .day-detail {
+            margin-top: 20px;
+            padding: 16px;
+            background: white;
+            border: 1px solid #e0f2fe;
+            border-radius: 8px;
+        }
+
+        .detail-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: #164E63;
+            margin-bottom: 12px;
+        }
+
+        .detail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f0fdfa;
+            border-radius: 6px;
+        }
+
+        .detail-icon {
+            font-size: 16px;
+        }
+
+        .detail-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .detail-time {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .detail-status {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .status-done {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-missed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <!-- Member Tabs -->
+        <div class="member-tabs">
+            <div class="tab active">
+                <div class="tab-name">全部成员</div>
+            </div>
+            <div class="tab">
+                <div class="tab-name">👴 爷爷</div>
+            </div>
+            <div class="tab">
+                <div class="tab-name">👵 奶奶</div>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <div class="tab-item active">📅 日历</div>
+            <div class="tab-item">📊 统计</div>
+            <div class="tab-item">⚠️ 漏服</div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <button class="month-nav">‹</button>
+                <div class="current-month">2024年6月</div>
+                <button class="month-nav">›</button>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="calendar-grid">
+                <!-- Weekday Headers -->
+                <div class="weekday-header">日</div>
+                <div class="weekday-header">一</div>
+                <div class="weekday-header">二</div>
+                <div class="weekday-header">三</div>
+                <div class="weekday-header">四</div>
+                <div class="weekday-header">五</div>
+                <div class="weekday-header">六</div>
+
+                <!-- Calendar Days -->
+                <div class="calendar-day day-none">
+                    <div class="day-number">1</div>
+                </div>
+                <div class="calendar-day day-success">
+                    <div class="day-number">2</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-success">
+                    <div class="day-number">3</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-partial">
+                    <div class="day-number">4</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-success">
+                    <div class="day-number">5</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-missed">
+                    <div class="day-number">6</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-success">
+                    <div class="day-number">7</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-success">
+                    <div class="day-number">8</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-partial">
+                    <div class="day-number">9</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-success">
+                    <div class="day-number">10</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">11</div>
+                </div>
+                <div class="calendar-day day-success">
+                    <div class="day-number">12</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-missed">
+                    <div class="day-number">13</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-success">
+                    <div class="day-number">14</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-today">
+                    <div class="day-number">15</div>
+                    <div class="day-status"></div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">16</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">17</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">18</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">19</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">20</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">21</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">22</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">23</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">24</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">25</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">26</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">27</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">28</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">29</div>
+                </div>
+                <div class="calendar-day day-none">
+                    <div class="day-number">30</div>
+                </div>
+            </div>
+
+            <!-- Monthly Stats -->
+            <div class="monthly-stats">
+                <div class="stats-title">📊 本月统计</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value stat-success">10</div>
+                        <div class="stat-label">全部完成</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value stat-partial">2</div>
+                        <div class="stat-label">部分完成</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value stat-missed">2</div>
+                        <div class="stat-label">有漏服</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day Detail -->
+            <div class="day-detail">
+                <div class="detail-date">📅 2024年6月15日（今天）</div>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-icon">✓</span>
+                        <div class="detail-text">
+                            <div>降压灵片</div>
+                            <div class="detail-time">08:00 · 1片</div>
+                        </div>
+                        <span class="detail-status status-done">已服</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">✓</span>
+                        <div class="detail-text">
+                            <div>维生素B族</div>
+                            <div class="detail-time">08:30 · 2片</div>
+                        </div>
+                        <span class="detail-status status-done">已服</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏰</span>
+                        <div class="detail-text">
+                            <div>阿莫西林胶囊</div>
+                            <div class="detail-time">12:00 · 2粒</div>
+                        </div>
+                        <span class="detail-status" style="background: #fed7aa; color: #9a3412;">待服</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">·</span>
+                        <div class="detail-text">
+                            <div>钙尔奇D</div>
+                            <div class="detail-time">20:00 · 1片</div>
+                        </div>
+                        <span class="detail-status" style="background: #f1f5f9; color: #475569;">未到</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Tab bar switching
+        const tabBarItems = document.querySelectorAll('.tab-item');
+        tabBarItems.forEach(item => {
+            item.addEventListener('click', function() {
+                tabBarItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Month navigation
+        document.querySelectorAll('.month-nav').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('切换月份');
+            });
+        });
+
+        // Calendar day click
+        document.querySelectorAll('.calendar-day').forEach(day => {
+            if (!day.classList.contains('day-none')) {
+                day.addEventListener('click', function() {
+                    const dayNum = this.querySelector('.day-number').textContent;
+                    console.log('Showing details for June', dayNum);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

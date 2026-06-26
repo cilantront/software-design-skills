@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摄影选片修图反馈台 - 订单看板</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
+
+/* Layout */
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #1a1a2e; color: #fff; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+.main { flex: 1; margin-left: 220px; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: #fff; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #e8e8e8; flex-shrink: 0; }
+.kanban-area { flex: 1; display: flex; gap: 16px; padding: 20px; overflow-x: auto; }
+
+/* Sidebar */
+.sidebar-header { padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-header h2 { font-size: 15px; font-weight: 600; }
+.sidebar-header p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.nav-item { display: flex; align-items: center; padding: 10px 20px; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; font-size: 13px; }
+.nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.nav-item.active { background: rgba(99,102,241,0.15); color: #818cf8; border-right: 3px solid #818cf8; }
+.nav-item .icon { width: 20px; margin-right: 10px; text-align: center; }
+.nav-section { padding: 12px 0; }
+.nav-section-title { padding: 0 20px; font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 6px; letter-spacing: 1px; }
+
+/* Topbar */
+.topbar h1 { font-size: 17px; font-weight: 600; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-right .filter-btn { padding: 6px 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.topbar-right .filter-btn:hover { background: #f5f5f5; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; }
+
+/* Kanban Column */
+.kanban-column { width: 320px; min-width: 320px; background: #f7f8fa; border-radius: 12px; display: flex; flex-direction: column; max-height: calc(100vh - 96px); }
+.column-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.column-header .title-group { display: flex; align-items: center; gap: 8px; }
+.column-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+.column-header h3 { font-size: 15px; font-weight: 600; }
+.column-header .count { background: #e5e7eb; color: #6b7280; font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.column-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Kanban Card */
+.kanban-card { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+.kanban-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
+.kanban-card.timeout { border-left-color: #ef4444; }
+.kanban-card .card-top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
+.kanban-card .order-no { font-size: 14px; font-weight: 600; color: #1f2937; }
+.kanban-card .shoot-type { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+.type-wedding { background: #fce7f3; color: #db2777; }
+.type-family { background: #dbeafe; color: #2563eb; }
+.type-id { background: #fef3c7; color: #d97706; }
+.type-commercial { background: #e0e7ff; color: #4f46e5; }
+.kanban-card .customer { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+.kanban-card .progress-bar { height: 4px; background: #f3f4f6; border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+.kanban-card .progress-bar .fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.kanban-card .card-meta { display: flex; align-items: center; justify-content: space-between; }
+.kanban-card .assignee { display: flex; align-items: center; gap: 6px; }
+.kanban-card .assignee .avatar { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+.kanban-card .assignee .name { font-size: 12px; color: #6b7280; }
+.kanban-card .time { font-size: 11px; color: #9ca3af; }
+.kanban-card .alert { font-size: 11px; padding: 4px 8px; border-radius: 4px; margin-top: 8px; }
+.kanban-card .alert.red { background: #fee2e2; color: #dc2626; }
+.kanban-card .alert.orange { background: #fef3c7; color: #d97706; }
+.kanban-card .retouch-info { font-size: 12px; color: #6b7280; margin-top: 4px; }
+
+/* Detail Panel */
+.detail-panel { display: none; position: fixed; top: 0; right: 0; bottom: 0; width: 420px; background: #fff; box-shadow: -4px 0 20px rgba(0,0,0,0.1); z-index: 200; overflow-y: auto; }
+.detail-panel.active { display: block; }
+.detail-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.detail-header h3 { font-size: 18px; }
+.detail-close { width: 32px; height: 32px; border: none; background: #f5f5f5; border-radius: 8px; cursor: pointer; font-size: 18px; }
+.detail-body { padding: 20px; }
+.detail-section { margin-bottom: 24px; }
+.detail-section h4 { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.detail-row { display: flex; align-items: center; padding: 8px 0; font-size: 14px; }
+.detail-row .label { width: 80px; color: #6b7280; flex-shrink: 0; }
+.detail-row .value { flex: 1; }
+.status-flow { display: flex; align-items: center; gap: 4px; margin: 12px 0; }
+.status-flow .step { padding: 6px 12px; border-radius: 6px; font-size: 12px; background: #f3f4f6; color: #9ca3af; }
+.status-flow .step.done { background: #d1fae5; color: #059669; }
+.status-flow .step.current { background: #6366f1; color: #fff; font-weight: 600; }
+.status-flow .arrow { color: #d1d5db; font-size: 12px; }
+.mini-photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.mini-photo { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.feedback-mini { padding: 8px; background: #fafafa; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
+.feedback-mini .meta { font-size: 11px; color: #9ca3af; margin-bottom: 2px; }
+
+/* Stats Bar */
+.stats-bar { display: flex; gap: 12px; padding: 0 20px 0; flex-shrink: 0; }
+.stat-chip { background: #fff; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex: 1; }
+.stat-chip .stat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.stat-chip .stat-info .number { font-size: 20px; font-weight: 700; }
+.stat-chip .stat-info .desc { font-size: 12px; color: #6b7280; }
+
+/* Column Footer */
+.column-footer { padding: 10px 12px; border-top: 1px solid #eee; text-align: center; flex-shrink: 0; }
+.column-footer span { font-size: 12px; color: #9ca3af; }
+
+/* Empty State */
+.empty-state { text-align: center; padding: 40px 20px; color: #9ca3af; }
+.empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+.empty-state p { font-size: 13px; }
+
+/* Overlay for detail panel */
+.panel-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 150; }
+.panel-overlay.active { display: block; }
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .kanban-column { width: 280px; min-width: 280px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>📸 光影工作室</h2>
+      <p>订单看板</p>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">工作台</div>
+      <div class="nav-item">
+        <span class="icon">📊</span> 首页总览
+      </div>
+      <div class="nav-item">
+        <span class="icon">📋</span> 订单管理
+      </div>
+      <div class="nav-item active">
+        <span class="icon">📌</span> 订单看板
+      </div>
+      <div class="nav-item">
+        <span class="icon">🎨</span> 修图工作台
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">管理</div>
+      <div class="nav-item">
+        <span class="icon">👥</span> 团队管理
+      </div>
+      <div class="nav-item">
+        <span class="icon">⚙️</span> 工作室设置
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <h1>📌 订单看板</h1>
+      <div class="topbar-right">
+        <button class="filter-btn">👤 全部修图师 ▾</button>
+        <button class="filter-btn">📅 全部时间 ▾</button>
+        <button class="filter-btn">🔄 刷新</button>
+        <div class="user-avatar">王</div>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-bar" style="padding-top: 16px; padding-bottom: 4px;">
+      <div class="stat-chip">
+        <div class="stat-icon" style="background: #fef3c7;">🟡</div>
+        <div class="stat-info">
+          <div class="number">8</div>
+          <div class="desc">待修图</div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-icon" style="background: #ede9fe;">🟣</div>
+        <div class="stat-info">
+          <div class="number">5</div>
+          <div class="desc">待客户确认</div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-icon" style="background: #d1fae5;">🟢</div>
+        <div class="stat-info">
+          <div class="number">3</div>
+          <div class="desc">待交付</div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-icon" style="background: #fee2e2;">⚠️</div>
+        <div class="stat-info">
+          <div class="number" style="color: #ef4444;">2</div>
+          <div class="desc">超时订单</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="kanban-area">
+      <!-- Column 1: 待修图 -->
+      <div class="kanban-column">
+        <div class="column-header">
+          <div class="title-group">
+            <span class="dot" style="background: #d97706;"></span>
+            <h3>待修图</h3>
+            <span class="count">8</span>
+          </div>
+        </div>
+        <div class="column-body">
+          <!-- Card 1 -->
+          <div class="kanban-card" onclick="showDetail('detail-1')">
+            <div class="card-top">
+              <span class="order-no">ORD-20260624-003</span>
+              <span class="shoot-type type-wedding">婚纱</span>
+            </div>
+            <div class="customer">张*华 · 精修 20 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 50%; background: #d97706;"></div></div>
+            <div class="retouch-info">精修进度：10/20 张</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #818cf8;">陈</div>
+                <span class="name">陈师傅</span>
+              </div>
+              <span class="time">2小时前</span>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260625-001</span>
+              <span class="shoot-type type-family">亲子</span>
+            </div>
+            <div class="customer">李*芳 · 精修 8 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 0%; background: #d97706;"></div></div>
+            <div class="retouch-info">精修进度：0/8 张</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <span class="name" style="color: #d97706;">⏳ 待领取</span>
+              </div>
+              <span class="time">1天前</span>
+            </div>
+          </div>
+
+          <!-- Card 3 - Timeout -->
+          <div class="kanban-card timeout">
+            <div class="card-top">
+              <span class="order-no">ORD-20260622-005</span>
+              <span class="shoot-type type-wedding">婚纱</span>
+            </div>
+            <div class="customer">孙*丽 · 精修 15 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 33%; background: #ef4444;"></div></div>
+            <div class="retouch-info">精修进度：5/15 张</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #f472b6;">李</div>
+                <span class="name">小李</span>
+              </div>
+              <span class="time">4天前</span>
+            </div>
+            <div class="alert red">⚠️ 已超时 1 天，约定交付日 6/25</div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260625-003</span>
+              <span class="shoot-type type-commercial">商业</span>
+            </div>
+            <div class="customer">周*司 · 精修 30 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 20%; background: #d97706;"></div></div>
+            <div class="retouch-info">精修进度：6/30 张</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #818cf8;">陈</div>
+                <span class="name">陈师傅</span>
+              </div>
+              <span class="time">1天前</span>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260626-002</span>
+              <span class="shoot-type type-id">证件照</span>
+            </div>
+            <div class="customer">吴*杰 · 精修 3 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 0%; background: #d97706;"></div></div>
+            <div class="retouch-info">精修进度：0/3 张</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <span class="name" style="color: #d97706;">⏳ 待领取</span>
+              </div>
+              <span class="time">刚刚</span>
+            </div>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260625-004</span>
+              <span class="shoot-type type-family">亲子</span>
+            </div>
+            <div class="customer">郑*雯 · 精修 10 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 70%; background: #d97706;"></div></div>
+            <div class="retouch-info">精修进度：7/10 张</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #f472b6;">李</div>
+                <span class="name">小李</span>
+              </div>
+              <span class="time">3小时前</span>
+            </div>
+            <div class="alert orange">⏰ 约定交付日 6/28，还剩 2 天</div>
+          </div>
+        </div>
+        <div class="column-footer"><span>共 8 个订单</span></div>
+      </div>
+
+      <!-- Column 2: 待客户确认 -->
+      <div class="kanban-column">
+        <div class="column-header">
+          <div class="title-group">
+            <span class="dot" style="background: #7c3aed;"></span>
+            <h3>待客户确认</h3>
+            <span class="count" style="background: #ede9fe; color: #7c3aed;">5</span>
+          </div>
+        </div>
+        <div class="column-body">
+          <!-- Card -->
+          <div class="kanban-card" onclick="showDetail('detail-2')">
+            <div class="card-top">
+              <span class="order-no">ORD-20260622-002</span>
+              <span class="shoot-type type-wedding">婚纱</span>
+            </div>
+            <div class="customer">王*明 · 精修 20 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 100%; background: #7c3aed;"></div></div>
+            <div class="retouch-info">全部精修已完成</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #818cf8;">陈</div>
+                <span class="name">陈师傅</span>
+              </div>
+              <span class="time">3天前</span>
+            </div>
+            <div class="alert orange">⏰ 客户已等待 2 天</div>
+          </div>
+
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260623-001</span>
+              <span class="shoot-type type-id">证件照</span>
+            </div>
+            <div class="customer">赵*龙 · 精修 5 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 100%; background: #7c3aed;"></div></div>
+            <div class="retouch-info">全部精修已完成</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #f472b6;">李</div>
+                <span class="name">小李</span>
+              </div>
+              <span class="time">2天前</span>
+            </div>
+            <div class="alert orange">⏰ 客户已等待 1 天</div>
+          </div>
+
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260624-001</span>
+              <span class="shoot-type type-commercial">商业</span>
+            </div>
+            <div class="customer">黄*司 · 精修 25 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 100%; background: #7c3aed;"></div></div>
+            <div class="retouch-info">全部精修已完成</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #818cf8;">陈</div>
+                <span class="name">陈师傅</span>
+              </div>
+              <span class="time">1天前</span>
+            </div>
+          </div>
+
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260623-003</span>
+              <span class="shoot-type type-wedding">婚纱</span>
+            </div>
+            <div class="customer">马*婷 · 精修 18 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 100%; background: #7c3aed;"></div></div>
+            <div class="retouch-info">全部精修已完成</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #f472b6;">李</div>
+                <span class="name">小李</span>
+              </div>
+              <span class="time">2天前</span>
+            </div>
+          </div>
+
+          <div class="kanban-card timeout">
+            <div class="card-top">
+              <span class="order-no">ORD-20260618-003</span>
+              <span class="shoot-type type-family">亲子</span>
+            </div>
+            <div class="customer">陈*华 · 精修 12 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 100%; background: #ef4444;"></div></div>
+            <div class="retouch-info">全部精修已完成</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #818cf8;">陈</div>
+                <span class="name">陈师傅</span>
+              </div>
+              <span class="time">7天前</span>
+            </div>
+            <div class="alert red">⚠️ 客户已等待 5 天，建议电话跟进</div>
+          </div>
+        </div>
+        <div class="column-footer"><span>共 5 个订单</span></div>
+      </div>
+
+      <!-- Column 3: 待交付 -->
+      <div class="kanban-column">
+        <div class="column-header">
+          <div class="title-group">
+            <span class="dot" style="background: #059669;"></span>
+            <h3>待交付</h3>
+            <span class="count" style="background: #d1fae5; color: #059669;">3</span>
+          </div>
+        </div>
+        <div class="column-body">
+          <!-- Card - Timeout -->
+          <div class="kanban-card timeout" onclick="showDetail('detail-3')">
+            <div class="card-top">
+              <span class="order-no">ORD-20260620-001</span>
+              <span class="shoot-type type-commercial">商业</span>
+            </div>
+            <div class="customer">刘*强 · 精修 12 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 100%; background: #059669;"></div></div>
+            <div class="retouch-info">交付链接已生成 · 未下载</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #818cf8;">陈</div>
+                <span class="name">陈师傅</span>
+              </div>
+              <span class="time">5天前</span>
+            </div>
+            <div class="alert red">⚠️ 交付已超时 2 天</div>
+          </div>
+
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260624-002</span>
+              <span class="shoot-type type-wedding">婚纱</span>
+            </div>
+            <div class="customer">陈*婷 · 精修 15 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 100%; background: #059669;"></div></div>
+            <div class="retouch-info">交付链接已生成 · 已下载 1 次</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #f472b6;">李</div>
+                <span class="name">小李</span>
+              </div>
+              <span class="time">2天前</span>
+            </div>
+          </div>
+
+          <div class="kanban-card">
+            <div class="card-top">
+              <span class="order-no">ORD-20260623-002</span>
+              <span class="shoot-type type-id">证件照</span>
+            </div>
+            <div class="customer">林*峰 · 精修 4 张</div>
+            <div class="progress-bar"><div class="fill" style="width: 100%; background: #059669;"></div></div>
+            <div class="retouch-info">交付链接已生成 · 已下载 2 次</div>
+            <div class="card-meta">
+              <div class="assignee">
+                <div class="avatar" style="background: #818cf8;">陈</div>
+                <span class="name">陈师傅</span>
+              </div>
+              <span class="time">3天前</span>
+            </div>
+          </div>
+        </div>
+        <div class="column-footer"><span>共 3 个订单</span></div>
+      </div>
+
+      <!-- Column 4: 已完成 (collapsed) -->
+      <div class="kanban-column" style="width: 200px; min-width: 200px; opacity: 0.7;">
+        <div class="column-header">
+          <div class="title-group">
+            <span class="dot" style="background: #9ca3af;"></span>
+            <h3>已完成</h3>
+            <span class="count">12</span>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="empty-state">
+            <div class="icon">📁</div>
+            <p>12 个已完成订单</p>
+            <p style="margin-top: 8px;"><a href="#" style="color: #6366f1; font-size: 13px;">查看全部 →</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel Overlay -->
+<div class="panel-overlay" id="panel-overlay" onclick="closeDetail()"></div>
+
+<!-- Detail Panel -->
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <h3 id="detail-title">订单详情</h3>
+    <button class="detail-close" onclick="closeDetail()">×</button>
+  </div>
+  <div class="detail-body" id="detail-body">
+    <!-- Dynamic content -->
+  </div>
+</div>
+
+<script>
+const orderDetails = {
+  'detail-1': {
+    title: 'ORD-20260624-003',
+    status: '待修图',
+    statusFlow: ['待上传原片', '待选片', '待修图', '待客户确认', '待交付'],
+    currentStep: 2,
+    customer: '张*华',
+    phone: '138****1234',
+    type: '婚纱',
+    packageInfo: '婚纱照 ¥5999 套餐',
+    retouchCount: 20,
+    selectedCount: 18,
+    completedRetouch: 10,
+    assignee: '陈师傅',
+    created: '2026-06-24',
+    deadline: '2026-07-04',
+    feedbacks: [
+      { photo: 'DSC_0001.jpg', text: '调色偏暖一点', status: '已处理' },
+      { photo: 'DSC_0007.jpg', text: '脸修瘦一点，自然就好', status: '待处理' },
+      { photo: 'DSC_0003.jpg', text: '背景杂物处理掉', status: '已处理' }
+    ]
+  },
+  'detail-2': {
+    title: 'ORD-20260622-002',
+    status: '待客户确认',
+    statusFlow: ['待上传原片', '待选片', '待修图', '待客户确认', '待交付'],
+    currentStep: 3,
+    customer: '王*明',
+    phone: '139****5678',
+    type: '婚纱',
+    packageInfo: '婚纱照 ¥3999 套餐',
+    retouchCount: 20,
+    selectedCount: 20,
+    completedRetouch: 20,
+    assignee: '陈师傅',
+    created: '2026-06-22',
+    deadline: '2026-07-02',
+    feedbacks: []
+  },
+  'detail-3': {
+    title: 'ORD-20260620-001',
+    status: '待交付',
+    statusFlow: ['待上传原片', '待选片', '待修图', '待客户确认', '待交付'],
+    currentStep: 4,
+    customer: '刘*强',
+    phone: '137****9012',
+    type: '商业',
+    packageInfo: '商业拍摄 ¥8999 套餐',
+    retouchCount: 12,
+    selectedCount: 12,
+    completedRetouch: 12,
+    assignee: '陈师傅',
+    created: '2026-06-20',
+    deadline: '2026-06-24',
+    feedbacks: []
+  }
+};
+
+function showDetail(id) {
+  const detail = orderDetails[id];
+  if (!detail) return;
+
+  document.getElementById('detail-title').textContent = detail.title;
+
+  const statusFlowHtml = detail.statusFlow.map((step, i) => {
+    let cls = '';
+    if (i < detail.currentStep) cls = 'done';
+    else if (i === detail.currentStep) cls = 'current';
+    return `<span class="step ${cls}">${step}</span>${i < detail.statusFlow.length - 1 ? '<span class="arrow">→</span>' : ''}`;
+  }).join('');
+
+  const feedbacksHtml = detail.feedbacks.length > 0 ? `
+    <div class="detail-section">
+      <h4>💬 客户反馈</h4>
+      ${detail.feedbacks.map(f => `
+        <div class="feedback-mini">
+          <div class="meta">${f.photo} · <span style="color: ${f.status === '已处理' ? '#059669' : '#d97706'}">${f.status}</span></div>
+          <div>${f.text}</div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  const progressPercent = Math.round((detail.completedRetouch / detail.retouchCount) * 100);
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-section">
+      <h4>📊 状态流转</h4>
+      <div class="status-flow">${statusFlowHtml}</div>
+    </div>
+    <div class="detail-section">
+      <h4>📋 订单信息</h4>
+      <div class="detail-row"><span class="label">客户</span><span class="value">${detail.customer}</span></div>
+      <div class="detail-row"><span class="label">手机号</span><span class="value">${detail.phone}</span></div>
+      <div class="detail-row"><span class="label">拍摄类型</span><span class="value">${detail.type}</span></div>
+      <div class="detail-row"><span class="label">套餐</span><span class="value">${detail.packageInfo}</span></div>
+      <div class="detail-row"><span class="label">精修张数</span><span class="value">${detail.retouchCount} 张</span></div>
+      <div class="detail-row"><span class="label">修图师</span><span class="value">${detail.assignee}</span></div>
+      <div class="detail-row"><span class="label">创建时间</span><span class="value">${detail.created}</span></div>
+      <div class="detail-row"><span class="label">交付日期</span><span class="value" style="${new Date(detail.deadline) < new Date() ? 'color: #ef4444; font-weight: 600;' : ''}">${detail.deadline}</span></div>
+    </div>
+    <div class="detail-section">
+      <h4>🎨 修图进度</h4>
+      <div style="margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+          <span>精修进度</span>
+          <span>${detail.completedRetouch}/${detail.retouchCount} 张 (${progressPercent}%)</span>
+        </div>
+        <div style="height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden;">
+          <div style="height: 100%; width: ${progressPercent}%; background: ${progressPercent === 100 ? '#059669' : '#d97706'}; border-radius: 4px;"></div>
+        </div>
+      </div>
+    </div>
+    ${feedbacksHtml}
+    <div class="detail-section">
+      <h4>🔗 链接</h4>
+      <div style="display: flex; gap: 8px;">
+        <button style="flex: 1; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px;" onclick="alert('选片链接已复制')">📋 复制选片链接</button>
+        <button style="flex: 1; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px;" onclick="alert('交付链接已复制')">📤 复制交付链接</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('detail-panel').classList.add('active');
+  document.getElementById('panel-overlay').classList.add('active');
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('active');
+  document.getElementById('panel-overlay').classList.remove('active');
+}
+</script>
+</body>
+</html>

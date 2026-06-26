@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>借还记录查询与导出 - Widget原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+.phone-frame { width: 375px; height: 720px; background: #fff; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: 8px solid #1a1a1a; }
+.nav-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f0f0f0; position: relative; }
+.nav-title { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+.nav-export { position: absolute; right: 16px; font-size: 13px; color: #4A90D9; font-weight: 500; cursor: pointer; }
+.filter-section { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+.filter-row { display: flex; gap: 8px; margin-bottom: 8px; overflow-x: auto; }
+.filter-chip { padding: 5px 12px; background: #f5f5f5; border-radius: 16px; font-size: 12px; color: #666; white-space: nowrap; cursor: pointer; border: 1px solid transparent; }
+.filter-chip.active { background: #e8f4fd; color: #4A90D9; border-color: #4A90D9; }
+.filter-date { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
+.filter-date input { flex: 1; height: 32px; border: 1px solid #e0e0e0; border-radius: 6px; padding: 0 8px; font-size: 12px; }
+.content { padding: 12px 16px; overflow-y: auto; height: calc(100% - 44px - 100px); }
+.record-item { padding: 12px 0; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+.record-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.record-name { font-size: 14px; font-weight: 600; color: #333; }
+.record-status { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.status-returned { background: #e8f5e9; color: #388e3c; }
+.status-borrowed { background: #fff3e0; color: #f57c00; }
+.status-overdue { background: #fce4ec; color: #c62828; }
+.record-bottom { display: flex; justify-content: space-between; font-size: 12px; color: #999; }
+.overdue-banner { margin: 12px 16px; padding: 12px; background: #fce4ec; border-radius: 10px; display: flex; align-items: center; gap: 10px; }
+.overdue-icon { font-size: 24px; }
+.overdue-text { flex: 1; }
+.overdue-title { font-size: 13px; font-weight: 600; color: #c62828; }
+.overdue-desc { font-size: 11px; color: #999; }
+.overdue-count { font-size: 20px; font-weight: 700; color: #c62828; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="nav-bar">
+    <span class="nav-title">借还记录</span>
+    <span class="nav-export">📤 导出</span>
+  </div>
+
+  <div class="overdue-banner">
+    <div class="overdue-icon">⚠️</div>
+    <div class="overdue-text">
+      <div class="overdue-title">超期未还</div>
+      <div class="overdue-desc">需要跟进处理</div>
+    </div>
+    <div class="overdue-count">2</div>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-row">
+      <span class="filter-chip active">全部状态</span>
+      <span class="filter-chip">借出中</span>
+      <span class="filter-chip">已归还</span>
+      <span class="filter-chip">超期</span>
+      <span class="filter-chip">异常</span>
+    </div>
+    <div class="filter-date">
+      <input type="text" placeholder="开始日期" value="2026-06-01">
+      <span>至</span>
+      <input type="text" placeholder="结束日期" value="2026-06-26">
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="record-item">
+      <div class="record-top">
+        <span class="record-name">🔑 B栋配电房门钥匙</span>
+        <span class="record-status status-overdue">超期</span>
+      </div>
+      <div class="record-bottom">
+        <span>借用人：赵大勇</span>
+        <span>借出：06-20 09:00</span>
+      </div>
+    </div>
+    <div class="record-item">
+      <div class="record-top">
+        <span class="record-name">🔑 A栋大门钥匙</span>
+        <span class="record-status status-borrowed">借出中</span>
+      </div>
+      <div class="record-bottom">
+        <span>借用人：李小明</span>
+        <span>借出：06-26 10:30</span>
+      </div>
+    </div>
+    <div class="record-item">
+      <div class="record-top">
+        <span class="record-name">💳 地下车库门禁卡</span>
+        <span class="record-status status-returned">已归还</span>
+      </div>
+      <div class="record-bottom">
+        <span>借用人：王芳</span>
+        <span>归还：06-16 10:30</span>
+      </div>
+    </div>
+    <div class="record-item">
+      <div class="record-top">
+        <span class="record-name">🪪 访客临时工牌</span>
+        <span class="record-status status-returned">已归还</span>
+      </div>
+      <div class="record-bottom">
+        <span>借用人：刘建国</span>
+        <span>归还：06-14 17:00</span>
+      </div>
+    </div>
+    <div class="record-item">
+      <div class="record-top">
+        <span class="record-name">🔑 天台门钥匙</span>
+        <span class="record-status status-returned">已归还</span>
+      </div>
+      <div class="record-bottom">
+        <span>借用人：张经理</span>
+        <span>归还：06-10 14:30</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
