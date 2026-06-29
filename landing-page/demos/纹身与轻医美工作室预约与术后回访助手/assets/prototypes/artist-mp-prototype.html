@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>纹身与轻医美工作室 - 操作师端小程序（宫格展示）</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; }
+
+/* 宫格容器 */
+.grid-container { display: flex; flex-wrap: wrap; gap: 40px; padding: 40px; justify-content: center; }
+
+/* 单个手机模拟器包装 */
+.phone-wrapper { display: flex; flex-direction: column; align-items: center; }
+.phone-label { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; text-align: center; padding: 6px 16px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+/* 手机框架 */
+.phone-frame { width: 375px; height: 750px; background: #fff; border-radius: 32px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.15); position: relative; border: 8px solid #1a1a1a; display: flex; flex-direction: column; }
+
+/* 微信小程序头部 */
+.wx-header { height: 44px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; padding: 0 16px; color: #fff; font-size: 14px; position: relative; flex-shrink: 0; }
+.wx-header .title { font-weight: 500; flex: 1; text-align: center; margin-right: 20px; }
+.wx-header .dots { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: flex; gap: 3px; }
+.wx-header .dots span { width: 4px; height: 4px; background: #fff; border-radius: 50%; }
+
+/* 手机屏幕内容区 - 固定高度，内部滚动 */
+.phone-screen { flex: 1; overflow-y: auto; background: #f5f6f8; }
+
+/* Tab Bar */
+.tab-bar { height: 56px; background: #fff; display: flex; border-top: 1px solid #eaeaea; flex-shrink: 0; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #999; font-size: 11px; }
+.tab-item.active { color: #667eea; }
+.tab-item .icon { font-size: 20px; }
+
+/* 通用样式 */
+.card { background: #fff; margin: 12px; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.section-title { font-size: 16px; font-weight: 600; padding: 16px; display: flex; align-items: center; justify-content: space-between; }
+.section-title .more { font-size: 12px; color: #999; font-weight: normal; }
+.badge { display: inline-block; background: #ff4d4f; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.tag-purple { background: #f9f0ff; color: #722ed1; }
+.tag-blue { background: #e6f7ff; color: #1890ff; }
+.tag-green { background: #f6ffed; color: #52c41a; }
+.tag-orange { background: #fff7e6; color: #fa8c16; }
+.tag-red { background: #fff2f0; color: #ff4d4f; }
+
+/* 首页 */
+.home-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px 16px; color: #fff; }
+.home-hero .greeting { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.home-hero .sub { font-size: 13px; opacity: 0.9; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: -30px 12px 12px; position: relative; z-index: 10; }
+.stat-card { background: #fff; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.stat-card .num { font-size: 22px; font-weight: 700; color: #667eea; }
+.stat-card .label { font-size: 11px; color: #999; margin-top: 2px; }
+
+.booking-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.booking-item:last-child { border-bottom: none; }
+.booking-time { font-size: 13px; font-weight: 600; color: #333; min-width: 60px; }
+.booking-info { flex: 1; }
+.booking-info .name { font-size: 14px; font-weight: 500; }
+.booking-info .project { font-size: 12px; color: #666; margin-top: 2px; }
+
+/* 日历页 */
+.calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fff; }
+.calendar-header .date { font-size: 16px; font-weight: 600; }
+.calendar-header .view-switch { display: flex; gap: 4px; }
+.calendar-header .view-switch button { padding: 4px 12px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.calendar-header .view-switch button.active { background: #667eea; color: #fff; border-color: #667eea; }
+
+.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); padding: 8px 12px; background: #fff; }
+.calendar-weekdays span { text-align: center; font-size: 12px; color: #999; }
+
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 8px 12px; background: #fff; }
+.calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; font-size: 13px; cursor: pointer; position: relative; }
+.calendar-day.today { background: #f0f7ff; color: #667eea; font-weight: 600; }
+.calendar-day.selected { background: #667eea; color: #fff; }
+.calendar-day .dot { width: 4px; height: 4px; background: #667eea; border-radius: 50%; position: absolute; bottom: 4px; }
+
+.time-block { background: #fff; margin: 8px 12px; border-radius: 8px; padding: 12px; border-left: 4px solid; display: flex; gap: 12px; align-items: center; }
+.time-block.tattoo { border-color: #722ed1; }
+.time-block.touchup { border-color: #1890ff; }
+.time-block.piercing { border-color: #fa8c16; }
+.time-block.brow { border-color: #eb2f96; }
+.time-block .time { font-size: 13px; font-weight: 600; min-width: 100px; }
+.time-block .info { flex: 1; }
+.time-block .info .name { font-size: 14px; font-weight: 500; }
+.time-block .info .proj { font-size: 12px; color: #666; }
+
+/* 项目设置 */
+.project-item { background: #fff; margin: 8px 12px; border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 12px; }
+.project-color { width: 36px; height: 36px; border-radius: 8px; }
+.project-info { flex: 1; }
+.project-info .name { font-size: 14px; font-weight: 500; }
+.project-info .meta { font-size: 12px; color: #666; margin-top: 2px; }
+
+/* 客户列表 */
+.search-bar { padding: 12px; background: #fff; }
+.search-bar input { width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 20px; font-size: 13px; outline: none; }
+
+.customer-item { display: flex; gap: 12px; padding: 14px 16px; background: #fff; border-bottom: 1px solid #f5f5f5; }
+.customer-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.customer-info { flex: 1; }
+.customer-info .name { font-size: 14px; font-weight: 500; }
+.customer-info .phone { font-size: 12px; color: #666; margin-top: 2px; }
+.customer-info .last { font-size: 11px; color: #999; margin-top: 2px; }
+
+/* 作品档案 */
+.upload-area { margin: 12px; border: 2px dashed #d9d9d9; border-radius: 12px; padding: 30px 20px; text-align: center; }
+.upload-area .icon { font-size: 36px; color: #bfbfbf; margin-bottom: 8px; }
+.upload-area .text { font-size: 13px; color: #666; }
+
+.form-section { margin: 12px; background: #fff; border-radius: 10px; padding: 14px; }
+.form-section h4 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.form-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.form-row label { font-size: 13px; color: #666; min-width: 70px; line-height: 32px; }
+.form-row input, .form-row select, .form-row textarea { flex: 1; padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; outline: none; }
+.form-row textarea { resize: none; height: 60px; }
+
+/* 回访计划 */
+.followup-item { background: #fff; margin: 8px 12px; border-radius: 10px; padding: 14px; }
+.followup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.followup-header .client { font-size: 15px; font-weight: 600; }
+.followup-header .date { font-size: 12px; color: #999; }
+.followup-timeline { display: flex; gap: 0; align-items: center; }
+.followup-node { flex: 1; text-align: center; position: relative; }
+.followup-node::before { content: ''; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: #f0f0f0; }
+.followup-node:first-child::before { left: 50%; }
+.followup-node:last-child::before { right: 50%; }
+.followup-node .dot { width: 16px; height: 16px; border-radius: 50%; background: #f0f0f0; margin: 0 auto 4px; position: relative; z-index: 1; border: 2px solid #fff; }
+.followup-node.done .dot { background: #52c41a; }
+.followup-node.current .dot { background: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.2); }
+.followup-node .label { font-size: 11px; color: #999; }
+
+/* 客户反馈 */
+.feedback-timeline { padding: 12px; }
+.feedback-item { display: flex; gap: 12px; padding: 12px 0; position: relative; }
+.feedback-dot-col { display: flex; flex-direction: column; align-items: center; width: 20px; }
+.feedback-dot { width: 10px; height: 10px; border-radius: 50%; background: #667eea; }
+.feedback-line { flex: 1; width: 2px; background: #f0f0f0; margin-top: 4px; }
+.feedback-content { flex: 1; background: #f9f9f9; border-radius: 10px; padding: 12px; }
+.feedback-content .score { color: #fa8c16; font-weight: 600; }
+.feedback-content .desc { font-size: 13px; color: #666; margin-top: 4px; }
+.feedback-photos { display: flex; gap: 6px; margin-top: 8px; }
+.feedback-photos .photo { width: 60px; height: 60px; border-radius: 6px; background: linear-gradient(135deg, #f5f5f5, #e0e0e0); }
+
+/* 分享链接 */
+.share-card { background: #fff; margin: 12px; border-radius: 12px; padding: 20px; text-align: center; }
+.share-card .studio-info { padding: 16px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; color: #fff; margin-bottom: 16px; }
+.share-card .studio-info .name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.qr-code { width: 180px; height: 180px; margin: 16px auto; background: #fff; border: 1px solid #d9d9d9; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px; }
+.link-box { display: flex; gap: 8px; align-items: center; background: #f5f6f8; border-radius: 8px; padding: 10px 12px; }
+.link-box .link { flex: 1; font-size: 12px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link-box button { padding: 4px 12px; background: #667eea; color: #fff; border: none; border-radius: 4px; font-size: 12px; }
+.share-buttons { display: flex; justify-content: center; gap: 24px; margin-top: 20px; }
+.share-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.share-btn .icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; }
+.share-btn .icon.wechat { background: #07c160; }
+.share-btn .icon.link { background: #667eea; }
+.share-btn .icon.qr { background: #fa8c16; }
+.share-btn .label { font-size: 11px; color: #666; }
+
+/* 我的 */
+.profile-header { background: linear-gradient(135deg, #667eea, #764ba2); padding: 24px 16px; color: #fff; display: flex; align-items: center; gap: 14px; }
+.profile-avatar { width: 60px; height: 60px; border-radius: 50%; background: #fff; color: #667eea; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
+.profile-info .name { font-size: 18px; font-weight: 600; }
+.profile-info .role { font-size: 12px; opacity: 0.9; }
+
+.menu-list { background: #fff; margin: 12px; border-radius: 10px; overflow: hidden; }
+.menu-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f5f5f5; }
+.menu-item:last-child { border-bottom: none; }
+.menu-item .icon { width: 24px; font-size: 16px; margin-right: 12px; }
+.menu-item .label { flex: 1; font-size: 14px; }
+.menu-item .arrow { color: #ccc; }
+
+/* 按钮 */
+.btn { display: block; width: calc(100% - 24px); margin: 12px; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; text-align: center; }
+.btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
+
+/* FAB */
+.fab { position: absolute; bottom: 70px; right: 16px; width: 48px; height: 48px; border-radius: 50%; background: #667eea; color: #fff; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(102,126,234,0.4); display: flex; align-items: center; justify-content: center; z-index: 10; }
+</style>
+</head>
+<body>
+
+<div class="grid-container">
+
+<!-- 页面1: 首页工作台 -->
+<div class="phone-wrapper">
+    <div class="phone-label">📱 首页工作台</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">首页工作台</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div class="home-hero"><div class="greeting">👋 下午好，李老师</div><div class="sub">今日有 6 个预约 · 2 个待处理</div></div>
+            <div class="stat-grid">
+                <div class="stat-card"><div class="num">6</div><div class="label">今日预约</div></div>
+                <div class="stat-card"><div class="num">2</div><div class="label">待处理</div></div>
+                <div class="stat-card"><div class="num">3</div><div class="label">待回访</div></div>
+            </div>
+            <div class="card">
+                <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">🔔 待处理预约申请</div>
+                <div class="booking-item">
+                    <div class="booking-info"><div class="name">张女士 · <span class="tag tag-purple">纹眉</span></div><div class="project">6月29日 14:00-15:30</div></div>
+                    <div><button style="padding: 4px 10px; background: #667eea; color: #fff; border: none; border-radius: 4px; font-size: 12px; margin-right: 4px;">确认</button><button style="padding: 4px 10px; background: #fff; color: #666; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px;">拒绝</button></div>
+                </div>
+                <div class="booking-item">
+                    <div class="booking-info"><div class="name">王先生 · <span class="tag tag-purple">纹身</span></div><div class="project">6月29日 16:30-18:30</div></div>
+                    <div><button style="padding: 4px 10px; background: #667eea; color: #fff; border: none; border-radius: 4px; font-size: 12px; margin-right: 4px;">确认</button><button style="padding: 4px 10px; background: #fff; color: #666; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px;">拒绝</button></div>
+                </div>
+            </div>
+            <div class="section-title">📋 今日预约 <span class="more">查看全部 →</span></div>
+            <div class="card" style="margin-top: 0;">
+                <div class="booking-item"><div class="booking-time">09:00-11:00</div><div class="booking-info"><div class="name">王女士 · 纹身</div><div class="project" style="color: #52c41a;">✅ 已完成</div></div></div>
+                <div class="booking-item"><div class="booking-time">11:30-12:00</div><div class="booking-info"><div class="name">赵先生 · 补色</div><div class="project" style="color: #1890ff;">⏰ 进行中</div></div></div>
+                <div class="booking-item"><div class="booking-time">14:00-15:30</div><div class="booking-info"><div class="name">刘女士 · 纹眉</div><div class="project">⏳ 待确认</div></div></div>
+                <div class="booking-item"><div class="booking-time">16:00-17:00</div><div class="booking-info"><div class="name">陈女士 · 穿孔</div><div class="project">✅ 已确认</div></div></div>
+            </div>
+            <div class="section-title">⏰ 待回访客户 <span class="more">查看全部 →</span></div>
+            <div class="card" style="margin-top: 0;">
+                <div class="booking-item"><div class="booking-info"><div class="name">周女士 · 纹身Day3</div><div class="project">今天需回访 · 推送护理提醒</div></div><span class="tag tag-orange">待回访</span></div>
+                <div class="booking-item"><div class="booking-info"><div class="name">孙女士 · 纹眉Day7</div><div class="project">今天需回访 · 收集反馈</div></div><span class="tag tag-red">待反馈</span></div>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item active"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item"><span class="icon">📅</span>预约</div>
+            <div class="tab-item"><span class="icon">👥</span>客户</div>
+            <div class="tab-item"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面2: 预约日历 -->
+<div class="phone-wrapper">
+    <div class="phone-label">📅 预约日历</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">预约日历</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div class="calendar-header"><span style="cursor: pointer;">‹</span><span class="date">2026年6月29日</span><span style="cursor: pointer;">›</span><div class="view-switch"><button class="active">日</button><button>周</button></div></div>
+            <div class="calendar-weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+            <div class="calendar-grid">
+                <div class="calendar-day" style="color: #d9d9d9;">28</div>
+                <div class="calendar-day">1<div class="dot"></div></div>
+                <div class="calendar-day">2</div>
+                <div class="calendar-day">3<div class="dot"></div></div>
+                <div class="calendar-day">4</div>
+                <div class="calendar-day">5<div class="dot"></div></div>
+                <div class="calendar-day">6</div>
+                <div class="calendar-day">7</div>
+                <div class="calendar-day">8<div class="dot"></div></div>
+                <div class="calendar-day">9</div>
+                <div class="calendar-day">10</div>
+                <div class="calendar-day">11<div class="dot"></div></div>
+                <div class="calendar-day">12</div>
+                <div class="calendar-day">13</div>
+                <div class="calendar-day">14<div class="dot"></div></div>
+                <div class="calendar-day">15</div>
+                <div class="calendar-day">16</div>
+                <div class="calendar-day">17</div>
+                <div class="calendar-day">18</div>
+                <div class="calendar-day">19</div>
+                <div class="calendar-day">20</div>
+                <div class="calendar-day">21</div>
+                <div class="calendar-day">22</div>
+                <div class="calendar-day">23</div>
+                <div class="calendar-day">24</div>
+                <div class="calendar-day">25</div>
+                <div class="calendar-day">26</div>
+                <div class="calendar-day">27</div>
+                <div class="calendar-day">28</div>
+                <div class="calendar-day today selected">29<div class="dot"></div></div>
+                <div class="calendar-day">30</div>
+                <div class="calendar-day" style="color: #d9d9d9;">1</div>
+                <div class="calendar-day" style="color: #d9d9d9;">2</div>
+                <div class="calendar-day" style="color: #d9d9d9;">3</div>
+                <div class="calendar-day" style="color: #d9d9d9;">4</div>
+            </div>
+            <div style="padding: 12px; font-size: 13px; color: #666; font-weight: 600;">6月29日 · 6个预约</div>
+            <div class="time-block tattoo"><div class="time">09:00-11:00</div><div class="info"><div class="name">王女士</div><div class="proj">纹身 · 手臂图腾</div></div><span class="tag tag-green">已完成</span></div>
+            <div class="time-block touchup"><div class="time">11:30-12:00</div><div class="info"><div class="name">赵先生</div><div class="proj">补色 · 背部纹身</div></div><span class="tag tag-blue">进行中</span></div>
+            <div class="time-block brow"><div class="time">14:00-15:30</div><div class="info"><div class="name">刘女士</div><div class="proj">纹眉 · 雾眉</div></div><span class="tag tag-orange">待确认</span></div>
+            <div class="time-block piercing"><div class="time">16:00-17:00</div><div class="info"><div class="name">陈女士</div><div class="proj">穿孔 · 耳骨</div></div><span class="tag tag-blue">已确认</span></div>
+            <div class="time-block tattoo"><div class="time">17:30-19:30</div><div class="info"><div class="name">孙先生</div><div class="proj">纹身 · 胸口图案</div></div><span class="tag tag-blue">已确认</span></div>
+        </div>
+        <button class="fab">+</button>
+        <div class="tab-bar">
+            <div class="tab-item"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item active"><span class="icon">📅</span>预约</div>
+            <div class="tab-item"><span class="icon">👥</span>客户</div>
+            <div class="tab-item"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面3: 项目设置 -->
+<div class="phone-wrapper">
+    <div class="phone-label">🎨 项目设置</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">项目设置</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div class="section-title">🎨 项目设置 <span class="more">+ 新增项目</span></div>
+            <div class="project-item"><div class="project-color" style="background: linear-gradient(135deg, #722ed1, #b37feb);"></div><div class="project-info"><div class="name">纹身</div><div class="meta">时长 120分钟 · ¥500起</div></div><button style="padding: 4px 10px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;">编辑</button></div>
+            <div class="project-item"><div class="project-color" style="background: linear-gradient(135deg, #1890ff, #69c0ff);"></div><div class="project-info"><div class="name">补色</div><div class="meta">时长 30分钟 · ¥200</div></div><button style="padding: 4px 10px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;">编辑</button></div>
+            <div class="project-item"><div class="project-color" style="background: linear-gradient(135deg, #fa8c16, #ffc069);"></div><div class="project-info"><div class="name">穿孔</div><div class="meta">时长 15分钟 · ¥100</div></div><button style="padding: 4px 10px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;">编辑</button></div>
+            <div class="project-item"><div class="project-color" style="background: linear-gradient(135deg, #eb2f96, #ff85c0);"></div><div class="project-info"><div class="name">纹眉</div><div class="meta">时长 90分钟 · ¥800起</div></div><button style="padding: 4px 10px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;">编辑</button></div>
+            <div class="project-item"><div class="project-color" style="background: linear-gradient(135deg, #13c2c2, #5cdbd3);"></div><div class="project-info"><div class="name">美睫</div><div class="meta">时长 60分钟 · ¥280</div></div><button style="padding: 4px 10px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;">编辑</button></div>
+            <button class="btn btn-primary">+ 新增项目类型</button>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item"><span class="icon">📅</span>预约</div>
+            <div class="tab-item"><span class="icon">👥</span>客户</div>
+            <div class="tab-item"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面4: 客户列表 -->
+<div class="phone-wrapper">
+    <div class="phone-label">👥 客户列表</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">客户列表</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div class="search-bar"><input type="text" placeholder="🔍 搜索客户姓名或手机号"></div>
+            <div class="customer-item"><div class="customer-avatar">王</div><div class="customer-info"><div class="name">王女士 <span class="tag tag-purple">VIP</span></div><div class="phone">138****5678</div><div class="last">最近服务: 2026-06-29 纹身</div></div><span style="color: #ccc;">›</span></div>
+            <div class="customer-item"><div class="customer-avatar">赵</div><div class="customer-info"><div class="name">赵先生</div><div class="phone">139****2345</div><div class="last">最近服务: 2026-06-15 补色</div></div><span style="color: #ccc;">›</span></div>
+            <div class="customer-item"><div class="customer-avatar">刘</div><div class="customer-info"><div class="name">刘女士</div><div class="phone">137****8901</div><div class="last">最近服务: 2026-06-22 纹眉</div></div><span style="color: #ccc;">›</span></div>
+            <div class="customer-item"><div class="customer-avatar">陈</div><div class="customer-info"><div class="name">陈女士 <span class="tag tag-orange">过敏体质</span></div><div class="phone">136****4567</div><div class="last">最近服务: 2026-06-10 穿孔</div></div><span style="color: #ccc;">›</span></div>
+            <div class="customer-item"><div class="customer-avatar">孙</div><div class="customer-info"><div class="name">孙先生</div><div class="phone">135****7890</div><div class="last">最近服务: 2026-05-28 纹身</div></div><span style="color: #ccc;">›</span></div>
+            <div class="customer-item"><div class="customer-avatar">周</div><div class="customer-info"><div class="name">周女士</div><div class="phone">134****1234</div><div class="last">最近服务: 2026-06-26 纹身</div></div><span style="color: #ccc;">›</span></div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item"><span class="icon">📅</span>预约</div>
+            <div class="tab-item active"><span class="icon">👥</span>客户</div>
+            <div class="tab-item"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面5: 创建作品档案 -->
+<div class="phone-wrapper">
+    <div class="phone-label">📷 创建作品档案</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">创建作品档案</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div style="padding: 12px 16px; font-size: 14px; color: #666;">关联预约: 王女士 · 纹身 · 2026-06-29</div>
+            <div class="upload-area"><div class="icon">📷</div><div class="text">点击上传作品照片（至少1张，最多20张）</div><div style="font-size: 11px; color: #999; margin-top: 4px;">单张最大20MB，支持原图保存</div></div>
+            <div style="display: flex; gap: 6px; padding: 0 12px; flex-wrap: wrap;">
+                <div style="width: 70px; height: 70px; border-radius: 8px; background: linear-gradient(135deg, #722ed1, #b37feb); position: relative;"><span style="position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.5); color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 4px;">原图</span></div>
+                <div style="width: 70px; height: 70px; border-radius: 8px; background: linear-gradient(135deg, #eb2f96, #ff85c0);"></div>
+                <div style="width: 70px; height: 70px; border-radius: 8px; background: linear-gradient(135deg, #1890ff, #69c0ff);"></div>
+                <div style="width: 70px; height: 70px; border-radius: 8px; border: 1px dashed #d9d9d9; display: flex; align-items: center; justify-content: center; color: #999; font-size: 24px; cursor: pointer;">+</div>
+            </div>
+            <div class="form-section"><h4>🎨 色料信息</h4><div class="form-row"><label>品牌</label><select><option selected>Intenze 国际色</option><option>Dynamic 黑</option></select></div><div class="form-row"><label>色号</label><input type="text" value="Jet Black + White"></div><div class="form-row"><label>配比</label><input type="text" value="黑:白 = 3:1"></div></div>
+            <div class="form-section"><h4>🪡 针型与参数</h4><div class="form-row"><label>针型</label><select><option selected>RL 圆针 7RL</option><option>RS 圆针 3RS</option></select></div><div class="form-row"><label>深度</label><input type="text" value="1.5mm"></div><div class="form-row"><label>频率</label><input type="text" value="8.5Hz"></div></div>
+            <div class="form-section"><h4>📝 操作备注</h4><div class="form-row"><textarea>客户皮肤偏干，上色较慢，已做保湿处理。线条部分一次上色成功，阴影部分需补色。</textarea></div></div>
+            <button class="btn btn-primary">💾 保存档案 · 启动回访计划</button>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item"><span class="icon">📅</span>预约</div>
+            <div class="tab-item"><span class="icon">👥</span>客户</div>
+            <div class="tab-item"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面6: 回访计划 -->
+<div class="phone-wrapper">
+    <div class="phone-label">⏰ 回访计划</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">回访计划</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div style="display: flex; gap: 8px; padding: 12px; overflow-x: auto;"><span class="tag tag-purple" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0;">全部 (15)</span><span class="tag tag-blue" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0;">待回访 (3)</span><span class="tag tag-orange" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0;">待反馈 (2)</span><span class="tag tag-green" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0;">已完成 (10)</span></div>
+            <div class="followup-item"><div class="followup-header"><span class="client">王女士 <span class="tag tag-purple" style="font-size: 10px;">纹身</span></span><span class="date">操作: 2026-06-29</span></div><div class="followup-timeline"><div class="followup-node current"><div class="dot"></div><div class="label">D+1</div></div><div class="followup-node"><div class="dot"></div><div class="label">D+3</div></div><div class="followup-node"><div class="dot"></div><div class="label">D+7</div></div><div class="followup-node"><div class="dot"></div><div class="label">D+30</div></div></div><div style="font-size: 12px; color: #fa8c16; margin-top: 8px;">⏰ 明天需推送D+1护理提醒</div></div>
+            <div class="followup-item"><div class="followup-header"><span class="client">周女士 <span class="tag tag-purple" style="font-size: 10px;">纹身</span></span><span class="date">操作: 2026-06-26</span></div><div class="followup-timeline"><div class="followup-node done"><div class="dot"></div><div class="label">D+1</div></div><div class="followup-node done"><div class="dot"></div><div class="label">D+3</div></div><div class="followup-node current"><div class="dot"></div><div class="label">D+7</div></div><div class="followup-node"><div class="dot"></div><div class="label">D+30</div></div></div><div style="font-size: 12px; color: #1890ff; margin-top: 8px;">📋 今天需推送D+7护理提醒+反馈表单</div></div>
+            <div class="followup-item"><div class="followup-header"><span class="client">刘女士 <span class="tag tag-purple" style="font-size: 10px;">纹眉</span></span><span class="date">操作: 2026-06-22</span></div><div class="followup-timeline"><div class="followup-node done"><div class="dot"></div><div class="label">D+1</div></div><div class="followup-node done"><div class="dot"></div><div class="label">D+3</div></div><div class="followup-node done"><div class="dot"></div><div class="label">D+7</div></div><div class="followup-node current"><div class="dot"></div><div class="label">D+30</div></div></div><div style="font-size: 12px; color: #52c41a; margin-top: 8px;">✅ D+7已收到反馈，恢复良好</div></div>
+            <div class="followup-item" style="border: 1px solid #ffccc7;"><div class="followup-header"><span class="client">孙先生 <span class="tag tag-red" style="font-size: 10px;">⚠️ 异常</span></span><span class="date">操作: 2026-05-28</span></div><div class="followup-timeline"><div class="followup-node done"><div class="dot"></div><div class="label">D+1</div></div><div class="followup-node done"><div class="dot"></div><div class="label">D+3</div></div><div class="followup-node done"><div class="dot"></div><div class="label">D+7</div></div><div class="followup-node done"><div class="dot"></div><div class="label">D+30</div></div></div><div style="font-size: 12px; color: #ff4d4f; margin-top: 8px;">🚨 客户反馈有感染迹象，需主动跟进</div></div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item"><span class="icon">📅</span>预约</div>
+            <div class="tab-item"><span class="icon">👥</span>客户</div>
+            <div class="tab-item active"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面7: 客户反馈 -->
+<div class="phone-wrapper">
+    <div class="phone-label">💬 客户反馈</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">客户反馈</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div style="padding: 12px 16px; font-size: 14px; font-weight: 600;">周女士 · 纹身术后反馈</div>
+            <div class="feedback-timeline">
+                <div class="feedback-item">
+                    <div class="feedback-dot-col"><div class="feedback-dot"></div><div class="feedback-line"></div></div>
+                    <div class="feedback-content">
+                        <div style="font-size: 12px; color: #999;">D+7 反馈 · 2026-07-05</div>
+                        <div style="margin: 6px 0;">恢复评分: <span class="score">★★★★★ 5星</span></div>
+                        <div style="font-size: 13px; color: #666;">异常: 无</div>
+                        <div class="desc">结痂已自然脱落，颜色保留很好，没有不适感。非常满意！</div>
+                        <div class="feedback-photos"><div class="photo"></div><div class="photo"></div></div>
+                        <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">✅ 已标记正常</div>
+                    </div>
+                </div>
+                <div class="feedback-item">
+                    <div class="feedback-dot-col"><div class="feedback-dot" style="background: #fa8c16;"></div></div>
+                    <div class="feedback-content">
+                        <div style="font-size: 12px; color: #999;">操作完成照 · 2026-06-29</div>
+                        <div class="desc">纹身作品完成照片（操作师上传）</div>
+                        <div class="feedback-photos"><div class="photo" style="background: linear-gradient(135deg, #722ed1, #b37feb);"></div><div class="photo" style="background: linear-gradient(135deg, #eb2f96, #ff85c0);"></div><div class="photo" style="background: linear-gradient(135deg, #1890ff, #69c0ff);"></div></div>
+                        <button style="margin-top: 8px; padding: 4px 10px; background: #f0f0f0; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">🔍 前后对比模式</button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" style="background: #ff4d4f; color: #fff; margin: 12px;">🚨 标记异常</button>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item"><span class="icon">📅</span>预约</div>
+            <div class="tab-item"><span class="icon">👥</span>客户</div>
+            <div class="tab-item"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面8: 预约链接分享 -->
+<div class="phone-wrapper">
+    <div class="phone-label">🔗 预约链接分享</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">预约链接分享</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div class="share-card">
+                <div class="studio-info"><div class="name">✨ 李老师纹身工作室</div><div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">📍 上海市长宁区某某路100号</div><div style="font-size: 12px; opacity: 0.9; margin-top: 2px;">🕐 营业时间 10:00-20:00</div></div>
+                <div style="font-size: 14px; font-weight: 600; margin: 16px 0 8px;">扫码预约</div>
+                <div class="qr-code"><div style="text-align: center;"><div style="font-size: 48px;">▦</div><div style="margin-top: 8px;">预约二维码</div></div></div>
+                <div class="link-box"><div class="link">https://book.example.com/studio/lixs</div><button>复制</button></div>
+                <div class="share-buttons">
+                    <div class="share-btn"><div class="icon wechat">💬</div><div class="label">发送给客户</div></div>
+                    <div class="share-btn"><div class="icon link">🔗</div><div class="label">复制链接</div></div>
+                    <div class="share-btn"><div class="icon qr">▦</div><div class="label">保存二维码</div></div>
+                </div>
+            </div>
+            <div class="card"><div style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">📊 预约链接统计</div><div style="display: flex; justify-content: space-around; text-align: center;"><div><div style="font-size: 20px; font-weight: 700; color: #667eea;">156</div><div style="font-size: 11px; color: #999;">累计访问</div></div><div><div style="font-size: 20px; font-weight: 700; color: #667eea;">38</div><div style="font-size: 11px; color: #999;">成功预约</div></div><div><div style="font-size: 20px; font-weight: 700; color: #667eea;">24%</div><div style="font-size: 11px; color: #999;">转化率</div></div></div></div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item"><span class="icon">📅</span>预约</div>
+            <div class="tab-item"><span class="icon">👥</span>客户</div>
+            <div class="tab-item"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面9: 我的 -->
+<div class="phone-wrapper">
+    <div class="phone-label">👤 我的</div>
+    <div class="phone-frame">
+        <div class="wx-header"><span style="font-size: 18px;">←</span><span class="title">我的</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="phone-screen">
+            <div class="profile-header"><div class="profile-avatar">李</div><div class="profile-info"><div class="name">李老师</div><div class="role">✨ 李老师纹身工作室 · 管理员</div></div></div>
+            <div class="menu-list">
+                <div class="menu-item"><span class="icon">👤</span><span class="label">个人资料</span><span class="arrow">›</span></div>
+                <div class="menu-item"><span class="icon">🎨</span><span class="label">项目设置</span><span class="arrow">›</span></div>
+                <div class="menu-item"><span class="icon">⏰</span><span class="label">工作时间设置</span><span class="arrow">›</span></div>
+                <div class="menu-item"><span class="icon">🔗</span><span class="label">预约链接</span><span class="arrow">›</span></div>
+                <div class="menu-item"><span class="icon">🔔</span><span class="label">消息通知</span><span class="arrow">›</span></div>
+            </div>
+            <div class="menu-list">
+                <div class="menu-item"><span class="icon">💎</span><span class="label">版本套餐</span><span class="tag tag-orange" style="margin-left: 8px; font-size: 11px;">免费版</span><span class="arrow">›</span></div>
+                <div class="menu-item"><span class="icon">📊</span><span class="label">数据统计</span><span class="arrow">›</span></div>
+                <div class="menu-item"><span class="icon">ℹ️</span><span class="label">关于我们</span><span class="arrow">›</span></div>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item"><span class="icon">🏠</span>首页</div>
+            <div class="tab-item"><span class="icon">📅</span>预约</div>
+            <div class="tab-item"><span class="icon">👥</span>客户</div>
+            <div class="tab-item"><span class="icon">⏰</span>回访</div>
+            <div class="tab-item active"><span class="icon">👤</span>我的</div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>平台选择与配置组件原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F3FF;padding:32px;color:#312E81;}
+.widget{max-width:680px;margin:0 auto;background:white;border-radius:16px;border:1px solid #E5E7EB;padding:32px;box-shadow:0 4px 12px rgba(99,102,241,0.08);}
+.title{font-size:14px;font-weight:600;margin-bottom:16px;}
+.section{margin-bottom:20px;}
+.section-label{font-size:13px;font-weight:600;color:#6B7280;margin-bottom:10px;}
+.platforms{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.platform{border:2px solid #E5E7EB;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;}
+.platform:hover{border-color:#818CF8;}
+.platform.selected{border-color:#6366F1;background:#EEF2FF;}
+.platform .icon{width:32px;height:32px;border-radius:8px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.platform .name{font-size:12px;font-weight:600;}
+.platform .spec{font-size:10px;color:#6B7280;margin-top:2px;}
+.style-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.style-card{border:1px solid #E5E7EB;border-radius:10px;padding:12px;cursor:pointer;transition:all .2s;}
+.style-card:hover{border-color:#818CF8;}
+.style-card.active{border-color:#6366F1;background:#EEF2FF;}
+.style-card .sname{font-size:13px;font-weight:600;}
+.style-card .sdesc{font-size:11px;color:#6B7280;margin-top:4px;}
+.identify-box{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px;margin-bottom:20px;}
+.identify-row{display:flex;align-items:center;gap:10px;font-size:13px;}
+.identify-dot{width:8px;height:8px;border-radius:50%;background:#10B981;}
+.btn-primary{background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:16px;}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="title">平台选择与配置</div>
+  <div class="identify-box">
+    <div class="identify-row"><div class="identify-dot"></div><strong>识别完成：</strong>图片 · 2400×3200px · 主体居中</div>
+  </div>
+  <div class="section">
+    <div class="section-label">选择目标平台</div>
+    <div class="platforms">
+      <div class="platform selected" onclick="this.classList.toggle('selected')"><div class="icon" style="background:#FFE4E8;">📕</div><div class="name">小红书</div><div class="spec">3:4</div></div>
+      <div class="platform selected" onclick="this.classList.toggle('selected')"><div class="icon" style="background:#E8F5E8;">🎵</div><div class="name">抖音</div><div class="spec">9:16</div></div>
+      <div class="platform selected" onclick="this.classList.toggle('selected')"><div class="icon" style="background:#E8F0FE;">💬</div><div class="name">公众号</div><div class="spec">2.35:1</div></div>
+      <div class="platform" onclick="this.classList.toggle('selected')"><div class="icon" style="background:#E8F8F5;">📺</div><div class="name">B站</div><div class="spec">16:10</div></div>
+      <div class="platform" onclick="this.classList.toggle('selected')"><div class="icon" style="background:#FFF4E5;">🎬</div><div class="name">视频号</div><div class="spec">多种</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">改写风格</div>
+    <div class="style-cards">
+      <div class="style-card active" onclick="document.querySelectorAll('.style-card').forEach(c=>c.classList.remove('active'));this.classList.add('active');"><div class="sname">✨ 智能匹配</div><div class="sdesc">按平台调性自动匹配</div></div>
+      <div class="style-card" onclick="document.querySelectorAll('.style-card').forEach(c=>c.classList.remove('active'));this.classList.add('active');"><div class="sname">🎨 轻度润色</div><div class="sdesc">仅调整语气用词</div></div>
+      <div class="style-card" onclick="document.querySelectorAll('.style-card').forEach(c=>c.classList.remove('active'));this.classList.add('active');"><div class="sname">🔥 深度重写</div><div class="sdesc">完全重新表达</div></div>
+    </div>
+  </div>
+  <button class="btn-primary">开始适配（3个平台）</button>
+</div>
+</body>
+</html>

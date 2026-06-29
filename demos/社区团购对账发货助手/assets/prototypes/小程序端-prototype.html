@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社区团购对账发货助手 - 团长端小程序全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f0f2f5;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.phone {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+  border: 8px solid #1a1a1a;
+  position: relative;
+}
+.phone-notch {
+  background: #1a1a1a;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.phone-notch::after {
+  content: '';
+  width: 60px;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+}
+.wx-bar {
+  background: #ededed;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid #ddd;
+}
+.wx-bar .dots { font-size: 16px; color: #333; cursor: pointer; }
+.wx-bar .title { font-size: 14px; font-weight: 500; color: #333; }
+.wx-bar .close { font-size: 18px; color: #333; cursor: pointer; }
+.screen {
+  height: 520px;
+  overflow-y: auto;
+  background: #f5f5f5;
+}
+.screen::-webkit-scrollbar { width: 0; }
+.page-label {
+  text-align: center;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  background: #fff;
+  border-top: 1px solid #eee;
+}
+.home-indicator {
+  height: 20px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-indicator::after {
+  content: '';
+  width: 100px;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+}
+
+/* Common styles */
+.card {
+  background: #fff;
+  border-radius: 8px;
+  margin: 10px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+}
+.btn-primary { background: #07c160; color: #fff; }
+.btn-orange { background: #ff9500; color: #fff; }
+.btn-blue { background: #007aff; color: #fff; }
+.btn-red { background: #ff3b30; color: #fff; }
+.btn-outline { background: #fff; color: #07c160; border: 1px solid #07c160; }
+
+/* Login page */
+.login-page { background: linear-gradient(135deg, #07c160 0%, #06ad56 100%); height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.login-logo { width: 64px; height: 64px; background: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 16px; }
+.login-title { color: #fff; font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.login-desc { color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 40px; }
+.login-btn { background: #fff; color: #07c160; border: none; padding: 12px 48px; border-radius: 24px; font-size: 15px; font-weight: 500; cursor: pointer; }
+
+/* Dashboard stats */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-card { background: #f8f9fa; border-radius: 8px; padding: 10px; text-align: center; }
+.stat-value { font-size: 20px; font-weight: 700; color: #333; }
+.stat-value.green { color: #07c160; }
+.stat-value.red { color: #ff3b30; }
+.stat-value.blue { color: #007aff; }
+.stat-label { font-size: 11px; color: #999; margin-top: 2px; }
+.progress-bar { height: 6px; background: #eee; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #07c160, #06ad56); border-radius: 3px; }
+
+/* Nav tabs */
+.nav-tabs { display: flex; background: #fff; border-bottom: 1px solid #eee; }
+.nav-tab { flex: 1; text-align: center; padding: 10px 0; font-size: 12px; color: #666; cursor: pointer; }
+.nav-tab.active { color: #07c160; border-bottom: 2px solid #07c160; font-weight: 500; }
+
+/* Quick actions */
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.quick-action { text-align: center; padding: 8px 0; }
+.quick-action .icon { font-size: 24px; margin-bottom: 4px; }
+.quick-action .label { font-size: 10px; color: #666; }
+
+/* List items */
+.list-item {
+  display: flex; align-items: center; padding: 10px 12px; background: #fff; border-bottom: 1px solid #f0f0f0;
+}
+.list-item .avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: #e8f5e9; display: flex; align-items: center;
+  justify-content: center; font-size: 16px; margin-right: 10px; flex-shrink: 0;
+}
+.list-item .info { flex: 1; }
+.list-item .name { font-size: 13px; font-weight: 500; color: #333; }
+.list-item .desc { font-size: 11px; color: #999; margin-top: 2px; }
+.list-item .action { font-size: 12px; }
+.badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.badge-green { background: #e8f5e9; color: #07c160; }
+.badge-red { background: #ffebee; color: #ff3b30; }
+.badge-orange { background: #fff3e0; color: #ff9500; }
+.badge-blue { background: #e3f2fd; color: #007aff; }
+
+/* Import page */
+.import-option {
+  display: flex; align-items: center; padding: 14px; background: #fff; border-radius: 10px; margin-bottom: 8px;
+  cursor: pointer; border: 1px solid #eee;
+}
+.import-option .icon { font-size: 28px; margin-right: 12px; }
+.import-option .text { flex: 1; }
+.import-option .text .t1 { font-size: 14px; font-weight: 500; color: #333; }
+.import-option .text .t2 { font-size: 11px; color: #999; margin-top: 2px; }
+.import-option .arrow { color: #ccc; }
+
+/* Form */
+.form-group { margin-bottom: 12px; }
+.form-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+.form-input {
+  width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px;
+  background: #fafafa;
+}
+.form-input.highlight { background: #fff8e1; border-color: #ffc107; }
+
+/* Table */
+.mini-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+.mini-table th { background: #f5f5f5; padding: 6px 4px; text-align: left; font-weight: 500; color: #666; }
+.mini-table td { padding: 6px 4px; border-bottom: 1px solid #f0f0f0; color: #333; }
+
+/* Tags */
+.tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.tag { padding: 4px 10px; border-radius: 12px; font-size: 11px; background: #f0f0f0; color: #666; cursor: pointer; }
+.tag.active { background: #07c160; color: #fff; }
+
+/* Notice card */
+.notice-card {
+  background: #fff; border-radius: 8px; padding: 12px; margin: 10px; border-left: 3px solid #07c160;
+}
+.notice-card .title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.notice-card .content { font-size: 12px; color: #666; line-height: 1.5; }
+
+/* Stats cards */
+.metric-row { display: flex; gap: 6px; margin: 10px; }
+.metric {
+  flex: 1; background: #fff; border-radius: 8px; padding: 10px; text-align: center;
+}
+.metric .val { font-size: 18px; font-weight: 700; }
+.metric .lbl { font-size: 10px; color: #999; margin-top: 2px; }
+
+/* Bottom tab bar */
+.tab-bar {
+  display: flex; background: #fff; border-top: 1px solid #eee; height: 50px; align-items: center;
+}
+.tab-bar-item {
+  flex: 1; text-align: center; font-size: 10px; color: #999; cursor: pointer;
+}
+.tab-bar-item .icon { font-size: 20px; margin-bottom: 2px; }
+.tab-bar-item.active { color: #07c160; }
+
+/* Print preview */
+.label-preview {
+  border: 1px dashed #ccc; border-radius: 6px; padding: 8px; margin: 6px 0;
+  font-size: 11px; background: #fffef5;
+}
+.label-preview .product { font-size: 14px; font-weight: 600; }
+.label-preview .detail { color: #666; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>📱 社区团购对账发货助手 - 团长端小程序</h1>
+<p class="subtitle">全站点原型 · 宫格布局 · 15个核心页面</p>
+
+<div class="grid">
+
+<!-- 1. 登录页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">对账发货助手</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="login-page">
+      <div class="login-logo">🛒</div>
+      <div class="login-title">社区团购对账发货助手</div>
+      <div class="login-desc">订单对账 · 分拣清单 · 提货通知</div>
+      <button class="login-btn">微信授权登录</button>
+    </div>
+  </div>
+  <div class="page-label">① 登录页</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 2. 首页/对账看板 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">对账看板</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="section-title" style="margin:0;">本周水果团购</span>
+        <span class="badge badge-green">进行中</span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value">¥2,580</div>
+          <div class="stat-label">应收总额</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green">¥1,860</div>
+          <div class="stat-label">已收金额</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value red">¥720</div>
+          <div class="stat-label">未收金额</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value blue">72%</div>
+          <div class="stat-label">收款完成率</div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">快捷操作</div>
+      <div class="quick-actions">
+        <div class="quick-action"><div class="icon">📥</div><div class="label">导入订单</div></div>
+        <div class="quick-action"><div class="icon">💰</div><div class="label">对账收款</div></div>
+        <div class="quick-action"><div class="icon">📦</div><div class="label">分拣清单</div></div>
+        <div class="quick-action"><div class="icon">📢</div><div class="label">提货通知</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">待处理提醒</div>
+      <div class="list-item" style="padding:8px 0;border:none;">
+        <div class="avatar" style="background:#ffebee;">💸</div>
+        <div class="info">
+          <div class="name">8人未付款</div>
+          <div class="desc">合计 ¥720，点击催收</div>
+        </div>
+        <span class="badge badge-red">待处理</span>
+      </div>
+      <div class="list-item" style="padding:8px 0;border:none;">
+        <div class="avatar" style="background:#fff3e0;">📦</div>
+        <div class="info">
+          <div class="name">5人待提货</div>
+          <div class="desc">已发送通知，等待确认</div>
+        </div>
+        <span class="badge badge-orange">待提货</span>
+      </div>
+    </div>
+  </div>
+  <div class="page-label">② 首页/对账看板</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 3. 订单导入页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">订单导入</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div class="section-title">选择导入方式</div>
+      <div class="import-option">
+        <div class="icon">📊</div>
+        <div class="text">
+          <div class="t1">Excel文件导入</div>
+          <div class="t2">上传.xlsx/.xls订单文件</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="import-option">
+        <div class="icon">📷</div>
+        <div class="text">
+          <div class="t1">接龙截图OCR导入</div>
+          <div class="t2">拍照/上传微信接龙截图</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="import-option">
+        <div class="icon">✏️</div>
+        <div class="text">
+          <div class="t1">手动录入订单</div>
+          <div class="t2">逐条或批量手动录入</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">导入历史</div>
+      <div class="list-item" style="padding:8px 0;border:none;">
+        <div class="info">
+          <div class="name">Excel导入 · 32条</div>
+          <div class="desc">2026-06-28 14:30</div>
+        </div>
+        <span class="badge badge-green">成功</span>
+      </div>
+      <div class="list-item" style="padding:8px 0;border:none;">
+        <div class="info">
+          <div class="name">OCR导入 · 15条</div>
+          <div class="desc">2026-06-27 09:15</div>
+        </div>
+        <span class="badge badge-green">成功</span>
+      </div>
+    </div>
+  </div>
+  <div class="page-label">③ 订单导入页</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 4. Excel导入预览页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">导入预览</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="section-title" style="margin:0;">解析结果（共32条）</span>
+        <span class="badge badge-green">解析成功</span>
+      </div>
+      <div style="margin-top:8px;overflow-x:auto;">
+        <table class="mini-table">
+          <tr><th>#</th><th>姓名</th><th>商品</th><th>数量</th><th>金额</th></tr>
+          <tr><td>1</td><td>张三</td><td>苹果5斤</td><td>1</td><td>¥25</td></tr>
+          <tr><td>2</td><td>李四</td><td>樱桃2斤</td><td>1</td><td>¥60</td></tr>
+          <tr><td>3</td><td>王五</td><td>香蕉3斤</td><td>2</td><td>¥30</td></tr>
+          <tr><td>4</td><td>赵六</td><td>芒果4斤</td><td>1</td><td>¥45</td></tr>
+          <tr><td>5</td><td>钱七</td><td>葡萄2斤</td><td>1</td><td>¥38</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="background:#f0f9ff;">
+      <div style="font-size:12px;color:#007aff;">💡 已自动识别表头字段映射</div>
+      <div style="font-size:11px;color:#666;margin-top:4px;">姓名→买家姓名 | 手机→手机号 | 金额→小计</div>
+    </div>
+    <div style="padding:10px;">
+      <button class="btn btn-primary" style="width:100%;padding:12px;">确认导入（32条）</button>
+    </div>
+  </div>
+  <div class="page-label">④ Excel导入预览</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 5. OCR导入预览页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">OCR识别结果</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="section-title" style="margin:0;">识别结果</span>
+        <span class="badge badge-orange">3处需确认</span>
+      </div>
+      <div style="margin-top:8px;overflow-x:auto;">
+        <table class="mini-table">
+          <tr><th>姓名</th><th>商品</th><th>数量</th><th>金额</th></tr>
+          <tr><td>张三</td><td>苹果5斤</td><td>1</td><td>¥25</td></tr>
+          <tr style="background:#fff8e1;"><td style="color:#e65100;">张?</td><td>樱桃2斤</td><td>1</td><td>¥60</td></tr>
+          <tr><td>王五</td><td>香蕉3斤</td><td>2</td><td>¥30</td></tr>
+          <tr style="background:#fff8e1;"><td>赵六</td><td style="color:#e65100;">芒?4斤</td><td>1</td><td>¥45</td></tr>
+          <tr style="background:#fff8e1;"><td>钱七</td><td>葡萄2斤</td><td style="color:#e65100;">?</td><td>¥38</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="background:#fff8e1;border:1px solid #ffc107;">
+      <div style="font-size:12px;color:#e65100;">⚠️ 黄色高亮字段为低置信度识别结果</div>
+      <div style="font-size:11px;color:#666;margin-top:4px;">点击高亮字段可手动修正</div>
+    </div>
+    <div style="padding:10px;display:flex;gap:8px;">
+      <button class="btn btn-outline" style="flex:1;">重新识别</button>
+      <button class="btn btn-primary" style="flex:1;">确认导入</button>
+    </div>
+  </div>
+  <div class="page-label">⑤ OCR导入预览</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 6. 手动录入页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">手动录入</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div class="tag-row">
+        <span class="tag active">单条录入</span>
+        <span class="tag">批量录入</span>
+      </div>
+      <div class="form-group">
+        <div class="form-label">买家姓名 *</div>
+        <input class="form-input" placeholder="请输入买家姓名" value="张三">
+      </div>
+      <div class="form-group">
+        <div class="form-label">手机号 *</div>
+        <input class="form-input" placeholder="请输入手机号" value="138****1234">
+      </div>
+      <div class="form-group">
+        <div class="form-label">商品名称 *</div>
+        <input class="form-input" placeholder="请输入商品名称" value="苹果5斤">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div class="form-group" style="flex:1;">
+          <div class="form-label">数量 *</div>
+          <input class="form-input" type="number" value="1">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <div class="form-label">单价(元) *</div>
+          <input class="form-input" type="number" value="25.00">
+        </div>
+      </div>
+      <div style="background:#f0f9ff;padding:8px;border-radius:6px;margin-top:8px;">
+        <span style="font-size:12px;color:#666;">小计：</span>
+        <span style="font-size:16px;font-weight:700;color:#007aff;">¥25.00</span>
+      </div>
+    </div>
+    <div style="padding:10px;">
+      <button class="btn btn-primary" style="width:100%;padding:12px;">保存订单</button>
+    </div>
+  </div>
+  <div class="page-label">⑥ 手动录入</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 7. 收款状态列表 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">收款管理</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="nav-tabs">
+      <div class="nav-tab">全部(32)</div>
+      <div class="nav-tab active">未收款(8)</div>
+      <div class="nav-tab">已收款(24)</div>
+    </div>
+    <div class="list-item">
+      <div class="avatar">👤</div>
+      <div class="info">
+        <div class="name">张三 <span style="font-size:11px;color:#999;">138****1234</span></div>
+        <div class="desc">苹果5斤 × 1 = ¥25</div>
+      </div>
+      <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;">标记收款</button>
+    </div>
+    <div class="list-item">
+      <div class="avatar">👤</div>
+      <div class="info">
+        <div class="name">李四 <span style="font-size:11px;color:#999;">139****5678</span></div>
+        <div class="desc">樱桃2斤 × 1 = ¥60</div>
+      </div>
+      <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;">标记收款</button>
+    </div>
+    <div class="list-item">
+      <div class="avatar">👤</div>
+      <div class="info">
+        <div class="name">王五 <span style="font-size:11px;color:#999;">136****9012</span></div>
+        <div class="desc">香蕉3斤 × 2 = ¥30</div>
+      </div>
+      <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;">标记收款</button>
+    </div>
+    <div style="padding:10px;display:flex;gap:8px;">
+      <button class="btn btn-orange" style="flex:1;font-size:12px;">📋 生成催款文案</button>
+      <button class="btn btn-outline" style="flex:1;font-size:12px;">✓ 批量标记</button>
+    </div>
+  </div>
+  <div class="page-label">⑦ 收款状态列表</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 8. 催款提醒页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">催款提醒</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div class="section-title">未收款用户（8人，合计¥720）</div>
+      <div class="list-item" style="padding:6px 0;border:none;">
+        <div class="info">
+          <div class="name">张三</div>
+          <div class="desc">苹果5斤 ¥25</div>
+        </div>
+        <span class="badge badge-red">¥25</span>
+      </div>
+      <div class="list-item" style="padding:6px 0;border:none;">
+        <div class="info">
+          <div class="name">李四</div>
+          <div class="desc">樱桃2斤 ¥60</div>
+        </div>
+        <span class="badge badge-red">¥60</span>
+      </div>
+      <div class="list-item" style="padding:6px 0;border:none;">
+        <div class="info">
+          <div class="name">王五</div>
+          <div class="desc">香蕉3斤×2 ¥30</div>
+        </div>
+        <span class="badge badge-red">¥30</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">选择催款模板</div>
+      <div class="tag-row">
+        <span class="tag active">按人汇总</span>
+        <span class="tag">按订单明细</span>
+        <span class="tag">温馨提醒</span>
+      </div>
+    </div>
+    <div class="notice-card">
+      <div class="title">📋 催款文案预览</div>
+      <div class="content">
+        各位邻居好！本周水果团购已到货，以下亲还未付款哦～<br>
+        张三：¥25（苹果5斤）<br>
+        李四：¥60（樱桃2斤）<br>
+        王五：¥30（香蕉3斤×2）<br>
+        合计¥720，麻烦尽快微信转账给我，谢谢！🙏
+      </div>
+    </div>
+    <div style="padding:10px;">
+      <button class="btn btn-primary" style="width:100%;padding:12px;">📋 一键复制文案</button>
+    </div>
+  </div>
+  <div class="page-label">⑧ 催款提醒</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 9. 分拣清单页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">分拣清单</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div class="tag-row">
+        <span class="tag active">按供应商</span>
+        <span class="tag">按品类</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">🏪 水果张记（供应商）</div>
+      <table class="mini-table">
+        <tr><th>商品</th><th>数量</th><th>买家数</th></tr>
+        <tr><td>苹果</td><td>15斤</td><td>8人</td></tr>
+        <tr><td>樱桃</td><td>6斤</td><td>4人</td></tr>
+        <tr><td>香蕉</td><td>9斤</td><td>5人</td></tr>
+        <tr><td>芒果</td><td>8斤</td><td>3人</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="section-title">🏪 生鲜李叔（供应商）</div>
+      <table class="mini-table">
+        <tr><th>商品</th><th>数量</th><th>买家数</th></tr>
+        <tr><td>葡萄</td><td>4斤</td><td>3人</td></tr>
+        <tr><td>西瓜</td><td>2个</td><td>2人</td></tr>
+      </table>
+    </div>
+    <div style="padding:10px;display:flex;gap:8px;">
+      <button class="btn btn-outline" style="flex:1;">🏷️ 生成商品标签</button>
+      <button class="btn btn-primary" style="flex:1;">🖨️ 打印清单</button>
+    </div>
+  </div>
+  <div class="page-label">⑨ 分拣清单</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 10. 商品标签页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">商品标签</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div class="section-title">选择标签模板</div>
+      <div class="tag-row">
+        <span class="tag active">58mm小标签</span>
+        <span class="tag">80mm大标签</span>
+        <span class="tag">简易标签</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">标签预览</div>
+      <div class="label-preview">
+        <div class="product">🍎 苹果</div>
+        <div class="detail">数量：5斤</div>
+        <div class="detail">买家：张三</div>
+      </div>
+      <div class="label-preview">
+        <div class="product">🍒 樱桃</div>
+        <div class="detail">数量：2斤</div>
+        <div class="detail">买家：李四</div>
+      </div>
+      <div class="label-preview">
+        <div class="product">🍌 香蕉</div>
+        <div class="detail">数量：3斤</div>
+        <div class="detail">买家：王五</div>
+      </div>
+    </div>
+    <div style="padding:10px;">
+      <div style="font-size:12px;color:#666;text-align:center;margin-bottom:8px;">共32个标签待打印</div>
+      <button class="btn btn-primary" style="width:100%;padding:12px;">🖨️ 连接打印机并打印</button>
+    </div>
+  </div>
+  <div class="page-label">⑩ 商品标签</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 11. 打印预览页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">打印预览</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div class="section-title">打印机状态</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:24px;">🖨️</span>
+        <div>
+          <div style="font-size:13px;font-weight:500;">GP-58MB 已连接</div>
+          <div style="font-size:11px;color:#07c160;">● 蓝牙已连接 · 电量85%</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">打印设置</div>
+      <div style="display:flex;justify-content:space-between;margin:6px 0;font-size:13px;">
+        <span style="color:#666;">纸张尺寸</span><span>58mm × 40mm</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin:6px 0;font-size:13px;">
+        <span style="color:#666;">打印份数</span><span>1份</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin:6px 0;font-size:13px;">
+        <span style="color:#666;">打印内容</span><span>商品标签（32个）</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">预览</div>
+      <div style="border:1px dashed #ccc;padding:12px;text-align:center;background:#fafafa;border-radius:4px;">
+        <div style="font-size:16px;font-weight:600;">🍎 苹果 5斤</div>
+        <div style="font-size:12px;color:#666;margin-top:4px;">买家：张三</div>
+        <div style="border-top:1px dashed #ddd;margin:8px 0;"></div>
+        <div style="font-size:16px;font-weight:600;">🍒 樱桃 2斤</div>
+        <div style="font-size:12px;color:#666;margin-top:4px;">买家：李四</div>
+      </div>
+    </div>
+    <div style="padding:10px;">
+      <button class="btn btn-primary" style="width:100%;padding:12px;">开始打印</button>
+    </div>
+  </div>
+  <div class="page-label">⑪ 打印预览</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 12. 提货通知页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">提货通知</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div class="section-title">通知内容</div>
+      <div style="background:#f8f9fa;padding:10px;border-radius:6px;font-size:12px;line-height:1.6;color:#333;">
+        📢 <b>提货通知</b><br><br>
+        亲爱的邻居，您预订的本周水果团购已到货！<br><br>
+        📦 商品：苹果、樱桃、香蕉等<br>
+        📍 提货地点：幸福小区3号楼一楼大厅<br>
+        ⏰ 提货时间：今天 18:00-20:00<br><br>
+        请准时前来提货，谢谢！
+      </div>
+      <button class="btn btn-outline" style="width:100%;margin-top:8px;font-size:12px;">✏️ 编辑通知内容</button>
+    </div>
+    <div class="card">
+      <div class="section-title">发送范围</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin:4px 0;">
+        <span style="color:#666;">待提货人数</span><span style="font-weight:500;">27人</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin:4px 0;">
+        <span style="color:#666;">已提货人数</span><span style="font-weight:500;color:#07c160;">22人</span>
+      </div>
+    </div>
+    <div style="padding:10px;">
+      <button class="btn btn-primary" style="width:100%;padding:12px;">📢 一键发送提货通知</button>
+    </div>
+    <div class="card" style="background:#f0f9ff;">
+      <div style="font-size:12px;color:#007aff;">✅ 上次发送结果：26人成功，1人未授权</div>
+    </div>
+  </div>
+  <div class="page-label">⑫ 提货通知</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 13. 提货确认页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">提货确认</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="metric-row">
+      <div class="metric" style="border-left:3px solid #ff9500;">
+        <div class="val" style="color:#ff9500;">5</div>
+        <div class="lbl">待提货</div>
+      </div>
+      <div class="metric" style="border-left:3px solid #07c160;">
+        <div class="val" style="color:#07c160;">22</div>
+        <div class="lbl">已提货</div>
+      </div>
+      <div class="metric" style="border-left:3px solid #007aff;">
+        <div class="val" style="color:#007aff;">81%</div>
+        <div class="lbl">完成率</div>
+      </div>
+    </div>
+    <div style="padding:0 10px;">
+      <button class="btn btn-blue" style="width:100%;margin-bottom:8px;">📷 扫码确认提货</button>
+    </div>
+    <div class="card" style="padding:0;">
+      <div style="padding:8px 12px;font-size:13px;font-weight:500;border-bottom:1px solid #f0f0f0;">待提货列表</div>
+      <div class="list-item">
+        <div class="avatar">👤</div>
+        <div class="info">
+          <div class="name">孙八</div>
+          <div class="desc">苹果+樱桃+香蕉</div>
+        </div>
+        <button class="btn btn-primary" style="padding:4px 8px;font-size:11px;">确认</button>
+      </div>
+      <div class="list-item">
+        <div class="avatar">👤</div>
+        <div class="info">
+          <div class="name">周九</div>
+          <div class="desc">芒果+葡萄</div>
+        </div>
+        <button class="btn btn-primary" style="padding:4px 8px;font-size:11px;">确认</button>
+      </div>
+      <div class="list-item">
+        <div class="avatar">👤</div>
+        <div class="info">
+          <div class="name">吴十</div>
+          <div class="desc">西瓜×1</div>
+        </div>
+        <button class="btn btn-primary" style="padding:4px 8px;font-size:11px;">确认</button>
+      </div>
+    </div>
+  </div>
+  <div class="page-label">⑬ 提货确认</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 14. 统计报表页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">统计报表</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card">
+      <div class="tag-row">
+        <span class="tag active">本期</span>
+        <span class="tag">历史趋势</span>
+      </div>
+    </div>
+    <div class="metric-row">
+      <div class="metric">
+        <div class="val">32</div>
+        <div class="lbl">订单总量</div>
+      </div>
+      <div class="metric">
+        <div class="val">¥2,580</div>
+        <div class="lbl">应收总额</div>
+      </div>
+    </div>
+    <div class="metric-row">
+      <div class="metric">
+        <div class="val" style="color:#07c160;">¥1,860</div>
+        <div class="lbl">已收金额</div>
+      </div>
+      <div class="metric">
+        <div class="val" style="color:#ff3b30;">¥720</div>
+        <div class="lbl">未收金额</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">完成率</div>
+      <div style="display:flex;justify-content:space-between;margin:6px 0;font-size:13px;">
+        <span>💰 收款完成率</span><span style="color:#07c160;font-weight:500;">72%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin:6px 0;margin-top:10px;font-size:13px;">
+        <span>📦 提货完成率</span><span style="color:#07c160;font-weight:500;">81%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:81%"></div></div>
+    </div>
+    <div style="padding:10px;">
+      <button class="btn btn-outline" style="width:100%;">📥 导出报表Excel</button>
+    </div>
+  </div>
+  <div class="page-label">⑭ 统计报表</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+<!-- 15. 我的/账户页 -->
+<div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="wx-bar">
+    <span class="dots">···</span>
+    <span class="title">我的</span>
+    <span class="close">○</span>
+  </div>
+  <div class="screen">
+    <div class="card" style="text-align:center;padding:20px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:#e8f5e9;display:inline-flex;align-items:center;justify-content:center;font-size:28px;">😊</div>
+      <div style="font-size:16px;font-weight:600;margin-top:8px;">王团长</div>
+      <div style="font-size:12px;color:#999;">138****8888</div>
+      <div style="margin-top:8px;"><span class="badge badge-green">团长版 · 有效期至2026-12-31</span></div>
+    </div>
+    <div class="card" style="padding:0;">
+      <div class="list-item">
+        <div class="avatar" style="background:#e3f2fd;font-size:14px;">📊</div>
+        <div class="info">
+          <div class="name">套餐与订阅</div>
+          <div class="desc">当前：团长版 ¥29/月</div>
+        </div>
+        <span style="color:#ccc;">›</span>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:#f3e5f5;font-size:14px;">📍</div>
+        <div class="info">
+          <div class="name">提货地址设置</div>
+          <div class="desc">幸福小区3号楼一楼大厅</div>
+        </div>
+        <span style="color:#ccc;">›</span>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:#fff3e0;font-size:14px;">⏰</div>
+        <div class="info">
+          <div class="name">默认提货时间</div>
+          <div class="desc">18:00 - 20:00</div>
+        </div>
+        <span style="color:#ccc;">›</span>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:#e8f5e9;font-size:14px;">🔔</div>
+        <div class="info">
+          <div class="name">消息通知设置</div>
+          <div class="desc">订阅消息、提醒设置</div>
+        </div>
+        <span style="color:#ccc;">›</span>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:#ffebee;font-size:14px;">❓</div>
+        <div class="info">
+          <div class="name">帮助与反馈</div>
+          <div class="desc">使用指南、意见反馈</div>
+        </div>
+        <span style="color:#ccc;">›</span>
+      </div>
+    </div>
+    <div style="padding:10px;">
+      <button class="btn" style="width:100%;background:#f5f5f5;color:#666;">退出登录</button>
+    </div>
+  </div>
+  <div class="page-label">⑮ 我的/账户</div>
+  <div class="home-indicator"></div>
+</div>
+</div>
+
+</div>
+
+<div style="text-align:center;margin-top:30px;color:#999;font-size:12px;">
+  社区团购对账发货助手 · 团长端小程序全站点原型 · V1.0 · 2026-06-28
+</div>
+
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教练工作台 - 健身房私教课消课与续课提醒助手</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --primary: #F97316; --primary-light: #FFF7ED; --primary-dark: #EA580C;
+  --success: #22C55E; --warning: #F59E0B; --danger: #EF4444;
+  --bg: #F8FAFC; --sidebar-bg: #1F2937; --card: #FFFFFF;
+  --text: #0F172A; --text-muted: #64748B; --border: #E2E8F0;
+}
+body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); }
+
+/* Login Page */
+.login-page { display:none; position:fixed; inset:0; background:linear-gradient(135deg,#F97316 0%,#EA580C 100%); z-index:1000; align-items:center; justify-content:center; }
+.login-page.active { display:flex; }
+.login-card { background:#fff; border-radius:16px; padding:48px; width:400px; box-shadow:0 20px 60px rgba(0,0,0,.15); }
+.login-card h1 { font-size:24px; margin-bottom:8px; color:var(--text); }
+.login-card p { color:var(--text-muted); margin-bottom:32px; font-size:14px; }
+.login-card input { width:100%; padding:12px 16px; border:1px solid var(--border); border-radius:8px; margin-bottom:16px; font-size:14px; }
+.login-card input:focus { outline:none; border-color:var(--primary); }
+.login-card .code-row { display:flex; gap:8px; }
+.login-card .code-row input { flex:1; }
+.login-card .code-btn { padding:12px 16px; background:var(--primary-light); color:var(--primary); border:none; border-radius:8px; cursor:pointer; white-space:nowrap; font-size:13px; }
+.login-card .login-btn { width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:500; cursor:pointer; margin-top:8px; transition:background .2s; }
+.login-card .login-btn:hover { background:var(--primary-dark); }
+.login-logo { font-size:48px; text-align:center; margin-bottom:16px; }
+
+/* Layout */
+.app { display:flex; min-height:100vh; }
+.sidebar { width:220px; background:var(--sidebar-bg); color:#fff; padding:20px 0; position:fixed; height:100vh; overflow-y:auto; }
+.sidebar-brand { padding:0 20px 24px; border-bottom:1px solid rgba(255,255,255,.1); margin-bottom:16px; }
+.sidebar-brand h2 { font-size:16px; font-weight:700; color:#fff; }
+.sidebar-brand span { font-size:12px; color:rgba(255,255,255,.6); }
+.nav-item { display:flex; align-items:center; gap:12px; padding:10px 20px; color:rgba(255,255,255,.7); cursor:pointer; transition:all .2s; font-size:14px; border-left:3px solid transparent; }
+.nav-item:hover { background:rgba(255,255,255,.05); color:#fff; }
+.nav-item.active { background:rgba(249,115,22,.15); color:var(--primary); border-left-color:var(--primary); }
+.nav-item svg { width:18px; height:18px; flex-shrink:0; }
+.nav-section { padding:8px 20px; font-size:11px; color:rgba(255,255,255,.4); text-transform:uppercase; margin-top:12px; }
+
+.main { flex:1; margin-left:220px; }
+.topbar { background:#fff; border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:10; }
+.topbar h1 { font-size:18px; font-weight:600; }
+.topbar-right { display:flex; align-items:center; gap:16px; }
+.topbar-right .notif { position:relative; cursor:pointer; }
+.topbar-right .notif-badge { position:absolute; top:-4px; right:-4px; width:16px; height:16px; background:var(--danger); color:#fff; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; }
+.topbar-right .avatar { width:32px; height:32px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:500; cursor:pointer; }
+
+.content { padding:24px 32px; }
+.page { display:none; }
+.page.active { display:block; }
+
+/* Cards */
+.stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+.stat-card { background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); }
+.stat-card .label { font-size:13px; color:var(--text-muted); margin-bottom:8px; }
+.stat-card .value { font-size:28px; font-weight:700; color:var(--text); }
+.stat-card .trend { font-size:12px; color:var(--success); margin-top:4px; }
+.stat-card.highlight { background:var(--primary); color:#fff; }
+.stat-card.highlight .label, .stat-card.highlight .value { color:#fff; }
+
+.card { background:var(--card); border-radius:12px; padding:24px; border:1px solid var(--border); margin-bottom:20px; }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.card-header h3 { font-size:16px; font-weight:600; }
+
+/* Buttons */
+.btn { padding:8px 16px; border-radius:8px; border:none; cursor:pointer; font-size:13px; font-weight:500; transition:all .2s; display:inline-flex; align-items:center; gap:6px; }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-primary:hover { background:var(--primary-dark); }
+.btn-outline { background:#fff; color:var(--text); border:1px solid var(--border); }
+.btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+.btn-danger { background:var(--danger); color:#fff; }
+.btn-success { background:var(--success); color:#fff; }
+.btn-sm { padding:6px 12px; font-size:12px; }
+
+/* Schedule */
+.view-toggle { display:flex; gap:8px; margin-bottom:16px; }
+.view-toggle button { padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer; font-size:13px; }
+.view-toggle button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+.day-timeline { position:relative; }
+.time-slot { display:flex; min-height:60px; border-bottom:1px solid var(--border); }
+.time-label { width:60px; font-size:12px; color:var(--text-muted); padding-top:4px; flex-shrink:0; }
+.slot-content { flex:1; padding:4px 8px; }
+.appt-card { background:var(--primary-light); border-left:3px solid var(--primary); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:box-shadow .2s; }
+.appt-card:hover { box-shadow:0 2px 8px rgba(0,0,0,.08); }
+.appt-info h4 { font-size:14px; font-weight:500; }
+.appt-info span { font-size:12px; color:var(--text-muted); }
+.appt-actions { display:flex; gap:6px; }
+.appt-tag { padding:2px 8px; border-radius:4px; font-size:11px; font-weight:500; }
+.tag-muscle { background:#DBEAFE; color:#1D4ED8; }
+.tag-fat { background:#FEE2E2; color:#DC2626; }
+.tag-yoga { background:#D1FAE5; color:#059669; }
+.tag-rehab { background:#FEF3C7; color:#D97706; }
+
+/* Week view */
+.week-grid { display:grid; grid-template-columns:60px repeat(7,1fr); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.week-header { background:#F8FAFC; padding:10px; text-align:center; font-size:12px; font-weight:500; border-bottom:1px solid var(--border); border-right:1px solid var(--border); }
+.week-time { padding:8px; font-size:11px; color:var(--text-muted); text-align:center; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+.week-cell { padding:4px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); min-height:50px; }
+.week-appt { background:var(--primary-light); border-radius:4px; padding:4px 6px; font-size:11px; margin-bottom:2px; cursor:pointer; }
+
+/* Table */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; padding:12px; font-size:12px; color:var(--text-muted); font-weight:500; background:#F8FAFC; border-bottom:1px solid var(--border); }
+td { padding:12px; font-size:13px; border-bottom:1px solid var(--border); }
+tr:hover td { background:#FAFAFA; }
+.member-name { display:flex; align-items:center; gap:10px; }
+.member-avatar { width:32px; height:32px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+.hours-bar { display:inline-flex; align-items:center; gap:8px; }
+.hours-bar .bar { width:80px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+.hours-bar .bar-fill { height:100%; border-radius:3px; }
+.low-hours { color:var(--danger); font-weight:600; }
+
+/* Profile */
+.profile-header { display:flex; gap:24px; margin-bottom:24px; }
+.profile-avatar { width:80px; height:80px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:600; }
+.profile-info h2 { font-size:20px; margin-bottom:4px; }
+.profile-info p { color:var(--text-muted); font-size:13px; }
+.profile-stats { display:flex; gap:24px; margin-top:12px; }
+.profile-stat { text-align:center; }
+.profile-stat .num { font-size:20px; font-weight:700; color:var(--primary); }
+.profile-stat .lbl { font-size:11px; color:var(--text-muted); }
+.tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:20px; }
+.tab { padding:12px 20px; font-size:14px; cursor:pointer; color:var(--text-muted); border-bottom:2px solid transparent; }
+.tab.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:500; }
+
+/* Package cards */
+.pkg-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.pkg-card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:20px; }
+.pkg-card .pkg-type { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.pkg-card .pkg-type-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.pkg-card h4 { font-size:15px; }
+.pkg-progress { margin:12px 0; }
+.pkg-progress .bar { width:100%; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+.pkg-progress .bar-fill { height:100%; background:var(--primary); border-radius:4px; transition:width .3s; }
+.pkg-progress-info { display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-top:6px; }
+.pkg-card .pkg-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+
+/* Charts */
+.chart-tabs { display:flex; gap:8px; margin-bottom:20px; }
+.chart-tab { padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:#fff; cursor:pointer; font-size:13px; }
+.chart-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.chart-area { height:260px; background:#FAFAFA; border-radius:8px; padding:20px; position:relative; }
+.chart-svg { width:100%; height:100%; }
+
+/* Settings */
+.settings-section { margin-bottom:32px; }
+.settings-section h4 { font-size:14px; font-weight:600; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.setting-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid #F1F5F9; }
+.setting-label { font-size:13px; }
+.setting-label span { display:block; font-size:11px; color:var(--text-muted); margin-top:2px; }
+.setting-control select, .setting-control input { padding:8px 12px; border:1px solid var(--border); border-radius:6px; font-size:13px; }
+.toggle { width:40px; height:22px; background:var(--border); border-radius:11px; position:relative; cursor:pointer; transition:background .2s; }
+.toggle.on { background:var(--primary); }
+.toggle::after { content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; background:#fff; border-radius:50%; transition:left .2s; }
+.toggle.on::after { left:20px; }
+
+/* Modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; align-items:center; justify-content:center; }
+.modal-overlay.active { display:flex; }
+.modal { background:#fff; border-radius:16px; padding:32px; width:440px; max-width:90vw; }
+.modal h3 { font-size:18px; margin-bottom:8px; }
+.modal p { color:var(--text-muted); font-size:13px; margin-bottom:20px; }
+.modal-info { background:var(--primary-light); border-radius:8px; padding:16px; margin-bottom:20px; }
+.modal-info .row { display:flex; justify-content:space-between; padding:4px 0; font-size:13px; }
+.modal-info .row .label { color:var(--text-muted); }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; }
+
+/* Filter bar */
+.filter-bar { display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+.filter-bar input, .filter-bar select { padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:13px; }
+.filter-bar .search-input { flex:1; min-width:200px; }
+
+/* Reminder log */
+.log-item { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid #F1F5F9; }
+.log-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.log-icon.renewal { background:#FEF3C7; color:#D97706; }
+.log-icon.class { background:#DBEAFE; color:#1D4ED8; }
+.log-info { flex:1; }
+.log-info h5 { font-size:13px; margin-bottom:2px; }
+.log-info span { font-size:11px; color:var(--text-muted); }
+.log-status { font-size:11px; padding:2px 8px; border-radius:4px; align-self:center; }
+.log-status.success { background:#D1FAE5; color:#059669; }
+.log-status.failed { background:#FEE2E2; color:#DC2626; }
+
+/* Responsive */
+@media (max-width:1024px) {
+  .stat-row { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Login Page -->
+<div class="login-page active" id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">💪</div>
+    <h1>教练工作台</h1>
+    <p>健身房私教课消课与续课提醒助手</p>
+    <input type="tel" placeholder="手机号" value="13800138000">
+    <div class="code-row">
+      <input type="text" placeholder="验证码" value="123456">
+      <button class="code-btn">获取验证码</button>
+    </div>
+    <button class="login-btn" onclick="doLogin()">登 录</button>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app" style="display:none;">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>💪 教练工作台</h2>
+      <span>FitCoach Pro</span>
+    </div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      课表看板
+    </div>
+    <div class="nav-item" onclick="showPage('members',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      会员管理
+    </div>
+    <div class="nav-item" onclick="showPage('packages',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      课包管理
+    </div>
+    <div class="nav-item" onclick="showPage('training',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      训练进度
+    </div>
+    <div class="nav-item" onclick="showPage('records',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      消课记录
+    </div>
+    <div class="nav-section">设置</div>
+    <div class="nav-item" onclick="showPage('settings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c.26.604.852 1 1.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      提醒设置
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <h1 id="pageTitle">课表看板</h1>
+      <div class="topbar-right">
+        <div class="notif" title="通知">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-badge">3</span>
+        </div>
+        <div class="avatar" title="李教练">李</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Dashboard Page -->
+      <div class="page active" id="page-dashboard">
+        <div class="stat-row">
+          <div class="stat-card highlight">
+            <div class="label">今日课程</div>
+            <div class="value">8</div>
+            <div class="trend" style="color:#fff;">待完成 3 节</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">本周课程</div>
+            <div class="value">32</div>
+            <div class="trend">↑ 12% vs 上周</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">待续课会员</div>
+            <div class="value" style="color:var(--danger);">5</div>
+            <div class="trend" style="color:var(--danger);">需及时跟进</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">本月消课</div>
+            <div class="value">128</div>
+            <div class="trend">↑ 8% vs 上月</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>今日课表 — 2026年6月29日（周日）</h3>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary" onclick="showModal('createApptModal')">+ 创建预约</button>
+            </div>
+          </div>
+          <div class="view-toggle">
+            <button class="active">日视图</button>
+            <button onclick="showPage('dashboard-week',document.querySelectorAll('.nav-item')[0])">周视图</button>
+          </div>
+          <div class="day-timeline">
+            <div class="time-slot">
+              <div class="time-label">09:00</div>
+              <div class="slot-content">
+                <div class="appt-card">
+                  <div class="appt-info">
+                    <h4>张小明 <span class="appt-tag tag-muscle">增肌</span></h4>
+                    <span>09:00 - 10:00 · 剩余12次</span>
+                  </div>
+                  <div class="appt-actions">
+                    <button class="btn btn-success btn-sm" onclick="showModal('consumeModal')">消课</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="time-slot">
+              <div class="time-label">10:00</div>
+              <div class="slot-content">
+                <div class="appt-card">
+                  <div class="appt-info">
+                    <h4>王丽华 <span class="appt-tag tag-fat">减脂</span></h4>
+                    <span>10:00 - 11:00 · 剩余3次</span>
+                  </div>
+                  <div class="appt-actions">
+                    <button class="btn btn-success btn-sm" onclick="showModal('consumeModal2')">消课</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="time-slot">
+              <div class="time-label">14:00</div>
+              <div class="slot-content">
+                <div class="appt-card" style="border-left-color:var(--success);">
+                  <div class="appt-info">
+                    <h4>刘建国 <span class="appt-tag tag-yoga">瑜伽</span></h4>
+                    <span>14:00 - 15:00 · 已完成</span>
+                  </div>
+                  <div class="appt-actions">
+                    <span style="font-size:12px;color:var(--success);">✓ 已消课</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="time-slot">
+              <div class="time-label">15:30</div>
+              <div class="slot-content">
+                <div class="appt-card">
+                  <div class="appt-info">
+                    <h4>陈美玲 <span class="appt-tag tag-muscle">增肌</span></h4>
+                    <span>15:30 - 16:30 · 剩余8次</span>
+                  </div>
+                  <div class="appt-actions">
+                    <button class="btn btn-success btn-sm" onclick="showModal('consumeModal3')">消课</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="time-slot">
+              <div class="time-label">17:00</div>
+              <div class="slot-content">
+                <div class="appt-card" style="border-left-color:var(--warning);">
+                  <div class="appt-info">
+                    <h4>赵强 <span class="appt-tag tag-rehab">康复</span></h4>
+                    <span>17:00 - 18:00 · 待确认</span>
+                  </div>
+                  <div class="appt-actions">
+                    <button class="btn btn-outline btn-sm">确认</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Members Page -->
+      <div class="page" id="page-members">
+        <div class="filter-bar">
+          <input class="search-input" placeholder="🔍 搜索会员姓名或手机号">
+          <select><option>全部课程类型</option><option>增肌</option><option>减脂</option><option>瑜伽</option><option>康复</option></select>
+          <select><option>全部状态</option><option>课时充足</option><option>课时预警</option></select>
+          <button class="btn btn-primary">+ 新增会员</button>
+          <button class="btn btn-outline">批量导入</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>会员</th><th>手机号</th><th>课程类型</th><th>剩余课时</th><th>最近上课</th><th>操作</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="member-name"><div class="member-avatar">张</div>张小明</div></td>
+                  <td>138****1234</td>
+                  <td><span class="appt-tag tag-muscle">增肌</span></td>
+                  <td><div class="hours-bar"><div class="bar"><div class="bar-fill" style="width:60%;background:var(--success);"></div></div>12次</div></td>
+                  <td>今天 09:00</td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showPage('profile',document.querySelectorAll('.nav-item')[1])">档案</button></td>
+                </tr>
+                <tr>
+                  <td><div class="member-name"><div class="member-avatar">王</div>王丽华</div></td>
+                  <td>139****5678</td>
+                  <td><span class="appt-tag tag-fat">减脂</span></td>
+                  <td><div class="hours-bar"><div class="bar"><div class="bar-fill" style="width:15%;background:var(--danger);"></div></div><span class="low-hours">3次 ⚠️</span></div></td>
+                  <td>今天 10:00</td>
+                  <td><button class="btn btn-outline btn-sm">档案</button></td>
+                </tr>
+                <tr>
+                  <td><div class="member-name"><div class="member-avatar">刘</div>刘建国</div></td>
+                  <td>136****9012</td>
+                  <td><span class="appt-tag tag-yoga">瑜伽</span></td>
+                  <td><div class="hours-bar"><div class="bar"><div class="bar-fill" style="width:80%;background:var(--success);"></div></div>16次</div></td>
+                  <td>今天 14:00</td>
+                  <td><button class="btn btn-outline btn-sm">档案</button></td>
+                </tr>
+                <tr>
+                  <td><div class="member-name"><div class="member-avatar">陈</div>陈美玲</div></td>
+                  <td>137****3456</td>
+                  <td><span class="appt-tag tag-muscle">增肌</span></td>
+                  <td><div class="hours-bar"><div class="bar"><div class="bar-fill" style="width:40%;background:var(--primary);"></div></div>8次</div></td>
+                  <td>今天 15:30</td>
+                  <td><button class="btn btn-outline btn-sm">档案</button></td>
+                </tr>
+                <tr>
+                  <td><div class="member-name"><div class="member-avatar">赵</div>赵强</div></td>
+                  <td>135****7890</td>
+                  <td><span class="appt-tag tag-rehab">康复</span></td>
+                  <td><div class="hours-bar"><div class="bar"><div class="bar-fill" style="width:25%;background:var(--warning);"></div></div>5次</div></td>
+                  <td>昨天 17:00</td>
+                  <td><button class="btn btn-outline btn-sm">档案</button></td>
+                </tr>
+                <tr>
+                  <td><div class="member-name"><div class="member-avatar">孙</div>孙晓燕</div></td>
+                  <td>158****2345</td>
+                  <td><span class="appt-tag tag-fat">减脂</span></td>
+                  <td><div class="hours-bar"><div class="bar"><div class="bar-fill" style="width:10%;background:var(--danger);"></div></div><span class="low-hours">2次 ⚠️</span></div></td>
+                  <td>3天前</td>
+                  <td><button class="btn btn-outline btn-sm">档案</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Page -->
+      <div class="page" id="page-profile">
+        <div class="profile-header">
+          <div class="profile-avatar">张</div>
+          <div class="profile-info">
+            <h2>张小明</h2>
+            <p>📱 138****1234 · 男 · 28岁 · 健身目标：增肌塑形</p>
+            <div class="profile-stats">
+              <div class="profile-stat"><div class="num">20</div><div class="lbl">总课时</div></div>
+              <div class="profile-stat"><div class="num">8</div><div class="lbl">已消课时</div></div>
+              <div class="profile-stat"><div class="num" style="color:var(--primary);">12</div><div class="lbl">剩余课时</div></div>
+              <div class="profile-stat"><div class="num">32</div><div class="lbl">累计上课</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active">课包信息</div>
+          <div class="tab">消课记录</div>
+          <div class="tab">训练进度</div>
+        </div>
+        <div class="pkg-grid">
+          <div class="pkg-card">
+            <div class="pkg-type">
+              <div class="pkg-type-icon" style="background:#DBEAFE;">🏋️</div>
+              <div><h4>增肌课包</h4><span style="font-size:11px;color:var(--text-muted);">2026.05.01 - 2026.11.01</span></div>
+            </div>
+            <div class="pkg-progress">
+              <div class="bar"><div class="bar-fill" style="width:60%;"></div></div>
+              <div class="pkg-progress-info"><span>已消 8次 / 总20次</span><span>剩余12次</span></div>
+            </div>
+            <div class="pkg-footer"><span style="font-size:12px;color:var(--success);">● 进行中</span><button class="btn btn-outline btn-sm">查看详情</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Packages Page -->
+      <div class="page" id="page-packages">
+        <div class="filter-bar">
+          <input class="search-input" placeholder="🔍 搜索会员">
+          <select><option>全部类型</option><option>增肌</option><option>减脂</option><option>瑜伽</option><option>康复</option></select>
+          <select><option>全部状态</option><option>进行中</option><option>即将过期</option><option>已用完</option></select>
+          <button class="btn btn-primary" onclick="showModal('createPkgModal')">+ 创建课包</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>全部课包</h3></div>
+          <div class="pkg-grid">
+            <div class="pkg-card">
+              <div class="pkg-type">
+                <div class="pkg-type-icon" style="background:#DBEAFE;">🏋️</div>
+                <div><h4>张小明 · 增肌课包</h4><span style="font-size:11px;color:var(--text-muted);">至 2026.11.01</span></div>
+              </div>
+              <div class="pkg-progress">
+                <div class="bar"><div class="bar-fill" style="width:60%;"></div></div>
+                <div class="pkg-progress-info"><span>8/20 已消</span><span>剩余12次</span></div>
+              </div>
+              <div class="pkg-footer"><span style="font-size:12px;color:var(--success);">● 进行中</span><div><button class="btn btn-outline btn-sm">续期</button></div></div>
+            </div>
+            <div class="pkg-card">
+              <div class="pkg-type">
+                <div class="pkg-type-icon" style="background:#FEE2E2;">🔥</div>
+                <div><h4>王丽华 · 减脂课包</h4><span style="font-size:11px;color:var(--text-muted);">至 2026.09.15</span></div>
+              </div>
+              <div class="pkg-progress">
+                <div class="bar"><div class="bar-fill" style="width:85%;background:var(--danger);"></div></div>
+                <div class="pkg-progress-info"><span>17/20 已消</span><span class="low-hours">剩余3次 ⚠️</span></div>
+              </div>
+              <div class="pkg-footer"><span style="font-size:12px;color:var(--danger);">● 课时不足</span><div><button class="btn btn-primary btn-sm">发起续课</button></div></div>
+            </div>
+            <div class="pkg-card">
+              <div class="pkg-type">
+                <div class="pkg-type-icon" style="background:#D1FAE5;">🧘</div>
+                <div><h4>刘建国 · 瑜伽课包</h4><span style="font-size:11px;color:var(--text-muted);">至 2026.12.31</span></div>
+              </div>
+              <div class="pkg-progress">
+                <div class="bar"><div class="bar-fill" style="width:20%;"></div></div>
+                <div class="pkg-progress-info"><span>4/20 已消</span><span>剩余16次</span></div>
+              </div>
+              <div class="pkg-footer"><span style="font-size:12px;color:var(--success);">● 进行中</span><div><button class="btn btn-outline btn-sm">续期</button></div></div>
+            </div>
+            <div class="pkg-card">
+              <div class="pkg-type">
+                <div class="pkg-type-icon" style="background:#FEF3C7;">💆</div>
+                <div><h4>赵强 · 康复课包</h4><span style="font-size:11px;color:var(--text-muted);">至 2026.08.20</span></div>
+              </div>
+              <div class="pkg-progress">
+                <div class="bar"><div class="bar-fill" style="width:75%;"></div></div>
+                <div class="pkg-progress-info"><span>15/20 已消</span><span>剩余5次</span></div>
+              </div>
+              <div class="pkg-footer"><span style="font-size:12px;color:var(--warning);">● 即将到期</span><div><button class="btn btn-outline btn-sm">续期</button></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Training Page -->
+      <div class="page" id="page-training">
+        <div class="filter-bar">
+          <select><option>张小明</option><option>王丽华</option><option>刘建国</option></select>
+          <button class="btn btn-primary">+ 录入数据</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>训练数据趋势</h3></div>
+          <div class="chart-tabs">
+            <div class="chart-tab active">体重</div>
+            <div class="chart-tab">体脂率</div>
+            <div class="chart-tab">力量</div>
+            <div class="chart-tab">围度</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button class="btn btn-outline btn-sm">近7天</button>
+            <button class="btn btn-primary btn-sm">近30天</button>
+            <button class="btn btn-outline btn-sm">近3月</button>
+            <button class="btn btn-outline btn-sm">全部</button>
+          </div>
+          <div class="chart-area">
+            <svg class="chart-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
+              <defs><linearGradient id="grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F97316" stop-opacity="0.3"/><stop offset="100%" stop-color="#F97316" stop-opacity="0"/></linearGradient></defs>
+              <polyline fill="none" stroke="#F97316" stroke-width="2" points="0,120 60,115 120,118 180,105 240,100 300,95 360,88 420,85 480,80 540,78 600,75"/>
+              <polygon fill="url(#grad)" points="0,120 60,115 120,118 180,105 240,100 300,95 360,88 420,85 480,80 540,78 600,75 600,200 0,200"/>
+              <g fill="#F97316"><circle cx="0" cy="120" r="3"/><circle cx="120" cy="118" r="3"/><circle cx="240" cy="100" r="3"/><circle cx="360" cy="88" r="3"/><circle cx="480" cy="80" r="3"/><circle cx="600" cy="75" r="3"/></g>
+            </svg>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px;">
+            <div class="stat-card" style="padding:12px;"><div class="label" style="font-size:11px;">起始体重</div><div class="value" style="font-size:20px;">75.0 kg</div></div>
+            <div class="stat-card" style="padding:12px;"><div class="label" style="font-size:11px;">当前体重</div><div class="value" style="font-size:20px;">72.5 kg</div></div>
+            <div class="stat-card" style="padding:12px;"><div class="label" style="font-size:11px;">变化量</div><div class="value" style="font-size:20px;color:var(--success);">-2.5 kg</div></div>
+            <div class="stat-card" style="padding:12px;"><div class="label" style="font-size:11px;">目标体重</div><div class="value" style="font-size:20px;">70.0 kg</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Records Page -->
+      <div class="page" id="page-records">
+        <div class="filter-bar">
+          <input type="date" value="2026-06-01">
+          <span style="color:var(--text-muted);font-size:13px;">至</span>
+          <input type="date" value="2026-06-29">
+          <select><option>全部会员</option><option>张小明</option><option>王丽华</option></select>
+          <select><option>全部类型</option><option>增肌</option><option>减脂</option></select>
+          <button class="btn btn-outline">导出 Excel</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>时间</th><th>会员</th><th>课程类型</th><th>扣减</th><th>消课前剩余</th><th>消课后剩余</th><th>备注</th></tr></thead>
+              <tbody>
+                <tr><td>06-29 14:00</td><td>刘建国</td><td><span class="appt-tag tag-yoga">瑜伽</span></td><td>1次</td><td>17次</td><td>16次</td><td>柔韧性训练，表现良好</td></tr>
+                <tr><td>06-28 18:00</td><td>赵强</td><td><span class="appt-tag tag-rehab">康复</span></td><td>1次</td><td>6次</td><td>5次</td><td>腰部康复拉伸</td></tr>
+                <tr><td>06-28 10:00</td><td>王丽华</td><td><span class="appt-tag tag-fat">减脂</span></td><td>1次</td><td>4次</td><td>3次</td><td>HIIT+有氧，燃脂效果好</td></tr>
+                <tr><td>06-27 15:00</td><td>陈美玲</td><td><span class="appt-tag tag-muscle">增肌</span></td><td>1次</td><td>9次</td><td>8次</td><td>上肢力量训练</td></tr>
+                <tr><td>06-27 09:00</td><td>张小明</td><td><span class="appt-tag tag-muscle">增肌</span></td><td>1次</td><td>9次</td><td>8次</td><td>胸部+三头训练，卧推突破</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div class="page" id="page-settings">
+        <div class="card">
+          <div class="card-header"><h3>续课提醒配置</h3></div>
+          <div class="settings-section">
+            <div class="setting-row">
+              <div class="setting-label">课时阈值<span>剩余课时低于此值时触发续课提醒</span></div>
+              <div class="setting-control"><input type="number" value="5" style="width:80px;"> 次</div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">提醒方式<span>选择推送渠道</span></div>
+              <div class="setting-control"><select><option>微信 + 短信</option><option>仅微信</option><option>仅短信</option></select></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">提醒频率<span>避免过度打扰会员</span></div>
+              <div class="setting-control"><select><option>仅首次触发</option><option>每日提醒</option><option>间隔提醒（3天）</option></select></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>上课提醒配置</h3></div>
+          <div class="settings-section">
+            <div class="setting-row">
+              <div class="setting-label">课前提醒时间<span>上课前多久推送提醒</span></div>
+              <div class="setting-control"><select><option>15分钟</option><option>30分钟</option><option>1小时</option><option selected>2小时</option></select></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">上课确认机制<span>会员可确认出席或请假</span></div>
+              <div class="setting-control"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>提醒日志</h3></div>
+          <div class="log-item"><div class="log-icon renewal">⏰</div><div class="log-info"><h5>续课提醒 → 王丽华</h5><span>减脂课包剩余3次 · 微信+短信</span></div><span class="log-status success">已送达</span></div>
+          <div class="log-item"><div class="log-icon class">📅</div><div class="log-info"><h5>上课提醒 → 张小明</h5><span>今日09:00 增肌课 · 课前2小时</span></div><span class="log-status success">已送达</span></div>
+          <div class="log-item"><div class="log-icon renewal">⏰</div><div class="log-info"><h5>续课提醒 → 孙晓燕</h5><span>减脂课包剩余2次 · 微信+短信</span></div><span class="log-status success">已送达</span></div>
+          <div class="log-item"><div class="log-icon class">📅</div><div class="log-info"><h5>上课提醒 → 赵强</h5><span>昨日17:00 康复课 · 课前2小时</span></div><span class="log-status failed">发送失败</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Consume Modal -->
+<div class="modal-overlay" id="consumeModal">
+  <div class="modal">
+    <h3>确认消课</h3>
+    <p>请核实以下信息，确认后自动扣减会员课时</p>
+    <div class="modal-info">
+      <div class="row"><span class="label">会员姓名</span><span>张小明</span></div>
+      <div class="row"><span class="label">课程类型</span><span>增肌</span></div>
+      <div class="row"><span class="label">本次扣减</span><span>1 次</span></div>
+      <div class="row"><span class="label">消课前剩余</span><span>12 次</span></div>
+      <div class="row"><span class="label">消课后剩余</span><span style="font-weight:600;color:var(--primary);">11 次</span></div>
+    </div>
+    <div style="margin-bottom:16px;"><label style="font-size:13px;display:block;margin-bottom:4px;">训练备注（可选）</label><textarea style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;resize:vertical;min-height:60px;" placeholder="记录本次训练内容和完成情况..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideModal('consumeModal')">取消</button>
+      <button class="btn btn-success" onclick="hideModal('consumeModal')">✓ 确认消课</button>
+    </div>
+  </div>
+</div>
+
+<!-- Consume Modal 2 (low hours) -->
+<div class="modal-overlay" id="consumeModal2">
+  <div class="modal">
+    <h3>确认消课</h3>
+    <p>请核实以下信息</p>
+    <div class="modal-info">
+      <div class="row"><span class="label">会员姓名</span><span>王丽华</span></div>
+      <div class="row"><span class="label">课程类型</span><span>减脂</span></div>
+      <div class="row"><span class="label">本次扣减</span><span>1 次</span></div>
+      <div class="row"><span class="label">消课前剩余</span><span>3 次</span></div>
+      <div class="row"><span class="label">消课后剩余</span><span style="font-weight:600;color:var(--danger);">2 次 ⚠️</span></div>
+    </div>
+    <div style="background:#FEF3C7;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:#92400E;">⚠️ 消课后剩余课时将低于阈值（5次），系统将自动发送续课提醒给会员</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideModal('consumeModal2')">取消</button>
+      <button class="btn btn-success" onclick="hideModal('consumeModal2')">✓ 确认消课</button>
+    </div>
+  </div>
+</div>
+
+<!-- Consume Modal 3 -->
+<div class="modal-overlay" id="consumeModal3">
+  <div class="modal">
+    <h3>确认消课</h3>
+    <p>请核实以下信息</p>
+    <div class="modal-info">
+      <div class="row"><span class="label">会员姓名</span><span>陈美玲</span></div>
+      <div class="row"><span class="label">课程类型</span><span>增肌</span></div>
+      <div class="row"><span class="label">本次扣减</span><span>1 次</span></div>
+      <div class="row"><span class="label">消课前剩余</span><span>8 次</span></div>
+      <div class="row"><span class="label">消课后剩余</span><span style="font-weight:600;color:var(--primary);">7 次</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideModal('consumeModal3')">取消</button>
+      <button class="btn btn-success" onclick="hideModal('consumeModal3')">✓ 确认消课</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Appointment Modal -->
+<div class="modal-overlay" id="createApptModal">
+  <div class="modal">
+    <h3>创建预约</h3>
+    <p>选择会员、课程类型和时间</p>
+    <div style="margin-bottom:12px;"><label style="font-size:13px;display:block;margin-bottom:4px;">选择会员</label><select style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"><option>张小明（剩余12次）</option><option>王丽华（剩余3次）</option><option>刘建国（剩余16次）</option></select></div>
+    <div style="margin-bottom:12px;"><label style="font-size:13px;display:block;margin-bottom:4px;">课程类型</label><select style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"><option>增肌</option><option>减脂</option><option>瑜伽</option><option>康复</option></select></div>
+    <div style="margin-bottom:12px;"><label style="font-size:13px;display:block;margin-bottom:4px;">日期</label><input type="date" value="2026-06-29" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"></div>
+    <div style="margin-bottom:16px;"><label style="font-size:13px;display:block;margin-bottom:4px;">时间段</label><select style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"><option>09:00 - 10:00</option><option>10:00 - 11:00</option><option>14:00 - 15:00</option><option>15:30 - 16:30</option></select></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideModal('createApptModal')">取消</button>
+      <button class="btn btn-primary" onclick="hideModal('createApptModal')">确认预约</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Package Modal -->
+<div class="modal-overlay" id="createPkgModal">
+  <div class="modal">
+    <h3>创建课包</h3>
+    <p>为会员创建新的私教课包</p>
+    <div style="margin-bottom:12px;"><label style="font-size:13px;display:block;margin-bottom:4px;">选择会员</label><select style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"><option>张小明</option><option>王丽华</option><option>刘建国</option></select></div>
+    <div style="margin-bottom:12px;"><label style="font-size:13px;display:block;margin-bottom:4px;">课程类型</label><select style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"><option>增肌</option><option>减脂</option><option>瑜伽</option><option>康复</option><option>综合</option></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><label style="font-size:13px;display:block;margin-bottom:4px;">总课时</label><input type="number" value="20" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"></div>
+      <div><label style="font-size:13px;display:block;margin-bottom:4px;">单价（元/课时）</label><input type="number" value="300" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"></div>
+    </div>
+    <div style="margin-bottom:12px;"><label style="font-size:13px;display:block;margin-bottom:4px;">快速模板</label><div style="display:flex;gap:6px;flex-wrap:wrap;"><span style="padding:4px 10px;background:var(--primary-light);color:var(--primary);border-radius:12px;font-size:12px;cursor:pointer;">10次增肌</span><span style="padding:4px 10px;background:var(--primary-light);color:var(--primary);border-radius:12px;font-size:12px;cursor:pointer;">20次减脂</span><span style="padding:4px 10px;background:var(--primary-light);color:var(--primary);border-radius:12px;font-size:12px;cursor:pointer;">30次瑜伽</span></div></div>
+    <div style="margin-bottom:16px;"><label style="font-size:13px;display:block;margin-bottom:4px;">有效期</label><div style="display:flex;gap:8px;"><input type="date" value="2026-06-29" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"><span style="align-self:center;color:var(--text-muted);">至</span><input type="date" value="2026-12-29" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;"></div></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideModal('createPkgModal')">取消</button>
+      <button class="btn btn-primary" onclick="hideModal('createPkgModal')">创建课包</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function doLogin() {
+  document.getElementById('loginPage').classList.remove('active');
+  document.getElementById('app').style.display = 'flex';
+}
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  if (el && el.classList.contains('nav-item')) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+  }
+  const titles = {dashboard:'课表看板','dashboard-week':'课表看板',members:'会员管理',profile:'会员档案',packages:'课包管理',training:'训练进度',records:'消课记录',settings:'提醒设置'};
+  document.getElementById('pageTitle').textContent = titles[id] || '课表看板';
+}
+function showModal(id) { document.getElementById(id).classList.add('active'); }
+function hideModal(id) { document.getElementById(id).classList.remove('active'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+});
+</script>
+</body>
+</html>

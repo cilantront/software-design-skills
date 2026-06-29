@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户端 H5 - 报价验收一体化 - 宫格展示</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .page-header {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        .page-header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .page-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+        @media (max-width: 1600px) {
+            .grid-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 1200px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 800px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        .phone-wrapper {
+            background: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        .phone-wrapper:hover {
+            transform: translateY(-5px);
+        }
+        .phone-label {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 12px;
+            padding: 6px 12px;
+            background: #f0f4ff;
+            border-radius: 8px;
+        }
+        .phone-screen {
+            width: 375px;
+            height: 750px;
+            margin: 0 auto;
+            background: #f5f5f5;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        .phone-content {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #fff;
+        }
+        .phone-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .phone-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 2px;
+        }
+
+        /* 状态栏 */
+        .status-header {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563eb 100%);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        .status-header.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .status-header.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .status-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 10px;
+        }
+        .status-header h2 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        .status-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* 服务方信息 */
+        .provider-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .provider-avatar {
+            width: 40px;
+            height: 40px;
+            background: #3B82F6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .provider-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .provider-title {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        /* 文档主体 */
+        .doc-body {
+            padding: 16px;
+        }
+        .doc-section {
+            margin-bottom: 20px;
+        }
+        .doc-section-title {
+            font-size: 10px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .doc-number {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .doc-number span:first-child {
+            color: #6b7280;
+        }
+        .doc-number span:last-child {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        /* 报价项目 */
+        .item-list {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .item-row {
+            padding: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .item-row:last-child {
+            border-bottom: none;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4px;
+        }
+        .item-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111827;
+        }
+        .item-amount {
+            font-size: 13px;
+            font-weight: 600;
+            color: #3B82F6;
+        }
+        .item-desc {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+        .item-meta {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        /* 总价 */
+        .total-section {
+            background: #f9fafb;
+            padding: 14px;
+            border-radius: 6px;
+            margin-top: 12px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .total-row.main {
+            padding-top: 10px;
+            margin-top: 6px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .total-row.main .amount {
+            color: #3B82F6;
+            font-size: 18px;
+        }
+
+        /* 付款条款 */
+        .terms-section {
+            background: #fef3c7;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #92400e;
+            line-height: 1.6;
+        }
+        .terms-section strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .btn {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn-primary {
+            background: #3B82F6;
+            color: #fff;
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .btn-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .btn-success {
+            background: #10b981;
+            color: #fff;
+        }
+
+        /* 签名板 */
+        .signature-area {
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 10px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 12px 0;
+            position: relative;
+        }
+        .signature-placeholder {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        /* 验收页 - 交付物 */
+        .deliverable-item {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .deliverable-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .deliverable-name {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .deliverable-icon {
+            width: 28px;
+            height: 28px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .deliverable-meta {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            padding-left: 34px;
+        }
+        .verify-actions {
+            display: flex;
+            gap: 6px;
+            padding-left: 34px;
+        }
+        .verify-btn {
+            flex: 1;
+            padding: 6px;
+            border-radius: 5px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .verify-btn.pass.selected {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+        .verify-btn.fail.selected {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+        }
+        .feedback-input {
+            margin-top: 6px;
+            padding: 6px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 12px;
+            width: calc(100% - 34px);
+            margin-left: 34px;
+        }
+
+        /* 进度指示 */
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .progress-step::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+        .progress-step:last-child::after {
+            display: none;
+        }
+        .progress-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 4px;
+            position: relative;
+            z-index: 1;
+        }
+        .progress-step.active .progress-dot {
+            background: #3B82F6;
+            color: #fff;
+        }
+        .progress-step.done .progress-dot {
+            background: #10b981;
+            color: #fff;
+        }
+        .progress-step.done::after {
+            background: #10b981;
+        }
+        .progress-label {
+            font-size: 9px;
+            color: #6b7280;
+        }
+        .progress-step.active .progress-label {
+            color: #3B82F6;
+            font-weight: 600;
+        }
+
+        /* 回执页 */
+        .receipt-card {
+            margin: 16px;
+            padding: 20px;
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .receipt-info {
+            text-align: left;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 12px;
+        }
+        .receipt-row span:first-child {
+            color: #6b7280;
+        }
+        .receipt-row span:last-child {
+            color: #111827;
+            font-weight: 500;
+        }
+
+        /* 付款页 */
+        .payment-info {
+            background: #eff6ff;
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .payment-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3B82F6;
+            margin-bottom: 4px;
+        }
+        .payment-deadline {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .account-info {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .account-info p {
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        .account-info strong {
+            color: #111827;
+        }
+
+        /* 表单 */
+        .form-group {
+            margin-top: 12px;
+        }
+        .form-group label {
+            font-size: 12px;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        /* 提示信息 */
+        .info-box {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .info-blue {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+        .info-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            background: #f3f4f6;
+            border-radius: 6px;
+            height: 5px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: #3B82F6;
+        }
+
+        /* 按钮组 */
+        .button-group {
+            display: flex;
+            gap: 6px;
+            padding-left: 34px;
+        }
+        .button-group button {
+            padding: 5px 8px;
+            font-size: 11px;
+            border-radius: 5px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1>💼 报价验收一体化 - 客户端视图</h1>
+        <p>自由职业者报价验收全流程原型展示</p>
+    </div>
+
+    <div class="grid-container">
+        <!-- 第1屏：查看报价单 -->
+        <div class="phone-wrapper">
+            <div class="phone-label">📄 1. 查看报价单</div>
+            <div class="phone-screen">
+                <div class="phone-content">
+                    <div class="status-header">
+                        <div class="status-icon">📄</div>
+                        <h2>报价单详情</h2>
+                        <p>请仔细查看后确认</p>
+                    </div>
+                    <div class="provider-info">
+                        <div class="provider-avatar">王</div>
+                        <div>
+                            <div class="provider-name">王小明</div>
+                            <div class="provider-title">独立设计师 · 10年UI/UX设计经验</div>
+                        </div>
+                    </div>
+                    <div class="doc-body">
+                        <div class="doc-section">
+                            <div class="doc-number">
+                                <span>报价编号</span>
+                                <span>QT-2026-015</span>
+                            </div>
+                            <div class="doc-number">
+                                <span>报价日期</span>
+                                <span>2026-06-27</span>
+                            </div>
+                            <div class="doc-number">
+                                <span>有效期至</span>
+                                <span style="color:#f59e0b;">2026-07-27（剩余 28 天）</span>
+                            </div>
+                        </div>
+                        <div class="doc-section">
+                            <div class="doc-section-title">服务项明细</div>
+                            <div class="item-list">
+                                <div class="item-row">
+                                    <div class="item-header">
+                                        <span class="item-name">UI 界面设计</span>
+                                        <span class="item-amount">¥8,000</span>
+                                    </div>
+                                    <div class="item-desc">APP 全部界面设计（含 10 个核心页面）</div>
+                                    <div class="item-meta">10 天 × ¥800/天</div>
+                                </div>
+                                <div class="item-row">
+                                    <div class="item-header">
+                                        <span class="item-name">交互原型</span>
+                                        <span class="item-amount">¥3,000</span>
+                                    </div>
+                                    <div class="item-desc">高保真交互原型</div>
+                                    <div class="item-meta">1 项 × ¥3,000</div>
+                                </div>
+                                <div class="item-row">
+                                    <div class="item-header">
+                                        <span class="item-name">切图输出</span>
+                                        <span class="item-amount">¥2,000</span>
+                                    </div>
+                                    <div class="item-desc">iOS + Android 双端切图</div>
+                                    <div class="item-meta">1 项 × ¥2,000</div>
+                                </div>
+                            </div>
+                            <div class="total-section">
+                                <div class="total-row main">
+                                    <span>总计</span>
+                                    <span class="amount">¥13,000.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="doc-section">
+                            <div class="doc-section-title">付款条款</div>
+                            <div class="terms-section">
+                                <strong>付款方式</strong>
+                                · 预付 50%：¥6,500.00（项目启动时支付）<br>
+                                · 尾款：¥6,500.00（验收通过后 30 天内结清）<br>
+                                · 逾期按每日 0.05% 收取滞纳金
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">✅ 确认报价并签名</button>
+                        <button class="btn btn-secondary">💬 提出修改意见</button>
+                        <button class="btn btn-danger">❌ 拒绝报价</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第2屏：签名确认 -->
+        <div class="phone-wrapper">
+            <div class="phone-label">✍️ 2. 签名确认</div>
+            <div class="phone-screen">
+                <div class="phone-content">
+                    <div class="status-header">
+                        <div class="status-icon">✍️</div>
+                        <h2>签名确认报价</h2>
+                        <p>请在下方签名板上签名</p>
+                    </div>
+                    <div class="doc-body">
+                        <p style="font-size:12px;color:#6b7280;margin-bottom:10px;">
+                            我已阅读并同意报价单内容，确认以签名作为电子凭证。签名将记录时间戳和 IP 地址。
+                        </p>
+                        <div style="background:#f9fafb;padding:12px;border-radius:6px;margin-bottom:14px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span style="font-size:11px;color:#6b7280;">报价金额</span>
+                                <span style="font-size:13px;font-weight:600;">¥13,000.00</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span style="font-size:11px;color:#6b7280;">预付款</span>
+                                <span style="font-size:13px;font-weight:600;">¥6,500.00</span>
+                            </div>
+                        </div>
+                        <div class="doc-section-title">手写签名</div>
+                        <div class="signature-area">
+                            <span class="signature-placeholder">在此处签名</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+                            <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;">🔄 清除重写</button>
+                            <span style="font-size:10px;color:#9ca3af;">支持手指/鼠标/触控笔</span>
+                        </div>
+                        <div class="form-group">
+                            <label>签名人姓名</label>
+                            <input type="text" value="张三" placeholder="请输入姓名">
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">提交签名并确认</button>
+                        <button class="btn btn-secondary">返回修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第3屏：报价确认回执 -->
+        <div class="phone-wrapper">
+            <div class="phone-label">✅ 3. 报价确认回执</div>
+            <div class="phone-screen">
+                <div class="phone-content">
+                    <div class="status-header success">
+                        <div class="status-icon">✅</div>
+                        <h2>报价已确认</h2>
+                        <p>感谢您的确认，项目即将启动</p>
+                    </div>
+                    <div class="doc-body">
+                        <div class="receipt-card">
+                            <div style="font-size:40px;margin-bottom:6px;">🎉</div>
+                            <h3 style="font-size:16px;margin-bottom:4px;">确认成功</h3>
+                            <p style="font-size:12px;color:#6b7280;">服务方已收到您的确认</p>
+                        </div>
+                        <div class="receipt-info">
+                            <div class="receipt-row">
+                                <span>报价编号</span>
+                                <span>QT-2026-015</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>确认金额</span>
+                                <span style="color:#3B82F6;font-weight:700;">¥13,000.00</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>确认时间</span>
+                                <span>2026-06-29 10:30:15</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>签名人</span>
+                                <span>张三</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>签名 IP</span>
+                                <span>192.168.1.***</span>
+                            </div>
+                        </div>
+                        <div class="info-blue" style="margin:14px 16px;">
+                            <p><strong>下一步：</strong>服务方将在 1-2 个工作日内启动项目，请关注后续验收通知。</p>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">📥 下载确认凭证</button>
+                        <button class="btn btn-secondary">返回主页</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第4屏：验收清单 -->
+        <div class="phone-wrapper">
+            <div class="phone-label">📦 4. 验收清单</div>
+            <div class="phone-screen">
+                <div class="phone-content">
+                    <div class="progress-indicator">
+                        <div class="progress-step done">
+                            <div class="progress-dot">✓</div>
+                            <div class="progress-label">报价确认</div>
+                        </div>
+                        <div class="progress-step done">
+                            <div class="progress-dot">✓</div>
+                            <div class="progress-label">项目交付</div>
+                        </div>
+                        <div class="progress-step active">
+                            <div class="progress-dot">3</div>
+                            <div class="progress-label">验收交付物</div>
+                        </div>
+                        <div class="progress-step">
+                            <div class="progress-dot">4</div>
+                            <div class="progress-label">付款</div>
+                        </div>
+                    </div>
+                    <div class="status-header">
+                        <div class="status-icon">📦</div>
+                        <h2>验收清单</h2>
+                        <p>请逐项查看并确认交付物</p>
+                    </div>
+                    <div class="provider-info">
+                        <div class="provider-avatar">王</div>
+                        <div>
+                            <div class="provider-name">王小明 · 品牌 VI 设计</div>
+                            <div class="provider-title">提交时间：2026-06-28 · 共 4 项交付物</div>
+                        </div>
+                    </div>
+                    <div class="doc-body">
+                        <div class="doc-section">
+                            <div class="doc-section-title">交付物列表</div>
+                            <div class="deliverable-item">
+                                <div class="deliverable-header">
+                                    <div class="deliverable-name">
+                                        <div class="deliverable-icon">🎨</div>
+                                        <div>
+                                            <div style="font-weight:600;">Logo 主视觉</div>
+                                            <div style="font-size:10px;color:#9ca3af;">logo_main.png · 2.3 MB</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="button-group">
+                                    <button>预览</button>
+                                    <button>下载</button>
+                                </div>
+                            </div>
+                            <div class="deliverable-item">
+                                <div class="deliverable-header">
+                                    <div class="deliverable-name">
+                                        <div class="deliverable-icon">📄</div>
+                                        <div>
+                                            <div style="font-weight:600;">VI 规范手册</div>
+                                            <div style="font-size:10px;color:#9ca3af;">vi_manual.pdf · 8.5 MB</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="button-group">
+                                    <button>预览</button>
+                                    <button>下载</button>
+                                </div>
+                            </div>
+                            <div class="deliverable-item">
+                                <div class="deliverable-header">
+                                    <div class="deliverable-name">
+                                        <div class="deliverable-icon">🎨</div>
+                                        <div>
+                                            <div style="font-weight:600;">应用物料设计</div>
+                                            <div style="font-size:10px;color:#9ca3af;">application.zip · 15.2 MB</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="button-group">
+                                    <button>预览</button>
+                                    <button>下载</button>
+                                </div>
+                            </div>
+                            <div class="deliverable-item">
+                                <div class="deliverable-header">
+                                    <div class="deliverable-name">
+                                        <div class="deliverable-icon">📁</div>
+                                        <div>
+                                            <div style="font-weight:600;">源文件包</div>
+                                            <div style="font-size:10px;color:#9ca3af;">source_files.ai · 45.6 MB</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="button-group">
+                                    <button>预览</button>
+                                    <button>下载</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" style="width:100%;margin-top:10px;font-size:12px;">📥 打包下载全部</button>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">开始逐项验收</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第5屏：逐项验收 -->
+        <div class="phone-wrapper">
+            <div class="phone-label">✓ 5. 逐项验收</div>
+            <div class="phone-screen">
+                <div class="phone-content">
+                    <div class="status-header">
+                        <div class="status-icon">✓</div>
+                        <h2>逐项验收</h2>
+                        <p>对每项交付物标记通过或不通过</p>
+                    </div>
+                    <div class="doc-body">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+                            <span style="font-size:12px;color:#6b7280;">验收进度</span>
+                            <span style="font-size:12px;font-weight:600;color:#3B82F6;">3 / 4 已确认</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" style="width:75%;"></div>
+                        </div>
+                        <div class="deliverable-item" style="border-color:#10b981;">
+                            <div class="deliverable-header">
+                                <div class="deliverable-name">
+                                    <div class="deliverable-icon" style="background:#d1fae5;color:#065f46;">✓</div>
+                                    <div>
+                                        <div style="font-weight:600;">Logo 主视觉</div>
+                                        <div style="font-size:10px;color:#10b981;font-weight:500;">已通过</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="verify-actions">
+                                <button class="verify-btn pass selected">✓ 通过</button>
+                                <button class="verify-btn fail">✗ 不通过</button>
+                            </div>
+                        </div>
+                        <div class="deliverable-item" style="border-color:#10b981;">
+                            <div class="deliverable-header">
+                                <div class="deliverable-name">
+                                    <div class="deliverable-icon" style="background:#d1fae5;color:#065f46;">✓</div>
+                                    <div>
+                                        <div style="font-weight:600;">VI 规范手册</div>
+                                        <div style="font-size:10px;color:#10b981;font-weight:500;">已通过</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="verify-actions">
+                                <button class="verify-btn pass selected">✓ 通过</button>
+                                <button class="verify-btn fail">✗ 不通过</button>
+                            </div>
+                        </div>
+                        <div class="deliverable-item" style="border-color:#10b981;">
+                            <div class="deliverable-header">
+                                <div class="deliverable-name">
+                                    <div class="deliverable-icon" style="background:#d1fae5;color:#065f46;">✓</div>
+                                    <div>
+                                        <div style="font-weight:600;">应用物料设计</div>
+                                        <div style="font-size:10px;color:#10b981;font-weight:500;">已通过</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="verify-actions">
+                                <button class="verify-btn pass selected">✓ 通过</button>
+                                <button class="verify-btn fail">✗ 不通过</button>
+                            </div>
+                        </div>
+                        <div class="deliverable-item" style="border-color:#ef4444;">
+                            <div class="deliverable-header">
+                                <div class="deliverable-name">
+                                    <div class="deliverable-icon" style="background:#fee2e2;color:#991b1b;">✗</div>
+                                    <div>
+                                        <div style="font-weight:600;">源文件包</div>
+                                        <div style="font-size:10px;color:#ef4444;font-weight:500;">不通过</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="verify-actions">
+                                <button class="verify-btn pass">✓ 通过</button>
+                                <button class="verify-btn fail selected">✗ 不通过</button>
+                            </div>
+                            <textarea class="feedback-input" style="height:50px;">源文件未包含字体文件，请补充后重新提交</textarea>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" style="background:#9ca3af;font-size:12px;">全部确认后才能提交</button>
+                        <button class="btn btn-secondary">保存草稿</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第6屏：签署验收单 -->
+        <div class="phone-wrapper">
+            <div class="phone-label">✍️ 6. 签署验收单</div>
+            <div class="phone-screen">
+                <div class="phone-content">
+                    <div class="status-header">
+                        <div class="status-icon">✍️</div>
+                        <h2>签署验收单</h2>
+                        <p>所有项目已通过，请签名确认验收</p>
+                    </div>
+                    <div class="doc-body">
+                        <div class="info-green">
+                            <p><strong>✓ 全部交付物已通过验收</strong><br>
+                            签名确认后，项目将进入付款阶段。</p>
+                        </div>
+                        <div style="background:#f9fafb;padding:12px;border-radius:6px;margin-bottom:14px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span style="font-size:12px;color:#6b7280;">项目名称</span>
+                                <span style="font-size:12px;font-weight:600;">品牌 VI 设计</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span style="font-size:12px;color:#6b7280;">验收金额</span>
+                                <span style="font-size:12px;font-weight:600;color:#3B82F6;">¥18,000.00</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span style="font-size:12px;color:#6b7280;">待付尾款</span>
+                                <span style="font-size:12px;font-weight:600;color:#f59e0b;">¥9,000.00</span>
+                            </div>
+                        </div>
+                        <div class="doc-section-title">手写签名</div>
+                        <div class="signature-area">
+                            <span class="signature-placeholder">在此处签名</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+                            <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;">🔄 清除重写</button>
+                            <span style="font-size:10px;color:#9ca3af;">签名即代表验收通过</span>
+                        </div>
+                        <div class="form-group">
+                            <label>签名人姓名</label>
+                            <input type="text" value="张三" placeholder="请输入姓名">
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">提交验收并签名</button>
+                        <button class="btn btn-secondary">返回修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第7屏：验收回执 -->
+        <div class="phone-wrapper">
+            <div class="phone-label">✅ 7. 验收回执</div>
+            <div class="phone-screen">
+                <div class="phone-content">
+                    <div class="status-header success">
+                        <div class="status-icon">✅</div>
+                        <h2>验收已通过</h2>
+                        <p>项目进入付款阶段</p>
+                    </div>
+                    <div class="doc-body">
+                        <div class="receipt-card">
+                            <div style="font-size:40px;margin-bottom:6px;">🎉</div>
+                            <h3 style="font-size:16px;margin-bottom:4px;">验收成功</h3>
+                            <p style="font-size:12px;color:#6b7280;">服务方已收到您的验收确认</p>
+                        </div>
+                        <div class="receipt-info">
+                            <div class="receipt-row">
+                                <span>验收单号</span>
+                                <span>ACC-2026-008</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>项目</span>
+                                <span>品牌 VI 设计</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>验收金额</span>
+                                <span style="color:#3B82F6;font-weight:700;">¥18,000.00</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>待付尾款</span>
+                                <span style="color:#f59e0b;font-weight:700;">¥9,000.00</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>付款期限</span>
+                                <span>2026-07-29 前</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>签名人</span>
+                                <span>张三</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>签名时间</span>
+                                <span>2026-06-29 14:20:30</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">前往付款</button>
+                        <button class="btn btn-secondary">📥 下载验收凭证</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第8屏：付款确认 -->
+        <div class="phone-wrapper">
+            <div class="phone-label">💰 8. 付款确认</div>
+            <div class="phone-screen">
+                <div class="phone-content">
+                    <div class="progress-indicator">
+                        <div class="progress-step done">
+                            <div class="progress-dot">✓</div>
+                            <div class="progress-label">报价确认</div>
+                        </div>
+                        <div class="progress-step done">
+                            <div class="progress-dot">✓</div>
+                            <div class="progress-label">项目交付</div>
+                        </div>
+                        <div class="progress-step done">
+                            <div class="progress-dot">✓</div>
+                            <div class="progress-label">验收完成</div>
+                        </div>
+                        <div class="progress-step active">
+                            <div class="progress-dot">4</div>
+                            <div class="progress-label">付款</div>
+                        </div>
+                    </div>
+                    <div class="status-header warning">
+                        <div class="status-icon">💰</div>
+                        <h2>待付款</h2>
+                        <p>请在期限前完成付款</p>
+                    </div>
+                    <div class="doc-body">
+                        <div class="payment-info">
+                            <div class="payment-amount">¥9,000.00</div>
+                            <div class="payment-deadline">付款截止：2026-07-29（剩余 30 天）</div>
+                        </div>
+                        <div class="doc-section">
+                            <div class="doc-section-title">收款账户信息</div>
+                            <div class="account-info">
+                                <p><strong>户名：</strong>王小明</p>
+                                <p><strong>开户行：</strong>招商银行</p>
+                                <p><strong>账号：</strong>6225 **** **** 1234</p>
+                                <p style="font-size:10px;color:#6b7280;margin-top:6px;">
+                                    请备注项目名称"品牌VI设计-尾款"以便识别
+                                </p>
+                            </div>
+                        </div>
+                        <div class="doc-section">
+                            <div class="doc-section-title">付款记录</div>
+                            <div style="padding:12px;background:#f9fafb;border-radius:6px;">
+                                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                    <span style="font-size:12px;color:#6b7280;">已付预付款</span>
+                                    <span style="font-size:12px;font-weight:600;color:#10b981;">¥9,000.00 ✓</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span style="font-size:12px;color:#6b7280;">待付尾款</span>
+                                    <span style="font-size:12px;font-weight:600;color:#f59e0b;">¥9,000.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>付款凭证（可选）</label>
+                            <div style="border:2px dashed #d1d5db;border-radius:6px;padding:16px;text-align:center;color:#9ca3af;cursor:pointer;font-size:12px;">
+                                📎 点击上传转账截图
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-success">✅ 我已完成付款</button>
+                        <button class="btn btn-secondary">联系服务方</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

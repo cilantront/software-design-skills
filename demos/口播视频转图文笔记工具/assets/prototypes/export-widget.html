@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导出功能组件原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 24px; }
+.container { max-width: 700px; margin: 0 auto; }
+.card { background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+h2 { font-size: 18px; color: #333; margin-bottom: 8px; }
+.subtitle { font-size: 13px; color: #999; margin-bottom: 24px; }
+.success-banner { display: flex; align-items: center; gap: 12px; padding: 16px; background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; margin-bottom: 24px; }
+.success-icon { font-size: 24px; }
+.success-text { font-size: 14px; color: #333; }
+.success-sub { font-size: 12px; color: #52c41a; }
+.export-formats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.format-card { padding: 20px 16px; border: 2px solid #eee; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.format-card:hover { border-color: #667eea; background: #fafbff; }
+.format-card.selected { border-color: #667eea; background: #f0f3ff; }
+.format-icon { font-size: 28px; margin-bottom: 8px; }
+.format-name { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 4px; }
+.format-desc { font-size: 11px; color: #999; }
+.action-buttons { display: flex; gap: 12px; margin-bottom: 24px; }
+.btn { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; font-weight: 500; }
+.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.btn-copy { background: #f5f5f5; color: #333; border: 1px solid #ddd; }
+.btn:hover { opacity: 0.9; }
+.batch-section { border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px; }
+.batch-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.batch-title { font-size: 14px; font-weight: 500; color: #333; }
+.batch-badge { padding: 2px 8px; background: #fff7e6; color: #fa8c16; font-size: 11px; border-radius: 4px; }
+.batch-list { }
+.batch-item { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 6px; }
+.batch-check { width: 18px; height: 18px; border: 2px solid #d9d9d9; border-radius: 4px; cursor: pointer; }
+.batch-check.checked { background: #667eea; border-color: #667eea; }
+.batch-name { flex: 1; font-size: 13px; color: #333; }
+.batch-platform { font-size: 11px; padding: 2px 8px; background: #f5f5f5; border-radius: 4px; color: #666; }
+.batch-download { padding: 10px 24px; background: #667eea; color: #fff; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<h2>📦 导出图文内容</h2>
+<p class="subtitle">选择导出格式，将排版好的内容导出或复制</p>
+
+<div class="success-banner">
+  <div class="success-icon">✅</div>
+  <div>
+    <div class="success-text">内容已准备就绪</div>
+    <div class="success-sub">小红书 · 已排版完成 · 含3张配图标记</div>
+  </div>
+</div>
+
+<div class="export-formats">
+  <div class="format-card selected">
+    <div class="format-icon">📝</div>
+    <div class="format-name">Markdown</div>
+    <div class="format-desc">便于复制到各平台</div>
+  </div>
+  <div class="format-card">
+    <div class="format-icon">📄</div>
+    <div class="format-name">富文本</div>
+    <div class="format-desc">保留格式直接粘贴</div>
+  </div>
+  <div class="format-card">
+    <div class="format-icon">🌐</div>
+    <div class="format-name">HTML</div>
+    <div class="format-desc">适合网站部署</div>
+  </div>
+  <div class="format-card">
+    <div class="format-icon">📕</div>
+    <div class="format-name">PDF</div>
+    <div class="format-desc">便于归档分享</div>
+  </div>
+  <div class="format-card">
+    <div class="format-icon">📋</div>
+    <div class="format-name">一键复制</div>
+    <div class="format-desc">复制到剪贴板</div>
+  </div>
+  <div class="format-card">
+    <div class="format-icon">📦</div>
+    <div class="format-name">批量ZIP</div>
+    <div class="format-desc">打包下载多个</div>
+  </div>
+</div>
+
+<div class="action-buttons">
+  <button class="btn btn-copy">📋 复制到剪贴板</button>
+  <button class="btn btn-primary">⬇️ 下载 Markdown 文件</button>
+</div>
+
+<div class="batch-section">
+  <div class="batch-header">
+    <span class="batch-title">批量导出</span>
+    <span class="batch-badge">Pro版功能</span>
+  </div>
+  <div class="batch-list">
+    <div class="batch-item">
+      <div class="batch-check checked"></div>
+      <span class="batch-name">知识分享_第12期.mp4 → 小红书笔记</span>
+      <span class="batch-platform">📕 小红书</span>
+    </div>
+    <div class="batch-item">
+      <div class="batch-check checked"></div>
+      <span class="batch-name">知识分享_第12期.mp4 → 公众号文章</span>
+      <span class="batch-platform">📱 公众号</span>
+    </div>
+    <div class="batch-item">
+      <div class="batch-check checked"></div>
+      <span class="batch-name">产品解读_完整版.mov → 知乎回答</span>
+      <span class="batch-platform">💡 知乎</span>
+    </div>
+    <div class="batch-item">
+      <div class="batch-check"></div>
+      <span class="batch-name">课程精华_第3讲.mp4 → 小红书笔记</span>
+      <span class="batch-platform">📕 小红书</span>
+    </div>
+  </div>
+  <div style="text-align:right; margin-top:12px;">
+    <button class="batch-download">📦 打包下载 3 个文件 (ZIP)</button>
+  </div>
+</div>
+
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户端 WEB - 全站点原型</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        .prototype-frame {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: 240px;
+            background: #1f2937;
+            color: #fff;
+            padding: 24px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sidebar-logo {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid #374151;
+            margin-bottom: 16px;
+        }
+        .sidebar-logo h2 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .sidebar-logo p {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        .nav-section {
+            margin-bottom: 24px;
+        }
+        .nav-section-title {
+            padding: 0 24px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .nav-item {
+            padding: 10px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #d1d5db;
+        }
+        .nav-item:hover {
+            background: #374151;
+            color: #fff;
+        }
+        .nav-item.active {
+            background: #3B82F6;
+            color: #fff;
+        }
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            background: currentColor;
+            opacity: 0.6;
+            border-radius: 3px;
+        }
+        .main-area {
+            margin-left: 240px;
+            flex: 1;
+            min-height: 100vh;
+        }
+        .top-bar {
+            background: #fff;
+            padding: 16px 32px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .top-bar h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: #3B82F6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+        }
+        .content {
+            padding: 32px;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .stat-change {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .stat-change.positive { color: #10b981; }
+        .stat-change.negative { color: #ef4444; }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+        }
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #3B82F6;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .table td {
+            padding: 12px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .table tr:hover {
+            background: #f9fafb;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-draft { background: #f3f4f6; color: #374151; }
+        .badge-sent { background: #dbeafe; color: #1d4ed8; }
+        .badge-accepted { background: #d1fae5; color: #065f46; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .template-card {
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .template-card:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+        }
+        .template-preview {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .template-info {
+            padding: 16px;
+        }
+        .template-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .template-info p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+        .chart-placeholder {
+            height: 300px;
+            background: #f9fafb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .plan-card {
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .plan-card.current {
+            border-color: #3B82F6;
+            background: #eff6ff;
+        }
+        .plan-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .plan-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: #3B82F6;
+            margin-bottom: 16px;
+        }
+        .plan-price span {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+        .plan-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+        .plan-features li {
+            padding: 8px 0;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .plan-features li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: 600;
+        }
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="prototype-frame">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <h2>报价单生成器</h2>
+                <p>自由职业者效率工具</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">主菜单</div>
+                <div class="nav-item active" onclick="showPage('dashboard')">
+                    <div class="nav-icon"></div>
+                    <span>主工作台</span>
+                </div>
+                <div class="nav-item" onclick="showPage('templates')">
+                    <div class="nav-icon"></div>
+                    <span>模板中心</span>
+                </div>
+                <div class="nav-item" onclick="showPage('customers')">
+                    <div class="nav-icon"></div>
+                    <span>客户管理</span>
+                </div>
+                <div class="nav-item" onclick="showPage('analytics')">
+                    <div class="nav-icon"></div>
+                    <span>数据看板</span>
+                </div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">账户</div>
+                <div class="nav-item" onclick="showPage('subscription')">
+                    <div class="nav-icon"></div>
+                    <span>订阅管理</span>
+                </div>
+                <div class="nav-item" onclick="showPage('settings')">
+                    <div class="nav-icon"></div>
+                    <span>个人设置</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="top-bar">
+                <h1 id="page-title">主工作台</h1>
+                <div class="user-info">
+                    <span>王小明</span>
+                    <div class="user-avatar">王</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- 主工作台 -->
+                <div class="page active" id="page-dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">本月报价单</div>
+                            <div class="stat-value">12</div>
+                            <div class="stat-change positive">↑ 20% vs 上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">待处理</div>
+                            <div class="stat-value">3</div>
+                            <div class="stat-change">份报价单待确认</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">本月成交</div>
+                            <div class="stat-value">¥48,500</div>
+                            <div class="stat-change positive">↑ 15% vs 上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">剩余额度</div>
+                            <div class="stat-value">无限</div>
+                            <div class="stat-change">专业版</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>最近报价单</h3>
+                            <button class="btn btn-primary" onclick="showPage('templates')">+ 新建报价单</button>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>报价编号</th>
+                                        <th>客户</th>
+                                        <th>金额</th>
+                                        <th>状态</th>
+                                        <th>创建日期</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>QT-2026-012</td>
+                                        <td>张三 - 设计工作室</td>
+                                        <td>¥15,264</td>
+                                        <td><span class="status-badge badge-accepted">已接受</span></td>
+                                        <td>2026-06-25</td>
+                                        <td><button class="btn btn-secondary">查看</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>QT-2026-011</td>
+                                        <td>李四 - 科技公司</td>
+                                        <td>¥28,000</td>
+                                        <td><span class="status-badge badge-sent">已发送</span></td>
+                                        <td>2026-06-23</td>
+                                        <td><button class="btn btn-secondary">查看</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>QT-2026-010</td>
+                                        <td>王五 - 摄影工作室</td>
+                                        <td>¥8,500</td>
+                                        <td><span class="status-badge badge-draft">草稿</span></td>
+                                        <td>2026-06-20</td>
+                                        <td><button class="btn btn-secondary">编辑</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>QT-2026-009</td>
+                                        <td>赵六 - 咨询公司</td>
+                                        <td>¥12,000</td>
+                                        <td><span class="status-badge badge-rejected">已拒绝</span></td>
+                                        <td>2026-06-18</td>
+                                        <td><button class="btn btn-secondary">查看</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>QT-2026-008</td>
+                                        <td>孙七 - 电商平台</td>
+                                        <td>¥35,000</td>
+                                        <td><span class="status-badge badge-accepted">已接受</span></td>
+                                        <td>2026-06-15</td>
+                                        <td><button class="btn btn-secondary">查看</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模板中心 -->
+                <div class="page" id="page-templates">
+                    <div class="search-bar">
+                        <input type="text" placeholder="搜索模板...">
+                        <button class="btn btn-primary">搜索</button>
+                    </div>
+                    <div style="margin-bottom: 20px; display: flex; gap: 12px;">
+                        <button class="btn btn-primary">全部</button>
+                        <button class="btn btn-secondary">设计类</button>
+                        <button class="btn btn-secondary">开发类</button>
+                        <button class="btn btn-secondary">摄影类</button>
+                        <button class="btn btn-secondary">咨询类</button>
+                    </div>
+                    <div class="template-grid">
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">设计模板 A</div>
+                            <div class="template-info">
+                                <h4>简约设计报价单</h4>
+                                <p>适用于 UI/UX 设计、平面设计等项目</p>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">设计模板 B</div>
+                            <div class="template-info">
+                                <h4>创意设计报价单</h4>
+                                <p>适用于品牌设计、视觉创意等项目</p>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">开发模板 A</div>
+                            <div class="template-info">
+                                <h4>技术开发报价单</h4>
+                                <p>适用于网站开发、APP 开发等项目</p>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">开发模板 B</div>
+                            <div class="template-info">
+                                <h4>系统开发报价单</h4>
+                                <p>适用于企业系统、后台开发等项目</p>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">摄影模板 A</div>
+                            <div class="template-info">
+                                <h4>商业摄影报价单</h4>
+                                <p>适用于商业拍摄、产品摄影等项目</p>
+                            </div>
+                        </div>
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">咨询模板 A</div>
+                            <div class="template-info">
+                                <h4>专业咨询报价单</h4>
+                                <p>适用于管理咨询、技术咨询等项目</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 客户管理 -->
+                <div class="page" id="page-customers">
+                    <div class="search-bar">
+                        <input type="text" placeholder="搜索客户名称、公司、邮箱...">
+                        <button class="btn btn-primary">+ 新建客户</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>客户名称</th>
+                                        <th>公司</th>
+                                        <th>联系方式</th>
+                                        <th>历史报价</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>张三</strong></td>
+                                        <td>设计工作室</td>
+                                        <td>138****1234</td>
+                                        <td>5 份</td>
+                                        <td>
+                                            <button class="btn btn-secondary">查看</button>
+                                            <button class="btn btn-secondary">编辑</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>李四</strong></td>
+                                        <td>科技公司</td>
+                                        <td>139****5678</td>
+                                        <td>3 份</td>
+                                        <td>
+                                            <button class="btn btn-secondary">查看</button>
+                                            <button class="btn btn-secondary">编辑</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>王五</strong></td>
+                                        <td>摄影工作室</td>
+                                        <td>136****9012</td>
+                                        <td>2 份</td>
+                                        <td>
+                                            <button class="btn btn-secondary">查看</button>
+                                            <button class="btn btn-secondary">编辑</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>赵六</strong></td>
+                                        <td>咨询公司</td>
+                                        <td>137****3456</td>
+                                        <td>1 份</td>
+                                        <td>
+                                            <button class="btn btn-secondary">查看</button>
+                                            <button class="btn btn-secondary">编辑</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据看板 -->
+                <div class="page" id="page-analytics">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">报价接受率</div>
+                            <div class="stat-value">68%</div>
+                            <div class="stat-change positive">↑ 5% vs 上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">平均利润率</div>
+                            <div class="stat-value">42%</div>
+                            <div class="stat-change positive">↑ 3% vs 上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">累计报价金额</div>
+                            <div class="stat-value">¥285K</div>
+                            <div class="stat-change positive">↑ 12% vs 上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">已成交金额</div>
+                            <div class="stat-value">¥194K</div>
+                            <div class="stat-change positive">↑ 8% vs 上月</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>月度报价趋势</h3>
+                            <button class="btn btn-secondary">导出报告</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-placeholder">
+                                📊 折线图：近 12 个月报价数量、金额、接受率趋势
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>项目类型分布</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-placeholder">
+                                    🥧 饼图：设计/开发/摄影/咨询占比
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>客户集中度</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-placeholder">
+                                    📊 柱状图：Top 客户贡献金额
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 订阅管理 -->
+                <div class="page" id="page-subscription">
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <h2>当前订阅：专业版</h2>
+                        <p style="color: #6b7280; margin-top: 8px;">到期日：2027-06-28 · 剩余额度：无限</p>
+                    </div>
+
+                    <div class="plans-grid">
+                        <div class="plan-card">
+                            <h3>免费版</h3>
+                            <div class="plan-price">¥0<span>/月</span></div>
+                            <ul class="plan-features">
+                                <li>每月 3 份报价单</li>
+                                <li>基础模板</li>
+                                <li>PDF 导出</li>
+                                <li>链接分享</li>
+                            </ul>
+                            <button class="btn btn-secondary" style="width: 100%;">降级到免费版</button>
+                        </div>
+                        <div class="plan-card current">
+                            <h3>专业版 ✨</h3>
+                            <div class="plan-price">¥19<span>/月</span></div>
+                            <ul class="plan-features">
+                                <li>无限报价单</li>
+                                <li>全部模板</li>
+                                <li>客户管理</li>
+                                <li>品牌定制</li>
+                                <li>数据分析</li>
+                                <li>多币种支持</li>
+                                <li>邮件发送</li>
+                            </ul>
+                            <button class="btn btn-primary" style="width: 100%;">当前方案</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 个人设置 -->
+                <div class="page" id="page-settings">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>个人信息</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">姓名</label>
+                                <input type="text" class="form-input" value="王小明">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">手机号</label>
+                                <input type="text" class="form-input" value="138****1234">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">邮箱</label>
+                                <input type="email" class="form-input" value="wangxm@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">所在行业</label>
+                                <select class="form-select">
+                                    <option>设计</option>
+                                    <option selected>开发</option>
+                                    <option>摄影</option>
+                                    <option>咨询</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary">保存修改</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+
+            const titles = {
+                dashboard: '主工作台',
+                templates: '模板中心',
+                customers: '客户管理',
+                analytics: '数据看板',
+                subscription: '订阅管理',
+                settings: '个人设置'
+            };
+            document.getElementById('page-title').textContent = titles[pageId] || pageId;
+
+            event.target.closest('.nav-item').classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小作坊生产订单排期助手 — 工人端原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; padding: 40px 20px; }
+h1 { text-align: center; font-size: 24px; margin-bottom: 8px; color: #333; }
+.subtitle { text-align: center; font-size: 14px; color: #999; margin-bottom: 40px; }
+.phone-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; max-width: 1400px; margin: 0 auto; }
+.phone-label { text-align: center; font-size: 14px; color: #666; margin-bottom: 12px; font-weight: 500; }
+
+/* Phone Frame */
+.phone-frame {
+  width: 280px; height: 560px;
+  background: #000;
+  border-radius: 36px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  margin: 0 auto;
+  position: relative;
+}
+.phone-frame::before {
+  content: '';
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 100px; height: 24px;
+  background: #000; border-radius: 0 0 16px 16px;
+  z-index: 10;
+}
+.phone-screen {
+  width: 100%; height: 100%;
+  background: #f5f5f5;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* WeChat-style top bar */
+.wx-topbar {
+  height: 44px; background: #ededed;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 16px; position: relative;
+  border-bottom: 1px solid #d9d9d9;
+}
+.wx-topbar .title { font-size: 15px; font-weight: 600; color: #333; }
+.wx-topbar .back { position: absolute; left: 12px; font-size: 18px; color: #333; }
+.wx-topbar .dots { position: absolute; right: 12px; font-size: 16px; color: #666; }
+
+/* Status bar */
+.status-bar {
+  height: 24px; background: #ededed;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; font-size: 10px; color: #333;
+}
+
+/* Content area */
+.screen-content { height: calc(100% - 68px); overflow-y: auto; background: #f5f5f5; }
+
+/* Task Card */
+.task-card {
+  background: #fff; margin: 8px; border-radius: 10px;
+  padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.task-card .card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.task-card .card-title { font-size: 15px; font-weight: 600; color: #333; }
+.task-card .card-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.status-producing { background: #e6f7ff; color: #1890ff; }
+.status-scheduled { background: #f5f5f5; color: #666; }
+.status-overdue { background: #fff1f0; color: #f5222d; }
+.task-card .card-info { font-size: 13px; color: #666; line-height: 1.6; }
+.task-card .card-info span { color: #999; margin-right: 4px; }
+.task-card .card-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+.big-btn {
+  flex: 1; padding: 12px; border-radius: 8px; border: none;
+  font-size: 15px; font-weight: 500; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.big-btn-primary { background: #1890ff; color: #fff; }
+.big-btn-success { background: #52c41a; color: #fff; }
+.big-btn-warning { background: #fa8c16; color: #fff; }
+.big-btn-outline { background: #fff; color: #666; border: 1px solid #d9d9d9; }
+
+/* Process Steps */
+.process-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.step-tag { font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+.step-done { background: #f6ffed; color: #52c41a; }
+.step-current { background: #e6f7ff; color: #1890ff; font-weight: 600; }
+.step-todo { background: #f5f5f5; color: #999; }
+
+/* Header bar for task list */
+.section-header {
+  padding: 12px 16px 8px;
+  font-size: 12px; color: #999; font-weight: 500;
+}
+
+/* Overdue banner */
+.overdue-banner {
+  background: #fff1f0; margin: 8px; border-radius: 8px;
+  padding: 10px 12px; display: flex; align-items: center; gap: 8px;
+  border: 1px solid #ffa39e;
+}
+.overdue-banner .icon { font-size: 18px; }
+.overdue-banner .text { font-size: 13px; color: #f5222d; font-weight: 500; }
+
+/* Task Detail Screen */
+.detail-section { background: #fff; margin: 8px; border-radius: 10px; padding: 14px; }
+.detail-section h4 { font-size: 13px; color: #999; margin-bottom: 8px; }
+.detail-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid #f5f5f5; }
+.detail-row:last-child { border: none; }
+.detail-row .label { color: #999; }
+.detail-row .value { color: #333; font-weight: 500; }
+.progress-section { margin-top: 12px; }
+.progress-label { font-size: 13px; color: #666; margin-bottom: 6px; }
+.progress-track { height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: #1890ff; border-radius: 4px; }
+
+/* Exception Report */
+.exception-options { padding: 12px; }
+.exception-option {
+  background: #fff; border-radius: 10px; padding: 16px;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+  border: 2px solid transparent; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.exception-option.selected { border-color: #fa8c16; background: #fff7e6; }
+.exception-option .icon { font-size: 28px; }
+.exception-option .info .title { font-size: 15px; font-weight: 500; }
+.exception-option .info .desc { font-size: 12px; color: #999; margin-top: 2px; }
+.text-area {
+  margin: 8px 12px; background: #fff; border-radius: 10px; padding: 12px;
+  min-height: 80px;
+}
+.text-area .placeholder { font-size: 14px; color: #bbb; }
+
+/* History Screen */
+.history-item {
+  background: #fff; margin: 6px 8px; border-radius: 8px;
+  padding: 12px; display: flex; justify-content: space-between; align-items: center;
+}
+.history-item .info .title { font-size: 14px; font-weight: 500; }
+.history-item .info .meta { font-size: 12px; color: #999; margin-top: 4px; }
+.history-item .result { text-align: right; }
+.history-item .result .status { font-size: 12px; color: #52c41a; font-weight: 500; }
+.history-item .result .date { font-size: 11px; color: #999; margin-top: 2px; }
+
+/* Tab bar */
+.tab-bar {
+  height: 50px; background: #fff;
+  border-top: 1px solid #e8e8e8;
+  display: flex; align-items: center; justify-content: space-around;
+  position: absolute; bottom: 0; left: 0; right: 0;
+}
+.tab-item { text-align: center; }
+.tab-item .icon { font-size: 18px; }
+.tab-item .label { font-size: 10px; color: #999; }
+.tab-item.active .label { color: #1890ff; }
+
+/* Page indicator */
+.page-indicator { text-align: center; margin-top: 16px; font-size: 12px; color: #999; }
+</style>
+</head>
+<body>
+
+<h1>📱 工人端全站点原型</h1>
+<p class="subtitle">小作坊生产订单排期助手 · 移动端 H5 / 小程序</p>
+
+<div class="phone-grid">
+
+  <!-- ===== Screen 1: Task List ===== -->
+  <div>
+    <div class="phone-label">① 当日任务列表</div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>09:41</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="wx-topbar">
+          <span class="title">今日任务</span>
+          <span class="dots">···</span>
+        </div>
+        <div class="screen-content" style="padding-bottom: 50px;">
+
+          <!-- Overdue Banner -->
+          <div class="overdue-banner">
+            <span class="icon">⚠️</span>
+            <span class="text">1 个任务已逾期，请尽快完成</span>
+          </div>
+
+          <div class="section-header">进行中的任务</div>
+
+          <!-- Task 1 - Overdue -->
+          <div class="task-card" style="border-left: 3px solid #f5222d;">
+            <div class="card-head">
+              <span class="card-title">华兴包装 · 瓦楞纸箱</span>
+              <span class="card-status status-overdue">逾期</span>
+            </div>
+            <div class="card-info">
+              <span>数量</span> 2,000件 · <span>交期</span> 06-30<br>
+              <span>当前工序</span> 压线
+            </div>
+            <div class="process-steps">
+              <span class="step-tag step-done">✓ 裁切</span>
+              <span class="step-tag step-current">▶ 压线</span>
+              <span class="step-tag step-todo">○ 粘合</span>
+              <span class="step-tag step-todo">○ 打包</span>
+            </div>
+            <div class="card-actions">
+              <button class="big-btn big-btn-success">✓ 本工序完工</button>
+              <button class="big-btn big-btn-warning" style="flex:0.5">⚠</button>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-card">
+            <div class="card-head">
+              <span class="card-title">张记五金 · 法兰盘</span>
+              <span class="card-status status-producing">生产中</span>
+            </div>
+            <div class="card-info">
+              <span>数量</span> 500件 · <span>交期</span> 07-01<br>
+              <span>当前工序</span> 表面处理
+            </div>
+            <div class="process-steps">
+              <span class="step-tag step-done">✓ 下料</span>
+              <span class="step-tag step-done">✓ 冲压</span>
+              <span class="step-tag step-current">▶ 表面处理</span>
+              <span class="step-tag step-todo">○ 包装</span>
+            </div>
+            <div class="card-actions">
+              <button class="big-btn big-btn-success">✓ 本工序完工</button>
+              <button class="big-btn big-btn-outline" style="flex:0.5">详情</button>
+            </div>
+          </div>
+
+          <div class="section-header">待开始</div>
+
+          <!-- Task 3 -->
+          <div class="task-card">
+            <div class="card-head">
+              <span class="card-title">利达服装 · 工装外套</span>
+              <span class="card-status status-scheduled">待开始</span>
+            </div>
+            <div class="card-info">
+              <span>数量</span> 300件 · <span>交期</span> 07-03<br>
+              <span>首道工序</span> 裁剪
+            </div>
+            <div class="card-actions">
+              <button class="big-btn big-btn-primary">▶ 开始生产</button>
+            </div>
+          </div>
+
+        </div>
+        <!-- Tab bar -->
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="icon">📋</div><div class="label">今日任务</div></div>
+          <div class="tab-item"><div class="icon">📁</div><div class="label">历史任务</div></div>
+          <div class="tab-item"><div class="icon">👤</div><div class="label">我的</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="page-indicator">1 / 4</div>
+  </div>
+
+  <!-- ===== Screen 2: Task Detail ===== -->
+  <div>
+    <div class="phone-label">② 任务详情</div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>09:41</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="wx-topbar">
+          <span class="back">‹</span>
+          <span class="title">任务详情</span>
+          <span class="dots">···</span>
+        </div>
+        <div class="screen-content" style="padding-bottom: 50px;">
+
+          <div class="detail-section">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h3 style="font-size:16px;">张记五金 · 不锈钢法兰盘</h3>
+              <span class="card-status status-producing">生产中</span>
+            </div>
+            <div class="detail-row"><span class="label">订单编号</span><span class="value">ORD-2026062</span></div>
+            <div class="detail-row"><span class="label">客户</span><span class="value">张记五金</span></div>
+            <div class="detail-row"><span class="label">产品</span><span class="value">不锈钢法兰盘</span></div>
+            <div class="detail-row"><span class="label">数量</span><span class="value">500 件</span></div>
+            <div class="detail-row"><span class="label">交期</span><span class="value">2026-07-01</span></div>
+          </div>
+
+          <div class="detail-section">
+            <h4>工艺进度</h4>
+            <div class="process-steps" style="gap:8px;">
+              <span class="step-tag step-done" style="padding:6px 12px;font-size:13px;">✓ 下料</span>
+              <span class="step-tag step-done" style="padding:6px 12px;font-size:13px;">✓ 冲压</span>
+              <span class="step-tag step-current" style="padding:6px 12px;font-size:13px;">▶ 表面处理</span>
+              <span class="step-tag step-todo" style="padding:6px 12px;font-size:13px;">○ 包装</span>
+            </div>
+            <div class="progress-section">
+              <div class="progress-label">总体进度：<strong style="color:#1890ff">60%</strong>（2/4 完成）</div>
+              <div class="progress-track"><div class="progress-fill" style="width:60%"></div></div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>工艺要求</h4>
+            <div style="font-size:13px;color:#666;line-height:1.8;">
+              · 表面处理：电镀镀锌，厚度 ≥ 5μm<br>
+              · 包装：每 50 件一箱，贴标签<br>
+              · 注意：轻拿轻放，避免磕碰
+            </div>
+          </div>
+
+          <div style="padding:12px 8px;">
+            <button class="big-btn big-btn-success" style="width:100%;">✓ 本工序完工（表面处理）</button>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="big-btn big-btn-warning" style="flex:1;">⚠ 异常上报</button>
+              <button class="big-btn big-btn-outline" style="flex:1;">‹ 返回列表</button>
+            </div>
+          </div>
+
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="icon">📋</div><div class="label">今日任务</div></div>
+          <div class="tab-item"><div class="icon">📁</div><div class="label">历史任务</div></div>
+          <div class="tab-item"><div class="icon">👤</div><div class="label">我的</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="page-indicator">2 / 4</div>
+  </div>
+
+  <!-- ===== Screen 3: Exception Report ===== -->
+  <div>
+    <div class="phone-label">③ 异常上报</div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>09:42</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="wx-topbar">
+          <span class="back">‹</span>
+          <span class="title">异常上报</span>
+          <span class="dots">···</span>
+        </div>
+        <div class="screen-content" style="padding-bottom: 50px;">
+
+          <div style="padding:12px 8px 4px;font-size:14px;color:#666;">
+            关联任务：<strong style="color:#333;">华兴包装 · 瓦楞纸箱</strong>
+          </div>
+
+          <div class="section-header">选择异常类型</div>
+
+          <div class="exception-options">
+            <div class="exception-option selected">
+              <span class="icon">📦</span>
+              <div class="info">
+                <div class="title">缺料</div>
+                <div class="desc">原材料不足，无法继续生产</div>
+              </div>
+            </div>
+            <div class="exception-option">
+              <span class="icon">🔧</span>
+              <div class="info">
+                <div class="title">设备故障</div>
+                <div class="desc">设备异常，需维修</div>
+              </div>
+            </div>
+            <div class="exception-option">
+              <span class="icon">⚡</span>
+              <div class="info">
+                <div class="title">质量问题</div>
+                <div class="desc">产品不合格，需返工</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-area">
+            <div class="placeholder">简要描述（可选）：<br><br>例如：压线机刀具磨损，需要更换...</div>
+          </div>
+
+          <div style="padding:8px 12px;">
+            <button class="big-btn big-btn-warning" style="width:100%;">提交上报</button>
+            <div style="text-align:center;margin-top:8px;font-size:12px;color:#999;">
+              提交后系统会自动通知主管
+            </div>
+          </div>
+
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="icon">📋</div><div class="label">今日任务</div></div>
+          <div class="tab-item"><div class="icon">📁</div><div class="label">历史任务</div></div>
+          <div class="tab-item"><div class="icon">👤</div><div class="label">我的</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="page-indicator">3 / 4</div>
+  </div>
+
+  <!-- ===== Screen 4: History ===== -->
+  <div>
+    <div class="phone-label">④ 历史任务</div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>09:42</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="wx-topbar">
+          <span class="title">我的任务</span>
+          <span class="dots">···</span>
+        </div>
+        <div class="screen-content" style="padding-bottom: 50px;">
+
+          <div style="background:#fff;margin:8px;border-radius:10px;padding:16px;text-align:center;">
+            <div style="display:flex;justify-content:space-around;">
+              <div>
+                <div style="font-size:24px;font-weight:600;color:#1890ff;">23</div>
+                <div style="font-size:12px;color:#999;">本月完成</div>
+              </div>
+              <div>
+                <div style="font-size:24px;font-weight:600;color:#52c41a;">98%</div>
+                <div style="font-size:12px;color:#999;">按时完成率</div>
+              </div>
+              <div>
+                <div style="font-size:24px;font-weight:600;color:#fa8c16;">2</div>
+                <div style="font-size:12px;color:#999;">异常上报</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-header">最近 30 天</div>
+
+          <div class="history-item">
+            <div class="info">
+              <div class="title">瑞丰 · 密封垫圈</div>
+              <div class="meta">5,000件 · 4道工序</div>
+            </div>
+            <div class="result">
+              <div class="status">✓ 已完成</div>
+              <div class="date">06-28</div>
+            </div>
+          </div>
+
+          <div class="history-item">
+            <div class="info">
+              <div class="title">恒通机械 · 轴承座</div>
+              <div class="meta">100件 · 3道工序</div>
+            </div>
+            <div class="result">
+              <div class="status">✓ 已完成</div>
+              <div class="date">06-27</div>
+            </div>
+          </div>
+
+          <div class="history-item">
+            <div class="info">
+              <div class="title">永丰电子 · 连接器</div>
+              <div class="meta">3,000件 · 3道工序</div>
+            </div>
+            <div class="result">
+              <div class="status">✓ 已完成</div>
+              <div class="date">06-26</div>
+            </div>
+          </div>
+
+          <div class="history-item">
+            <div class="info">
+              <div class="title">张记五金 · 法兰盘</div>
+              <div class="meta">200件 · 4道工序</div>
+            </div>
+            <div class="result">
+              <div class="status">✓ 已完成</div>
+              <div class="date">06-25</div>
+            </div>
+          </div>
+
+          <div class="history-item">
+            <div class="info">
+              <div class="title">华兴包装 · 礼品盒</div>
+              <div class="meta">1,000件 · 4道工序</div>
+            </div>
+            <div class="result">
+              <div class="status">✓ 已完成</div>
+              <div class="date">06-24</div>
+            </div>
+          </div>
+
+          <div class="history-item">
+            <div class="info">
+              <div class="title">利达服装 · 工作服</div>
+              <div class="meta">150件 · 4道工序</div>
+            </div>
+            <div class="result">
+              <div class="status">✓ 已完成</div>
+              <div class="date">06-22</div>
+            </div>
+          </div>
+
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="icon">📋</div><div class="label">今日任务</div></div>
+          <div class="tab-item active"><div class="icon">📁</div><div class="label">历史任务</div></div>
+          <div class="tab-item"><div class="icon">👤</div><div class="label">我的</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="page-indicator">4 / 4</div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:40px;color:#999;font-size:13px;">
+  设计说明：工人端采用极简设计，字体 ≥ 16px，关键按钮 ≥ 44×44px，适配年龄较大用户。<br>
+  支持弱网离线缓存，核心操作（查看任务 / 标记完工）3 次点击内完成。
+</div>
+
+</body>
+</html>

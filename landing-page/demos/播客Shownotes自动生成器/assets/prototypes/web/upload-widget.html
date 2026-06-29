@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>音频上传 - Widget</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #0D0D1A;
+  color: #E8E8F0;
+  padding: 24px;
+}
+.widget-label { color: #8A8AA0; font-size: 12px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+.upload-card {
+  background: #1A1A2E;
+  border: 1px solid #2A2A45;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.drop-zone {
+  border: 2px dashed #2A2A45;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: rgba(124, 92, 255, 0.02);
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: #7C5CFF;
+  background: rgba(124, 92, 255, 0.06);
+}
+.drop-icon { font-size: 48px; margin-bottom: 16px; }
+.drop-title { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
+.drop-hint { color: #8A8AA0; font-size: 13px; margin-bottom: 16px; }
+.format-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.format-tag {
+  background: rgba(124, 92, 255, 0.1);
+  color: #A89BFF;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: monospace;
+}
+.file-card {
+  background: #0D0D1A;
+  border: 1px solid #2A2A45;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 20px;
+  display: none;
+}
+.file-card.show { display: block; }
+.file-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.file-icon { font-size: 28px; }
+.file-meta { flex: 1; min-width: 0; }
+.file-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-info { font-size: 12px; color: #8A8AA0; margin-top: 2px; }
+.file-remove { color: #555568; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+.file-remove:hover { color: #FF8888; background: rgba(255, 88, 88, 0.08); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.form-group { margin-top: 12px; }
+.form-label { display: block; font-size: 12px; color: #A0A0B8; margin-bottom: 6px; }
+.input {
+  width: 100%;
+  background: #1A1A2E;
+  border: 1px solid #2A2A45;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #E8E8F0;
+  font-size: 13px;
+  outline: none;
+}
+.input:focus { border-color: #7C5CFF; }
+.progress-wrap { margin-top: 14px; display: none; }
+.progress-wrap.show { display: block; }
+.progress-bar {
+  height: 6px;
+  background: #0D0D1A;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7C5CFF, #4A9EFF);
+  width: 0%;
+  transition: width .3s;
+}
+.progress-text { display: flex; justify-content: space-between; font-size: 11px; color: #8A8AA0; margin-top: 6px; }
+.primary-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #7C5CFF, #4A9EFF);
+  color: white; border: none; padding: 12px;
+  border-radius: 10px; font-size: 14px; font-weight: 500;
+  cursor: pointer; margin-top: 20px;
+  transition: transform .1s;
+}
+.primary-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.primary-btn:disabled { opacity: .5; cursor: not-allowed; }
+.quota-notice {
+  background: rgba(124, 92, 255, 0.08);
+  border: 1px solid rgba(124, 92, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #A89BFF;
+  margin-top: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+</style>
+</head>
+<body>
+
+<div class="widget-label">Widget: 音频上传（3.2.1）</div>
+
+<div class="upload-card">
+  <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <div class="drop-icon">🎧</div>
+    <div class="drop-title">拖拽音频文件到这里，或点击选择</div>
+    <div class="drop-hint">免费版单文件 ≤ 200MB / 90分钟 · 专业版 ≤ 500MB</div>
+    <div class="format-tags">
+      <span class="format-tag">.mp3</span>
+      <span class="format-tag">.wav</span>
+      <span class="format-tag">.m4a</span>
+      <span class="format-tag">.flac</span>
+      <span class="format-tag">.ogg</span>
+    </div>
+    <input type="file" id="fileInput" accept=".mp3,.wav,.m4a,.flac,.ogg,audio/*" style="display:none" onchange="handleFile(this.files[0])">
+  </div>
+
+  <div class="file-card" id="fileCard">
+    <div class="file-head">
+      <div class="file-icon">🎵</div>
+      <div class="file-meta">
+        <div class="file-name" id="fileName">—</div>
+        <div class="file-info" id="fileInfo">—</div>
+      </div>
+      <div class="file-remove" onclick="removeFile()" title="移除">✕</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">节目标题 *</label>
+      <input class="input" id="title" placeholder="例如：EP01 与张三聊播客创作的那些事">
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label class="form-label">主播名</label>
+        <input class="input" id="host" placeholder="主播名">
+      </div>
+      <div>
+        <label class="form-label">嘉宾名（可选）</label>
+        <input class="input" id="guest" placeholder="嘉宾名">
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text">
+        <span id="progressPercent">0%</span>
+        <span id="progressSpeed">—</span>
+      </div>
+    </div>
+
+    <button class="primary-btn" id="uploadBtn" onclick="startUpload()">开始上传并开始转录</button>
+  </div>
+
+  <div class="quota-notice">
+    <span>ℹ️</span>
+    <span>本月剩余免费额度：<strong>3 期</strong> · 套餐：免费版</span>
+  </div>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+['dragenter', 'dragover'].forEach(ev => dropZone.addEventListener(ev, e => {
+  e.preventDefault(); dropZone.classList.add('drag-over');
+}));
+['dragleave', 'drop'].forEach(ev => dropZone.addEventListener(ev, e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+}));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  const card = document.getElementById('fileCard');
+  card.classList.add('show');
+  document.getElementById('fileName').textContent = file.name;
+  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+  document.getElementById('fileInfo').textContent = `${sizeMB} MB · ${file.type || '音频'}`;
+  if (file.size > 200 * 1024 * 1024) {
+    alert('当前免费版限制单文件 ≤ 200MB，请升级专业版（≤500MB）');
+  }
+}
+function removeFile() {
+  document.getElementById('fileCard').classList.remove('show');
+  document.getElementById('fileInput').value = '';
+}
+function startUpload() {
+  const title = document.getElementById('title').value.trim();
+  if (!title) { alert('请填写节目标题'); return; }
+  const wrap = document.getElementById('progressWrap');
+  wrap.classList.add('show');
+  const fill = document.getElementById('progressFill');
+  const percent = document.getElementById('progressPercent');
+  const speed = document.getElementById('progressSpeed');
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true; btn.textContent = '上传中…';
+  let p = 0;
+  const t = setInterval(() => {
+    p += Math.random() * 15;
+    if (p >= 100) { p = 100; clearInterval(t); btn.textContent = '上传完成，开始转录 ✓'; }
+    fill.style.width = p + '%';
+    percent.textContent = Math.floor(p) + '%';
+    speed.textContent = (Math.random() * 2 + 1).toFixed(1) + ' MB/s';
+  }, 200);
+}
+</script>
+</body>
+</html>

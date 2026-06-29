@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户管理原型</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; padding: 32px; }
+        .widget-container { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 900px; margin: 0 auto; }
+
+        .account-layout { display: grid; grid-template-columns: 240px 1fr; gap: 24px; }
+
+        .sidebar { }
+        .user-card { text-align: center; padding: 20px 16px; background: linear-gradient(135deg, #f8f9ff, #fff); border-radius: 12px; margin-bottom: 16px; }
+        .avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; font-weight: 600; }
+        .user-name { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 8px; }
+        .user-plan { display: inline-block; padding: 4px 12px; background: #f5f5f5; color: #999; border-radius: 12px; font-size: 12px; }
+        .user-plan.pro { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+
+        .menu-list { list-style: none; }
+        .menu-item { padding: 10px 16px; cursor: pointer; border-radius: 8px; margin-bottom: 4px; font-size: 14px; color: #666; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+        .menu-item:hover { background: #f8f9ff; color: #667eea; }
+        .menu-item.active { background: #667eea; color: #fff; }
+        .menu-icon { font-size: 16px; }
+
+        .main-content { }
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .content-title { font-size: 18px; font-weight: 600; color: #333; }
+
+        .plan-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .plan-card { border: 2px solid #f0f0f0; border-radius: 14px; padding: 20px; position: relative; transition: all 0.2s; }
+        .plan-card.current { border-color: #d9d9d9; background: #fafafa; }
+        .plan-card.recommended { border-color: #667eea; }
+        .recommend-badge { position: absolute; top: -10px; right: 16px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 10px; }
+        .plan-name { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 8px; }
+        .plan-price { font-size: 32px; font-weight: 600; color: #333; margin-bottom: 4px; }
+        .plan-price .currency { font-size: 16px; }
+        .plan-price .period { font-size: 13px; color: #999; font-weight: normal; }
+        .plan-desc { font-size: 12px; color: #999; margin-bottom: 16px; }
+        .plan-features { list-style: none; margin-bottom: 16px; }
+        .plan-feature { padding: 6px 0; font-size: 13px; color: #666; display: flex; align-items: center; gap: 8px; }
+        .plan-feature::before { content: "✓"; color: #52c41a; font-weight: bold; }
+        .plan-feature.disabled { color: #ccc; }
+        .plan-feature.disabled::before { content: "—"; color: #ccc; }
+        .plan-btn { width: 100%; padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .plan-btn-current { background: #f5f5f5; color: #999; cursor: default; }
+        .plan-btn-upgrade { background: #667eea; color: #fff; }
+        .plan-btn-upgrade:hover { background: #5568d3; }
+
+        .price-options { display: flex; gap: 8px; margin-bottom: 16px; }
+        .price-option { flex: 1; padding: 10px; border: 1px solid #e8e8e8; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .price-option:hover { border-color: #667eea; }
+        .price-option.selected { border-color: #667eea; background: #f8f9ff; }
+        .price-duration { font-size: 13px; color: #333; font-weight: 500; margin-bottom: 4px; }
+        .price-amount { font-size: 16px; color: #667eea; font-weight: 600; }
+        .price-discount { font-size: 11px; color: #52c41a; margin-top: 2px; }
+
+        .usage-section { background: #fafafa; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+        .usage-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; }
+        .usage-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; }
+        .usage-label { color: #666; }
+        .usage-value { color: #333; font-weight: 500; }
+        .usage-bar { width: 120px; height: 6px; background: #e8e8e8; border-radius: 3px; overflow: hidden; margin: 0 12px; }
+        .usage-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 3px; }
+
+        .form-section { margin-bottom: 20px; }
+        .form-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .form-group { }
+        .form-label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
+        .form-input { width: 100%; padding: 8px 12px; border: 1px solid #e8e8e8; border-radius: 6px; font-size: 13px; outline: none; }
+        .form-input:focus { border-color: #667eea; }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="account-layout">
+            <div class="sidebar">
+                <div class="user-card">
+                    <div class="avatar">播</div>
+                    <div class="user-name">播客创作者</div>
+                    <div class="user-plan">免费版</div>
+                </div>
+                <ul class="menu-list">
+                    <li class="menu-item">
+                        <span class="menu-icon">👤</span>
+                        个人信息
+                    </li>
+                    <li class="menu-item active">
+                        <span class="menu-icon">💎</span>
+                        订阅方案
+                    </li>
+                    <li class="menu-item">
+                        <span class="menu-icon">📊</span>
+                        用量查询
+                    </li>
+                    <li class="menu-item">
+                        <span class="menu-icon">⚙️</span>
+                        偏好设置
+                    </li>
+                    <li class="menu-item">
+                        <span class="menu-icon">🔒</span>
+                        安全设置
+                    </li>
+                </ul>
+            </div>
+
+            <div class="main-content">
+                <div class="content-header">
+                    <div class="content-title">订阅方案</div>
+                </div>
+
+                <div class="usage-section">
+                    <div class="usage-title">本月用量</div>
+                    <div class="usage-item">
+                        <span class="usage-label">播客处理</span>
+                        <div class="usage-bar"><div class="usage-fill" style="width: 33%;"></div></div>
+                        <span class="usage-value">1 / 3 期</span>
+                    </div>
+                    <div class="usage-item">
+                        <span class="usage-label">片段识别</span>
+                        <div class="usage-bar"><div class="usage-fill" style="width: 100%;"></div></div>
+                        <span class="usage-value">24 个 (无限制)</span>
+                    </div>
+                    <div class="usage-item">
+                        <span class="usage-label">文案生成</span>
+                        <div class="usage-bar"><div class="usage-fill" style="width: 100%;"></div></div>
+                        <span class="usage-value">96 条 (无限制)</span>
+                    </div>
+                </div>
+
+                <div class="plan-cards">
+                    <div class="plan-card current">
+                        <div class="plan-name">免费版</div>
+                        <div class="plan-price">
+                            <span class="currency">¥</span>0
+                            <span class="period">/月</span>
+                        </div>
+                        <div class="plan-desc">适合刚开始尝试的播客主</div>
+                        <ul class="plan-features">
+                            <li class="plan-feature">每月 3 期播客处理</li>
+                            <li class="plan-feature">基础文案生成</li>
+                            <li class="plan-feature">单平台导出</li>
+                            <li class="plan-feature">片段库管理</li>
+                            <li class="plan-feature disabled">自定义文案模板</li>
+                            <li class="plan-feature disabled">批量导出</li>
+                            <li class="plan-feature disabled">多平台同步发布</li>
+                            <li class="plan-feature disabled">数据分析看板</li>
+                        </ul>
+                        <button class="plan-btn plan-btn-current">当前方案</button>
+                    </div>
+
+                    <div class="plan-card recommended">
+                        <div class="recommend-badge">推荐</div>
+                        <div class="plan-name">专业版</div>
+                        <div class="plan-price">
+                            <span class="currency">¥</span>39
+                            <span class="period">/月</span>
+                        </div>
+                        <div class="plan-desc">适合认真做内容分发的创作者</div>
+                        <ul class="plan-features">
+                            <li class="plan-feature">不限播客期数</li>
+                            <li class="plan-feature">高级文案生成</li>
+                            <li class="plan-feature">批量导出 ZIP/Excel</li>
+                            <li class="plan-feature">自定义文案模板</li>
+                            <li class="plan-feature">多平台同步发布</li>
+                            <li class="plan-feature">定时发布</li>
+                            <li class="plan-feature">数据分析看板</li>
+                            <li class="plan-feature">无水印导出</li>
+                        </ul>
+                        <button class="plan-btn plan-btn-upgrade">立即升级</button>
+                    </div>
+                </div>
+
+                <div class="price-options">
+                    <div class="price-option">
+                        <div class="price-duration">月付</div>
+                        <div class="price-amount">¥39/月</div>
+                    </div>
+                    <div class="price-option selected">
+                        <div class="price-duration">季付</div>
+                        <div class="price-amount">¥99/季</div>
+                        <div class="price-discount">省 15%</div>
+                    </div>
+                    <div class="price-option">
+                        <div class="price-duration">年付</div>
+                        <div class="price-amount">¥349/年</div>
+                        <div class="price-discount">省 25%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        document.querySelectorAll('.price-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.price-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

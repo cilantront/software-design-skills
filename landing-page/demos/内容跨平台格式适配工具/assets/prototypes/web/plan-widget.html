@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>套餐管理组件原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F3FF;padding:32px;color:#312E81;}
+.widget{max-width:680px;margin:0 auto;}
+.title{font-size:14px;font-weight:600;margin-bottom:16px;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat{background:white;border:1px solid #E5E7EB;border-radius:12px;padding:18px;text-align:center;}
+.stat .val{font-size:24px;font-weight:700;background:linear-gradient(135deg,#6366F1,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat .lbl{font-size:11px;color:#6B7280;margin-top:4px;}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.plan{background:white;border:2px solid #E5E7EB;border-radius:14px;padding:24px;position:relative;}
+.plan.featured{border-color:#6366F1;}
+.plan.featured::before{content:'推荐';position:absolute;top:-8px;right:16px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;}
+.plan-name{font-size:16px;font-weight:700;margin-bottom:6px;}
+.plan-price{font-size:28px;font-weight:700;color:#6366F1;}
+.plan-price span{font-size:12px;color:#6B7280;font-weight:400;}
+.plan-features{list-style:none;margin-top:16px;}
+.plan-features li{padding:6px 0;font-size:12px;color:#6B7280;display:flex;align-items:center;gap:6px;}
+.plan-features li::before{content:'✓';color:#10B981;font-weight:700;}
+.plan-btn{width:100%;margin-top:16px;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;}
+.btn-current{background:#F3F4F6;color:#6B7280;}
+.btn-upgrade{background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;}
+.progress-section{background:white;border:1px solid #E5E7EB;border-radius:12px;padding:18px;margin-bottom:20px;}
+.progress-header{display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;}
+.progress-bar{height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6366F1,#8B5CF6);border-radius:4px;width:20%;}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="title">套餐管理与使用统计</div>
+  <div class="progress-section">
+    <div class="progress-header"><span>本月配额使用</span><span><strong>2</strong>/10 次</span></div>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+    <div style="font-size:11px;color:#6B7280;margin-top:8px;">剩余 8 次 · 7天后重置</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="val">2</div><div class="lbl">本月已使用</div></div>
+    <div class="stat"><div class="val">8</div><div class="lbl">剩余配额</div></div>
+    <div class="stat"><div class="val">12</div><div class="lbl">累计总次数</div></div>
+  </div>
+  <div class="plans">
+    <div class="plan">
+      <div class="plan-name">免费版</div>
+      <div class="plan-price">¥0<span>/月</span></div>
+      <ul class="plan-features">
+        <li>每月 10 次适配</li>
+        <li>最多 3 个平台/次</li>
+        <li>AI智能改写</li>
+      </ul>
+      <button class="plan-btn btn-current">当前套餐</button>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">专业版</div>
+      <div class="plan-price">¥39<span>/月</span></div>
+      <ul class="plan-features">
+        <li>不限适配次数</li>
+        <li>不限平台数量</li>
+        <li>自定义改写风格</li>
+        <li>团队协作</li>
+      </ul>
+      <button class="plan-btn btn-upgrade">立即升级</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

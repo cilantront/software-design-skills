@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搬家物品清单与进度跟踪器 · 全站原型宫格展示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #eef7f6; color: #134e4a; min-height: 100vh; }
+
+/* Site Header */
+.site-header { text-align: center; padding: 30px 20px 10px; }
+.site-title { font-size: 26px; font-weight: 700; color: #0d9488; }
+.site-desc { font-size: 14px; color: #64748b; margin-top: 8px; }
+
+/* Screen Grid - 宫格布局 */
+.screen-grid { display: grid; grid-template-columns: repeat(3, 375px); gap: 40px 30px; justify-content: center; padding: 30px 20px 60px; }
+
+/* Phone Container */
+.phone { width: 375px; height: 750px; background: #fff; border-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); overflow: hidden; border: 8px solid #1a1a1a; position: relative; display: flex; flex-direction: column; }
+.phone-label { text-align: center; margin-top: 14px; font-size: 14px; font-weight: 600; color: #134e4a; }
+.phone-sublabel { text-align: center; font-size: 12px; color: #999; margin-top: 4px; }
+
+/* WeChat Status Bar */
+.wx-bar { height: 44px; background: #ededed; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 12px; color: #333; border-bottom: 1px solid #d9d9d9; flex-shrink: 0; }
+.wx-title { flex: 1; text-align: center; font-size: 15px; font-weight: 600; }
+.wx-dots { font-size: 18px; letter-spacing: 2px; }
+
+/* Phone Content Area */
+.phone-content { flex: 1; overflow-y: auto; background: #F8F9FA; }
+
+/* ===== Page 01: Home ===== */
+.home-header { background: linear-gradient(135deg, #4A90D9, #5BA0E6); color: #fff; padding: 20px 16px 24px; border-radius: 0 0 20px 20px; }
+.home-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.home-header-top h1 { font-size: 18px; font-weight: 600; }
+.home-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.active-task { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); margin: 0 16px; position: relative; top: -12px; }
+.active-task .task-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: #2C3E50; }
+.active-task .task-date { font-size: 13px; color: #95A5A6; margin-bottom: 12px; }
+.task-stats { display: flex; gap: 12px; }
+.stat-item { flex: 1; text-align: center; }
+.stat-item .stat-num { font-size: 20px; font-weight: 700; color: #4A90D9; }
+.stat-item .stat-label { font-size: 11px; color: #95A5A6; margin-top: 2px; }
+.progress-bar { height: 6px; background: #EEF2F7; border-radius: 3px; margin-top: 12px; overflow: hidden; }
+.progress-bar .fill { height: 100%; background: linear-gradient(90deg, #4A90D9, #7EC8B7); border-radius: 3px; }
+.progress-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #95A5A6; }
+.section { padding: 16px; }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; color: #2C3E50; }
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.action-btn { background: #fff; border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.action-btn .icon { font-size: 24px; margin-bottom: 6px; }
+.action-btn .label { font-size: 11px; color: #2C3E50; }
+.timeline-card { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 10px; }
+.timeline-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.timeline-item:not(:last-child) { border-bottom: 1px solid #F0F2F5; }
+.timeline-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.timeline-dot.done { background: #10B981; }
+.timeline-dot.current { background: #4A90D9; box-shadow: 0 0 0 3px rgba(74,144,217,0.2); }
+.timeline-dot.overdue { background: #EF4444; }
+.timeline-info { flex: 1; }
+.timeline-info .name { font-size: 13px; font-weight: 500; color: #2C3E50; }
+.timeline-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.badge-done { background: #ECFDF5; color: #10B981; }
+.badge-today { background: #EFF6FF; color: #4A90D9; }
+.badge-overdue { background: #FEF2F2; color: #EF4444; }
+.room-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.room-tag { font-size: 11px; padding: 4px 10px; border-radius: 14px; background: #F0F7FF; color: #4A90D9; }
+.bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; height: 55px; background: #fff; border-top: 1px solid #F0F2F5; display: flex; }
+.nav-item { flex: 1; text-align: center; padding: 8px 0; font-size: 10px; color: #95A5A6; }
+.nav-item.active { color: #4A90D9; font-weight: 600; }
+.nav-icon { font-size: 20px; margin-bottom: 2px; }
+
+/* ===== Page 02: Create Task ===== */
+.form-section { background: #fff; margin: 12px 0; padding: 0 16px; }
+.form-section-title { font-size: 14px; font-weight: 600; color: #4A90D9; padding: 16px 0 8px; border-bottom: 1px solid #F0F2F5; }
+.form-item { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid #F0F2F5; }
+.form-item:last-child { border-bottom: none; }
+.form-item label { width: 80px; font-size: 14px; color: #2C3E50; flex-shrink: 0; }
+.form-item .input { flex: 1; }
+.form-item input[type="text"], .form-item input[type="date"] { width: 100%; border: none; font-size: 14px; color: #2C3E50; outline: none; background: transparent; text-align: right; }
+.radio-group { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; justify-content: flex-end; }
+.radio-option { padding: 6px 14px; border-radius: 16px; font-size: 13px; border: 1px solid #E5E7EB; }
+.radio-option.selected { background: #EFF6FF; border-color: #4A90D9; color: #4A90D9; font-weight: 500; }
+.room-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding: 0 16px 16px; }
+.room-chip { display: flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: 20px; font-size: 13px; border: 1px solid #E5E7EB; background: #fff; }
+.room-chip.selected { background: #EFF6FF; border-color: #4A90D9; color: #4A90D9; }
+.info-box { background: #F0F7FF; border-radius: 10px; padding: 12px; margin: 12px 16px; font-size: 12px; color: #4A90D9; line-height: 1.6; }
+.primary-btn-bottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; background: linear-gradient(135deg, #4A90D9, #5BA0E6); color: #fff; border: none; font-size: 15px; font-weight: 600; }
+
+/* ===== Page 03: Checklist ===== */
+.nav-bar { background: #fff; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F0F2F5; position: sticky; top: 0; z-index: 10; }
+.nav-bar .back { font-size: 20px; color: #2C3E50; }
+.nav-bar .task-info { flex: 1; }
+.nav-bar .task-info h2 { font-size: 15px; font-weight: 600; }
+.nav-bar .task-info .sub { font-size: 11px; color: #95A5A6; }
+.progress-badge { background: #ECFDF5; color: #10B981; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.tabs { display: flex; background: #fff; border-bottom: 1px solid #F0F2F5; padding: 0 16px; }
+.tab { padding: 12px 0; margin-right: 24px; font-size: 14px; color: #95A5A6; position: relative; }
+.tab.active { color: #4A90D9; font-weight: 600; }
+.tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #4A90D9; border-radius: 1px; }
+.filter-bar { display: flex; gap: 8px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #F0F2F5; align-items: center; }
+.filter-chip { padding: 6px 12px; border-radius: 14px; font-size: 12px; background: #F0F2F5; color: #2C3E50; }
+.filter-chip.active { background: #EFF6FF; color: #4A90D9; }
+.search-box { flex: 1; }
+.search-box input { width: 100%; border: 1px solid #E5E7EB; border-radius: 14px; padding: 6px 12px; font-size: 12px; outline: none; }
+.room-group { background: #fff; margin: 8px 0; }
+.room-header { display: flex; align-items: center; padding: 12px 16px; gap: 8px; border-bottom: 1px solid #F5F7FA; }
+.room-header .room-name { flex: 1; font-size: 14px; font-weight: 600; }
+.room-header .room-stats { font-size: 11px; color: #95A5A6; }
+.room-header .room-progress { font-size: 12px; font-weight: 600; color: #10B981; }
+.item-row { display: flex; align-items: center; padding: 10px 16px 10px 44px; border-top: 1px solid #F5F7FA; }
+.item-row .item-name { flex: 1; font-size: 14px; color: #2C3E50; }
+.item-row .item-qty { font-size: 11px; color: #95A5A6; margin-left: 4px; }
+.status-tag { padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.status-pack { background: #ECFDF5; color: #10B981; }
+.status-discard { background: #FEF2F2; color: #EF4444; }
+.status-donate { background: #EFF6FF; color: #3B82F6; }
+.status-special { background: #FFFBEB; color: #F59E0B; }
+.more-btn { margin-left: 8px; font-size: 16px; color: #C0C4CC; }
+.add-bar { position: absolute; bottom: 55px; left: 0; right: 0; background: #fff; padding: 10px 16px; border-top: 1px solid #F0F2F5; display: flex; gap: 10px; }
+.add-btn { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 500; border: none; }
+.add-btn.primary { background: #4A90D9; color: #fff; }
+.add-btn.secondary { background: #F0F7FF; color: #4A90D9; }
+
+/* ===== Page 04: Item Edit ===== */
+.item-image { background: #fff; padding: 20px; text-align: center; }
+.photo-area { width: 200px; height: 200px; background: #F0F2F5; border-radius: 12px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #95A5A6; font-size: 13px; }
+.photo-area .icon { font-size: 40px; margin-bottom: 8px; }
+.status-section { background: #fff; margin-top: 8px; padding: 16px; }
+.section-title-sm { font-size: 13px; color: #95A5A6; margin-bottom: 12px; }
+.status-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.status-option { padding: 10px 4px; border-radius: 10px; text-align: center; font-size: 12px; border: 2px solid #E5E7EB; }
+.status-option .s-icon { font-size: 18px; margin-bottom: 4px; }
+.form-section-edit { background: #fff; margin-top: 8px; padding: 0 16px; }
+.form-item-edit { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid #F0F2F5; }
+.form-item-edit:last-child { border-bottom: none; }
+.form-item-edit label { width: 72px; font-size: 14px; color: #2C3E50; }
+.form-item-edit input { flex: 1; border: none; font-size: 14px; outline: none; text-align: right; background: transparent; color: #2C3E50; }
+.attr-section { background: #fff; margin-top: 8px; padding: 16px; }
+.attr-options { display: flex; gap: 10px; flex-wrap: wrap; }
+.attr-chip { padding: 8px 16px; border-radius: 16px; font-size: 13px; border: 1px solid #E5E7EB; }
+.attr-chip.selected { background: #FFF7ED; border-color: #F59E0B; color: #F59E0B; }
+.bottom-action { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; padding: 12px 16px; border-top: 1px solid #F0F2F5; display: flex; gap: 10px; }
+.btn-edit { flex: 1; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; border: none; }
+.btn-secondary-edit { background: #F0F2F5; color: #2C3E50; }
+.btn-primary-edit { background: #4A90D9; color: #fff; }
+
+/* ===== Page 05: Timeline ===== */
+.circle-progress { width: 56px; height: 56px; border-radius: 50%; background: conic-gradient(#10B981 0% 62%, #E5E7EB 62% 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.circle-inner { width: 44px; height: 44px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #10B981; }
+.progress-summary { background: #fff; margin: 8px 0; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+.summary-info { flex: 1; }
+.summary-info .label { font-size: 12px; color: #95A5A6; }
+.timeline-nodes { background: #fff; margin: 8px 0; padding: 16px; }
+.timeline-node { position: relative; padding-left: 28px; padding-bottom: 20px; }
+.timeline-node:last-child { padding-bottom: 0; }
+.timeline-node::before { content: ''; position: absolute; left: 7px; top: 14px; bottom: -6px; width: 2px; background: #E5E7EB; }
+.timeline-node:last-child::before { display: none; }
+.timeline-node .dot { position: absolute; left: 0; top: 4px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 8px; }
+.dot-done { border-color: #10B981; background: #10B981; color: #fff; }
+.dot-current { border-color: #4A90D9; background: #4A90D9; color: #fff; box-shadow: 0 0 0 4px rgba(74,144,217,0.15); }
+.dot-pending { border-color: #D1D5DB; background: #fff; }
+.dot-overdue { border-color: #EF4444; background: #EF4444; color: #fff; }
+.node-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.node-date { font-size: 12px; color: #95A5A6; }
+.node-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.node-tasks { }
+.task-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+.task-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #D1D5DB; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.task-check.checked { border-color: #10B981; background: #10B981; color: #fff; }
+.task-text { flex: 1; font-size: 13px; color: #2C3E50; }
+.task-text.done { text-decoration: line-through; color: #95A5A6; }
+.task-action { font-size: 11px; color: #4A90D9; }
+
+/* ===== Page 06: Dashboard ===== */
+.overall { background: linear-gradient(135deg, #4A90D9, #5BA0E6); margin: 8px; border-radius: 16px; padding: 24px 16px; text-align: center; color: #fff; }
+.overall .big-num { font-size: 48px; font-weight: 700; line-height: 1; }
+.overall .big-unit { font-size: 16px; font-weight: 400; }
+.overall .label { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+.overall-stats { display: flex; gap: 0; margin-top: 16px; }
+.overall-stat { flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,0.2); }
+.overall-stat:last-child { border-right: none; }
+.overall-stat .num { font-size: 20px; font-weight: 700; }
+.overall-stat .lbl { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+.card { background: #fff; margin: 8px; border-radius: 12px; padding: 16px; }
+.card-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; color: #2C3E50; }
+.card-title a { font-size: 12px; color: #4A90D9; text-decoration: none; }
+.room-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.room-row:not(:last-child) { border-bottom: 1px solid #F5F7FA; }
+.room-row .room-icon { font-size: 18px; }
+.room-row .room-info { flex: 1; }
+.room-row .room-name { font-size: 13px; font-weight: 500; color: #2C3E50; }
+.room-row .room-detail { font-size: 11px; color: #95A5A6; margin-top: 2px; }
+.room-progress-bar { height: 6px; background: #EEF2F7; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.room-progress-bar .fill { height: 100%; border-radius: 3px; }
+.room-pct { font-size: 14px; font-weight: 700; width: 40px; text-align: right; }
+.pie-container { display: flex; align-items: center; gap: 16px; }
+.pie-chart { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#10B981 0% 58%, #EF4444 58% 73%, #3B82F6 73% 83%, #9CA3AF 83% 88%, #F59E0B 88% 100%); flex-shrink: 0; position: relative; }
+.pie-chart::after { content: ''; position: absolute; top: 20%; left: 20%; width: 60%; height: 60%; background: #fff; border-radius: 50%; }
+.pie-legend { flex: 1; }
+.legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; color: #2C3E50; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.legend-item .count { margin-left: auto; font-weight: 600; }
+.box-stats { display: flex; gap: 8px; }
+.box-stat-item { flex: 1; background: #F8F9FA; border-radius: 10px; padding: 12px; text-align: center; }
+.box-stat-item .num { font-size: 24px; font-weight: 700; color: #4A90D9; }
+.box-stat-item .lbl { font-size: 11px; color: #95A5A6; margin-top: 2px; }
+.timeline-progress { display: flex; gap: 6px; align-items: center; }
+.tp-done, .tp-pending, .tp-overdue { padding: 6px 12px; border-radius: 14px; font-size: 12px; font-weight: 500; }
+.tp-done { background: #ECFDF5; color: #10B981; }
+.tp-pending { background: #EFF6FF; color: #4A90D9; }
+.tp-overdue { background: #FEF2F2; color: #EF4444; }
+.export-btn { padding: 6px 12px; border-radius: 14px; font-size: 12px; background: #F0F7FF; color: #4A90D9; border: none; }
+
+/* ===== Page 07: Boxes ===== */
+.stats-bar { background: #fff; margin: 8px; border-radius: 12px; padding: 12px 16px; display: flex; gap: 8px; }
+.stat-chip { flex: 1; text-align: center; padding: 8px; background: #F8F9FA; border-radius: 8px; }
+.stat-chip .num { font-size: 18px; font-weight: 700; color: #4A90D9; }
+.stat-chip .lbl { font-size: 10px; color: #95A5A6; margin-top: 2px; }
+.box-room-group { background: #fff; margin: 8px; border-radius: 12px; overflow: hidden; }
+.box-room-header { padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #F0F2F5; }
+.box-room-header .name { flex: 1; font-size: 14px; font-weight: 600; }
+.box-room-header .count { font-size: 12px; color: #95A5A6; }
+.box-card { padding: 12px 16px; border-bottom: 1px solid #F5F7FA; display: flex; gap: 12px; align-items: center; }
+.box-card:last-child { border-bottom: none; }
+.box-code { width: 56px; height: 56px; border-radius: 10px; background: #F0F7FF; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+.box-code .code { font-size: 18px; font-weight: 700; color: #4A90D9; }
+.box-code .room { font-size: 9px; color: #95A5A6; }
+.box-info { flex: 1; min-width: 0; }
+.box-info .summary { font-size: 13px; font-weight: 500; color: #2C3E50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.box-info .meta { font-size: 11px; color: #95A5A6; margin-top: 2px; display: flex; gap: 8px; align-items: center; }
+.priority-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.box-status { padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.status-packed { background: #ECFDF5; color: #10B981; }
+.status-moved { background: #EEF2FF; color: #6366F1; }
+.status-unpacked { background: #FFF7ED; color: #F59E0B; }
+
+/* ===== Page 08: Label Preview ===== */
+.segment { display: flex; background: #fff; padding: 8px 16px; gap: 8px; }
+.seg-btn { flex: 1; padding: 8px; border-radius: 8px; font-size: 13px; text-align: center; background: #F0F2F5; color: #2C3E50; border: none; }
+.seg-btn.active { background: #4A90D9; color: #fff; }
+.preview-area { padding: 16px; }
+.preview-label { background: #fff; border-radius: 2px; border: 2px solid #2C3E50; padding: 16px; margin-bottom: 12px; }
+.label-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.label-title { font-size: 11px; color: #95A5A6; letter-spacing: 2px; text-transform: uppercase; }
+.label-code { font-size: 28px; font-weight: 800; color: #2C3E50; }
+.label-qr { width: 48px; height: 48px; background: #F0F2F5; border: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #95A5A6; }
+.label-row { display: flex; padding: 4px 0; font-size: 12px; border-bottom: 1px dashed #E5E7EB; }
+.label-row:last-child { border-bottom: none; }
+.label-row .key { width: 60px; color: #95A5A6; flex-shrink: 0; }
+.label-row .value { flex: 1; font-weight: 500; color: #2C3E50; }
+.label-tags { display: flex; gap: 6px; margin-top: 10px; }
+.label-tag { padding: 3px 10px; border-radius: 3px; font-size: 10px; font-weight: 600; border: 1px solid; }
+.tag-fragile { border-color: #EF4444; color: #EF4444; }
+.tag-priority { border-color: #F59E0B; color: #F59E0B; }
+.tag-room { border-color: #4A90D9; color: #4A90D9; }
+.a4-review { background: #fff; border: 1px solid #D1D5DB; border-radius: 4px; padding: 12px; margin: 16px; aspect-ratio: 210/297; }
+.a4-title { text-align: center; font-size: 10px; color: #95A5A6; margin-bottom: 8px; border-bottom: 1px solid #E5E7EB; padding-bottom: 4px; }
+.a4-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mini-label { border: 1px solid #2C3E50; padding: 6px; font-size: 8px; }
+.mini-label .ml-code { font-size: 14px; font-weight: 800; }
+.mini-label .ml-room { color: #95A5A6; }
+.mini-label .ml-content { margin-top: 2px; line-height: 1.3; }
+.mini-label .ml-date { color: #95A5A6; margin-top: 2px; }
+.settings-card { background: #fff; margin: 0 16px 16px; border-radius: 12px; padding: 14px; }
+.settings-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #2C3E50; }
+.setting-row { display: flex; align-items: center; padding: 8px 0; }
+.setting-row:not(:last-child) { border-bottom: 1px solid #F5F7FA; }
+.setting-row .label { flex: 1; font-size: 13px; color: #2C3E50; }
+.setting-row .value { font-size: 13px; color: #4A90D9; }
+.print-btns { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; padding: 12px 16px; border-top: 1px solid #F0F2F5; display: flex; gap: 10px; }
+.btn-print { flex: 1; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 600; border: none; }
+.btn-outline { background: #fff; color: #4A90D9; border: 1px solid #4A90D9; }
+.btn-primary-print { background: #4A90D9; color: #fff; }
+
+/* ===== Page 09: Profile ===== */
+.profile-header { background: linear-gradient(135deg, #4A90D9, #5BA0E6); padding: 32px 20px 40px; text-align: center; color: #fff; border-radius: 0 0 24px 24px; }
+.profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.3); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid rgba(255,255,255,0.5); }
+.nickname { font-size: 18px; font-weight: 600; }
+.level-badge { display: inline-block; margin-top: 6px; padding: 4px 12px; border-radius: 12px; font-size: 12px; background: rgba(255,255,255,0.2); }
+.upgrade-link { display: block; margin-top: 12px; font-size: 13px; color: #fff; text-decoration: underline; opacity: 0.9; }
+.quota-card { background: #fff; margin: -20px 16px 12px; border-radius: 16px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.quota-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; color: #2C3E50; }
+.quota-title a { font-size: 12px; color: #4A90D9; text-decoration: none; }
+.quota-item { margin-bottom: 12px; }
+.quota-item:last-child { margin-bottom: 0; }
+.quota-item .top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+.quota-item .used { font-weight: 600; color: #2C3E50; }
+.quota-item .limit { color: #95A5A6; }
+.quota-bar { height: 8px; background: #EEF2F7; border-radius: 4px; overflow: hidden; }
+.quota-bar .fill { height: 100%; border-radius: 4px; }
+.fill-safe { background: linear-gradient(90deg, #4A90D9, #7EC8B7); }
+.fill-warn { background: linear-gradient(90deg, #F59E0B, #EF4444); }
+.task-card-profile { background: #fff; margin: 8px; border-radius: 12px; padding: 14px; }
+.task-card-profile .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.task-card-profile .title { font-size: 14px; font-weight: 600; color: #2C3E50; }
+.task-card-profile .status { padding: 3px 10px; border-radius: 10px; font-size: 11px; background: #ECFDF5; color: #10B981; }
+.task-card-profile .info { font-size: 12px; color: #95A5A6; line-height: 1.6; }
+.menu-group { background: #fff; margin: 8px; border-radius: 12px; overflow: hidden; }
+.menu-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #F5F7FA; }
+.menu-item:last-child { border-bottom: none; }
+.menu-item .icon { font-size: 20px; margin-right: 12px; }
+.menu-item .text { flex: 1; font-size: 14px; color: #2C3E50; }
+.menu-item .badge { padding: 2px 8px; border-radius: 8px; font-size: 10px; background: #F0F7FF; color: #4A90D9; margin-right: 8px; }
+.menu-item .pro-badge { padding: 2px 8px; border-radius: 8px; font-size: 10px; background: linear-gradient(135deg, #F59E0B, #EF4444); color: #fff; margin-right: 8px; }
+.menu-item .arrow { color: #C0C4CC; font-size: 14px; }
+
+/* ===== Page 10: Upgrade ===== */
+.hero-upgrade { background: linear-gradient(135deg, #F59E0B, #EF4444, #EC4899); padding: 40px 20px 60px; text-align: center; color: #fff; position: relative; }
+.nav-bar-upgrade { background: rgba(255,255,255,0.15); padding: 12px 16px; display: flex; align-items: center; position: absolute; top: 0; left: 0; right: 0; }
+.nav-bar-upgrade .back { font-size: 20px; color: #fff; text-decoration: none; }
+.nav-bar-upgrade h2 { font-size: 17px; font-weight: 600; color: #fff; flex: 1; text-align: center; margin-right: 20px; }
+.crown { font-size: 48px; margin-bottom: 12px; }
+.hero-upgrade h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.hero-upgrade .subtitle { font-size: 14px; opacity: 0.9; }
+.price-card { background: #fff; margin: -30px 16px 16px; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; z-index: 1; }
+.price { display: flex; align-items: baseline; justify-content: center; gap: 4px; margin-bottom: 4px; }
+.price .currency { font-size: 18px; font-weight: 600; color: #EF4444; }
+.price .amount { font-size: 48px; font-weight: 800; color: #EF4444; line-height: 1; }
+.price .unit { font-size: 14px; color: #95A5A6; }
+.price-note { font-size: 12px; color: #95A5A6; margin-bottom: 16px; }
+.cta-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #F59E0B, #EF4444); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; }
+.benefits { padding: 0 16px 24px; }
+.benefits-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; text-align: center; color: #2C3E50; }
+.benefit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.benefit-item { background: #fff; border-radius: 12px; padding: 14px; text-align: center; }
+.benefit-item .icon { font-size: 28px; margin-bottom: 8px; }
+.benefit-item .title { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #2C3E50; }
+.benefit-item .desc { font-size: 11px; color: #95A5A6; line-height: 1.4; }
+.compare-card { background: #fff; margin: 0 16px 16px; border-radius: 16px; padding: 16px; }
+.compare-title { font-size: 15px; font-weight: 600; text-align: center; margin-bottom: 16px; color: #2C3E50; }
+.compare-table { width: 100%; }
+.compare-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #F5F7FA; }
+.compare-row:last-child { border-bottom: none; }
+.compare-row .feature { flex: 1; font-size: 13px; color: #2C3E50; }
+.compare-row .free { width: 60px; text-align: center; font-size: 12px; color: #95A5A6; }
+.compare-row .pro { width: 60px; text-align: center; font-size: 12px; color: #F59E0B; font-weight: 600; }
+.compare-header { font-weight: 600; font-size: 12px; }
+.compare-header .free { color: #95A5A6; }
+.compare-header .pro { color: #F59E0B; }
+.check { color: #10B981; }
+.cross { color: #D1D5DB; }
+.cta-note { text-align: center; font-size: 11px; color: #95A5A6; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="site-title">📦 搬家物品清单与进度跟踪器 · 全站原型宫格展示</div>
+  <div class="site-desc">搬家物品清单与进度跟踪器 · Moving Checklist & Progress Tracker</div>
+</div>
+
+<div class="screen-grid">
+
+  <!-- Screen 1: 首页 / 任务概览 (01-home.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">搬家清单</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="home-header">
+          <div class="home-header-top">
+            <h1>🏠 搬家清单</h1>
+            <div class="home-avatar">😊</div>
+          </div>
+          <div class="active-task">
+            <div class="task-title">搬家去朝阳区新家</div>
+            <div class="task-date">📅 搬家日期：2026年7月1日 · 还有2天</div>
+            <div class="task-stats">
+              <div class="stat-item"><div class="stat-num">48</div><div class="stat-label">物品总数</div></div>
+              <div class="stat-item"><div class="stat-num">36</div><div class="stat-label">已处理</div></div>
+              <div class="stat-item"><div class="stat-num">8</div><div class="stat-label">打包箱</div></div>
+            </div>
+            <div class="progress-bar"><div class="fill" style="width:68%"></div></div>
+            <div class="progress-text"><span>整体进度</span><span>68%</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">快速操作</div>
+          <div class="quick-actions">
+            <div class="action-btn"><div class="icon">📋</div><div class="label">物品清单</div></div>
+            <div class="action-btn"><div class="icon">📅</div><div class="label">时间线</div></div>
+            <div class="action-btn"><div class="icon">📦</div><div class="label">打包箱</div></div>
+            <div class="action-btn"><div class="icon">📊</div><div class="label">进度看板</div></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">今日待办</div>
+          <div class="timeline-card">
+            <div class="timeline-item">
+              <div class="timeline-dot done"></div>
+              <div class="timeline-info"><div class="name">确认丢弃/捐赠清单</div></div>
+              <span class="timeline-badge badge-done">已完成</span>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot current"></div>
+              <div class="timeline-info"><div class="name">准备打包材料</div></div>
+              <span class="timeline-badge badge-today">今天</span>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot overdue"></div>
+              <div class="timeline-info"><div class="name">联系搬家公司确认时间</div></div>
+              <span class="timeline-badge badge-overdue">逾期</span>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">房间进度</div>
+          <div class="timeline-card">
+            <div class="timeline-item">
+              <div class="timeline-info">
+                <div class="name">🛏 卧室 <span style="color:#95A5A6;font-size:11px">11/12件已处理</span></div>
+                <div class="progress-bar" style="margin-top:6px"><div class="fill" style="width:92%"></div></div>
+              </div>
+              <span style="font-size:13px;font-weight:600;color:#10B981">92%</span>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-info">
+                <div class="name">🍳 厨房 <span style="color:#95A5A6;font-size:11px">5/8件已处理</span></div>
+                <div class="progress-bar" style="margin-top:6px"><div class="fill" style="width:60%"></div></div>
+              </div>
+              <span style="font-size:13px;font-weight:600;color:#4A90D9">60%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active">🏠<div>首页</div></div>
+        <div class="nav-item">📊<div>进度</div></div>
+        <div class="nav-item">👤<div>我的</div></div>
+      </div>
+    </div>
+    <div class="phone-label">首页 / 任务概览</div>
+    <div class="phone-sublabel">P01 · 01-home.html</div>
+  </div>
+
+  <!-- Screen 2: 创建搬家任务 (02-create-task.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">创建搬家任务</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="form-section">
+          <div class="form-section-title">基础信息</div>
+          <div class="form-item">
+            <label>搬家日期<span style="color:#EF4444">*</span></label>
+            <div class="input"><input type="date" value="2026-07-01" style="text-align:right"></div>
+          </div>
+          <div class="form-item">
+            <label>搬家类型</label>
+            <div class="radio-group">
+              <div class="radio-option selected">🏠 个人住宅</div>
+              <div class="radio-option">🏢 办公室</div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label>旧地址</label>
+            <div class="input"><input type="text" value="海淀区中关村大街XX号" style="text-align:right"></div>
+          </div>
+          <div class="form-item">
+            <label>新地址</label>
+            <div class="input"><input type="text" value="朝阳区望京SOHO T1" style="text-align:right"></div>
+          </div>
+          <div class="form-item">
+            <label>房屋户型</label>
+            <div class="radio-group">
+              <div class="radio-option">一室</div>
+              <div class="radio-option selected">二室</div>
+              <div class="radio-option">三室</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-title">选择房间（可多选）</div>
+          <div class="room-grid">
+            <div class="room-chip selected"><span>🛏</span> 卧室</div>
+            <div class="room-chip selected"><span>🍳</span> 厨房</div>
+            <div class="room-chip selected"><span>🛋</span> 客厅</div>
+            <div class="room-chip selected"><span>📚</span> 书房</div>
+            <div class="room-chip selected"><span>🚿</span> 卫生间</div>
+            <div class="room-chip"><span>🌿</span> 阳台</div>
+            <div class="room-chip" style="border:1px dashed #C0C4CC;color:#95A5A6">＋ 自定义</div>
+          </div>
+        </div>
+        <div class="info-box">
+          💡 <strong>提示：</strong>选择房间后，系统将自动填充该房间的常见物品模板，您可以后续在清单中自由增减。同时会根据搬家日期自动生成时间线任务提醒。
+        </div>
+      </div>
+      <div class="primary-btn-bottom">创建任务并开始整理</div>
+    </div>
+    <div class="phone-label">创建搬家任务</div>
+    <div class="phone-sublabel">P02 · 02-create-task.html</div>
+  </div>
+
+  <!-- Screen 3: 物品清单主界面 (03-checklist.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">物品清单</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="nav-bar" style="position:relative;top:0;background:#fff;">
+          <div class="task-info">
+            <h2>搬家去朝阳区新家</h2>
+            <div class="sub">📅 2026-07-01 · 还有2天</div>
+          </div>
+          <div class="progress-badge">68%</div>
+        </div>
+        <div class="tabs">
+          <div class="tab active">📋 物品清单</div>
+          <div class="tab">📅 时间线</div>
+          <div class="tab">📦 打包箱</div>
+          <div class="tab">📊 进度</div>
+        </div>
+        <div class="filter-bar">
+          <div class="filter-chip active">全部房间 ▾</div>
+          <div class="filter-chip">全部状态 ▾</div>
+          <div class="search-box"><input type="text" placeholder="🔍 搜索物品"></div>
+        </div>
+        <div class="room-group">
+          <div class="room-header">
+            <span style="font-size:12px;color:#95A5A6">▼</span>
+            <span class="room-name">🛏 卧室</span>
+            <span class="room-stats">11/12件</span>
+            <span class="room-progress">92%</span>
+          </div>
+          <div class="item-row"><span class="item-name">床</span><span class="status-tag status-special">⚡ 单独搬运</span><span class="more-btn">···</span></div>
+          <div class="item-row"><span class="item-name">衣柜</span><span class="status-tag status-special">⚡ 单独搬运</span><span class="more-btn">···</span></div>
+          <div class="item-row"><span class="item-name">冬季衣物</span><span class="item-qty">×5</span><span class="status-tag status-pack">☑ 打包带走</span><span class="more-btn">···</span></div>
+          <div class="item-row"><span class="item-name">旧杂志</span><span class="item-qty">×8</span><span class="status-tag status-discard">✕ 丢弃</span><span class="more-btn">···</span></div>
+          <div class="item-row"><span class="item-name">旧衣服</span><span class="item-qty">×6</span><span class="status-tag status-donate">♡ 捐赠</span><span class="more-btn">···</span></div>
+        </div>
+        <div class="room-group">
+          <div class="room-header">
+            <span style="font-size:12px;color:#95A5A6">▶</span>
+            <span class="room-name">🍳 厨房</span>
+            <span class="room-stats">5/8件</span>
+            <span style="font-size:12px;font-weight:600;color:#4A90D9">60%</span>
+          </div>
+        </div>
+        <div class="room-group">
+          <div class="room-header">
+            <span style="font-size:12px;color:#95A5A6">▶</span>
+            <span class="room-name">🛋 客厅</span>
+            <span class="room-stats">3/6件</span>
+            <span style="font-size:12px;font-weight:600;color:#4A90D9">50%</span>
+          </div>
+        </div>
+      </div>
+      <div class="add-bar">
+        <button class="add-btn primary">＋ 添加物品</button>
+        <button class="add-btn secondary">＋ 添加房间</button>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active">🏠<div>首页</div></div>
+        <div class="nav-item">📊<div>进度</div></div>
+        <div class="nav-item">👤<div>我的</div></div>
+      </div>
+    </div>
+    <div class="phone-label">物品清单主界面</div>
+    <div class="phone-sublabel">P03 · 03-checklist.html</div>
+  </div>
+
+  <!-- Screen 4: 物品详情 / 编辑 (04-item-edit.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">物品详情</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="item-image">
+          <div class="photo-area">
+            <div class="icon">📷</div>
+            <div>点击拍照或上传</div>
+          </div>
+        </div>
+        <div class="status-section">
+          <div class="section-title-sm">处理状态</div>
+          <div class="status-options">
+            <div class="status-option"><div class="s-icon">○</div><div>待处理</div></div>
+            <div class="status-option" style="border-color:#EF4444;background:#FEF2F2;color:#EF4444"><div class="s-icon">✕</div><div>丢弃</div></div>
+            <div class="status-option"><div class="s-icon">♡</div><div>捐赠</div></div>
+            <div class="status-option"><div class="s-icon">☑</div><div>打包</div></div>
+            <div class="status-option"><div class="s-icon">⚡</div><div>单独</div></div>
+          </div>
+        </div>
+        <div class="form-section-edit">
+          <div class="form-item-edit"><label>物品名称</label><input type="text" value="旧杂志"></div>
+          <div class="form-item-edit"><label>数量</label><input type="text" value="8"></div>
+          <div class="form-item-edit"><label>所属房间</label><input type="text" value="卧室" style="text-align:right"></div>
+          <div class="form-item-edit"><label>备注</label><input type="text" placeholder="选填"></div>
+        </div>
+        <div class="attr-section">
+          <div class="section-title-sm">特殊属性（可选）</div>
+          <div class="attr-options">
+            <div class="attr-chip">🔒 易碎品</div>
+            <div class="attr-chip">💎 贵重品</div>
+            <div class="attr-chip">💧 需防潮</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-action">
+        <button class="btn-edit btn-secondary-edit">取消</button>
+        <button class="btn-edit btn-primary-edit">保存</button>
+      </div>
+    </div>
+    <div class="phone-label">物品详情 / 编辑</div>
+    <div class="phone-sublabel">P04 · 04-item-edit.html</div>
+  </div>
+
+  <!-- Screen 5: 时间线任务 (05-timeline.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">时间线任务</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="nav-bar" style="position:relative;top:0;background:#fff;">
+          <div class="task-info">
+            <h2>搬家去朝阳区新家</h2>
+            <div class="sub">📅 2026-07-01 · 还有2天</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab">📋 物品清单</div>
+          <div class="tab active">📅 时间线</div>
+          <div class="tab">📦 打包箱</div>
+          <div class="tab">📊 进度</div>
+        </div>
+        <div class="progress-summary">
+          <div class="circle-progress"><div class="circle-inner">62%</div></div>
+          <div class="summary-info">
+            <div class="label">时间线任务完成进度</div>
+            <div class="detail"><span style="color:#10B981;font-weight:600">5</span> 已完成 · <span style="color:#4A90D9;font-weight:600">2</span> 待完成 · <span style="color:#EF4444;font-weight:600">1</span> 已逾期</div>
+          </div>
+        </div>
+        <div class="timeline-nodes">
+          <div class="timeline-node">
+            <div class="dot dot-done">✓</div>
+            <div class="node-header">
+              <div class="node-date">提前30天 · 6月1日</div>
+              <div class="node-badge badge-done">已完成</div>
+            </div>
+            <div class="node-tasks">
+              <div class="task-row"><div class="task-check checked">✓</div><span class="task-text done">开始整理不常用物品</span></div>
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="dot dot-overdue">!</div>
+            <div class="node-header">
+              <div class="node-date">提前7天 · 6月24日</div>
+              <div class="node-badge badge-overdue">已逾期</div>
+            </div>
+            <div class="node-tasks">
+              <div class="task-row"><div class="task-check"></div><span class="task-text">联系搬家公司/租车</span><span class="task-action">标记完成</span></div>
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="dot dot-current">●</div>
+            <div class="node-header">
+              <div class="node-date">提前3天 · 6月28日</div>
+              <div class="node-badge badge-today">今天</div>
+            </div>
+            <div class="node-tasks">
+              <div class="task-row"><div class="task-check"></div><span class="task-text">准备打包材料</span><span class="task-action">标记完成</span></div>
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="dot dot-pending"></div>
+            <div class="node-header">
+              <div class="node-date">搬家当天 · 7月1日</div>
+              <div class="node-badge" style="background:#F3F4F6;color:#95A5A6">待办</div>
+            </div>
+            <div class="node-tasks">
+              <div class="task-row"><div class="task-check"></div><span class="task-text">按箱清单逐一核对</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active">🏠<div>首页</div></div>
+        <div class="nav-item">📊<div>进度</div></div>
+        <div class="nav-item">👤<div>我的</div></div>
+      </div>
+    </div>
+    <div class="phone-label">时间线任务</div>
+    <div class="phone-sublabel">P05 · 05-timeline.html</div>
+  </div>
+
+  <!-- Screen 6: 进度看板 (06-dashboard.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">进度看板</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="nav-bar" style="position:relative;top:0;background:#fff;">
+          <div class="task-info">
+            <h2>搬家进度看板</h2>
+            <div class="sub">搬家去朝阳区新家</div>
+          </div>
+          <button class="export-btn">📤 导出</button>
+        </div>
+        <div class="tabs">
+          <div class="tab">📋 物品清单</div>
+          <div class="tab">📅 时间线</div>
+          <div class="tab">📦 打包箱</div>
+          <div class="tab active">📊 进度</div>
+        </div>
+        <div class="overall">
+          <div class="big-num">68<span class="big-unit">%</span></div>
+          <div class="label">整体搬家进度</div>
+          <div class="overall-stats">
+            <div class="overall-stat"><div class="num">48</div><div class="lbl">物品总数</div></div>
+            <div class="overall-stat"><div class="num">36</div><div class="lbl">已处理</div></div>
+            <div class="overall-stat"><div class="num">8</div><div class="lbl">打包箱</div></div>
+            <div class="overall-stat"><div class="num">2</div><div class="lbl">天后搬家</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">按房间进度 <a href="#">查看清单 →</a></div>
+          <div class="room-row">
+            <span class="room-icon">🛏</span>
+            <div class="room-info">
+              <div class="room-name">卧室</div>
+              <div class="room-detail">11/12 件已处理</div>
+              <div class="room-progress-bar"><div class="fill" style="width:92%;background:#10B981"></div></div>
+            </div>
+            <span class="room-pct" style="color:#10B981">92%</span>
+          </div>
+          <div class="room-row">
+            <span class="room-icon">🍳</span>
+            <div class="room-info">
+              <div class="room-name">厨房</div>
+              <div class="room-detail">5/8 件已处理</div>
+              <div class="room-progress-bar"><div class="fill" style="width:60%;background:#4A90D9"></div></div>
+            </div>
+            <span class="room-pct" style="color:#4A90D9">60%</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">物品状态分布</div>
+          <div class="pie-container">
+            <div class="pie-chart"></div>
+            <div class="pie-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>打包带走<span class="count">28件</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div>丢弃<span class="count">8件</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>捐赠<span class="count">5件</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>单独搬运<span class="count">5件</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item">🏠<div>首页</div></div>
+        <div class="nav-item active">📊<div>进度</div></div>
+        <div class="nav-item">👤<div>我的</div></div>
+      </div>
+    </div>
+    <div class="phone-label">进度看板</div>
+    <div class="phone-sublabel">P06 · 06-dashboard.html</div>
+  </div>
+
+  <!-- Screen 7: 打包箱标签管理 (07-boxes.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">打包箱标签</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="nav-bar" style="position:relative;top:0;background:#fff;">
+          <div class="task-info">
+            <h2>搬家去朝阳区新家</h2>
+            <div class="sub">📅 2026-07-01 · 还有2天</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab">📋 物品清单</div>
+          <div class="tab">📅 时间线</div>
+          <div class="tab active">📦 打包箱</div>
+          <div class="tab">📊 进度</div>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-chip"><div class="num">8</div><div class="lbl">总箱数</div></div>
+          <div class="stat-chip"><div class="num" style="color:#10B981">5</div><div class="lbl">已打包</div></div>
+          <div class="stat-chip"><div class="num" style="color:#6366F1">2</div><div class="lbl">已搬运</div></div>
+          <div class="stat-chip"><div class="num" style="color:#F59E0B">1</div><div class="lbl">未打包</div></div>
+        </div>
+        <div class="box-room-group">
+          <div class="box-room-header">
+            <span class="room-icon">🛏</span>
+            <span class="name">卧室</span>
+            <span class="count">3个箱子</span>
+          </div>
+          <div class="box-card">
+            <div class="box-code"><span class="code">A01</span><span class="room">卧室</span></div>
+            <div class="box-info">
+              <div class="summary">冬季衣物、外套、围巾</div>
+              <div class="meta"><span class="priority-dot" style="background:#F59E0B"></span>中优先级 · 10件</div>
+            </div>
+            <span class="box-status status-packed">已打包</span>
+          </div>
+          <div class="box-card">
+            <div class="box-code"><span class="code">A02</span><span class="room">卧室</span></div>
+            <div class="box-info">
+              <div class="summary">被褥、床单、枕头</div>
+              <div class="meta"><span class="priority-dot" style="background:#10B981"></span>高优先级 · 6件</div>
+            </div>
+            <span class="box-status status-moved">已搬运</span>
+          </div>
+        </div>
+        <div class="box-room-group">
+          <div class="box-room-header">
+            <span class="room-icon">🍳</span>
+            <span class="name">厨房</span>
+            <span class="count">2个箱子</span>
+          </div>
+          <div class="box-card">
+            <div class="box-code"><span class="code">B01</span><span class="room">厨房</span></div>
+            <div class="box-info">
+              <div class="summary">锅具、餐具、调料</div>
+              <div class="meta"><span class="priority-dot" style="background:#EF4444"></span>高优先级 · 易碎 · 12件</div>
+            </div>
+            <span class="box-status status-packed">已打包</span>
+          </div>
+        </div>
+      </div>
+      <div class="add-bar">
+        <button class="add-btn primary">＋ 新增打包箱</button>
+        <button class="add-btn secondar" style="flex:0.8">🖨 批量打印</button>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item">🏠<div>首页</div></div>
+        <div class="nav-item active">📦<div>打包箱</div></div>
+        <div class="nav-item">👤<div>我的</div></div>
+      </div>
+    </div>
+    <div class="phone-label">打包箱标签管理</div>
+    <div class="phone-sublabel">P07 · 07-boxes.html</div>
+  </div>
+
+  <!-- Screen 8: 标签预览 / 打印 (08-label-preview.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">标签预览</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="segment">
+          <button class="seg-btn active">单标签预览</button>
+          <button class="seg-btn">A4排版预览</button>
+        </div>
+        <div class="preview-area">
+          <div class="preview-label">
+            <div class="label-header">
+              <div>
+                <div class="label-title">搬家箱标签</div>
+                <div class="label-code">A01</div>
+              </div>
+              <div class="label-qr">QR</div>
+            </div>
+            <div class="label-row"><span class="key">房间</span><span class="value">🛏 卧室</span></div>
+            <div class="label-row"><span class="key">内容</span><span class="value">冬季衣物、外套5件、围巾3条</span></div>
+            <div class="label-row"><span class="key">件数</span><span class="value">共 10 件</span></div>
+            <div class="label-row"><span class="key">日期</span><span class="value">2026-06-28</span></div>
+            <div class="label-tags">
+              <span class="label-tag tag-room">卧室</span>
+              <span class="label-tag tag-priority">中优先级</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding:0 16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:#2C3E50">A4排版预览（每页8个标签）</div>
+        </div>
+        <div class="a4-review">
+          <div class="a4-title">A4 纸 · 2×4 排版 · 实际打印效果</div>
+          <div class="a4-grid">
+            <div class="mini-label"><div class="ml-code">A01</div><div class="ml-room">卧室</div><div class="ml-content">冬季衣物、外套</div></div>
+            <div class="mini-label"><div class="ml-code">A02</div><div class="ml-room">卧室</div><div class="ml-content">被褥、床单</div></div>
+            <div class="mini-label"><div class="ml-code">B01</div><div class="ml-room">厨房</div><div class="ml-content">锅具、餐具</div></div>
+            <div class="mini-label"><div class="ml-code">B02</div><div class="ml-room">厨房</div><div class="ml-content">小家电</div></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-title">打印设置</div>
+          <div class="setting-row"><span class="label">纸张大小</span><span class="value">A4 ▾</span></div>
+          <div class="setting-row"><span class="label">每页标签数</span><span class="value">8个 ▾</span></div>
+        </div>
+      </div>
+      <div class="print-btns">
+        <button class="btn-print btn-outline">💾 保存图片</button>
+        <button class="btn-print btn-primary-print">🖨 打印标签</button>
+      </div>
+    </div>
+    <div class="phone-label">标签预览 / 打印</div>
+    <div class="phone-sublabel">P08 · 08-label-preview.html</div>
+  </div>
+
+  <!-- Screen 9: 个人中心 (09-profile.html) -->
+  <div>
+    <div class="phone">
+      <div class="wx-bar">
+        <span>←</span>
+        <span class="wx-title">个人中心</span>
+        <span class="wx-dots">··· ○</span>
+      </div>
+      <div class="phone-content">
+        <div class="profile-header">
+          <div class="profile-avatar">😊</div>
+          <div class="nickname">小明</div>
+          <div class="level-badge">🆓 免费版用户</div>
+          <a href="#" class="upgrade-link">升级专业版，解锁全部功能 →</a>
+        </div>
+        <div class="quota-card">
+          <div class="quota-title">我的权益（免费版）<a href="#">升级 →</a></div>
+          <div class="quota-item">
+            <div class="top"><span class="used">物品 48件</span><span class="limit">/ 50件上限</span></div>
+            <div class="quota-bar"><div class="fill fill-warn" style="width:96%"></div></div>
+          </div>
+          <div class="quota-item">
+            <div class="top"><span class="used">打包箱 8个</span><span class="limit">/ 10个上限</span></div>
+            <div class="quota-bar"><div class="fill fill-safe" style="width:80%"></div></div>
+          </div>
+        </div>
+        <div class="task-card-profile">
+          <div class="header">
+            <div class="title">🏠 当前搬家任务</div>
+            <div class="status">打包中</div>
+          </div>
+          <div class="info">
+            搬家去朝阳区新家<br>
+            📅 2026-07-01 · 还有2天<br>
+            📍 海淀区 → 朝阳区
+          </div>
+        </div>
+        <div class="menu-group">
+          <div class="menu-item">
+            <span class="icon">📋</span>
+            <span class="text">导出清单为Excel</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="menu-item">
+            <span class="icon">🔔</span>
+            <span class="text">提醒设置</span>
+            <span class="badge">提前1天</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="menu-item">
+            <span class="icon">👥</span>
+            <span class="text">协同成员</span>
+            <span class="pro-badge">专业版</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="menu-item">
+            <span class="icon">📊</span>
+            <span class="text">进度报告导出</span>
+            <span class="pro-badge">专业版</span>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item">🏠<div>首页</div></div>
+        <div class="nav-item">📊<div>进度</div></div>
+        <div class="nav-item active">👤<div>我的</div></div>
+      </div>
+    </div>
+    <div class="phone-label">个人中心</div>
+    <div class="phone-sublabel">P09 · 09-profile.html</div>
+  </div>
+
+  <!-- Screen 10: 升级专业版 (10-upgrade.html) -->
+  <div>
+    <div class="phone">
+      <div class="hero-upgrade">
+        <div class="nav-bar-upgrade">
+          <a href="#" class="back">←</a>
+          <h2>升级专业版</h2>
+        </div>
+        <div style="padding-top:40px">
+          <div class="crown">👑</div>
+          <h1>专业版</h1>
+          <div class="subtitle">搬家无忧，一次付费全搞定</div>
+        </div>
+      </div>
+      <div class="phone-content">
+        <div class="price-card">
+          <div class="price">
+            <span class="currency">¥</span>
+            <span class="amount">9</span>
+            <span class="unit">/ 单次搬家</span>
+          </div>
+          <div class="price-note">一次购买，本次搬家全程使用所有功能</div>
+          <button class="cta-btn">立即升级 · 微信支付</button>
+        </div>
+        <div class="benefits">
+          <div class="benefits-title">专业版权益</div>
+          <div class="benefit-grid">
+            <div class="benefit-item">
+              <div class="icon">📦</div>
+              <div class="title">不限物品数量</div>
+              <div class="desc">告别50件上限<br>再多物品也够用</div>
+            </div>
+            <div class="benefit-item">
+              <div class="icon">🏷️</div>
+              <div class="title">不限打包箱</div>
+              <div class="desc">告别10箱上限<br>生成更多标签</div>
+            </div>
+            <div class="benefit-item">
+              <div class="icon">📱</div>
+              <div class="title">二维码标签</div>
+              <div class="desc">扫码查看箱内物品<br>搬到新家一目了然</div>
+            </div>
+            <div class="benefit-item">
+              <div class="icon">👥</div>
+              <div class="title">协同成员</div>
+              <div class="desc">最多邀请5人<br>全家一起整理</div>
+            </div>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-title">版本对比</div>
+          <div class="compare-table">
+            <div class="compare-row compare-header">
+              <div class="feature">功能</div>
+              <div class="free">免费版</div>
+              <div class="pro">专业版</div>
+            </div>
+            <div class="compare-row">
+              <div class="feature">物品数量</div>
+              <div class="free">50件</div>
+              <div class="pro"><span class="check">✓</span> 不限</div>
+            </div>
+            <div class="compare-row">
+              <div class="feature">二维码标签</div>
+              <div class="free"><span class="cross">✕</span></div>
+              <div class="pro"><span class="check">✓</span></div>
+            </div>
+            <div class="compare-row">
+              <div class="feature">协同成员</div>
+              <div class="free"><span class="cross">✕</span></div>
+              <div class="pro">最多5人</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">升级专业版</div>
+    <div class="phone-sublabel">P10 · 10-upgrade.html</div>
+  </div>
+
+</div>
+
+</body>
+</html>

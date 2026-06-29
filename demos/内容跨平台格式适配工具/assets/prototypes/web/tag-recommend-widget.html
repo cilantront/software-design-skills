@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>标签推荐组件原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F3FF;padding:32px;color:#312E81;}
+.widget{max-width:560px;margin:0 auto;background:white;border-radius:16px;border:1px solid #E5E7EB;padding:32px;box-shadow:0 4px 12px rgba(99,102,241,0.08);}
+.title{font-size:14px;font-weight:600;margin-bottom:16px;}
+.platform-section{margin-bottom:20px;}
+.platform-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:10px;}
+.platform-badge{font-size:11px;background:#EEF2FF;color:#6366F1;padding:2px 8px;border-radius:10px;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:6px;font-size:12px;background:#F3F4F6;color:#374151;cursor:pointer;transition:all .2s;}
+.tag:hover{background:#EEF2FF;color:#6366F1;}
+.tag.active{background:#EEF2FF;color:#6366F1;border:1px solid #818CF8;}
+.tag .heat{font-size:10px;color:#6B7280;}
+.tag .remove{font-size:14px;color:#9CA3AF;margin-left:4px;cursor:pointer;}
+.add-tag{padding:5px 10px;border-radius:6px;font-size:12px;background:white;border:1px dashed #D5D8DC;color:#6B7280;cursor:pointer;}
+.add-tag:hover{border-color:#6366F1;color:#6366F1;}
+.count-info{font-size:11px;color:#6B7280;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="title">标签与话题推荐</div>
+  <div class="platform-section">
+    <div class="platform-label">📕 小红书 <span class="platform-badge">推荐 8 个</span></div>
+    <div class="tags">
+      <span class="tag active">#秋季穿搭 <span class="heat">🔥 2.3w</span></span>
+      <span class="tag active">#新品推荐 <span class="heat">🔥 1.8w</span></span>
+      <span class="tag active">#每日穿搭</span>
+      <span class="tag active">#显瘦穿搭 <span class="heat">🔥 3.1w</span></span>
+      <span class="tag active">#焦糖色系</span>
+      <span class="tag active">#学生党好物</span>
+      <span class="tag active">#外套推荐</span>
+      <span class="tag active">#OOTD</span>
+      <span class="add-tag">+ 添加标签</span>
+    </div>
+    <div class="count-info">已选 8/10 个（建议5-10个）</div>
+  </div>
+  <div class="platform-section">
+    <div class="platform-label">🎵 抖音 <span class="platform-badge">推荐 4 个</span></div>
+    <div class="tags">
+      <span class="tag active">#秋季外套 <span class="heat">🔥 5.2w</span></span>
+      <span class="tag active">#新品首发</span>
+      <span class="tag active">#显瘦穿搭 <span class="heat">🔥 8.7w</span></span>
+      <span class="tag active">#焦糖色</span>
+      <span class="add-tag">+ 添加标签</span>
+    </div>
+    <div class="count-info">已选 4/5 个（建议3-5个）</div>
+  </div>
+  <div class="platform-section">
+    <div class="platform-label">💬 公众号 <span class="platform-badge">推荐 3 个</span></div>
+    <div class="tags">
+      <span class="tag active">#秋季新品</span>
+      <span class="tag active">#穿搭推荐</span>
+      <span class="tag active">#时尚</span>
+      <span class="add-tag">+ 添加标签</span>
+    </div>
+    <div class="count-info">已选 3/5 个（建议3-5个）</div>
+  </div>
+</div>
+</body>
+</html>

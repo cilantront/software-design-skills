@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>老年人数字遗产管家 - 家庭端小程序原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; padding: 24px; }
+h1 { text-align: center; color: #333; margin-bottom: 8px; font-size: 24px; }
+.subtitle { text-align: center; color: #666; margin-bottom: 24px; font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+
+/* WeChat mini-program frame */
+.mini-frame {
+  width: 320px; height: 620px; margin: 0 auto;
+  background: #fff; border-radius: 24px;
+  border: 3px solid #333;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  overflow: hidden; position: relative;
+  display: flex; flex-direction: column;
+}
+.phone-label { text-align: center; color: #666; font-size: 13px; margin-top: 12px; font-weight: 600; }
+
+/* WeChat status bar */
+.wx-bar {
+  height: 44px; background: #EDEDED; border-bottom: 1px solid #d9d9d9;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; font-size: 12px; color: #333;
+}
+.wx-bar .wx-left { font-size: 18px; cursor: pointer; }
+.wx-bar .wx-title { font-size: 16px; font-weight: 600; position: absolute; left: 50%; transform: translateX(-50%); }
+.wx-bar .wx-right { display: flex; gap: 12px; font-size: 18px; }
+
+/* Mini-program header */
+.mp-header {
+  background: #07C160; color: #fff; padding: 14px 16px;
+  font-size: 18px; font-weight: 600; text-align: center;
+}
+.mp-header.sub { font-size: 16px; padding: 12px 16px; }
+
+.content { flex: 1; overflow-y: auto; background: #f5f5f5; }
+
+/* WeChat mini-program tab bar */
+.wx-tab-bar {
+  height: 56px; background: #fff; border-top: 1px solid #e5e5e5;
+  display: flex; align-items: center; justify-content: space-around;
+  flex-shrink: 0;
+}
+.wx-tab {
+  display: flex; flex-direction: column; align-items: center;
+  font-size: 10px; color: #999; gap: 2px;
+}
+.wx-tab.active { color: #07C160; }
+.wx-tab .tab-icon { font-size: 20px; }
+
+/* Family home */
+.family-banner {
+  background: linear-gradient(135deg, #07C160 0%, #4CD964 100%);
+  color: #fff; padding: 20px 16px; text-align: center;
+}
+.family-banner h3 { font-size: 18px; margin-bottom: 4px; }
+.family-banner p { font-size: 13px; opacity: 0.9; }
+.family-members {
+  display: flex; justify-content: center; gap: 16px;
+  margin-top: 12px;
+}
+.member-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; background: rgba(255,255,255,0.2);
+}
+
+.quick-actions {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; padding: 16px;
+}
+.quick-action {
+  background: #fff; border-radius: 12px; padding: 12px 8px;
+  text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.quick-action .qa-icon { font-size: 28px; margin-bottom: 4px; }
+.quick-action .qa-name { font-size: 12px; color: #333; }
+
+.notify-section { padding: 0 16px 12px; }
+.section-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 8px; }
+.notify-card {
+  background: #fff; border-radius: 10px; padding: 12px;
+  margin-bottom: 8px; display: flex; gap: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.notify-icon { font-size: 24px; flex-shrink: 0; }
+.notify-content { flex: 1; }
+.notify-title { font-size: 14px; font-weight: 500; color: #333; }
+.notify-desc { font-size: 12px; color: #999; margin-top: 2px; }
+.notify-time { font-size: 11px; color: #bbb; margin-top: 4px; }
+.notify-badge {
+  display: inline-block; background: #F44336; color: #fff;
+  font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-left: 6px;
+}
+
+/* Member management */
+.member-list { padding: 12px 16px; }
+.member-card {
+  background: #fff; border-radius: 12px; padding: 14px;
+  margin-bottom: 10px; display: flex; align-items: center;
+  gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.member-avatar-sm {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.avatar-admin { background: #E8F5E9; }
+.avatar-member { background: #E3F2FD; }
+.avatar-agent { background: #FFF3E0; }
+.member-info { flex: 1; }
+.member-name { font-size: 15px; font-weight: 600; }
+.member-role { font-size: 12px; margin-top: 2px; }
+.role-admin { color: #07C160; }
+.role-member { color: #1976D2; }
+.role-agent { color: #FF9800; }
+.member-action { font-size: 12px; color: #999; }
+
+.invite-btn {
+  width: calc(100% - 32px); margin: 0 16px 16px;
+  height: 46px; background: #07C160; color: #fff;
+  border: none; border-radius: 10px; font-size: 15px;
+  font-weight: 500; cursor: pointer;
+}
+
+/* Delegation page */
+.delegate-select {
+  padding: 12px 16px; background: #fff; margin-bottom: 8px;
+}
+.delegate-select label { font-size: 14px; color: #666; display: block; margin-bottom: 6px; }
+.delegate-select select {
+  width: 100%; height: 42px; border: 1px solid #e0e0e0;
+  border-radius: 8px; padding: 0 12px; font-size: 15px;
+  appearance: auto;
+}
+.delegate-accounts { padding: 12px 16px; }
+.delegate-account {
+  background: #fff; border-radius: 10px; padding: 12px;
+  margin-bottom: 8px; display: flex; align-items: center;
+  justify-content: space-between;
+}
+.da-left { display: flex; align-items: center; gap: 10px; }
+.da-icon { font-size: 24px; }
+.da-name { font-size: 14px; font-weight: 500; }
+.da-sub { font-size: 12px; color: #999; }
+.da-actions { display: flex; gap: 6px; }
+.da-btn {
+  padding: 6px 10px; border-radius: 6px; font-size: 12px;
+  border: none; cursor: pointer;
+}
+.da-btn-view { background: #E3F2FD; color: #1976D2; }
+.da-btn-edit { background: #E8F5E9; color: #2E7D32; }
+
+/* Notification center */
+.notify-tabs {
+  display: flex; background: #fff; padding: 8px 12px; gap: 8px;
+  border-bottom: 1px solid #eee;
+}
+.notify-tab {
+  padding: 6px 12px; background: #f0f0f0; border-radius: 14px;
+  font-size: 13px; color: #666; cursor: pointer;
+}
+.notify-tab.active { background: #07C160; color: #fff; }
+.notify-list { padding: 12px 16px; }
+.notify-item {
+  background: #fff; border-radius: 10px; padding: 12px;
+  margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.ni-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ni-type { font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+.ni-type-activity { background: #FFF8E1; color: #F57F17; }
+.ni-type-inherit { background: #E8F5E9; color: #2E7D32; }
+.ni-type-emergency { background: #FFEBEE; color: #C62828; }
+.ni-title { font-size: 14px; font-weight: 500; }
+.ni-content { font-size: 13px; color: #666; line-height: 1.5; }
+.ni-footer { display: flex; justify-content: space-between; margin-top: 6px; }
+.ni-time { font-size: 11px; color: #bbb; }
+.ni-action { font-size: 12px; color: #07C160; }
+
+/* Family settings */
+.settings-section { padding: 12px 16px; }
+.settings-card {
+  background: #fff; border-radius: 12px; overflow: hidden;
+  margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.settings-row {
+  padding: 14px 16px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid #f5f5f5;
+  font-size: 15px;
+}
+.settings-row:last-child { border-bottom: none; }
+.sr-label { color: #333; }
+.sr-value { color: #999; font-size: 14px; }
+.sr-value.green { color: #07C160; }
+.sr-value.red { color: #F44336; }
+
+/* Invite QR */
+.invite-content { padding: 24px; text-align: center; }
+.invite-content h3 { font-size: 18px; margin-bottom: 16px; }
+.qr-box {
+  width: 200px; height: 200px; margin: 0 auto 16px;
+  background: #fff; border: 2px solid #e0e0e0; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px;
+}
+.invite-tip { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 16px; }
+.invite-phone {
+  margin: 16px 0;
+}
+.invite-phone input {
+  width: 100%; height: 44px; border: 1px solid #e0e0e0;
+  border-radius: 8px; padding: 0 12px; font-size: 15px;
+  text-align: center;
+}
+.invite-send {
+  width: 100%; height: 46px; background: #07C160; color: #fff;
+  border: none; border-radius: 10px; font-size: 16px; cursor: pointer;
+  margin-top: 12px;
+}
+.invite-or { color: #999; font-size: 13px; margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<h1>👨‍👩‍👧‍👦 老年人数字遗产管家 - 家庭端小程序原型</h1>
+<p class="subtitle">微信小程序 · 家庭成员管理 · 代办操作 · 通知接收 | 宫格布局展示所有核心页面</p>
+
+<div class="grid">
+
+<!-- Screen 1: Family Home -->
+<div>
+<div class="mini-frame">
+  <div class="wx-bar">
+    <span class="wx-left">‹</span>
+    <span class="wx-title">数字遗产管家</span>
+    <span class="wx-right">⋯</span>
+  </div>
+  <div class="content">
+    <div class="family-banner">
+      <h3>张大爷的家庭</h3>
+      <p>4位成员 · 家庭版有效期至 2027-06-29</p>
+      <div class="family-members">
+        <div class="member-avatar">👴</div>
+        <div class="member-avatar">👨</div>
+        <div class="member-avatar">👩</div>
+        <div class="member-avatar" style="border:2px dashed rgba(255,255,255,0.6);">＋</div>
+      </div>
+    </div>
+    <div class="quick-actions">
+      <div class="quick-action"><div class="qa-icon">👥</div><div class="qa-name">成员管理</div></div>
+      <div class="quick-action"><div class="qa-icon">📋</div><div class="qa-name">帮爸代办</div></div>
+      <div class="quick-action"><div class="qa-icon">🔔</div><div class="qa-name">消息通知</div></div>
+      <div class="quick-action"><div class="qa-icon">⚙️</div><div class="qa-name">家庭设置</div></div>
+    </div>
+    <div class="notify-section">
+      <div class="section-title">最近动态</div>
+      <div class="notify-card">
+        <span class="notify-icon">⚠️</span>
+        <div class="notify-content">
+          <div class="notify-title">爸爸医保账户低活跃<span class="notify-badge">新</span></div>
+          <div class="notify-desc">已45天未登录，建议提醒爸爸查看</div>
+          <div class="notify-time">今天 10:30</div>
+        </div>
+      </div>
+      <div class="notify-card">
+        <span class="notify-icon">✅</span>
+        <div class="notify-content">
+          <div class="notify-title">妹妹查看了支付宝账户</div>
+          <div class="notify-desc">代办操作已完成</div>
+          <div class="notify-time">昨天 15:22</div>
+        </div>
+      </div>
+      <div class="notify-card">
+        <span class="notify-icon">👤</span>
+        <div class="notify-content">
+          <div class="notify-title">张小红加入了家庭</div>
+          <div class="notify-desc">角色：普通成员</div>
+          <div class="notify-time">3天前</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="wx-tab-bar">
+    <div class="wx-tab active"><span class="tab-icon">🏠</span>首页</div>
+    <div class="wx-tab"><span class="tab-icon">📋</span>代办</div>
+    <div class="wx-tab"><span class="tab-icon">🔔</span>消息</div>
+    <div class="wx-tab"><span class="tab-icon">👤</span>我的</div>
+  </div>
+</div>
+<p class="phone-label">① 家庭首页</p>
+</div>
+
+<!-- Screen 2: Member Management -->
+<div>
+<div class="mini-frame">
+  <div class="wx-bar">
+    <span class="wx-left">‹</span>
+    <span class="wx-title">成员管理</span>
+    <span class="wx-right">⋯</span>
+  </div>
+  <div class="content">
+    <div style="padding:12px 16px;font-size:13px;color:#999;">共4位成员 · 管理员可设置角色</div>
+    <div class="member-list">
+      <div class="member-card">
+        <div class="member-avatar-sm avatar-admin">👴</div>
+        <div class="member-info">
+          <div class="member-name">张大爷</div>
+          <div class="member-role role-admin">👑 管理员（被管理人）</div>
+        </div>
+        <div class="member-action">本人</div>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar-sm avatar-agent">👨</div>
+        <div class="member-info">
+          <div class="member-name">张小明</div>
+          <div class="member-role role-agent">🔧 代办人</div>
+        </div>
+        <div class="member-action">可代办 ›</div>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar-sm avatar-member">👩</div>
+        <div class="member-info">
+          <div class="member-name">张小红</div>
+          <div class="member-role role-member">👤 普通成员</div>
+        </div>
+        <div class="member-action">设置 ›</div>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar-sm avatar-member">👵</div>
+        <div class="member-info">
+          <div class="member-name">张奶奶</div>
+          <div class="member-role role-member">👤 普通成员</div>
+        </div>
+        <div class="member-action">设置 ›</div>
+      </div>
+    </div>
+    <button class="invite-btn">＋ 邀请新成员</button>
+  </div>
+  <div class="wx-tab-bar">
+    <div class="wx-tab active"><span class="tab-icon">🏠</span>首页</div>
+    <div class="wx-tab"><span class="tab-icon">📋</span>代办</div>
+    <div class="wx-tab"><span class="tab-icon">🔔</span>消息</div>
+    <div class="wx-tab"><span class="tab-icon">👤</span>我的</div>
+  </div>
+</div>
+<p class="phone-label">② 成员管理</p>
+</div>
+
+<!-- Screen 3: Invite Member -->
+<div>
+<div class="mini-frame">
+  <div class="wx-bar">
+    <span class="wx-left">‹</span>
+    <span class="wx-title">邀请成员</span>
+    <span class="wx-right">⋯</span>
+  </div>
+  <div class="content">
+    <div class="invite-content">
+      <h3>邀请家人加入</h3>
+      <div class="qr-box">📱</div>
+      <p class="invite-tip">让家人用微信扫描上方二维码<br>即可加入"张大爷的家庭"</p>
+      <div class="invite-or">— 或通过手机号邀请 —</div>
+      <div class="invite-phone">
+        <input type="tel" placeholder="输入家人手机号">
+      </div>
+      <button class="invite-send">发送邀请</button>
+      <p style="font-size:12px;color:#999;margin-top:12px;">邀请有效期7天</p>
+    </div>
+  </div>
+  <div class="wx-tab-bar">
+    <div class="wx-tab active"><span class="tab-icon">🏠</span>首页</div>
+    <div class="wx-tab"><span class="tab-icon">📋</span>代办</div>
+    <div class="wx-tab"><span class="tab-icon">🔔</span>消息</div>
+    <div class="wx-tab"><span class="tab-icon">👤</span>我的</div>
+  </div>
+</div>
+<p class="phone-label">③ 邀请成员</p>
+</div>
+
+<!-- Screen 4: Delegation -->
+<div>
+<div class="mini-frame">
+  <div class="wx-bar">
+    <span class="wx-left">‹</span>
+    <span class="wx-title">帮爸代办</span>
+    <span class="wx-right">⋯</span>
+  </div>
+  <div class="content">
+    <div class="delegate-select">
+      <label>选择代办对象</label>
+      <select>
+        <option>👴 张大爷（爸爸）</option>
+        <option>👵 张奶奶（妈妈）</option>
+      </select>
+    </div>
+    <div style="padding:8px 16px;font-size:13px;color:#999;">爸爸的账户（共6个）· 您可代办以下账户</div>
+    <div class="delegate-accounts">
+      <div class="delegate-account">
+        <div class="da-left">
+          <span class="da-icon">🏦</span>
+          <div>
+            <div class="da-name">中国工商银行</div>
+            <div class="da-sub">🟢 活跃 · 5天前</div>
+          </div>
+        </div>
+        <div class="da-actions">
+          <button class="da-btn da-btn-view">查看</button>
+          <button class="da-btn da-btn-edit">编辑</button>
+        </div>
+      </div>
+      <div class="delegate-account">
+        <div class="da-left">
+          <span class="da-icon">💬</span>
+          <div>
+            <div class="da-name">微信</div>
+            <div class="da-sub">🟢 活跃 · 1天前</div>
+          </div>
+        </div>
+        <div class="da-actions">
+          <button class="da-btn da-btn-view">查看</button>
+          <button class="da-btn da-btn-edit">编辑</button>
+        </div>
+      </div>
+      <div class="delegate-account">
+        <div class="da-left">
+          <span class="da-icon">🏥</span>
+          <div>
+            <div class="da-name">医保账户</div>
+            <div class="da-sub">🟡 45天未登录</div>
+          </div>
+        </div>
+        <div class="da-actions">
+          <button class="da-btn da-btn-view">查看</button>
+          <button class="da-btn da-btn-edit">编辑</button>
+        </div>
+      </div>
+      <div class="delegate-account">
+        <div class="da-left">
+          <span class="da-icon">💰</span>
+          <div>
+            <div class="da-name">支付宝</div>
+            <div class="da-sub">🟢 活跃 · 3天前</div>
+          </div>
+        </div>
+        <div class="da-actions">
+          <button class="da-btn da-btn-view">查看</button>
+          <button class="da-btn da-btn-edit">编辑</button>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px 16px;">
+      <button class="invite-btn" style="background:#1976D2;">＋ 帮爸爸添加新账户</button>
+    </div>
+  </div>
+  <div class="wx-tab-bar">
+    <div class="wx-tab"><span class="tab-icon">🏠</span>首页</div>
+    <div class="wx-tab active"><span class="tab-icon">📋</span>代办</div>
+    <div class="wx-tab"><span class="tab-icon">🔔</span>消息</div>
+    <div class="wx-tab"><span class="tab-icon">👤</span>我的</div>
+  </div>
+</div>
+<p class="phone-label">④ 代办管理</p>
+</div>
+
+<!-- Screen 5: Notification Center -->
+<div>
+<div class="mini-frame">
+  <div class="wx-bar">
+    <span class="wx-left">‹</span>
+    <span class="wx-title">消息通知</span>
+    <span class="wx-right">⋯</span>
+  </div>
+  <div class="content">
+    <div class="notify-tabs">
+      <span class="notify-tab active">全部</span>
+      <span class="notify-tab">活跃度</span>
+      <span class="notify-tab">继承</span>
+      <span class="notify-tab">紧急</span>
+    </div>
+    <div class="notify-list">
+      <div class="notify-item">
+        <div class="ni-header">
+          <span class="ni-type ni-type-activity">活跃度</span>
+          <span class="ni-title">爸爸医保账户低活跃提醒</span>
+        </div>
+        <div class="ni-content">爸爸的医保账户已45天未登录，建议提醒爸爸核查账户状态，防止账户异常。</div>
+        <div class="ni-footer">
+          <span class="ni-time">今天 10:30</span>
+          <span class="ni-action">提醒爸爸 ›</span>
+        </div>
+      </div>
+      <div class="notify-item">
+        <div class="ni-header">
+          <span class="ni-type ni-type-inherit">继承</span>
+          <span class="ni-title">继承设置已更新</span>
+        </div>
+        <div class="ni-content">爸爸更新了继承人设置，您的可继承账户范围已变更。</div>
+        <div class="ni-footer">
+          <span class="ni-time">昨天 09:15</span>
+          <span class="ni-action">查看详情 ›</span>
+        </div>
+      </div>
+      <div class="notify-item">
+        <div class="ni-header">
+          <span class="ni-type ni-type-activity">活跃度</span>
+          <span class="ni-title">爸爸建设银行长期未登录</span>
+        </div>
+        <div class="ni-content">爸爸的建设银行账户已62天未登录，请及时提醒。</div>
+        <div class="ni-footer">
+          <span class="ni-time">3天前</span>
+          <span class="ni-action">提醒爸爸 ›</span>
+        </div>
+      </div>
+      <div class="notify-item">
+        <div class="ni-header">
+          <span class="ni-type ni-type-emergency">紧急</span>
+          <span class="ni-title">紧急模式测试</span>
+        </div>
+        <div class="ni-content">爸爸激活了紧急模式（测试），请确认爸爸安全状况。</div>
+        <div class="ni-footer">
+          <span class="ni-time">1周前</span>
+          <span class="ni-action">已确认 ✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="wx-tab-bar">
+    <div class="wx-tab"><span class="tab-icon">🏠</span>首页</div>
+    <div class="wx-tab"><span class="tab-icon">📋</span>代办</div>
+    <div class="wx-tab active"><span class="tab-icon">🔔</span>消息</div>
+    <div class="wx-tab"><span class="tab-icon">👤</span>我的</div>
+  </div>
+</div>
+<p class="phone-label">⑤ 消息通知</p>
+</div>
+
+<!-- Screen 6: Family Settings -->
+<div>
+<div class="mini-frame">
+  <div class="wx-bar">
+    <span class="wx-left">‹</span>
+    <span class="wx-title">家庭设置</span>
+    <span class="wx-right">⋯</span>
+  </div>
+  <div class="content">
+    <div class="settings-section">
+      <div class="section-title" style="margin-bottom:8px;">基本信息</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="sr-label">家庭名称</span>
+          <span class="sr-value">张大爷的家庭 ›</span>
+        </div>
+        <div class="settings-row">
+          <span class="sr-label">成员数量</span>
+          <span class="sr-value">4/6人</span>
+        </div>
+        <div class="settings-row">
+          <span class="sr-label">创建时间</span>
+          <span class="sr-value">2026-06-29</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin:16px 0 8px;">订阅管理</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="sr-label">当前套餐</span>
+          <span class="sr-value green">家庭版 ¥19/月</span>
+        </div>
+        <div class="settings-row">
+          <span class="sr-label">到期时间</span>
+          <span class="sr-value">2027-06-29</span>
+        </div>
+        <div class="settings-row">
+          <span class="sr-label">自动续费</span>
+          <span class="sr-value green">已开启 ✓</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin:16px 0 8px;">通知设置</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="sr-label">活跃度提醒</span>
+          <span class="sr-value green">已开启</span>
+        </div>
+        <div class="settings-row">
+          <span class="sr-label">继承通知</span>
+          <span class="sr-value green">已开启</span>
+        </div>
+        <div class="settings-row">
+          <span class="sr-label">免打扰时间</span>
+          <span class="sr-value">22:00-07:00 ›</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin:16px 0 8px;">危险操作</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="sr-label" style="color:#F44336;">退出家庭组</span>
+          <span class="sr-value red">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="wx-tab-bar">
+    <div class="wx-tab"><span class="tab-icon">🏠</span>首页</div>
+    <div class="wx-tab"><span class="tab-icon">📋</span>代办</div>
+    <div class="wx-tab"><span class="tab-icon">🔔</span>消息</div>
+    <div class="wx-tab active"><span class="tab-icon">👤</span>我的</div>
+  </div>
+</div>
+<p class="phone-label">⑥ 家庭设置</p>
+</div>
+
+</div>
+
+<div style="text-align:center;margin-top:32px;padding:16px;color:#999;font-size:13px;">
+  老年人数字遗产管家 · 家庭端小程序全站点原型 · 共6个核心页面<br>
+  微信小程序风格 · 家庭成员管理 · 子女代办 · 通知接收
+</div>
+
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>导出功能组件原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; padding: 40px; }
+.widget-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.export-widget { max-width: 560px; background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.format-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.format-card { padding: 14px 10px; border: 2px solid #e0e0e0; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.format-card.selected { border-color: #667eea; background: #f0f2ff; }
+.format-icon { font-size: 24px; margin-bottom: 4px; }
+.format-name { font-size: 12px; font-weight: 600; }
+.format-desc { font-size: 10px; color: #999; margin-top: 2px; }
+.size-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.size-tag { padding: 6px 12px; border: 1px solid #e0e0e0; border-radius: 16px; font-size: 12px; cursor: pointer; }
+.size-tag.selected { border-color: #667eea; background: #f0f2ff; color: #667eea; }
+.divider { height: 1px; background: #f0f0f0; margin: 20px 0; }
+.pro-hint { background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08)); border-radius: 8px; padding: 10px; font-size: 12px; color: #667eea; display: flex; gap: 8px; align-items: center; }
+.btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 13px; cursor: pointer; }
+.btn-fill { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-weight: 600; }
+.footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="widget-title">📤 导出功能 Widget</div>
+<div class="export-widget">
+  <div class="section-title">📄 选择导出格式</div>
+  <div class="format-grid">
+    <div class="format-card selected">
+      <div class="format-icon">🖼️</div>
+      <div class="format-name">图片</div>
+      <div class="format-desc">PNG/JPG</div>
+    </div>
+    <div class="format-card">
+      <div class="format-icon">📑</div>
+      <div class="format-name">PDF</div>
+      <div class="format-desc">打印质量</div>
+    </div>
+    <div class="format-card">
+      <div class="format-icon">📝</div>
+      <div class="format-name">提词器</div>
+      <div class="format-desc">.txt 带时间轴</div>
+    </div>
+  </div>
+
+  <div class="section-title">📐 选择平台尺寸</div>
+  <div class="size-tags">
+    <div class="size-tag selected">📱 抖音 9:16</div>
+    <div class="size-tag selected">📺 B站 16:9</div>
+    <div class="size-tag">📷 小红书 3:4</div>
+    <div class="size-tag">⬜ 自定义</div>
+  </div>
+
+  <div class="pro-hint">
+    <span>🚀</span>
+    <div>图片、PDF、提词器格式导出为 Pro 功能，<a href="#" style="color:#667eea;">升级 Pro</a> 解锁全部格式</div>
+  </div>
+
+  <div class="footer">
+    <button class="btn" style="background:#f0f0f0;">取消</button>
+    <button class="btn btn-fill">📥 导出 2 个尺寸</button>
+  </div>
+</div>
+</body>
+</html>

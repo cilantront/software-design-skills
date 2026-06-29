@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1 - 合同管理主页 - 自由职业者合同关键日期提醒器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f7fa; color: #2c3e50; }
+
+/* TopBar */
+.topbar { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+.topbar .logo { font-size: 18px; font-weight: 700; color: #4f46e5; display: flex; align-items: center; gap: 8px; }
+.topbar .logo span { font-size: 22px; }
+.topbar .search { margin-left: 40px; position: relative; }
+.topbar .search input { width: 320px; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0 12px 0 36px; font-size: 14px; background: #f8fafc; }
+.topbar .search::before { content: "🔍"; position: absolute; left: 10px; top: 8px; font-size: 14px; }
+.topbar .right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.topbar .bell { position: relative; cursor: pointer; font-size: 20px; }
+.topbar .bell .badge { position: absolute; top: -4px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.topbar .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+
+/* Layout */
+.layout { display: flex; margin-top: 56px; min-height: calc(100vh - 56px); }
+.sidebar { width: 220px; background: #fff; border-right: 1px solid #e2e8f0; padding: 16px 0; position: fixed; top: 56px; bottom: 0; }
+.sidebar a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #64748b; font-size: 14px; text-decoration: none; transition: all 0.15s; }
+.sidebar a:hover { background: #f1f5f9; color: #4f46e5; }
+.sidebar a.active { background: #eef2ff; color: #4f46e5; font-weight: 600; border-right: 3px solid #4f46e5; }
+.sidebar a .icon { font-size: 18px; width: 24px; text-align: center; }
+.sidebar a .lock { font-size: 12px; margin-left: auto; color: #94a3b8; }
+.sidebar .divider { height: 1px; background: #e2e8f0; margin: 8px 16px; }
+
+.main { margin-left: 220px; flex: 1; padding: 24px; }
+
+/* Page Header */
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.page-header h1 { font-size: 22px; font-weight: 600; color: #1e293b; }
+.page-header .welcome { color: #64748b; font-size: 14px; margin-top: 4px; }
+.stats-row { display: flex; gap: 12px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 12px; padding: 16px 20px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.stat-card .num { font-size: 28px; font-weight: 700; }
+.stat-card .num.orange { color: #f59e0b; }
+.stat-card .num.red { color: #ef4444; }
+.stat-card .num.green { color: #10b981; }
+.stat-card .label { font-size: 13px; color: #64748b; margin-top: 4px; }
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: #4f46e5; color: #fff; }
+.btn-primary:hover { background: #4338ca; }
+.btn-outline { background: #fff; color: #4f46e5; border: 1px solid #4f46e5; }
+.btn-outline:hover { background: #eef2ff; }
+.header-actions { display: flex; gap: 8px; }
+
+/* Calendar */
+.calendar-section { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.calendar-header h3 { font-size: 16px; font-weight: 600; }
+.view-tabs { display: flex; gap: 4px; background: #f1f5f9; border-radius: 8px; padding: 2px; }
+.view-tabs button { padding: 6px 12px; border: none; background: none; border-radius: 6px; font-size: 13px; cursor: pointer; color: #64748b; }
+.view-tabs button.active { background: #fff; color: #4f46e5; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+.cal-nav { display: flex; align-items: center; gap: 12px; }
+.cal-nav button { background: none; border: 1px solid #e2e8f0; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 16px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+.cal-grid .day-header { background: #f8fafc; padding: 8px; text-align: center; font-size: 13px; font-weight: 600; color: #64748b; }
+.cal-grid .day { background: #fff; padding: 8px; min-height: 80px; cursor: pointer; }
+.cal-grid .day:hover { background: #f8fafc; }
+.cal-grid .day .date-num { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.cal-grid .day.today .date-num { background: #4f46e5; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.cal-grid .day.other-month { color: #cbd5e1; }
+.cal-grid .day .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 2px; }
+.cal-grid .day .event { font-size: 11px; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-grid .day .event.payment { background: #d1fae5; color: #065f46; }
+.cal-grid .day .event.delivery { background: #dbeafe; color: #1e40af; }
+.cal-grid .day .event.renewal { background: #fef3c7; color: #92400e; }
+.cal-grid .day .event.end { background: #fee2e2; color: #991b1b; }
+.cal-grid .day .more { font-size: 11px; color: #94a3b8; }
+
+/* Contract List */
+.contract-section { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.contract-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.list-toolbar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+.list-toolbar input { height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0 12px; font-size: 14px; width: 240px; }
+.list-toolbar select { height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0 8px; font-size: 14px; color: #64748b; }
+table { width: 100%; border-collapse: collapse; }
+table th { text-align: left; padding: 10px 12px; font-size: 13px; font-weight: 600; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+table td { padding: 12px; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
+table tr:hover { background: #f8fafc; }
+.status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+.status-badge.normal { background: #d1fae5; color: #065f46; }
+.status-badge.upcoming { background: #fef3c7; color: #92400e; }
+.status-badge.overdue { background: #fee2e2; color: #991b1b; }
+.contract-name { color: #4f46e5; font-weight: 500; cursor: pointer; }
+.contract-name:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- TopBar -->
+<div class="topbar">
+  <div class="logo"><span>📅</span> 合同日期提醒器</div>
+  <div class="search"><input type="text" placeholder="搜索合同名称、合作方..."></div>
+  <div class="right">
+    <div class="bell">🔔<div class="badge">3</div></div>
+    <div class="avatar">林</div>
+  </div>
+</div>
+
+<!-- Layout -->
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <a href="#" class="active"><span class="icon">🏠</span> 主页</a>
+    <a href="#"><span class="icon">📄</span> 合同管理</a>
+    <a href="#"><span class="icon">📆</span> 日历看板</a>
+    <a href="#"><span class="icon">🔔</span> 消息中心</a>
+    <div class="divider"></div>
+    <a href="#"><span class="icon">👥</span> 团队管理 <span class="lock">🔒</span></a>
+    <a href="#"><span class="icon">📊</span> 统计报告 <span class="lock">🔒</span></a>
+    <div class="divider"></div>
+    <a href="#"><span class="icon">⚙️</span> 提醒设置</a>
+    <a href="#"><span class="icon">💎</span> 订阅管理</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1>你好，小林 👋</h1>
+        <div class="welcome">今天是 2026年6月28日，祝你工作顺利！</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary">+ 上传合同</button>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="num orange">3</div>
+        <div class="label">今日待办</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:#4f46e5;">8</div>
+        <div class="label">本周到期</div>
+      </div>
+      <div class="stat-card">
+        <div class="num red">2</div>
+        <div class="label">逾期未完成</div>
+      </div>
+      <div class="stat-card">
+        <div class="num green">15</div>
+        <div class="label">本月已完成</div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-section">
+      <div class="calendar-header">
+        <div class="cal-nav">
+          <button>&lt;</button>
+          <h3>2026年 7月</h3>
+          <button>&gt;</button>
+          <button class="btn btn-outline" style="padding:4px 12px;font-size:12px;">今天</button>
+        </div>
+        <div class="view-tabs">
+          <button class="active">月视图</button>
+          <button>周视图</button>
+          <button>时间线</button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="day-header">一</div>
+        <div class="day-header">二</div>
+        <div class="day-header">三</div>
+        <div class="day-header">四</div>
+        <div class="day-header">五</div>
+        <div class="day-header">六</div>
+        <div class="day-header">日</div>
+
+        <div class="day other-month"><div class="date-num">29</div></div>
+        <div class="day other-month"><div class="date-num">30</div></div>
+        <div class="day"><div class="date-num">1</div></div>
+        <div class="day"><div class="date-num">2</div></div>
+        <div class="day"><div class="date-num">3</div><div class="event payment">💰 XX设计-二期款</div></div>
+        <div class="day"><div class="date-num">4</div></div>
+        <div class="day"><div class="date-num">5</div></div>
+
+        <div class="day"><div class="date-num">6</div></div>
+        <div class="day"><div class="date-num">7</div><div class="event delivery">📦 YY开发-终稿</div></div>
+        <div class="day"><div class="date-num">8</div></div>
+        <div class="day"><div class="date-num">9</div></div>
+        <div class="day"><div class="date-num">10</div><div class="event renewal">🔄 ZZ翻译-续约</div></div>
+        <div class="day"><div class="date-num">11</div></div>
+        <div class="day"><div class="date-num">12</div></div>
+
+        <div class="day"><div class="date-num">13</div></div>
+        <div class="day"><div class="date-num">14</div></div>
+        <div class="day today"><div class="date-num">15</div><div class="event payment">💰 XX设计-三期款</div><div class="event end">🔴 AA合同到期</div></div>
+        <div class="day"><div class="date-num">16</div></div>
+        <div class="day"><div class="date-num">17</div><div class="event delivery">📦 BB项目交付</div></div>
+        <div class="day"><div class="date-num">18</div></div>
+        <div class="day"><div class="date-num">19</div></div>
+
+        <div class="day"><div class="date-num">20</div><div class="event payment">💰 CC设计款</div></div>
+        <div class="day"><div class="date-num">21</div></div>
+        <div class="day"><div class="date-num">22</div></div>
+        <div class="day"><div class="date-num">23</div><div class="event delivery">📦 DD项目终稿</div></div>
+        <div class="day"><div class="date-num">24</div></div>
+        <div class="day"><div class="date-num">25</div></div>
+        <div class="day"><div class="date-num">26</div></div>
+
+        <div class="day"><div class="date-num">27</div></div>
+        <div class="day"><div class="date-num">28</div></div>
+        <div class="day"><div class="date-num">29</div></div>
+        <div class="day"><div class="date-num">30</div><div class="event payment">💰 EE尾款</div></div>
+        <div class="day"><div class="date-num">31</div></div>
+        <div class="day other-month"><div class="date-num">1</div></div>
+        <div class="day other-month"><div class="date-num">2</div></div>
+      </div>
+    </div>
+
+    <!-- Contract List -->
+    <div class="contract-section">
+      <h3>我的合同</h3>
+      <div class="list-toolbar">
+        <input type="text" placeholder="搜索合同...">
+        <select><option>全部状态</option><option>即将到期</option><option>已到期</option><option>已完成</option></select>
+        <select><option>按最近到期排序</option><option>按上传时间</option><option>按合作方</option></select>
+      </div>
+      <table>
+        <thead>
+          <tr><th>合同名称</th><th>合作方</th><th>关键日期数</th><th>最近到期</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="contract-name">XX品牌设计服务合同</span></td>
+            <td>XX科技有限公司</td>
+            <td>5</td>
+            <td>2026-07-03 <span style="color:#f59e0b;font-size:12px;">(5天后)</span></td>
+            <td><span class="status-badge upcoming">即将到期</span></td>
+          </tr>
+          <tr>
+            <td><span class="contract-name">YY系统开发合同</span></td>
+            <td>YY互联网科技</td>
+            <td>3</td>
+            <td>2026-07-07 <span style="color:#f59e0b;font-size:12px;">(9天后)</span></td>
+            <td><span class="status-badge upcoming">即将到期</span></td>
+          </tr>
+          <tr>
+            <td><span class="contract-name">ZZ翻译服务合同</span></td>
+            <td>ZZ国际贸易</td>
+            <td>4</td>
+            <td>2026-07-10 <span style="color:#f59e0b;font-size:12px;">(12天后)</span></td>
+            <td><span class="status-badge normal">正常</span></td>
+          </tr>
+          <tr>
+            <td><span class="contract-name">AA年度顾问合同</span></td>
+            <td>AA咨询集团</td>
+            <td>2</td>
+            <td>2026-06-25 <span style="color:#ef4444;font-size:12px;">(逾期3天)</span></td>
+            <td><span class="status-badge overdue">逾期</span></td>
+          </tr>
+          <tr>
+            <td><span class="contract-name">BB网站改版合同</span></td>
+            <td>BB文化传媒</td>
+            <td>6</td>
+            <td>2026-07-17 <span style="color:#f59e0b;font-size:12px;">(19天后)</span></td>
+            <td><span class="status-badge normal">正常</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

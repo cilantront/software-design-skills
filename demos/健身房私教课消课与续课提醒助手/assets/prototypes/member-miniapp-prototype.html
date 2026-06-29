@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会员端小程序 - 健身房私教课消课与续课提醒助手</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans SC',sans-serif;background:#F0F2F5;padding:40px 20px;}
+h1.page-title{text-align:center;font-size:24px;margin-bottom:8px;color:#0F172A;}
+p.page-desc{text-align:center;color:#64748B;font-size:14px;margin-bottom:40px;}
+
+/* Grid of phone frames */
+.phone-grid{display:flex;flex-wrap:wrap;gap:32px;justify-content:center;max-width:1400px;margin:0 auto;}
+.phone-wrapper{display:flex;flex-direction:column;align-items:center;gap:12px;}
+.phone-label{font-size:13px;font-weight:500;color:#0F172A;}
+
+/* WeChat mini-program phone frame */
+.phone{width:320px;height:640px;background:#fff;border-radius:32px;border:3px solid #1F2937;overflow:hidden;display:flex;flex-direction:column;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.12);}
+.wx-bar{height:44px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;}
+.wx-bar .wx-title{font-size:14px;font-weight:500;color:#0F172A;}
+.wx-bar .wx-dots{display:flex;gap:6px;}
+.wx-bar .wx-dots span{width:8px;height:8px;border-radius:50%;background:#CBD5E1;}
+.wx-status{height:24px;background:#F8FAFC;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94A3B8;}
+
+.phone-content{flex:1;overflow-y:auto;background:#F8FAFC;}
+.phone-content::-webkit-scrollbar{width:0;}
+
+/* Bottom tab bar */
+.tab-bar{height:56px;background:#fff;border-top:1px solid #E2E8F0;display:flex;flex-shrink:0;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:#94A3B8;font-size:10px;}
+.tab-item.active{color:#F97316;}
+.tab-item svg{width:20px;height:20px;}
+
+/* === Page 1: Home (课时概览) === */
+.home-header{background:linear-gradient(135deg,#F97316,#EA580C);padding:20px 16px;color:#fff;}
+.home-greeting{font-size:13px;opacity:.9;margin-bottom:4px;}
+.home-hours-card{background:rgba(255,255,255,.2);border-radius:12px;padding:16px;backdrop-filter:blur(4px);}
+.home-hours-num{font-size:42px;font-weight:700;line-height:1;}
+.home-hours-label{font-size:12px;opacity:.8;margin-top:4px;}
+.home-packages-mini{margin-top:12px;display:flex;gap:8px;}
+.home-pkg-chip{background:rgba(255,255,255,.15);padding:4px 10px;border-radius:12px;font-size:11px;}
+
+.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;background:#fff;margin-top:-8px;border-radius:12px 12px 0 0;}
+.quick-action{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+.quick-action .icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.quick-action span{font-size:11px;color:#64748B;}
+
+.section-title{padding:16px 16px 8px;font-size:14px;font-weight:600;color:#0F172A;display:flex;justify-content:space-between;align-items:center;}
+.section-title a{font-size:12px;color:#94A3B8;text-decoration:none;}
+
+.notif-preview{padding:0 16px 16px;}
+.notif-item{display:flex;gap:10px;padding:10px;background:#fff;border-radius:8px;margin-bottom:8px;border:1px solid #E2E8F0;}
+.notif-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.notif-dot.orange{background:#F97316;}
+.notif-dot.blue{background:#3B82F6;}
+.notif-dot.gray{background:#CBD5E1;}
+.notif-text{flex:1;}
+.notif-text h5{font-size:12px;margin-bottom:2px;}
+.notif-text p{font-size:11px;color:#94A3B8;}
+
+/* Alert banner */
+.alert-banner{margin:12px 16px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;}
+.alert-banner .icon{font-size:16px;}
+.alert-banner .text{flex:1;font-size:12px;color:#92400E;}
+.alert-banner .btn{padding:4px 10px;background:#F97316;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;}
+
+/* === Page 2: Package Detail === */
+.pkg-header{background:#fff;padding:16px;border-bottom:1px solid #E2E8F0;}
+.pkg-header h3{font-size:16px;margin-bottom:4px;}
+.pkg-header p{font-size:12px;color:#64748B;}
+.pkg-main{background:#fff;margin:12px;border-radius:12px;padding:16px;border:1px solid #E2E8F0;}
+.pkg-type-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.pkg-type-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.pkg-progress-big{margin:12px 0;}
+.pkg-progress-big .bar{width:100%;height:10px;background:#E2E8F0;border-radius:5px;overflow:hidden;}
+.pkg-progress-big .bar-fill{height:100%;background:#F97316;border-radius:5px;}
+.pkg-progress-big .info{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:#64748B;}
+.pkg-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;}
+.pkg-info-item{text-align:center;padding:8px;background:#F8FAFC;border-radius:8px;}
+.pkg-info-item .num{font-size:18px;font-weight:700;color:#F97316;}
+.pkg-info-item .lbl{font-size:10px;color:#64748B;margin-top:2px;}
+
+.timeline{padding:12px 16px;}
+.timeline-title{font-size:14px;font-weight:600;margin-bottom:12px;}
+.tl-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9;}
+.tl-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.tl-info{flex:1;}
+.tl-info h5{font-size:12px;margin-bottom:2px;}
+.tl-info span{font-size:10px;color:#94A3B8;}
+.tl-value{font-size:12px;font-weight:500;align-self:center;}
+
+/* === Page 3: Booking === */
+.booking-header{background:#fff;padding:16px;text-align:center;border-bottom:1px solid #E2E8F0;}
+.booking-header h3{font-size:16px;margin-bottom:4px;}
+.booking-header p{font-size:12px;color:#64748B;}
+.date-picker{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;background:#fff;}
+.date-item{min-width:48px;padding:8px;text-align:center;border-radius:8px;cursor:pointer;border:1px solid #E2E8F0;flex-shrink:0;}
+.date-item.active{background:#F97316;color:#fff;border-color:#F97316;}
+.date-item .day{font-size:10px;}
+.date-item .num{font-size:16px;font-weight:600;}
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px;}
+.time-slot{padding:12px;text-align:center;border-radius:8px;border:1px solid #E2E8F0;cursor:pointer;font-size:13px;background:#fff;}
+.time-slot.active{background:#FFF7ED;border-color:#F97316;color:#F97316;}
+.time-slot.disabled{background:#F1F5F9;color:#CBD5E1;cursor:not-allowed;text-decoration:line-through;}
+.course-type-sel{padding:16px;}
+.course-type-sel h4{font-size:13px;margin-bottom:8px;}
+.ct-options{display:flex;gap:8px;flex-wrap:wrap;}
+.ct-opt{padding:6px 14px;border-radius:16px;border:1px solid #E2E8F0;font-size:12px;cursor:pointer;}
+.ct-opt.active{background:#F97316;color:#fff;border-color:#F97316;}
+.booking-btn{margin:16px;padding:14px;background:#F97316;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:500;width:calc(100% - 32px);cursor:pointer;}
+
+/* === Page 4: Training Progress === */
+.training-header{background:#fff;padding:16px;border-bottom:1px solid #E2E8F0;}
+.training-header h3{font-size:16px;margin-bottom:4px;}
+.training-header p{font-size:12px;color:#64748B;}
+.chart-tabs-m{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;}
+.chart-tab-m{padding:6px 12px;border-radius:14px;border:1px solid #E2E8F0;font-size:12px;cursor:pointer;white-space:nowrap;background:#fff;}
+.chart-tab-m.active{background:#F97316;color:#fff;border-color:#F97316;}
+.mini-chart{margin:0 16px;height:140px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:12px;position:relative;}
+.mini-chart svg{width:100%;height:100%;}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px;}
+.mini-stat{text-align:center;padding:10px 4px;background:#fff;border-radius:8px;border:1px solid #E2E8F0;}
+.mini-stat .num{font-size:16px;font-weight:700;color:#F97316;}
+.mini-stat .lbl{font-size:10px;color:#64748B;margin-top:2px;}
+.history-section{padding:12px 16px;}
+.history-item{display:flex;gap:10px;padding:10px;background:#fff;border-radius:8px;margin-bottom:8px;border:1px solid #E2E8F0;}
+.history-icon{width:32px;height:32px;border-radius:8px;background:#FFF7ED;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.history-info{flex:1;}
+.history-info h5{font-size:12px;margin-bottom:2px;}
+.history-info p{font-size:10px;color:#94A3B8;}
+
+/* === Page 5: Notifications === */
+.notif-page-header{background:#fff;padding:16px;border-bottom:1px solid #E2E8F0;}
+.notif-page-header h3{font-size:16px;}
+.notif-list{padding:12px 16px;}
+.notif-full{padding:12px;background:#fff;border-radius:8px;margin-bottom:8px;border:1px solid #E2E8F0;}
+.notif-full.unread{border-left:3px solid #F97316;}
+.notif-full .time{font-size:10px;color:#94A3B8;margin-bottom:4px;}
+.notif-full h5{font-size:13px;margin-bottom:2px;}
+.notif-full p{font-size:11px;color:#64748B;}
+.notif-full .action-btn{margin-top:8px;padding:6px 12px;background:#F97316;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<h1 class="page-title">会员端 · 微信小程序全站点原型</h1>
+<p class="page-desc">健身房私教课消课与续课提醒助手 — 会员可在小程序中查看课时、预约课程、查看训练进度</p>
+
+<div class="phone-grid">
+
+<!-- ===== Phone 1: Home / 课时概览 ===== -->
+<div class="phone-wrapper">
+  <div class="phone">
+    <div class="wx-status">9:41 AM</div>
+    <div class="wx-bar">
+      <div class="wx-dots"><span>···</span></div>
+      <div class="wx-title">FitCoach</div>
+      <div class="wx-dots"><span>○</span></div>
+    </div>
+    <div class="phone-content">
+      <div class="home-header">
+        <div class="home-greeting">Hi, 张小明 👋</div>
+        <div class="home-hours-card">
+          <div class="home-hours-num">12</div>
+          <div class="home-hours-label">剩余课时</div>
+          <div class="home-packages-mini">
+            <div class="home-pkg-chip">🏋️ 增肌 12次</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions" style="margin:-12px 16px 0;border-radius:12px;">
+        <div class="quick-action"><div class="icon" style="background:#FFF7ED;">📅</div><span>预约课程</span></div>
+        <div class="quick-action"><div class="icon" style="background:#EFF6FF;">📋</div><span>我的课表</span></div>
+        <div class="quick-action"><div class="icon" style="background:#F0FDF4;">📊</div><span>训练进度</span></div>
+      </div>
+
+      <div class="section-title">我的课包 <a href="#">查看全部 ›</a></div>
+      <div style="padding:0 16px 12px;">
+        <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #E2E8F0;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:32px;height:32px;background:#DBEAFE;border-radius:8px;display:flex;align-items:center;justify-content:center;">🏋️</div>
+            <div><div style="font-size:13px;font-weight:500;">增肌课包</div><div style="font-size:10px;color:#94A3B8;">至 2026.11.01</div></div>
+          </div>
+          <div style="height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden;"><div style="width:60%;height:100%;background:#F97316;border-radius:3px;"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748B;margin-top:4px;"><span>已消 8次</span><span>剩余 12次</span></div>
+        </div>
+      </div>
+
+      <div class="section-title">最近通知 <a href="#">全部 ›</a></div>
+      <div class="notif-preview">
+        <div class="notif-item"><div class="notif-dot orange"></div><div class="notif-text"><h5>消课通知</h5><p>您刚完成一次增肌课，剩余12次</p></div></div>
+        <div class="notif-item"><div class="notif-dot blue"></div><div class="notif-text"><h5>上课提醒</h5><p>今天 14:00 有您的瑜伽课</p></div></div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>首页</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>课包</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>预约</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>训练</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>我的</div>
+    </div>
+  </div>
+  <div class="phone-label">首页 · 课时概览</div>
+</div>
+
+<!-- ===== Phone 2: Package Detail / 课包详情 ===== -->
+<div class="phone-wrapper">
+  <div class="phone">
+    <div class="wx-status">9:41 AM</div>
+    <div class="wx-bar">
+      <div class="wx-dots"><span>‹ 返回</span></div>
+      <div class="wx-title">课包详情</div>
+      <div class="wx-dots"><span>···</span></div>
+    </div>
+    <div class="phone-content">
+      <div class="pkg-header">
+        <div class="pkg-type-row">
+          <div class="pkg-type-icon" style="background:#DBEAFE;">🏋️</div>
+          <div><h3>增肌课包</h3><p>李教练 · 有效期至 2026.11.01</p></div>
+        </div>
+      </div>
+      <div class="pkg-main">
+        <div class="pkg-progress-big">
+          <div class="bar"><div class="bar-fill" style="width:60%;"></div></div>
+          <div class="info"><span>已消 8 次</span><span>总 20 次</span></div>
+        </div>
+        <div class="pkg-info-grid">
+          <div class="pkg-info-item"><div class="num">20</div><div class="lbl">总课时</div></div>
+          <div class="pkg-info-item"><div class="num">8</div><div class="lbl">已消</div></div>
+          <div class="pkg-info-item"><div class="num" style="color:#F97316;">12</div><div class="lbl">剩余</div></div>
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="timeline-title">课时流水</div>
+        <div class="tl-item"><div class="tl-icon" style="background:#FEE2E2;">📉</div><div class="tl-info"><h5>消课扣减</h5><span>06-29 09:00 · 增肌训练</span></div><div class="tl-value" style="color:#EF4444;">-1次</div></div>
+        <div class="tl-item"><div class="tl-icon" style="background:#FEE2E2;">📉</div><div class="tl-info"><h5>消课扣减</h5><span>06-27 09:00 · 胸部训练</span></div><div class="tl-value" style="color:#EF4444;">-1次</div></div>
+        <div class="tl-item"><div class="tl-icon" style="background:#D1FAE5;">📈</div><div class="tl-info"><h5>购买增加</h5><span>05-01 · 增肌课包开通</span></div><div class="tl-value" style="color:#22C55E;">+20次</div></div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>首页</div>
+      <div class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>课包</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>预约</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>训练</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/></svg>我的</div>
+    </div>
+  </div>
+  <div class="phone-label">课包详情 · 课时流水</div>
+</div>
+
+<!-- ===== Phone 3: Booking / 课程预约 ===== -->
+<div class="phone-wrapper">
+  <div class="phone">
+    <div class="wx-status">9:41 AM</div>
+    <div class="wx-bar">
+      <div class="wx-dots"><span>‹ 返回</span></div>
+      <div class="wx-title">预约课程</div>
+      <div class="wx-dots"><span>···</span></div>
+    </div>
+    <div class="phone-content">
+      <div class="booking-header"><h3>选择上课时间</h3><p>李教练 · 增肌训练</p></div>
+      <div class="date-picker">
+        <div class="date-item"><div class="day">周六</div><div class="num">28</div></div>
+        <div class="date-item active"><div class="day">周日</div><div class="num">29</div></div>
+        <div class="date-item"><div class="day">周一</div><div class="num">30</div></div>
+        <div class="date-item"><div class="day">周二</div><div class="num">1</div></div>
+        <div class="date-item"><div class="day">周三</div><div class="num">2</div></div>
+      </div>
+      <div style="padding:12px 16px 4px;font-size:13px;font-weight:500;">可用时段</div>
+      <div class="time-grid">
+        <div class="time-slot disabled">09:00</div>
+        <div class="time-slot disabled">10:00</div>
+        <div class="time-slot">11:00</div>
+        <div class="time-slot active">14:00</div>
+        <div class="time-slot">15:00</div>
+        <div class="time-slot">16:00</div>
+        <div class="time-slot">17:00</div>
+        <div class="time-slot">18:00</div>
+        <div class="time-slot">19:00</div>
+      </div>
+      <div class="course-type-sel">
+        <h4>课程类型</h4>
+        <div class="ct-options">
+          <div class="ct-opt active">🏋️ 增肌</div>
+          <div class="ct-opt">🔥 减脂</div>
+          <div class="ct-opt">🧘 瑜伽</div>
+        </div>
+      </div>
+      <button class="booking-btn">确认预约 · 14:00-15:00</button>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>首页</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>课包</div>
+      <div class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>预约</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>训练</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/></svg>我的</div>
+    </div>
+  </div>
+  <div class="phone-label">课程预约</div>
+</div>
+
+<!-- ===== Phone 4: Training Progress ===== -->
+<div class="phone-wrapper">
+  <div class="phone">
+    <div class="wx-status">9:41 AM</div>
+    <div class="wx-bar">
+      <div class="wx-dots"><span>‹ 返回</span></div>
+      <div class="wx-title">训练进度</div>
+      <div class="wx-dots"><span>···</span></div>
+    </div>
+    <div class="phone-content">
+      <div class="training-header"><h3>张小明 · 训练数据</h3><p>近30天数据趋势</p></div>
+      <div class="chart-tabs-m">
+        <div class="chart-tab-m active">体重</div>
+        <div class="chart-tab-m">体脂率</div>
+        <div class="chart-tab-m">力量</div>
+        <div class="chart-tab-m">围度</div>
+      </div>
+      <div class="mini-chart">
+        <svg viewBox="0 0 280 100" preserveAspectRatio="none">
+          <defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F97316" stop-opacity=".3"/><stop offset="100%" stop-color="#F97316" stop-opacity="0"/></linearGradient></defs>
+          <polyline fill="none" stroke="#F97316" stroke-width="2" points="0,70 40,65 80,68 120,55 160,50 200,45 240,40 280,35"/>
+          <polygon fill="url(#g2)" points="0,70 40,65 80,68 120,55 160,50 200,45 240,40 280,35 280,100 0,100"/>
+        </svg>
+      </div>
+      <div class="stats-row">
+        <div class="mini-stat"><div class="num">75.0</div><div class="lbl">起始(kg)</div></div>
+        <div class="mini-stat"><div class="num">72.5</div><div class="lbl">当前(kg)</div></div>
+        <div class="mini-stat"><div class="num" style="color:#22C55E;">-2.5</div><div class="lbl">变化(kg)</div></div>
+      </div>
+      <div class="history-section">
+        <div style="font-size:14px;font-weight:600;margin-bottom:8px;">上课记录</div>
+        <div class="history-item"><div class="history-icon">🏋️</div><div class="history-info"><h5>增肌训练</h5><p>06-29 09:00 · 教练备注：胸部+三头，卧推突破60kg</p></div></div>
+        <div class="history-item"><div class="history-icon">🏋️</div><div class="history-info"><h5>增肌训练</h5><p>06-27 09:00 · 教练备注：上肢力量，表现良好</p></div></div>
+        <div class="history-item"><div class="history-icon">🏋️</div><div class="history-info"><h5>增肌训练</h5><p>06-25 09:00 · 教练备注：背部训练日</p></div></div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>首页</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>课包</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>预约</div>
+      <div class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>训练</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/></svg>我的</div>
+    </div>
+  </div>
+  <div class="phone-label">训练进度 · 趋势图表</div>
+</div>
+
+<!-- ===== Phone 5: Notifications ===== -->
+<div class="phone-wrapper">
+  <div class="phone">
+    <div class="wx-status">9:41 AM</div>
+    <div class="wx-bar">
+      <div class="wx-dots"><span>‹ 返回</span></div>
+      <div class="wx-title">消息通知</div>
+      <div class="wx-dots"><span>···</span></div>
+    </div>
+    <div class="phone-content">
+      <div class="notif-page-header"><h3>全部通知</h3></div>
+      <div class="notif-list">
+        <div class="alert-banner" style="margin:0 0 12px;">
+          <div class="icon">⚠️</div>
+          <div class="text">王丽华课包剩余3次，请及时续课</div>
+          <button class="btn">联系</button>
+        </div>
+        <div class="notif-full unread">
+          <div class="time">今天 09:30</div>
+          <h5>🏋️ 消课通知</h5>
+          <p>您刚完成一次增肌课（李教练），剩余课时12次。继续加油！</p>
+        </div>
+        <div class="notif-full unread">
+          <div class="time">今天 07:00</div>
+          <h5>📅 上课提醒</h5>
+          <p>您今天 09:00 有一节增肌课（李教练），请准时到达。</p>
+          <button class="action-btn">确认出席</button>
+        </div>
+        <div class="notif-full">
+          <div class="time">昨天 18:00</div>
+          <h5>📊 训练数据更新</h5>
+          <p>李教练为您更新了训练数据，前往查看训练进度。</p>
+        </div>
+        <div class="notif-full">
+          <div class="time">06-27</div>
+          <h5>🏋️ 消课通知</h5>
+          <p>您完成一次增肌课，剩余课时13次。</p>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>首页</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>课包</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>预约</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>训练</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/></svg>我的</div>
+    </div>
+  </div>
+  <div class="phone-label">消息通知</div>
+</div>
+
+<!-- ===== Phone 6: Low hours alert / 续课提醒 ===== -->
+<div class="phone-wrapper">
+  <div class="phone">
+    <div class="wx-status">9:41 AM</div>
+    <div class="wx-bar">
+      <div class="wx-dots"><span>‹ 返回</span></div>
+      <div class="wx-title">课包详情</div>
+      <div class="wx-dots"><span>···</span></div>
+    </div>
+    <div class="phone-content">
+      <div class="pkg-header">
+        <div class="pkg-type-row">
+          <div class="pkg-type-icon" style="background:#FEE2E2;">🔥</div>
+          <div><h3>减脂课包</h3><p>李教练 · 有效期至 2026.09.15</p></div>
+        </div>
+      </div>
+      <div style="margin:12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:18px;">⚠️</span><span style="font-size:13px;font-weight:600;color:#DC2626;">课时不足，请及时续课</span></div>
+        <p style="font-size:11px;color:#991B1B;">您的减脂课包仅剩 <strong>3次</strong> 课时，建议尽快联系教练续课，保持训练连续性。</p>
+      </div>
+      <div class="pkg-main">
+        <div class="pkg-progress-big">
+          <div class="bar"><div class="bar-fill" style="width:85%;background:#EF4444;"></div></div>
+          <div class="info"><span>已消 17 次</span><span style="color:#EF4444;font-weight:600;">剩余 3 次</span></div>
+        </div>
+        <div class="pkg-info-grid">
+          <div class="pkg-info-item"><div class="num">20</div><div class="lbl">总课时</div></div>
+          <div class="pkg-info-item"><div class="num">17</div><div class="lbl">已消</div></div>
+          <div class="pkg-info-item"><div class="num" style="color:#EF4444;">3</div><div class="lbl">剩余</div></div>
+        </div>
+      </div>
+      <div style="padding:16px;">
+        <button style="width:100%;padding:14px;background:#F97316;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;">📞 一键联系教练续课</button>
+        <p style="text-align:center;font-size:11px;color:#94A3B8;margin-top:8px;">点击后会自动发送续课意向给李教练</p>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>首页</div>
+      <div class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>课包</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>预约</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>训练</div>
+      <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/></svg>我的</div>
+    </div>
+  </div>
+  <div class="phone-label">续课提醒 · 课时不足</div>
+</div>
+
+</div>
+</body>
+</html>

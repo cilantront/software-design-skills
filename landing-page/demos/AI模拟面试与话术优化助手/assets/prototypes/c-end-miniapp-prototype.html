@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>求职者端小程序 - 全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; padding: 20px; }
+.site-header { text-align: center; margin-bottom: 30px; }
+.site-title { font-size: 24px; font-weight: 700; color: #333; }
+.site-desc { font-size: 14px; color: #999; margin-top: 8px; }
+.screen-grid { display: grid; grid-template-columns: repeat(3, 375px); gap: 30px; justify-content: center; padding: 20px; }
+.phone { width: 375px; height: 750px; background: #fff; border-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); overflow: hidden; border: 8px solid #1a1a1a; position: relative; }
+.phone-label { text-align: center; margin-top: 12px; font-size: 14px; font-weight: 600; color: #333; }
+.phone-sublabel { text-align: center; font-size: 12px; color: #999; }
+.status-bar { height: 44px; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #fff; font-size: 12px; }
+.status-bar.white { background: #fff; color: #333; }
+.nav-bar { height: 50px; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); display: flex; align-items: center; padding: 0 16px; color: #fff; }
+.nav-bar.white { background: #fff; border-bottom: 1px solid #f0f0f0; color: #333; }
+.nav-back { font-size: 24px; cursor: pointer; margin-right: 12px; }
+.nav-title { font-size: 17px; font-weight: 600; }
+.bottom-tab { position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: #fff; display: flex; border-top: 1px solid #f0f0f0; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #999; cursor: pointer; }
+.tab-item.active { color: #2563EB; }
+.tab-icon { font-size: 20px; margin-bottom: 2px; }
+
+/* Screen 1: Login */
+.login-content { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px 30px; background: linear-gradient(180deg, #EBF4FF 0%, #fff 50%); }
+.login-logo { font-size: 64px; margin-bottom: 16px; }
+.login-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+.login-subtitle { font-size: 14px; color: #666; margin-bottom: 40px; }
+.login-btn { width: 100%; padding: 14px; border-radius: 25px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; margin-bottom: 16px; }
+.login-btn-wechat { background: #07C160; color: #fff; }
+.login-btn-phone { background: #fff; color: #2563EB; border: 2px solid #2563EB; }
+.login-agreement { font-size: 11px; color: #999; margin-top: 20px; text-align: center; }
+
+/* Screen 2: Home */
+.home-content { padding: 12px 16px 70px; background: #f5f7fa; }
+.home-greeting { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); border-radius: 16px; padding: 20px; color: #fff; margin-bottom: 16px; }
+.greeting-text { font-size: 18px; font-weight: 700; }
+.greeting-sub { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+.greeting-stats { display: flex; gap: 20px; margin-top: 12px; }
+.stat-item { text-align: center; }
+.stat-num { font-size: 20px; font-weight: 700; }
+.stat-label { font-size: 11px; opacity: 0.8; }
+.quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+.action-card { background: #fff; border-radius: 14px; padding: 18px 14px; text-align: center; cursor: pointer; }
+.action-icon { font-size: 32px; margin-bottom: 8px; }
+.action-title { font-size: 15px; font-weight: 600; color: #333; }
+.action-desc { font-size: 11px; color: #999; margin-top: 4px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.section-title { font-size: 16px; font-weight: 600; color: #333; }
+.section-more { font-size: 12px; color: #999; }
+.recent-item { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; }
+.recent-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-right: 12px; }
+.recent-icon.interview { background: #EBF4FF; }
+.recent-icon.practice { background: #F0FDF4; }
+.recent-info { flex: 1; }
+.recent-title { font-size: 14px; font-weight: 500; color: #333; }
+.recent-meta { font-size: 12px; color: #999; margin-top: 4px; }
+.recent-score { font-size: 16px; font-weight: 700; color: #2563EB; }
+
+/* Screen 3: Upload JD */
+.upload-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.upload-method { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 12px; cursor: pointer; }
+.upload-method.active { border: 2px solid #2563EB; }
+.method-header { display: flex; align-items: center; margin-bottom: 8px; }
+.method-icon { font-size: 24px; margin-right: 10px; }
+.method-title { font-size: 15px; font-weight: 600; }
+.text-area { width: 100%; height: 200px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; font-size: 14px; resize: none; outline: none; }
+.text-area:focus { border-color: #2563EB; }
+.upload-tip { font-size: 12px; color: #999; margin-top: 8px; }
+.submit-btn { width: 100%; padding: 14px; background: #2563EB; color: #fff; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; }
+.submit-btn:disabled { background: #d1d5db; }
+
+/* Screen 4: JD Parse Confirm */
+.parse-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.parse-status { background: #F0FDF4; border-radius: 12px; padding: 14px; margin-bottom: 16px; display: flex; align-items: center; }
+.parse-icon { font-size: 24px; margin-right: 10px; }
+.parse-text { font-size: 14px; color: #166534; font-weight: 500; }
+.parse-card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.parse-field { margin-bottom: 14px; }
+.field-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+.field-value { font-size: 15px; font-weight: 500; color: #333; }
+.field-edit { font-size: 12px; color: #2563EB; cursor: pointer; float: right; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tag { padding: 4px 12px; background: #EBF4FF; color: #2563EB; border-radius: 12px; font-size: 12px; }
+.confirm-btn { width: 100%; padding: 14px; background: #2563EB; color: #fff; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+
+/* Screen 5: Interview Mode */
+.mode-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.mode-card { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 12px; cursor: pointer; position: relative; overflow: hidden; }
+.mode-card.recommended { border: 2px solid #2563EB; }
+.mode-badge { position: absolute; top: 12px; right: 12px; padding: 3px 10px; background: #2563EB; color: #fff; border-radius: 10px; font-size: 11px; }
+.mode-icon { font-size: 36px; margin-bottom: 10px; }
+.mode-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 6px; }
+.mode-desc { font-size: 13px; color: #666; line-height: 1.5; }
+.mode-meta { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; color: #999; }
+.stage-preview { background: #fff; border-radius: 14px; padding: 16px; margin-top: 16px; }
+.stage-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.stage-item:last-child { border-bottom: none; }
+.stage-dot { width: 8px; height: 8px; border-radius: 50%; background: #2563EB; margin-right: 12px; }
+.stage-name { flex: 1; font-size: 14px; color: #333; }
+.stage-count { font-size: 12px; color: #999; }
+
+/* Screen 6: Interview In Progress */
+.interview-content { display: flex; flex-direction: column; height: 100%; background: #f5f7fa; }
+.interview-header-bar { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); padding: 16px; color: #fff; }
+.interview-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; }
+.progress-fill { height: 100%; background: #fff; border-radius: 2px; width: 40%; }
+.progress-text { font-size: 12px; opacity: 0.9; }
+.stage-badge { display: inline-block; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 10px; font-size: 12px; }
+.question-area { flex: 1; padding: 20px 16px; overflow-y: auto; }
+.question-bubble { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.question-label { font-size: 12px; color: #2563EB; font-weight: 600; margin-bottom: 8px; }
+.question-text { font-size: 16px; color: #333; line-height: 1.6; }
+.answer-area { padding: 0 16px 16px; }
+.answer-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+.answer-tab { padding: 6px 16px; background: #fff; border-radius: 16px; font-size: 13px; cursor: pointer; }
+.answer-tab.active { background: #2563EB; color: #fff; }
+.answer-input { width: 100%; height: 100px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; font-size: 14px; resize: none; outline: none; }
+.answer-input:focus { border-color: #2563EB; }
+.answer-actions { display: flex; gap: 10px; margin-top: 10px; }
+.answer-btn { flex: 1; padding: 12px; border-radius: 20px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; }
+.btn-skip { background: #f3f4f6; color: #666; }
+.btn-submit { background: #2563EB; color: #fff; }
+
+/* Screen 7: Score Feedback */
+.score-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.score-overview { background: #fff; border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 16px; }
+.score-total { font-size: 48px; font-weight: 700; color: #2563EB; }
+.score-label { font-size: 14px; color: #999; margin-top: 4px; }
+.score-rank { display: inline-block; padding: 4px 16px; background: #F0FDF4; color: #166534; border-radius: 12px; font-size: 13px; font-weight: 600; margin-top: 8px; }
+.dimension-list { margin-top: 16px; }
+.dimension-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.dimension-name { width: 100px; font-size: 13px; color: #333; }
+.dimension-bar { flex: 1; height: 8px; background: #f3f4f6; border-radius: 4px; margin: 0 12px; }
+.dimension-fill { height: 100%; border-radius: 4px; }
+.dimension-fill.high { background: #2563EB; }
+.dimension-fill.mid { background: #F59E0B; }
+.dimension-fill.low { background: #EF4444; }
+.dimension-score { font-size: 14px; font-weight: 600; color: #333; width: 30px; text-align: right; }
+.feedback-card { background: #fff; border-radius: 14px; padding: 16px; margin-top: 16px; }
+.feedback-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 10px; }
+.feedback-text { font-size: 13px; color: #666; line-height: 1.6; }
+.reference-box { background: #EBF4FF; border-radius: 12px; padding: 14px; margin-top: 12px; }
+.ref-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.ref-label { font-size: 13px; font-weight: 600; color: #2563EB; }
+.ref-lock { font-size: 12px; color: #999; }
+.ref-text { font-size: 13px; color: #333; line-height: 1.6; }
+.next-btn { width: 100%; padding: 14px; background: #2563EB; color: #fff; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+
+/* Screen 8: Report */
+.report-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.report-header { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); border-radius: 16px; padding: 24px; color: #fff; text-align: center; margin-bottom: 16px; }
+.report-score { font-size: 56px; font-weight: 700; }
+.report-rank { font-size: 16px; opacity: 0.9; margin-top: 4px; }
+.radar-placeholder { width: 200px; height: 200px; margin: 16px auto; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; opacity: 0.8; }
+.report-section { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.report-section-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f5f5f5; }
+.review-item { padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.review-item:last-child { border-bottom: none; }
+.review-q { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 6px; }
+.review-meta { display: flex; justify-content: space-between; align-items: center; }
+.review-score { font-size: 14px; font-weight: 600; color: #2563EB; }
+.review-detail { font-size: 12px; color: #999; }
+.suggestion-list { list-style: none; }
+.suggestion-item { display: flex; align-items: flex-start; padding: 8px 0; }
+.suggestion-num { width: 20px; height: 20px; border-radius: 50%; background: #2563EB; color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0; margin-top: 2px; }
+.suggestion-text { font-size: 13px; color: #666; line-height: 1.5; }
+
+/* Screen 9: Practice Library */
+.practice-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
+.filter-chip { padding: 6px 14px; background: #fff; border-radius: 16px; font-size: 13px; color: #666; cursor: pointer; white-space: nowrap; }
+.filter-chip.active { background: #2563EB; color: #fff; }
+.question-list-item { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.q-difficulty { padding: 2px 8px; border-radius: 8px; font-size: 11px; }
+.q-difficulty.easy { background: #F0FDF4; color: #166534; }
+.q-difficulty.medium { background: #FFF7ED; color: #C2410C; }
+.q-difficulty.hard { background: #FEF2F2; color: #DC2626; }
+.q-title { font-size: 14px; color: #333; line-height: 1.5; }
+.q-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; color: #999; }
+.q-status { font-size: 12px; }
+.q-status.done { color: #2563EB; }
+
+/* Screen 10: Practice Answer */
+.practice-answer-content { display: flex; flex-direction: column; height: 100%; background: #f5f7fa; }
+.question-detail { padding: 16px; flex: 1; overflow-y: auto; }
+.question-card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+.question-tag { display: inline-block; padding: 3px 10px; background: #EBF4FF; color: #2563EB; border-radius: 10px; font-size: 12px; margin-bottom: 10px; }
+.question-full-text { font-size: 15px; color: #333; line-height: 1.7; }
+.answer-section { padding: 0 16px 16px; }
+.answer-textarea { width: 100%; height: 150px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; font-size: 14px; resize: none; outline: none; }
+.answer-toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.word-count { font-size: 12px; color: #999; }
+.voice-btn { padding: 8px 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; font-size: 13px; cursor: pointer; }
+
+/* Screen 11: Trend */
+.trend-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: 12px; padding: 14px; text-align: center; }
+.stat-value { font-size: 24px; font-weight: 700; color: #2563EB; }
+.stat-name { font-size: 11px; color: #999; margin-top: 4px; }
+.chart-card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.chart-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 12px; }
+.chart-placeholder { height: 160px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; }
+.time-switch { display: flex; gap: 8px; margin-bottom: 16px; }
+.time-btn { padding: 6px 14px; background: #fff; border-radius: 12px; font-size: 12px; cursor: pointer; }
+.time-btn.active { background: #2563EB; color: #fff; }
+.weakness-card { background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%); border-radius: 14px; padding: 16px; border: 1px solid #FDE68A; }
+.weakness-title { font-size: 14px; font-weight: 600; color: #92400E; margin-bottom: 8px; }
+.weakness-text { font-size: 13px; color: #78350F; line-height: 1.5; }
+.weakness-action { margin-top: 10px; font-size: 13px; color: #2563EB; font-weight: 500; cursor: pointer; }
+
+/* Screen 12: Profile */
+.profile-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.profile-card { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); border-radius: 16px; padding: 20px; color: #fff; margin-bottom: 16px; display: flex; align-items: center; }
+.profile-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-right: 14px; }
+.profile-name { font-size: 18px; font-weight: 600; }
+.profile-badge { display: inline-block; padding: 2px 8px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 11px; margin-top: 4px; }
+.menu-group { background: #fff; border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+.menu-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+.menu-item:last-child { border-bottom: none; }
+.menu-icon { font-size: 20px; margin-right: 12px; }
+.menu-text { flex: 1; font-size: 14px; color: #333; }
+.menu-arrow { color: #d1d5db; font-size: 14px; }
+.menu-extra { font-size: 12px; color: #999; margin-right: 8px; }
+
+/* Screen 13: Subscription */
+.sub-content { padding: 16px 16px 70px; background: #f5f7fa; }
+.current-plan { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 16px; text-align: center; }
+.plan-type { font-size: 14px; color: #999; }
+.plan-name { font-size: 24px; font-weight: 700; color: #333; margin-top: 4px; }
+.plan-usage { font-size: 13px; color: #666; margin-top: 8px; }
+.plan-usage strong { color: #2563EB; }
+.pro-banner { background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%); border-radius: 16px; padding: 24px; color: #fff; margin-bottom: 16px; }
+.pro-title { font-size: 20px; font-weight: 700; }
+.pro-price { font-size: 36px; font-weight: 700; margin-top: 8px; }
+.pro-price small { font-size: 14px; font-weight: 400; opacity: 0.8; }
+.pro-subscribe-btn { width: 100%; padding: 14px; background: #F59E0B; color: #fff; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+.benefit-list { margin-top: 16px; }
+.benefit-item { display: flex; align-items: center; padding: 8px 0; }
+.benefit-check { font-size: 16px; margin-right: 10px; }
+.benefit-text { font-size: 14px; }
+.compare-table { background: #fff; border-radius: 14px; overflow: hidden; margin-top: 16px; }
+.compare-row { display: flex; border-bottom: 1px solid #f5f5f5; }
+.compare-row:last-child { border-bottom: none; }
+.compare-row.header { background: #f9fafb; }
+.compare-cell { flex: 1; padding: 12px; font-size: 13px; text-align: center; }
+.compare-cell.label { text-align: left; font-weight: 500; }
+.compare-cell.check { color: #2563EB; }
+.compare-cell.cross { color: #d1d5db; }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+    <div class="site-title">AI模拟面试与话术优化助手 - 求职者端小程序原型</div>
+    <div class="site-desc">V1.0 MVP | 全站点页面原型设计 | 共13个核心页面</div>
+</div>
+
+<div class="screen-grid">
+
+<!-- Screen 1: Login -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="login-content">
+        <div class="login-logo">🎯</div>
+        <div class="login-title">AI面试助手</div>
+        <div class="login-subtitle">让每一次面试练习都有专业反馈</div>
+        <button class="login-btn login-btn-wechat">💬 微信一键登录</button>
+        <button class="login-btn login-btn-phone">📱 手机号登录</button>
+        <div class="login-agreement">登录即表示同意《用户协议》和《隐私政策》</div>
+    </div>
+</div>
+<div class="phone-label">登录页</div>
+<div class="phone-sublabel">微信/手机号双入口</div>
+</div>
+
+<!-- Screen 2: Home -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar"><span class="nav-title" style="margin-left:auto;margin-right:auto;">AI面试助手</span></div>
+    <div class="home-content">
+        <div class="home-greeting">
+            <div class="greeting-text">Hi，小明 👋</div>
+            <div class="greeting-sub">今天也要加油准备面试哦！</div>
+            <div class="greeting-stats">
+                <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">累计面试</div></div>
+                <div class="stat-item"><div class="stat-num">23</div><div class="stat-label">练习题目</div></div>
+                <div class="stat-item"><div class="stat-num">78</div><div class="stat-label">平均得分</div></div>
+            </div>
+        </div>
+        <div class="quick-actions">
+            <div class="action-card">
+                <div class="action-icon">📝</div>
+                <div class="action-title">创建模拟面试</div>
+                <div class="action-desc">上传JD，AI模拟面试</div>
+            </div>
+            <div class="action-card">
+                <div class="action-icon">📚</div>
+                <div class="action-title">专项练习</div>
+                <div class="action-desc">针对性刷题提升</div>
+            </div>
+        </div>
+        <div class="section-header">
+            <span class="section-title">最近练习</span>
+            <span class="section-more">查看全部 ›</span>
+        </div>
+        <div class="recent-item">
+            <div class="recent-icon interview">🎯</div>
+            <div class="recent-info">
+                <div class="recent-title">产品经理 - 字节跳动</div>
+                <div class="recent-meta">今天 14:30 · 全真模拟</div>
+            </div>
+            <div class="recent-score">82</div>
+        </div>
+        <div class="recent-item">
+            <div class="recent-icon practice">📖</div>
+            <div class="recent-info">
+                <div class="recent-title">技术面专项练习</div>
+                <div class="recent-meta">昨天 · 5题连续练习</div>
+            </div>
+            <div class="recent-score">76</div>
+        </div>
+    </div>
+    <div class="bottom-tab">
+        <div class="tab-item active"><span class="tab-icon">🏠</span>首页</div>
+        <div class="tab-item"><span class="tab-icon">📚</span>练习</div>
+        <div class="tab-item"><span class="tab-icon">📈</span>趋势</div>
+        <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+    </div>
+</div>
+<div class="phone-label">首页</div>
+<div class="phone-sublabel">核心入口与数据概览</div>
+</div>
+
+<!-- Screen 3: Upload JD -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar white"><span class="nav-back">‹</span><span class="nav-title">创建模拟面试</span></div>
+    <div class="upload-content">
+        <div class="upload-method active">
+            <div class="method-header"><span class="method-icon">📋</span><span class="method-title">粘贴JD文本</span></div>
+            <textarea class="text-area" placeholder="请粘贴目标岗位的JD描述内容...&#10;&#10;例如：&#10;职位名称：产品经理&#10;公司名称：字节跳动&#10;岗位职责：...&#10;任职要求：..."></textarea>
+            <div class="upload-tip">💡 建议粘贴完整JD，至少50字</div>
+        </div>
+        <div class="upload-method">
+            <div class="method-header"><span class="method-icon">📷</span><span class="method-title">上传JD图片</span></div>
+            <div style="font-size:13px;color:#999;margin-top:6px;">支持 JPG/PNG，点击上传截图</div>
+        </div>
+        <div class="upload-method">
+            <div class="method-header"><span class="method-icon">📄</span><span class="method-title">上传PDF文件</span></div>
+            <div style="font-size:13px;color:#999;margin-top:6px;">支持PDF文件，最大10MB</div>
+        </div>
+        <button class="submit-btn">开始AI解析</button>
+    </div>
+</div>
+<div class="phone-label">上传JD页</div>
+<div class="phone-sublabel">文本/图片/PDF三种方式</div>
+</div>
+
+<!-- Screen 4: JD Parse Confirm -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar white"><span class="nav-back">‹</span><span class="nav-title">确认岗位信息</span></div>
+    <div class="parse-content">
+        <div class="parse-status">
+            <span class="parse-icon">✅</span>
+            <span class="parse-text">JD解析完成，请确认以下信息</span>
+        </div>
+        <div class="parse-card">
+            <div class="parse-field">
+                <div class="field-label">职位名称 <span class="field-edit">修改</span></div>
+                <div class="field-value">产品经理</div>
+            </div>
+            <div class="parse-field">
+                <div class="field-label">公司名称 <span class="field-edit">修改</span></div>
+                <div class="field-value">字节跳动</div>
+            </div>
+            <div class="parse-field">
+                <div class="field-label">岗位类型 <span class="field-edit">修改</span></div>
+                <div class="field-value">产品类</div>
+            </div>
+            <div class="parse-field">
+                <div class="field-label">核心要求</div>
+                <div class="field-value" style="font-size:13px;line-height:1.6;">3年以上产品经验，熟悉移动端产品设计，具备数据分析能力</div>
+            </div>
+            <div class="parse-field">
+                <div class="field-label">技能关键词</div>
+                <div class="tag-list">
+                    <span class="tag">产品设计</span>
+                    <span class="tag">数据分析</span>
+                    <span class="tag">用户研究</span>
+                    <span class="tag">项目管理</span>
+                    <span class="tag">PRD</span>
+                </div>
+            </div>
+            <div class="parse-field">
+                <div class="field-label">建议面试阶段</div>
+                <div class="tag-list">
+                    <span class="tag">产品面(3题)</span>
+                    <span class="tag">技术面(2题)</span>
+                    <span class="tag">HR面(2题)</span>
+                </div>
+            </div>
+        </div>
+        <button class="confirm-btn">确认并开始面试</button>
+    </div>
+</div>
+<div class="phone-label">JD解析确认页</div>
+<div class="phone-sublabel">AI解析结果确认与修正</div>
+</div>
+
+<!-- Screen 5: Interview Mode -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar white"><span class="nav-back">‹</span><span class="nav-title">选择面试模式</span></div>
+    <div class="mode-content">
+        <div class="mode-card recommended">
+            <span class="mode-badge">推荐</span>
+            <div class="mode-icon">🎭</div>
+            <div class="mode-title">全真模拟</div>
+            <div class="mode-desc">完整模拟多阶段面试流程，体验真实面试节奏</div>
+            <div class="mode-meta">
+                <span>📋 7道题</span>
+                <span>⏱️ 约30分钟</span>
+                <span>📊 完整报告</span>
+            </div>
+        </div>
+        <div class="mode-card">
+            <div class="mode-icon">🎯</div>
+            <div class="mode-title">单阶段练习</div>
+            <div class="mode-desc">只练习某个面试阶段，针对性强化薄弱环节</div>
+            <div class="mode-meta">
+                <span>📋 2-3道题</span>
+                <span>⏱️ 约10分钟</span>
+                <span>📊 阶段评分</span>
+            </div>
+        </div>
+        <div class="stage-preview">
+            <div style="font-size:15px;font-weight:600;margin-bottom:12px;">面试阶段安排</div>
+            <div class="stage-item">
+                <div class="stage-dot"></div>
+                <div class="stage-name">产品面（产品思维与设计）</div>
+                <div class="stage-count">3题</div>
+            </div>
+            <div class="stage-item">
+                <div class="stage-dot" style="background:#F59E0B;"></div>
+                <div class="stage-name">技术面（技术理解与协作）</div>
+                <div class="stage-count">2题</div>
+            </div>
+            <div class="stage-item">
+                <div class="stage-dot" style="background:#10B981;"></div>
+                <div class="stage-name">HR面（综合素质与动机）</div>
+                <div class="stage-count">2题</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="phone-label">面试模式选择</div>
+<div class="phone-sublabel">全真模拟/单阶段练习</div>
+</div>
+
+<!-- Screen 6: Interview In Progress -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="interview-content">
+        <div class="interview-header-bar">
+            <div class="interview-progress">
+                <div class="progress-bar"><div class="progress-fill"></div></div>
+                <span class="progress-text">3/7</span>
+            </div>
+            <span class="stage-badge">📋 产品面 · 第3题</span>
+        </div>
+        <div class="question-area">
+            <div class="question-bubble">
+                <div class="question-label">面试题目</div>
+                <div class="question-text">请描述一个你主导的产品从0到1的过程，你在其中遇到了哪些关键挑战？是如何解决的？</div>
+            </div>
+            <div style="font-size:13px;color:#999;text-align:center;">💡 建议用STAR法则组织回答</div>
+        </div>
+        <div class="answer-area">
+            <div class="answer-tabs">
+                <div class="answer-tab active">📝 文字作答</div>
+                <div class="answer-tab">🎙️ 语音作答</div>
+            </div>
+            <textarea class="answer-input" placeholder="请输入你的回答...&#10;&#10;建议包含：&#10;S-情境：项目背景&#10;T-任务：你的职责&#10;A-行动：具体做了什么&#10;R-结果：取得了什么成果"></textarea>
+            <div class="answer-actions">
+                <button class="answer-btn btn-skip">跳过此题</button>
+                <button class="answer-btn btn-submit">提交回答</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="phone-label">面试进行中</div>
+<div class="phone-sublabel">AI逐题提问与作答</div>
+</div>
+
+<!-- Screen 7: Score Feedback -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar white"><span class="nav-back">‹</span><span class="nav-title">本题评分</span></div>
+    <div class="score-content">
+        <div class="score-overview">
+            <div class="score-total">82</div>
+            <div class="score-label">本题综合得分</div>
+            <div class="score-rank">良好 👍</div>
+            <div class="dimension-list">
+                <div class="dimension-item">
+                    <span class="dimension-name">回答流畅度</span>
+                    <div class="dimension-bar"><div class="dimension-fill high" style="width:85%"></div></div>
+                    <span class="dimension-score">85</span>
+                </div>
+                <div class="dimension-item">
+                    <span class="dimension-name">逻辑结构</span>
+                    <div class="dimension-bar"><div class="dimension-fill high" style="width:88%"></div></div>
+                    <span class="dimension-score">88</span>
+                </div>
+                <div class="dimension-item">
+                    <span class="dimension-name">信息覆盖</span>
+                    <div class="dimension-bar"><div class="dimension-fill mid" style="width:75%"></div></div>
+                    <span class="dimension-score">75</span>
+                </div>
+                <div class="dimension-item">
+                    <span class="dimension-name">STAR法则</span>
+                    <div class="dimension-bar"><div class="dimension-fill high" style="width:82%"></div></div>
+                    <span class="dimension-score">82</span>
+                </div>
+                <div class="dimension-item">
+                    <span class="dimension-name">专业深度</span>
+                    <div class="dimension-bar"><div class="dimension-fill mid" style="width:78%"></div></div>
+                    <span class="dimension-score">78</span>
+                </div>
+            </div>
+        </div>
+        <div class="feedback-card">
+            <div class="feedback-title">💡 优化建议</div>
+            <div class="feedback-text">回答结构清晰，STAR法则运用较好。建议在"结果"部分增加具体数据支撑，如DAU增长百分比、用户满意度提升等量化指标，让回答更有说服力。</div>
+        </div>
+        <div class="reference-box">
+            <div class="ref-header">
+                <span class="ref-label">📖 参考话术</span>
+                <span class="ref-lock">🔒 Pro专属</span>
+            </div>
+            <div class="ref-text" style="filter:blur(3px);">一个高质量的参考回答示例，展示了如何用STAR法则组织回答，包含具体的数据支撑和业务成果描述...</div>
+        </div>
+        <button class="next-btn">继续下一题 →</button>
+    </div>
+</div>
+<div class="phone-label">单题评分反馈</div>
+<div class="phone-sublabel">多维度评分与优化建议</div>
+</div>
+
+<!-- Screen 8: Report -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar white"><span class="nav-back">‹</span><span class="nav-title">面试报告</span></div>
+    <div class="report-content">
+        <div class="report-header">
+            <div class="report-score">79</div>
+            <div class="report-rank">良好 · 超过65%的用户</div>
+            <div class="radar-placeholder">📊 五维雷达图</div>
+        </div>
+        <div class="report-section">
+            <div class="report-section-title">📋 逐题回顾</div>
+            <div class="review-item">
+                <div class="review-q">Q1: 请自我介绍</div>
+                <div class="review-meta"><span class="review-detail">产品面</span><span class="review-score">85分</span></div>
+            </div>
+            <div class="review-item">
+                <div class="review-q">Q2: 为什么选择我们公司？</div>
+                <div class="review-meta"><span class="review-detail">产品面</span><span class="review-score">72分</span></div>
+            </div>
+            <div class="review-item">
+                <div class="review-q">Q3: 描述一个从0到1的产品经历</div>
+                <div class="review-meta"><span class="review-detail">产品面</span><span class="review-score">82分</span></div>
+            </div>
+            <div class="review-item">
+                <div class="review-q">Q4: 如何与技术团队协作？</div>
+                <div class="review-meta"><span class="review-detail">技术面</span><span class="review-score">76分</span></div>
+            </div>
+        </div>
+        <div class="report-section">
+            <div class="report-section-title">🎯 改进建议</div>
+            <ul class="suggestion-list">
+                <li class="suggestion-item"><span class="suggestion-num">1</span><span class="suggestion-text">加强数据化表达，多用具体数字支撑观点</span></li>
+                <li class="suggestion-item"><span class="suggestion-num">2</span><span class="suggestion-text">深入准备公司产品和业务，展示诚意</span></li>
+                <li class="suggestion-item"><span class="suggestion-num">3</span><span class="suggestion-text">STAR法则中Result部分需更突出量化成果</span></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="phone-label">面试总结报告</div>
+<div class="phone-sublabel">综合评分与逐题回顾</div>
+</div>
+
+<!-- Screen 9: Practice Library -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar"><span class="nav-title" style="margin-left:auto;margin-right:auto;">专项练习</span></div>
+    <div class="practice-content">
+        <div class="filter-bar">
+            <div class="filter-chip active">全部</div>
+            <div class="filter-chip">开发</div>
+            <div class="filter-chip">产品</div>
+            <div class="filter-chip">设计</div>
+            <div class="filter-chip">运营</div>
+        </div>
+        <div class="filter-bar">
+            <div class="filter-chip active">全部阶段</div>
+            <div class="filter-chip">技术面</div>
+            <div class="filter-chip">产品面</div>
+            <div class="filter-chip">HR面</div>
+            <div class="filter-chip">行为面</div>
+        </div>
+        <div class="question-list-item">
+            <div class="q-header">
+                <span style="font-size:12px;color:#999;">产品面</span>
+                <span class="q-difficulty medium">中级</span>
+            </div>
+            <div class="q-title">请设计一个针对老年人的打车App，你会如何考虑用户体验？</div>
+            <div class="q-footer">
+                <span class="q-status done">最佳得分: 85</span>
+                <span>已练习3次</span>
+            </div>
+        </div>
+        <div class="question-list-item">
+            <div class="q-header">
+                <span style="font-size:12px;color:#999;">技术面</span>
+                <span class="q-difficulty hard">高级</span>
+            </div>
+            <div class="q-title">如何实现一个高并发的秒杀系统？请从架构层面分析</div>
+            <div class="q-footer">
+                <span class="q-status">未练习</span>
+                <span>练习128次</span>
+            </div>
+        </div>
+        <div class="question-list-item">
+            <div class="q-header">
+                <span style="font-size:12px;color:#999;">HR面</span>
+                <span class="q-difficulty easy">初级</span>
+            </div>
+            <div class="q-title">你的职业规划是什么？未来3-5年有什么目标？</div>
+            <div class="q-footer">
+                <span class="q-status done">最佳得分: 72</span>
+                <span>已练习1次</span>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-tab">
+        <div class="tab-item"><span class="tab-icon">🏠</span>首页</div>
+        <div class="tab-item active"><span class="tab-icon">📚</span>练习</div>
+        <div class="tab-item"><span class="tab-icon">📈</span>趋势</div>
+        <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+    </div>
+</div>
+<div class="phone-label">专项练习-题库浏览</div>
+<div class="phone-sublabel">按岗位/阶段筛选</div>
+</div>
+
+<!-- Screen 10: Practice Answer -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar white"><span class="nav-back">‹</span><span class="nav-title">专项练习</span></div>
+    <div class="practice-answer-content">
+        <div class="question-detail">
+            <div class="question-card">
+                <span class="question-tag">产品面 · 中级</span>
+                <div class="question-full-text">请设计一个针对老年人的打车App，你会如何考虑用户体验？请从需求分析、交互设计、功能优先级等方面阐述你的思路。</div>
+            </div>
+            <div style="background:#fff;border-radius:14px;padding:16px;">
+                <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px;">💡 答题提示</div>
+                <div style="font-size:13px;color:#666;line-height:1.6;">建议从以下角度展开：<br>1. 目标用户特征分析<br>2. 核心需求提炼<br>3. 交互设计要点<br>4. 功能优先级排序<br>5. 差异化价值</div>
+            </div>
+        </div>
+        <div class="answer-section">
+            <textarea class="answer-textarea" placeholder="请输入你的回答..."></textarea>
+            <div class="answer-toolbar">
+                <span class="word-count">0/2000字</span>
+                <button class="voice-btn">🎙️ 语音输入</button>
+            </div>
+            <button class="submit-btn" style="margin-top:12px;">提交答案</button>
+        </div>
+    </div>
+</div>
+<div class="phone-label">专项练习-答题页</div>
+<div class="phone-sublabel">单题练习与答题提示</div>
+</div>
+
+<!-- Screen 11: Trend -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar"><span class="nav-title" style="margin-left:auto;margin-right:auto;">表现趋势</span></div>
+    <div class="trend-content">
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-value">5</div><div class="stat-name">模拟面试</div></div>
+            <div class="stat-card"><div class="stat-value">23</div><div class="stat-name">专项练习</div></div>
+            <div class="stat-card"><div class="stat-value">42</div><div class="stat-name">总答题数</div></div>
+        </div>
+        <div class="time-switch">
+            <div class="time-btn active">近7次</div>
+            <div class="time-btn">近30天</div>
+            <div class="time-btn">全部</div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">📈 综合得分趋势</div>
+            <div class="chart-placeholder">📊 折线图：65→72→68→75→79→82→79</div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">📊 各维度得分趋势</div>
+            <div class="chart-placeholder">📊 多维度折线图</div>
+        </div>
+        <div class="weakness-card">
+            <div class="weakness-title">⚠️ 薄弱项分析</div>
+            <div class="weakness-text">你的「关键信息覆盖」维度得分连续3次低于75分，建议在回答时多注意覆盖题目中的关键要点，使用结构化方式组织答案。</div>
+            <div class="weakness-action">去做针对性练习 →</div>
+        </div>
+    </div>
+    <div class="bottom-tab">
+        <div class="tab-item"><span class="tab-icon">🏠</span>首页</div>
+        <div class="tab-item"><span class="tab-icon">📚</span>练习</div>
+        <div class="tab-item active"><span class="tab-icon">📈</span>趋势</div>
+        <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+    </div>
+</div>
+<div class="phone-label">表现趋势</div>
+<div class="phone-sublabel">得分趋势与薄弱项分析</div>
+</div>
+
+<!-- Screen 12: Profile -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar"><span class="nav-title" style="margin-left:auto;margin-right:auto;">我的</span></div>
+    <div class="profile-content">
+        <div class="profile-card">
+            <div class="profile-avatar">😊</div>
+            <div>
+                <div class="profile-name">小明</div>
+                <div class="profile-badge">🆓 免费版</div>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="menu-item"><span class="menu-icon">📝</span><span class="menu-text">面试历史</span><span class="menu-extra">5次</span><span class="menu-arrow">›</span></div>
+            <div class="menu-item"><span class="menu-icon">📖</span><span class="menu-text">练习记录</span><span class="menu-extra">23次</span><span class="menu-arrow">›</span></div>
+            <div class="menu-item"><span class="menu-icon">📈</span><span class="menu-text">表现趋势</span><span class="menu-arrow">›</span></div>
+        </div>
+        <div class="menu-group">
+            <div class="menu-item"><span class="menu-icon">💎</span><span class="menu-text">订阅管理</span><span class="menu-extra">免费版</span><span class="menu-arrow">›</span></div>
+            <div class="menu-item"><span class="menu-icon">🎯</span><span class="menu-text">求职意向</span><span class="menu-extra">产品经理</span><span class="menu-arrow">›</span></div>
+            <div class="menu-item"><span class="menu-icon">🔔</span><span class="menu-text">消息通知</span><span class="menu-extra">2条未读</span><span class="menu-arrow">›</span></div>
+        </div>
+        <div class="menu-group">
+            <div class="menu-item"><span class="menu-icon">⚙️</span><span class="menu-text">设置</span><span class="menu-arrow">›</span></div>
+            <div class="menu-item"><span class="menu-icon">ℹ️</span><span class="menu-text">关于</span><span class="menu-arrow">›</span></div>
+        </div>
+    </div>
+    <div class="bottom-tab">
+        <div class="tab-item"><span class="tab-icon">🏠</span>首页</div>
+        <div class="tab-item"><span class="tab-icon">📚</span>练习</div>
+        <div class="tab-item"><span class="tab-icon">📈</span>趋势</div>
+        <div class="tab-item active"><span class="tab-icon">👤</span>我的</div>
+    </div>
+</div>
+<div class="phone-label">个人中心</div>
+<div class="phone-sublabel">个人信息与功能菜单</div>
+</div>
+
+<!-- Screen 13: Subscription -->
+<div>
+<div class="phone">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="nav-bar white"><span class="nav-back">‹</span><span class="nav-title">订阅管理</span></div>
+    <div class="sub-content">
+        <div class="current-plan">
+            <div class="plan-type">当前套餐</div>
+            <div class="plan-name">免费版</div>
+            <div class="plan-usage">今日面试剩余 <strong>0/1</strong> 次 · 专项练习不限</div>
+        </div>
+        <div class="pro-banner">
+            <div class="pro-title">🚀 升级Pro版</div>
+            <div class="pro-price">¥49<small>/月</small></div>
+            <div class="benefit-list">
+                <div class="benefit-item"><span class="benefit-check">✅</span><span class="benefit-text">不限模拟面试次数</span></div>
+                <div class="benefit-item"><span class="benefit-check">✅</span><span class="benefit-text">深度评分与详细反馈</span></div>
+                <div class="benefit-item"><span class="benefit-check">✅</span><span class="benefit-text">完整参考话术解锁</span></div>
+                <div class="benefit-item"><span class="benefit-check">✅</span><span class="benefit-text">表现趋势与薄弱项分析</span></div>
+                <div class="benefit-item"><span class="benefit-check">✅</span><span class="benefit-text">面试报告分享长图</span></div>
+            </div>
+            <button class="pro-subscribe-btn">立即开通 Pro</button>
+        </div>
+        <div class="compare-table">
+            <div class="compare-row header">
+                <div class="compare-cell label">功能</div>
+                <div class="compare-cell">免费版</div>
+                <div class="compare-cell">Pro版</div>
+            </div>
+            <div class="compare-row">
+                <div class="compare-cell label">每日面试</div>
+                <div class="compare-cell">1次</div>
+                <div class="compare-cell check">不限</div>
+            </div>
+            <div class="compare-row">
+                <div class="compare-cell label">参考话术</div>
+                <div class="compare-cell cross">概要</div>
+                <div class="compare-cell check">完整</div>
+            </div>
+            <div class="compare-row">
+                <div class="compare-cell label">趋势分析</div>
+                <div class="compare-cell cross">基础</div>
+                <div class="compare-cell check">深度</div>
+            </div>
+            <div class="compare-row">
+                <div class="compare-cell label">薄弱项分析</div>
+                <div class="compare-cell cross">-</div>
+                <div class="compare-cell check">✓</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="phone-label">订阅管理</div>
+<div class="phone-sublabel">Pro权益与套餐对比</div>
+</div>
+
+</div>
+
+</body>
+</html>

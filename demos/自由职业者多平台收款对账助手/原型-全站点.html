@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>对账助手 Web 端 - 全站点原型</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #1f2937; overflow: hidden; }
+  .app { display: flex; height: 100vh; }
+
+  /* Sidebar */
+  .sidebar { width: 220px; background: #1e293b; color: #94a3b8; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { color: #fff; font-size: 16px; font-weight: 600; padding: 16px 20px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo span { color: #3b82f6; font-size: 20px; }
+  .sidebar-menu { list-style: none; padding: 8px 0; flex: 1; }
+  .sidebar-menu li { padding: 10px 20px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 10px; transition: all 0.15s; border-left: 3px solid transparent; }
+  .sidebar-menu li:hover { background: #334155; color: #fff; }
+  .sidebar-menu li.active { background: rgba(59,130,246,0.15); color: #3b82f6; border-left-color: #3b82f6; font-weight: 500; }
+  .sidebar-menu li .icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-bottom { padding: 12px 16px; border-top: 1px solid #334155; }
+  .usage-info { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+  .usage-bar { height: 4px; background: #334155; border-radius: 2px; overflow: hidden; }
+  .usage-fill { height: 100%; width: 24%; background: linear-gradient(90deg, #10b981, #3b82f6); border-radius: 2px; }
+  .pro-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; background: #fef3c7; color: #92400e; margin-left: 4px; }
+  .upgrade-btn { display: block; width: 100%; margin-top: 10px; padding: 8px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; }
+
+  /* Main content */
+  .main { flex: 1; overflow-y: auto; background: #f0f2f5; }
+  .topbar { background: #fff; padding: 12px 24px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .breadcrumb { font-size: 13px; color: #6b7280; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-right .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .notif-badge { position: relative; cursor: pointer; font-size: 18px; }
+  .notif-badge .dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; }
+  .page-content { padding: 24px; }
+
+  /* Page sections (hidden by default) */
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+
+  /* Common styles */
+  .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-card { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .stat-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 700; }
+  .stat-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { background: #f9fafb; padding: 10px 12px; text-align: left; font-weight: 500; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; }
+  .data-table tr:hover { background: #f9fafb; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-orange { background: #ffedd5; color: #9a3412; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-gray { background: #f3f4f6; color: #374151; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .btn { padding: 8px 18px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-success { background: #10b981; color: #fff; }
+  .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+  .btn-outline:hover { background: #f9fafb; }
+  .btn-sm { padding: 4px 12px; font-size: 12px; }
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-bar select, .filter-bar input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+  .upload-area { border: 2px dashed #d1d5db; border-radius: 8px; padding: 32px; text-align: center; cursor: pointer; background: #fafbfc; }
+  .upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+  .upload-icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-text { font-size: 14px; color: #6b7280; }
+  .template-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+  .template-item { border: 2px solid #e5e7eb; border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .template-item:hover { border-color: #93c5fd; }
+  .template-item.selected { border-color: #3b82f6; background: #eff6ff; }
+  .template-item .ti-icon { font-size: 24px; margin-bottom: 4px; }
+  .template-item .ti-name { font-size: 12px; font-weight: 500; }
+  .chart-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 12px; }
+  .chart-label { width: 60px; text-align: right; color: #6b7280; }
+  .chart-fill { height: 20px; border-radius: 4px; background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .chart-count { width: 50px; font-size: 11px; color: #6b7280; }
+  .content-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .ring-container { text-align: center; padding: 12px 0; }
+  .legend-list { list-style: none; padding: 0; }
+  .legend-list li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .tabs-bar { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px; }
+  .tab-btn { padding: 8px 16px; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #6b7280; }
+  .tab-btn:hover { color: #1f2937; }
+  .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 500; }
+  .tabs-bar .tab-btn .count { background: #f3f4f6; padding: 1px 6px; border-radius: 8px; font-size: 10px; margin-left: 4px; }
+  .tabs-bar .tab-btn.active .count { background: #dbeafe; color: #1e40af; }
+  .account-card { display: flex; align-items: center; gap: 16px; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; }
+  .account-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; }
+  .account-info { flex: 1; }
+  .account-name { font-size: 16px; font-weight: 600; }
+  .account-email { font-size: 13px; color: #6b7280; }
+  .plan-card { border: 2px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; }
+  .plan-card.current { border-color: #3b82f6; background: #eff6ff; }
+  .plan-card.recommended { border-color: #8b5cf6; }
+  .plan-name { font-size: 16px; font-weight: 600; }
+  .plan-price { font-size: 22px; font-weight: 700; color: #3b82f6; }
+  .plan-features { font-size: 12px; color: #6b7280; margin-top: 6px; }
+  .plan-features li { padding: 2px 0; }
+  .rec-tag { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+  .empty-state { text-align: center; padding: 40px 20px; }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state .text { font-size: 14px; color: #6b7280; margin-bottom: 16px; }
+  .header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  .status-dot.green { background: #10b981; }
+  .status-dot.red { background: #ef4444; }
+  .status-dot.yellow { background: #f59e0b; }
+  .status-dot.gray { background: #9ca3af; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo"><span>⚡</span> 对账助手</div>
+    <ul class="sidebar-menu">
+      <li class="active" onclick="showPage('dashboard', this)"><span class="icon">📊</span> 对账看板</li>
+      <li onclick="showPage('import', this)"><span class="icon">📥</span> CSV 导入</li>
+      <li onclick="showPage('receivable', this)"><span class="icon">📋</span> 应收管理</li>
+      <li onclick="showPage('reconcile', this)"><span class="icon">🔍</span> 对账明细</li>
+      <li onclick="showPage('report', this)"><span class="icon">📄</span> 月度报告</li>
+      <li onclick="showPage('tax', this)"><span class="icon">🧾</span> 报税导出 <span class="pro-badge">PRO</span></li>
+      <li onclick="showPage('account', this)"><span class="icon">⚙️</span> 账户设置</li>
+    </ul>
+    <div class="sidebar-bottom">
+      <div class="usage-info">免费版 · 已用 12/50 笔</div>
+      <div class="usage-bar"><div class="usage-fill"></div></div>
+      <button class="upgrade-btn" onclick="showPage('account', document.querySelectorAll('.sidebar-menu li')[6])">升级到专业版 →</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="breadcrumb" id="breadcrumb">首页 / 对账看板</span>
+      </div>
+      <div class="topbar-right">
+        <span class="notif-badge">🔔<span class="dot"></span></span>
+        <div class="avatar" onclick="showPage('account', document.querySelectorAll('.sidebar-menu li')[6])">李</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- ========== DASHBOARD ========== -->
+      <div class="page-section active" id="page-dashboard">
+        <div class="header-row">
+          <div class="page-title">📊 对账看板</div>
+          <select style="padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+            <option>2026年6月</option><option>2026年5月</option>
+          </select>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">💰 应收总额</div><div class="stat-value" style="color:#3b82f6;">¥48,680</div><div class="stat-sub">15 笔应收</div></div>
+          <div class="stat-card"><div class="stat-label">✅ 实收总额</div><div class="stat-value" style="color:#10b981;">¥45,180</div><div class="stat-sub">13 笔到账</div></div>
+          <div class="stat-card"><div class="stat-label">⚠️ 差异总额</div><div class="stat-value" style="color:#ef4444;">¥3,500</div><div class="stat-sub">5 笔差异</div></div>
+          <div class="stat-card"><div class="stat-label">📈 匹配率</div><div class="stat-value" style="color:#f59e0b;">86.7%</div><div class="stat-sub">13/15 笔已匹配</div></div>
+        </div>
+        <div class="content-row">
+          <div class="card">
+            <div class="card-title">对账明细</div>
+            <div class="filter-bar">
+              <select><option>全部类型</option><option>未到账</option><option>超额</option><option>手续费</option></select>
+              <select><option>全部渠道</option><option>微信</option><option>支付宝</option></select>
+              <input type="text" placeholder="搜索..." style="width:120px;">
+            </div>
+            <table class="data-table">
+              <thead><tr><th>客户</th><th>应收</th><th>实收</th><th>差异</th><th>类型</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td><b>杭州某某科技</b></td><td>¥3,200</td><td style="color:#ef4444;">未到账</td><td style="color:#ef4444;">-¥3,200</td><td><span class="badge badge-red">未到账</span></td><td><span class="status-dot red"></span>待跟进</td></tr>
+                <tr><td><b>张先生</b></td><td>¥2,500</td><td style="color:#ef4444;">未到账</td><td style="color:#ef4444;">-¥2,500</td><td><span class="badge badge-red">未到账</span></td><td><span class="status-dot yellow"></span>待确认</td></tr>
+                <tr><td><b>深圳某某传媒</b></td><td>¥5,000</td><td>¥4,900</td><td style="color:#3b82f6;">-¥100</td><td><span class="badge badge-blue">手续费</span></td><td><span class="status-dot green"></span>已确认</td></tr>
+                <tr><td><b>北京某某教育</b></td><td>¥4,500</td><td>¥4,500</td><td style="color:#10b981;">¥0</td><td><span class="badge badge-green">无差异</span></td><td><span class="status-dot green"></span>已确认</td></tr>
+                <tr><td><b>杭州某某网络</b></td><td>¥3,800</td><td>¥4,000</td><td style="color:#f59e0b;">+¥200</td><td><span class="badge badge-yellow">超额</span></td><td><span class="status-dot yellow"></span>待确认</td></tr>
+                <tr><td><b>李先生 (USD)</b></td><td>¥1,500</td><td>¥1,478</td><td style="color:#f97316;">-¥22</td><td><span class="badge badge-orange">汇率差</span></td><td><span class="status-dot gray"></span>待处理</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">差异分布</div>
+              <div class="chart-bar"><div class="chart-label">未到账</div><div class="chart-fill" style="width:70%;background:linear-gradient(90deg,#ef4444,#f87171);"></div><div class="chart-count">¥5,700</div></div>
+              <div class="chart-bar"><div class="chart-label">超额</div><div class="chart-fill" style="width:25%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div><div class="chart-count">¥200</div></div>
+              <div class="chart-bar"><div class="chart-label">手续费</div><div class="chart-fill" style="width:20%;background:linear-gradient(90deg,#3b82f6,#60a5fa);"></div><div class="chart-count">¥100</div></div>
+              <div class="chart-bar"><div class="chart-label">汇率差</div><div class="chart-fill" style="width:10%;background:linear-gradient(90deg,#f97316,#fb923c);"></div><div class="chart-count">¥22</div></div>
+            </div>
+            <div class="card">
+              <div class="card-title">对账进度</div>
+              <div class="ring-container">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" stroke-width="10"/>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="10" stroke-dasharray="272 314" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+                  <text x="60" y="56" text-anchor="middle" font-size="18" font-weight="700" fill="#1f2937">87%</text>
+                  <text x="60" y="72" text-anchor="middle" font-size="10" fill="#6b7280">匹配率</text>
+                </svg>
+              </div>
+              <ul class="legend-list">
+                <li><div class="legend-dot" style="background:#10b981;"></div>已确认 8 笔</li>
+                <li><div class="legend-dot" style="background:#f59e0b;"></div>待确认 3 笔</li>
+                <li><div class="legend-dot" style="background:#ef4444;"></div>未到账 2 笔</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== CSV IMPORT ========== -->
+      <div class="page-section" id="page-import">
+        <div class="page-title">📥 CSV 导入</div>
+        <div class="card">
+          <div class="card-title">选择收款渠道</div>
+          <div class="template-grid">
+            <div class="template-item selected"><div class="ti-icon">💚</div><div class="ti-name">微信支付</div></div>
+            <div class="template-item"><div class="ti-icon">💙</div><div class="ti-name">支付宝</div></div>
+            <div class="template-item"><div class="ti-icon">🟣</div><div class="ti-name">Stripe</div></div>
+            <div class="template-item"><div class="ti-icon">🔵</div><div class="ti-name">PayPal</div></div>
+            <div class="template-item"><div class="ti-icon">🏦</div><div class="ti-name">银行转账</div></div>
+            <div class="template-item"><div class="ti-icon">✏️</div><div class="ti-name">自定义</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">上传文件</div>
+          <div class="upload-area">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">点击或拖拽 CSV 文件到此处</div>
+            <div style="font-size:12px;color:#9ca3af;margin-top:4px;">支持 .csv 格式，单文件最大 10MB</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:12px;">
+          <button class="btn btn-primary" onclick="showPage('reconcile', document.querySelectorAll('.sidebar-menu li')[3])">→ 进入对账明细</button>
+        </div>
+      </div>
+
+      <!-- ========== RECEIVABLE ========== -->
+      <div class="page-section" id="page-receivable">
+        <div class="header-row">
+          <div class="page-title">📋 应收管理</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline">📥 批量导入</button>
+            <button class="btn btn-primary">+ 新增应收</button>
+          </div>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+          <div class="stat-card"><div class="stat-label">待收款</div><div class="stat-value" style="color:#f59e0b;">5</div></div>
+          <div class="stat-card"><div class="stat-label">已逾期</div><div class="stat-value" style="color:#ef4444;">2</div></div>
+          <div class="stat-card"><div class="stat-label">已到账</div><div class="stat-value" style="color:#10b981;">8</div></div>
+          <div class="stat-card"><div class="stat-label">本月应收</div><div class="stat-value" style="color:#3b82f6;">¥48,680</div></div>
+        </div>
+        <div class="card">
+          <div class="filter-bar">
+            <select><option>全部状态</option><option>待收款</option><option>已逾期</option><option>已到账</option></select>
+            <select><option>全部客户</option><option>杭州某某科技</option><option>张先生</option></select>
+            <input type="text" placeholder="搜索客户/项目..." style="width:160px;">
+          </div>
+          <table class="data-table">
+            <thead><tr><th>客户</th><th>项目</th><th>金额</th><th>币种</th><th>预期到账</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr><td><b>杭州某某科技</b></td><td>UI设计项目</td><td>¥3,200</td><td>CNY</td><td>2026-06-05</td><td><span class="badge badge-red">已逾期</span></td></tr>
+              <tr><td><b>张先生</b></td><td>品牌设计尾款</td><td>¥2,500</td><td>CNY</td><td>2026-06-20</td><td><span class="badge badge-red">已逾期</span></td></tr>
+              <tr><td><b>深圳某某传媒</b></td><td>VI设计项目</td><td>¥5,000</td><td>CNY</td><td>2026-06-10</td><td><span class="badge badge-green">已到账</span></td></tr>
+              <tr><td><b>北京某某教育</b></td><td>课程PPT</td><td>¥4,500</td><td>CNY</td><td>2026-06-15</td><td><span class="badge badge-green">已到账</span></td></tr>
+              <tr><td><b>赵先生</b></td><td>APP界面设计</td><td>¥2,000</td><td>CNY</td><td>2026-06-30</td><td><span class="badge badge-yellow">待收款</span></td></tr>
+              <tr><td><b>李先生</b></td><td>Logo Design</td><td>$208</td><td>USD</td><td>2026-06-25</td><td><span class="badge badge-yellow">待收款</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== RECONCILE ========== -->
+      <div class="page-section" id="page-reconcile">
+        <div class="header-row">
+          <div class="page-title">🔍 对账明细</div>
+          <button class="btn btn-outline btn-sm">📥 导出差异报告</button>
+        </div>
+        <div class="card">
+          <div class="tabs-bar">
+            <div class="tab-btn active">全部 <span class="count">6</span></div>
+            <div class="tab-btn">未到账 <span class="count">2</span></div>
+            <div class="tab-btn">超额 <span class="count">1</span></div>
+            <div class="tab-btn">手续费 <span class="count">1</span></div>
+            <div class="tab-btn">汇率差 <span class="count">1</span></div>
+            <div class="tab-btn">已对平 <span class="count">4</span></div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>客户/项目</th><th>渠道</th><th>应收</th><th>实收</th><th>差异</th><th>类型</th><th>置信度</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr><td><b>杭州某某科技</b><br><span style="font-size:11px;color:#9ca3af;">UI设计项目</span></td><td>微信</td><td>¥3,200</td><td style="color:#ef4444;">未到账</td><td style="color:#ef4444;">-¥3,200</td><td><span class="badge badge-red">未到账</span></td><td>-</td><td><span class="status-dot red"></span>待处理</td></tr>
+              <tr><td><b>张先生</b><br><span style="font-size:11px;color:#9ca3af;">品牌设计</span></td><td>微信</td><td>¥2,500</td><td style="color:#ef4444;">未到账</td><td style="color:#ef4444;">-¥2,500</td><td><span class="badge badge-red">未到账</span></td><td>-</td><td><span class="status-dot yellow"></span>待确认</td></tr>
+              <tr><td><b>深圳某某传媒</b><br><span style="font-size:11px;color:#9ca3af;">VI设计</span></td><td>支付宝</td><td>¥5,000</td><td>¥4,900</td><td style="color:#3b82f6;">-¥100</td><td><span class="badge badge-blue">手续费</span></td><td style="color:#10b981;font-weight:600;">高</td><td><span class="status-dot green"></span>已确认</td></tr>
+              <tr><td><b>北京某某教育</b></td><td>微信</td><td>¥4,500</td><td>¥4,500</td><td style="color:#10b981;">¥0</td><td><span class="badge badge-green">无差异</span></td><td style="color:#10b981;font-weight:600;">高</td><td><span class="status-dot green"></span>已确认</td></tr>
+              <tr><td><b>杭州某某网络</b></td><td>微信</td><td>¥3,800</td><td>¥4,000</td><td style="color:#f59e0b;">+¥200</td><td><span class="badge badge-yellow">超额</span></td><td style="color:#f59e0b;font-weight:600;">中</td><td><span class="status-dot yellow"></span>待确认</td></tr>
+              <tr><td><b>李先生 (USD)</b></td><td>Stripe</td><td>¥1,500</td><td>¥1,478</td><td style="color:#f97316;">-¥22</td><td><span class="badge badge-orange">汇率差</span></td><td style="color:#ef4444;font-weight:600;">低</td><td><span class="status-dot gray"></span>待处理</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== MONTHLY REPORT ========== -->
+      <div class="page-section" id="page-report">
+        <div class="header-row">
+          <div class="page-title">📄 月度对账报告</div>
+          <div style="display:flex;gap:8px;">
+            <select style="padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+              <option>2026年6月</option><option>2026年5月</option>
+            </select>
+            <button class="btn btn-success">📥 导出报告</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">应收总额</div><div class="stat-value" style="color:#3b82f6;">¥48,680</div></div>
+          <div class="stat-card"><div class="stat-label">实收总额</div><div class="stat-value" style="color:#10b981;">¥45,180</div></div>
+          <div class="stat-card"><div class="stat-label">差异总额</div><div class="stat-value" style="color:#ef4444;">¥3,500</div></div>
+          <div class="stat-card"><div class="stat-label">完成率</div><div class="stat-value" style="color:#f59e0b;">86.7%</div></div>
+        </div>
+        <div class="card">
+          <div class="tabs-bar">
+            <div class="tab-btn active">总览</div>
+            <div class="tab-btn">按客户</div>
+            <div class="tab-btn">按项目</div>
+            <div class="tab-btn">按平台</div>
+            <div class="tab-btn">差异明细</div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>客户</th><th>应收</th><th>实收</th><th>差异</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr><td>杭州某某科技</td><td>¥12,000</td><td>¥8,800</td><td style="color:#ef4444;">-¥3,200</td><td><span class="badge badge-red">有未到账</span></td></tr>
+              <tr><td>深圳某某传媒</td><td>¥8,000</td><td>¥7,900</td><td style="color:#3b82f6;">-¥100</td><td><span class="badge badge-green">已对平</span></td></tr>
+              <tr><td>北京某某教育</td><td>¥4,500</td><td>¥4,500</td><td style="color:#10b981;">¥0</td><td><span class="badge badge-green">已对平</span></td></tr>
+              <tr><td>杭州某某网络</td><td>¥6,300</td><td>¥6,500</td><td style="color:#f59e0b;">+¥200</td><td><span class="badge badge-yellow">超额</span></td></tr>
+            </tbody>
+            <tfoot><tr><td><b>合计</b></td><td><b>¥37,300</b></td><td><b>¥31,678</b></td><td style="color:#ef4444;"><b>-¥5,622</b></td><td></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== TAX EXPORT ========== -->
+      <div class="page-section" id="page-tax">
+        <div class="header-row">
+          <div class="page-title">🧾 报税导出 <span class="rec-tag" style="font-size:11px;">PRO</span></div>
+          <button class="btn btn-success">📥 导出报税文件</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">年度总收入</div><div class="stat-value" style="color:#10b981;">¥286,500</div></div>
+          <div class="stat-card"><div class="stat-label">手续费合计</div><div class="stat-value" style="color:#f59e0b;">¥5,730</div></div>
+          <div class="stat-card"><div class="stat-label">净收入</div><div class="stat-value" style="color:#3b82f6;">¥280,770</div></div>
+          <div class="stat-card"><div class="stat-label">已开票</div><div class="stat-value" style="color:#8b5cf6;">¥198,000</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">收入汇总（按月度）</div>
+          <table class="data-table">
+            <thead><tr><th>月份</th><th>笔数</th><th>收入</th><th>手续费</th><th>净收入</th><th>开票</th></tr></thead>
+            <tbody>
+              <tr><td>1月</td><td>18</td><td>¥22,500</td><td>¥450</td><td>¥22,050</td><td><span class="badge badge-green">已开</span></td></tr>
+              <tr><td>2月</td><td>12</td><td>¥15,800</td><td>¥316</td><td>¥15,484</td><td><span class="badge badge-green">已开</span></td></tr>
+              <tr><td>3月</td><td>22</td><td>¥28,300</td><td>¥566</td><td>¥27,734</td><td><span class="badge badge-green">已开</span></td></tr>
+              <tr><td>4月</td><td>16</td><td>¥19,600</td><td>¥392</td><td>¥19,208</td><td><span class="badge badge-green">已开</span></td></tr>
+              <tr><td>5月</td><td>24</td><td>¥32,500</td><td>¥650</td><td>¥31,850</td><td><span class="badge badge-yellow">部分</span></td></tr>
+              <tr><td>6月</td><td>20</td><td>¥26,800</td><td>¥536</td><td>¥26,264</td><td><span class="badge badge-red">未开</span></td></tr>
+            </tbody>
+            <tfoot><tr><td><b>合计</b></td><td><b>112</b></td><td><b>¥145,500</b></td><td><b>¥2,910</b></td><td><b>¥142,590</b></td><td></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== ACCOUNT ========== -->
+      <div class="page-section" id="page-account">
+        <div class="page-title">⚙️ 账户设置</div>
+        <div class="account-card">
+          <div class="account-avatar">李</div>
+          <div class="account-info">
+            <div class="account-name">李设计师</div>
+            <div class="account-email">138****8888 · 当前版本：<span style="color:#6b7280;">免费版</span></div>
+          </div>
+          <button class="btn btn-outline">编辑资料</button>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 本月用量</div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+                <span>已导入流水</span><span><b>12</b> / 50 笔</span>
+              </div>
+              <div style="height:8px;background:#e5e7eb;border-radius:4px;"><div style="height:100%;width:24%;background:linear-gradient(90deg,#10b981,#3b82f6);border-radius:4px;"></div></div>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+                <span>已绑定渠道</span><span><b>2</b> / 2 个</span>
+              </div>
+              <div style="height:8px;background:#e5e7eb;border-radius:4px;"><div style="height:100%;width:100%;background:#f59e0b;border-radius:4px;"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">💎 订阅方案</div>
+          <div class="plan-card current">
+            <div>
+              <div class="plan-name">免费版</div>
+              <div class="plan-features">
+                <ul>
+                  <li>✓ 每月 50 笔流水</li>
+                  <li>✓ 2 个收款渠道</li>
+                  <li>✓ 基础匹配引擎</li>
+                  <li>✓ 基础月度报告</li>
+                  <li style="color:#d1d5db;">✗ 报税导出</li>
+                  <li style="color:#d1d5db;">✗ 多币种支持</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="plan-card recommended">
+            <div style="flex:1;">
+              <div class="plan-name">专业版 <span class="rec-tag">推荐</span></div>
+              <div class="plan-price">¥29<span style="font-size:13px;font-weight:400;color:#6b7280;">/月</span> <span style="font-size:12px;color:#9ca3af;">或 ¥290/年</span></div>
+              <div class="plan-features">
+                <ul>
+                  <li>✓ 不限流水笔数</li>
+                  <li>✓ 不限收款渠道</li>
+                  <li>✓ 高级匹配引擎（含模糊匹配）</li>
+                  <li>✓ 多维度报告 + 自定义模板</li>
+                  <li>✓ 报税导出</li>
+                  <li>✓ 多币种支持</li>
+                  <li>✓ 数据永久保留</li>
+                </ul>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="padding:10px 24px;font-size:14px;white-space:nowrap;">立即升级</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const pageNames = {
+  dashboard: '对账看板',
+  import: 'CSV 导入',
+  receivable: '应收管理',
+  reconcile: '对账明细',
+  report: '月度报告',
+  tax: '报税导出',
+  account: '账户设置'
+};
+function showPage(pageId, menuItem) {
+  document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-menu li').forEach(m => m.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  if (menuItem) menuItem.classList.add('active');
+  document.getElementById('breadcrumb').textContent = '首页 / ' + (pageNames[pageId] || pageId);
+}
+</script>
+</body>
+</html>

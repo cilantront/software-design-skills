@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>全文检索 Widget</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #F9FAFB; padding: 20px; }
+.widget-frame { background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; max-width: 520px; margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.widget-title { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 10px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: #374151; margin-bottom: 4px; font-weight: 500; }
+.field input, .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; font-family: inherit; }
+.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.btn { padding: 7px 13px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; }
+.btn-primary { background: #3B82F6; color: white; }
+.btn-ghost { background: transparent; color: #3B82F6; }
+.tag { display: inline-block; padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 500; background: #F3F4F6; color: #374151; cursor: pointer; }
+.tag.active { background: #3B82F6; color: white; }
+.upload-zone { border: 2px dashed #D1D5DB; border-radius: 8px; padding: 28px 20px; text-align: center; cursor: pointer; margin-bottom: 14px; }
+</style></head><body>
+
+<div class="widget-frame">
+  <div class="widget-title">全文检索 · 小王</div>
+  <input style="width:100%; padding:10px 12px; border:1px solid #E5E7EB; border-radius:6px; font-size:13px; margin-bottom:12px" value="方案 B"/>
+  <div style="font-size:12px; color:#6B7280; margin-bottom:10px">找到 3 条相关消息</div>
+  <div style="border:1px solid #E5E7EB; border-radius:6px; padding:10px; margin-bottom:8px"><div style="font-size:11px; color:#6B7280; margin-bottom:4px">小王 · 6/28 14:23</div><div style="font-size:13px">"我看了下两个方案，<mark style="background:#FEF08A">方案 B</mark> 更简洁，就定这个吧"</div></div>
+  <div style="border:1px solid #E5E7EB; border-radius:6px; padding:10px"><div style="font-size:11px; color:#6B7280; margin-bottom:4px">我 · 6/28 14:30</div><div style="font-size:13px">"好的，那就定 <mark style="background:#FEF08A">方案 B</mark>，今天开始细化"</div></div>
+</div>
+
+</body></html>

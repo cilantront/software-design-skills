@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>老年人数字遗产管家 - 管理后台单页应用原型</title>
+<style>
+:root{
+  --primary:#2563eb;
+  --primary-dark:#1d4ed8;
+  --sidebar:#0f172a;
+  --sidebar-soft:#1e293b;
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --green:#16a34a;
+  --amber:#d97706;
+  --red:#dc2626;
+  --cyan:#0891b2;
+  --purple:#7c3aed;
+  --shadow:0 10px 30px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+.app{height:100vh;display:grid;grid-template-columns:248px 1fr;background:var(--bg)}
+.sidebar{background:var(--sidebar);color:#fff;display:flex;flex-direction:column;min-height:0}
+.brand{height:72px;display:flex;align-items:center;gap:12px;padding:0 22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#60a5fa,#2563eb);display:grid;place-items:center;box-shadow:0 8px 20px rgba(37,99,235,.35)}
+.brand-mark svg{width:22px;height:22px;stroke:#fff}
+.brand-title{font-size:16px;font-weight:800;line-height:1.25}.brand-sub{font-size:12px;color:#94a3b8;margin-top:2px}
+.nav{padding:16px 12px;display:flex;flex-direction:column;gap:6px;overflow:auto}.nav-group{font-size:12px;color:#64748b;padding:14px 12px 6px;letter-spacing:.08em}.nav-btn{width:100%;border:0;background:transparent;color:#cbd5e1;padding:12px;border-radius:12px;display:flex;align-items:center;gap:12px;font-size:14px;text-align:left;transition:background .18s,color .18s}.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}.nav-btn.active{background:var(--primary);color:#fff}.nav-btn svg{width:20px;height:20px;stroke:currentColor;flex-shrink:0}.side-foot{margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#94a3b8;line-height:1.6}
+.main{min-width:0;display:flex;flex-direction:column;height:100vh}.topbar{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}.top-left{display:flex;flex-direction:column;gap:4px}.page-title{font-size:22px;font-weight:800}.breadcrumb{font-size:13px;color:var(--muted)}.top-actions{display:flex;align-items:center;gap:12px}.icon-btn{width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:12px;display:grid;place-items:center;color:#334155;position:relative}.icon-btn svg{width:20px;height:20px;stroke:currentColor}.badge-dot{position:absolute;right:9px;top:8px;width:8px;height:8px;background:var(--red);border:2px solid #fff;border-radius:50%}.admin-user{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:14px;background:#fff}.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#93c5fd,#2563eb);color:#fff;display:grid;place-items:center;font-weight:700}.admin-name{font-size:14px;font-weight:700}.admin-role{font-size:12px;color:var(--muted)}
+.content{flex:1;overflow:auto;padding:24px 28px 36px}.section{display:none;animation:fade .18s ease}.section.active{display:block}@keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.stat{padding:18px}.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.stat-label{font-size:13px;color:var(--muted);font-weight:600}.stat-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center}.stat-icon svg{width:22px;height:22px}.stat-value{font-size:30px;font-weight:850;letter-spacing:-.02em}.trend{font-size:12px;margin-top:8px;color:var(--green)}.trend.warn{color:var(--amber)}.trend.danger{color:var(--red)}
+.panel{padding:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.panel-title{font-size:16px;font-weight:800}.panel-desc{font-size:13px;color:var(--muted);margin-top:3px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.filters{display:flex;gap:10px;flex-wrap:wrap}.input,.select,.textarea{border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);height:40px;padding:0 12px;font-size:14px;outline:none}.input:focus,.select:focus,.textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}.textarea{height:84px;padding:10px 12px;resize:none}.btn{height:40px;padding:0 14px;border-radius:11px;border:1px solid var(--line);background:#fff;color:#334155;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px}.btn:hover{border-color:#cbd5e1;background:#f8fafc}.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn.primary:hover{background:var(--primary-dark)}.btn.green{background:var(--green);border-color:var(--green);color:#fff}.btn.red{background:var(--red);border-color:var(--red);color:#fff}.btn.ghost{border-color:transparent;background:transparent}.btn.sm{height:32px;padding:0 10px;font-size:13px}.btn svg{width:16px;height:16px;stroke:currentColor}
+table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;background:#f8fafc;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:12px;border-bottom:1px solid var(--line)}td{padding:14px 12px;border-bottom:1px solid #edf2f7;color:#1e293b;vertical-align:middle}tr:hover td{background:#fbfdff}.user-cell{display:flex;align-items:center;gap:10px}.mini-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;background:#3b82f6}.muted{color:var(--muted);font-size:13px}.tag{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:700}.tag.blue{background:#dbeafe;color:#1d4ed8}.tag.green{background:#dcfce7;color:#15803d}.tag.amber{background:#fef3c7;color:#b45309}.tag.red{background:#fee2e2;color:#b91c1c}.tag.gray{background:#f1f5f9;color:#475569}.tag.purple{background:#ede9fe;color:#6d28d9}.tag.cyan{background:#cffafe;color:#0e7490}.dot{width:7px;height:7px;border-radius:50%;background:currentColor}.empty{padding:32px;text-align:center;color:var(--muted)}.pagination{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:14px;color:var(--muted);font-size:13px}.page-btn{min-width:32px;height:32px;border:1px solid var(--line);background:#fff;border-radius:9px}.page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.progress-list{display:flex;flex-direction:column;gap:14px}.progress-row{display:grid;grid-template-columns:130px 1fr 70px;align-items:center;gap:12px;font-size:14px}.bar{height:10px;background:#edf2f7;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;border-radius:99px}.chart{height:230px;display:flex;align-items:flex-end;gap:14px;padding:18px;background:linear-gradient(180deg,#f8fbff,#fff);border:1px solid #eef2f7;border-radius:14px}.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}.chart-bar{width:100%;max-width:44px;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,#60a5fa,#2563eb);min-height:24px}.chart-label{font-size:12px;color:var(--muted)}
+.review-card{padding:18px;border-left:4px solid var(--amber);margin-bottom:14px}.review-card.death{border-left-color:var(--red)}.review-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}.review-title{font-size:16px;font-weight:800}.review-meta{font-size:13px;color:var(--muted);margin-top:4px}.review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;font-size:14px;line-height:1.6}.review-grid strong{color:#334155}.review-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}.proof-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.proof{height:34px;padding:0 10px;border-radius:10px;border:1px dashed #cbd5e1;background:#f8fafc;color:#334155;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}.proof svg{width:16px;height:16px;stroke:currentColor}
+.form-grid{display:grid;grid-template-columns:180px 1fr;gap:14px;align-items:center;max-width:760px}.form-label{font-size:14px;font-weight:700;color:#334155}.hint{font-size:12px;color:var(--muted);margin-left:8px}.switch{width:48px;height:26px;background:#cbd5e1;border-radius:99px;position:relative;border:0}.switch::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.2)}.switch.on{background:var(--primary)}.switch.on::after{left:25px}.settings-block{padding:18px;margin-bottom:16px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;padding:24px;z-index:20}.modal-backdrop.show{display:flex}.modal{width:min(760px,100%);background:#fff;border-radius:20px;box-shadow:0 30px 90px rgba(15,23,42,.35);overflow:hidden}.modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-title{font-size:18px;font-weight:850}.modal-body{padding:20px;max-height:70vh;overflow:auto}.doc-preview{height:360px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#f8fafc,#eef6ff);display:grid;place-items:center;color:#475569}.doc-card{text-align:center}.doc-card svg{width:72px;height:72px;stroke:var(--primary);margin-bottom:16px}.toast{position:fixed;right:24px;bottom:24px;background:#0f172a;color:#fff;padding:12px 16px;border-radius:14px;box-shadow:var(--shadow);font-size:14px;display:none;z-index:30}.toast.show{display:block;animation:toast .2s ease}@keyframes toast{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (max-width:1100px){.app{grid-template-columns:76px 1fr}.brand-title-wrap,.nav-btn span,.nav-group,.side-foot{display:none}.brand{justify-content:center;padding:0}.nav-btn{justify-content:center}.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){body{overflow:auto}.app{height:auto;min-height:100vh;grid-template-columns:1fr}.sidebar{display:none}.main{height:auto}.topbar{padding:0 16px}.content{padding:16px}.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}.toolbar{align-items:stretch;flex-direction:column}.filters{flex-direction:column}.input,.select{width:100%}.review-grid,.form-grid{grid-template-columns:1fr}.table-wrap{overflow:auto}table{min-width:840px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 10h16M6 10v9m4-9v9m4-9v9m4-9v9M3 21h18M12 3l8 5H4l8-5z"/></svg></div>
+      <div class="brand-title-wrap"><div class="brand-title">数字遗产管家</div><div class="brand-sub">管理后台 SPA 原型</div></div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-group">概览</div>
+      <button class="nav-btn active" data-page="dashboard"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 13h6V4H4v9zm10 7h6V4h-6v16zM4 20h6v-4H4v4z"/></svg><span>仪表盘</span></button>
+      <div class="nav-group">业务管理</div>
+      <button class="nav-btn" data-page="users"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M16 11a4 4 0 10-8 0m8 0a4 4 0 01-8 0m8 0v1a4 4 0 004 4M8 12a4 4 0 01-4 4m4 0h8M6 20h12"/></svg><span>用户管理</span></button>
+      <button class="nav-btn" data-page="families"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M3 11l9-7 9 7M5 10v10h14V10M9 20v-6h6v6"/></svg><span>家庭组管理</span></button>
+      <button class="nav-btn" data-page="reviews"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M9 12l2 2 4-4M7 4h10l2 2v14H5V6l2-2z"/></svg><span>继承审核</span></button>
+      <div class="nav-group">数据与配置</div>
+      <button class="nav-btn" data-page="stats"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 19V5m0 14h16M8 16V9m4 7V6m4 10v-4"/></svg><span>数据统计</span></button>
+      <button class="nav-btn" data-page="settings"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.7 1.7 0 00.34 1.88l.06.06-2 3.46-.08-.02a1.7 1.7 0 00-1.88.34 1.7 1.7 0 00-.5 1.2V22h-4v-.08a1.7 1.7 0 00-.5-1.2 1.7 1.7 0 00-1.88-.34l-.08.02-2-3.46.06-.06A1.7 1.7 0 007.3 15 1.7 1.7 0 006 13.6H5v-4h1a1.7 1.7 0 001.3-1.4 1.7 1.7 0 00-.34-1.88L6.9 6.26 8.9 2.8l.08.02a1.7 1.7 0 001.88-.34A1.7 1.7 0 0011.36 1.3V1h4v.3a1.7 1.7 0 00.5 1.18 1.7 1.7 0 001.88.34l.08-.02 2 3.46-.06.06A1.7 1.7 0 0019.4 8 1.7 1.7 0 0021 9.4h1v4h-1a1.7 1.7 0 00-1.6 1.6z" opacity=".35"/></svg><span>系统设置</span></button>
+    </nav>
+    <div class="side-foot">WEB端规范：单文件 HTML；单一后台应用容器；左侧导航切换内容区。</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left"><div class="page-title" id="pageTitle">仪表盘</div><div class="breadcrumb" id="breadcrumb">首页 / 仪表盘</div></div>
+      <div class="top-actions">
+        <button class="icon-btn" title="通知"><span class="badge-dot"></span><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-5-5.9V4a1 1 0 10-2 0v1.1A6 6 0 006 11v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 01-6 0"/></svg></button>
+        <div class="admin-user"><div class="avatar">管</div><div><div class="admin-name">平台管理员</div><div class="admin-role">运营审核</div></div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="section active" id="page-dashboard"></section>
+      <section class="section" id="page-users"></section>
+      <section class="section" id="page-families"></section>
+      <section class="section" id="page-reviews"></section>
+      <section class="section" id="page-stats"></section>
+      <section class="section" id="page-settings"></section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="modalTitle">材料预览</div><button class="btn sm" onclick="closeModal()">关闭</button></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const pages={dashboard:'仪表盘',users:'用户管理',families:'家庭组管理',reviews:'继承审核',stats:'数据统计',settings:'系统设置'};
+const users=[
+ {id:'U1001',phone:'138****8888',name:'张大爷',plan:'个人版',accounts:7,heirs:2,status:'正常',created:'2026-05-12',activity:'活跃'},
+ {id:'U1002',phone:'139****6666',name:'王阿姨',plan:'家庭版',accounts:12,heirs:3,status:'正常',created:'2026-05-18',activity:'低活跃'},
+ {id:'U1003',phone:'136****9999',name:'李叔叔',plan:'免费版',accounts:3,heirs:0,status:'正常',created:'2026-06-01',activity:'活跃'},
+ {id:'U1004',phone:'135****7777',name:'赵奶奶',plan:'个人版',accounts:5,heirs:1,status:'已禁用',created:'2026-06-10',activity:'长期未登录'},
+ {id:'U1005',phone:'137****5555',name:'孙大爷',plan:'家庭版',accounts:9,heirs:2,status:'正常',created:'2026-06-15',activity:'活跃'},
+ {id:'U1006',phone:'158****3333',name:'周大妈',plan:'免费版',accounts:2,heirs:0,status:'正常',created:'2026-06-20',activity:'可能遗忘'}
+];
+const families=[
+ {id:'F2001',name:'张大爷的家庭',admin:'张大爷',members:4,plan:'家庭版',expire:'2027-06-29',accounts:18,status:'正常'},
+ {id:'F2002',name:'王阿姨之家',admin:'王阿姨',members:5,plan:'家庭版',expire:'2027-05-18',accounts:24,status:'正常'},
+ {id:'F2003',name:'孙大爷家庭组',admin:'孙大爷',members:3,plan:'家庭版',expire:'2026-12-15',accounts:9,status:'正常'}
+];
+let reviews=[
+ {id:'IN-2026062801',type:'身故证明',level:'death',applicant:'张小明',relation:'儿子',phone:'138****1234',owner:'张大爷',ownerPhone:'138****8888',accounts:'中国工商银行、中国建设银行、微信（共3个）',desc:'父亲于2026年6月25日因病去世，申请继承其银行账户信息。',docs:['死亡证明.pdf','户口本.jpg'],time:'2026-06-28 14:30',status:'待审核'},
+ {id:'IN-2026062702',type:'失能证明',level:'disability',applicant:'李女士',relation:'女儿',phone:'139****5678',owner:'王阿姨',ownerPhone:'139****6666',accounts:'医保账户、支付宝（共2个）',desc:'母亲因中风住院，目前无法自理，需要管理其医保和支付账户。',docs:['医院诊断证明.pdf'],time:'2026-06-27 09:15',status:'待审核'},
+ {id:'IN-2026062603',type:'失能证明',level:'disability',applicant:'张先生',relation:'儿子',phone:'136****3456',owner:'赵奶奶',ownerPhone:'135****7777',accounts:'中国工商银行（1个）',desc:'母亲患阿尔茨海默症，已无法管理自己的财务账户。',docs:['医学鉴定报告.pdf','监护权证明.jpg'],time:'2026-06-26 16:45',status:'待补充'}
+];
+function icon(name){const m={search:'<svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 21l-4.3-4.3M11 18a7 7 0 100-14 7 7 0 000 14z"/></svg>',plus:'<svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',file:'<svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9l-6-6z"/><path d="M14 3v6h6"/></svg>'};return m[name]||''}
+function tag(text,type){return `<span class="tag ${type}"><span class="dot"></span>${text}</span>`}
+function planTag(plan){return plan==='家庭版'?tag(plan,'amber'):plan==='个人版'?tag(plan,'blue'):tag(plan,'gray')}
+function statusTag(status){return status==='正常'?tag(status,'green'):status==='待审核'?tag(status,'amber'):status==='待补充'?tag(status,'purple'):status==='已通过'?tag(status,'green'):status==='已拒绝'?tag(status,'red'):tag(status,'red')}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function setPage(page){document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');document.getElementById('pageTitle').textContent=pages[page];document.getElementById('breadcrumb').textContent='首页 / '+pages[page]}
+document.getElementById('nav').addEventListener('click',e=>{const btn=e.target.closest('.nav-btn');if(btn)setPage(btn.dataset.page)});
+function renderDashboard(){document.getElementById('page-dashboard').innerHTML=`
+  <div class="grid-4">
+    ${statCard('注册用户总数','2,847','较上月 +12.5%','#dbeafe','users')}
+    ${statCard('付费用户','186','付费转化率 6.5%','#dcfce7','paid')}
+    ${statCard('托管账户数','15,632','较上月 +18.7%','#fef3c7','accounts')}
+    ${statCard('待审核继承','3','需要48小时内处理','#fee2e2','reviews','danger')}
+  </div>
+  <div class="grid-2" style="margin-top:16px">
+    <div class="card panel"><div class="panel-head"><div><div class="panel-title">近7日新增用户</div><div class="panel-desc">按日统计注册量</div></div></div><div class="chart">${[50,68,45,82,66,94,76].map((h,i)=>`<div class="chart-col"><div class="chart-bar" style="height:${h}%"></div><div class="chart-label">${i+1}日</div></div>`).join('')}</div></div>
+    <div class="card panel"><div class="panel-head"><div><div class="panel-title">账户活跃度分布</div><div class="panel-desc">平台托管账户健康状态</div></div></div><div class="progress-list">
+      ${progress('活跃',62,'#16a34a','9,692')}${progress('低活跃',23,'#d97706','3,595')}${progress('长期未登录',12,'#ea580c','1,876')}${progress('可能遗忘',3,'#dc2626','469')}
+    </div></div>
+  </div>
+  <div class="card panel" style="margin-top:16px"><div class="panel-head"><div><div class="panel-title">最近待处理事项</div><div class="panel-desc">继承审核、账户异常、系统提醒</div></div><button class="btn primary" onclick="setPage('reviews')">进入审核</button></div>${reviewList(true)}</div>`}
+function statCard(label,value,trend,bg,kind,tclass=''){return `<div class="card stat"><div class="stat-top"><div class="stat-label">${label}</div><div class="stat-icon" style="background:${bg}">${svgMini(kind)}</div></div><div class="stat-value">${value}</div><div class="trend ${tclass}">${trend}</div></div>`}
+function svgMini(){return '<svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 19V5m0 14h16M8 16V9m4 7V6m4 10v-4" stroke="currentColor"/></svg>'}
+function progress(name,pct,color,val){return `<div class="progress-row"><div>${name}</div><div class="bar"><span style="width:${pct}%;background:${color}"></span></div><div class="muted">${pct}%</div></div><div style="margin-top:-10px;margin-left:142px" class="muted">${val} 个账户</div>`}
+function renderUsers(list=users){document.getElementById('page-users').innerHTML=`<div class="card panel"><div class="panel-head"><div><div class="panel-title">用户列表</div><div class="panel-desc">支持按手机号、昵称、版本、状态筛选</div></div><button class="btn">导出数据</button></div><div class="toolbar"><div class="filters"><input id="userKeyword" class="input" placeholder="搜索手机号/昵称/ID"><select id="userPlan" class="select"><option value="">全部版本</option><option>免费版</option><option>个人版</option><option>家庭版</option></select><select id="userStatus" class="select"><option value="">全部状态</option><option>正常</option><option>已禁用</option></select><button class="btn primary" onclick="filterUsers()">${icon('search')}搜索</button></div></div><div class="table-wrap"><table><thead><tr><th>用户</th><th>手机号</th><th>版本</th><th>托管账户</th><th>继承人</th><th>活跃度</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody>${list.map((u,i)=>`<tr><td><div class="user-cell"><div class="mini-avatar" style="background:${i%2?'#14b8a6':'#3b82f6'}">${u.name[0]}</div><div><strong>${u.name}</strong><div class="muted">${u.id}</div></div></div></td><td>${u.phone}</td><td>${planTag(u.plan)}</td><td>${u.accounts}</td><td>${u.heirs}</td><td>${activityTag(u.activity)}</td><td>${statusTag(u.status)}</td><td>${u.created}</td><td><button class="btn sm" onclick="showUser('${u.id}')">详情</button></td></tr>`).join('')}</tbody></table></div>${list.length?'':'<div class="empty">未找到匹配用户</div>'}<div class="pagination"><span>共 ${list.length} 条</span><button class="page-btn active">1</button></div></div>`}
+function activityTag(a){return a==='活跃'?tag(a,'green'):a==='低活跃'?tag(a,'amber'):a==='长期未登录'?tag(a,'red'):tag(a,'red')}
+function filterUsers(){const k=document.getElementById('userKeyword').value.trim();const p=document.getElementById('userPlan').value;const s=document.getElementById('userStatus').value;renderUsers(users.filter(u=>(!k||u.name.includes(k)||u.phone.includes(k)||u.id.includes(k))&&(!p||u.plan===p)&&(!s||u.status===s)))}
+function showUser(id){const u=users.find(x=>x.id===id);openModal('用户详情',`<div class="review-grid"><div><strong>用户：</strong>${u.name}</div><div><strong>手机号：</strong>${u.phone}</div><div><strong>版本：</strong>${u.plan}</div><div><strong>账户数：</strong>${u.accounts}</div><div><strong>继承人：</strong>${u.heirs}</div><div><strong>状态：</strong>${u.status}</div></div><div class="card panel" style="margin-top:16px;box-shadow:none"><div class="panel-title">近期操作日志</div><p class="muted" style="margin-top:10px;line-height:1.8">2026-06-28 查看密码：中国工商银行<br>2026-06-27 更新继承人：张小明<br>2026-06-26 标记医保账户已登录</p></div>`)}
+function renderFamilies(list=families){document.getElementById('page-families').innerHTML=`<div class="grid-3">${families.map(f=>`<div class="card stat"><div class="stat-label">${f.name}</div><div class="stat-value" style="font-size:24px;margin-top:8px">${f.members} 人</div><div class="muted" style="margin-top:8px">管理员：${f.admin} · 托管账户 ${f.accounts}</div><div style="margin-top:12px">${planTag(f.plan)} ${statusTag(f.status)}</div></div>`).join('')}</div><div class="card panel" style="margin-top:16px"><div class="panel-head"><div><div class="panel-title">家庭组列表</div><div class="panel-desc">查看家庭订阅与成员构成</div></div></div><div class="table-wrap"><table><thead><tr><th>家庭组</th><th>管理员</th><th>成员数</th><th>订阅</th><th>到期时间</th><th>托管账户</th><th>状态</th><th>操作</th></tr></thead><tbody>${list.map(f=>`<tr><td><strong>${f.name}</strong><div class="muted">${f.id}</div></td><td>${f.admin}</td><td>${f.members}/6</td><td>${planTag(f.plan)}</td><td>${f.expire}</td><td>${f.accounts}</td><td>${statusTag(f.status)}</td><td><button class="btn sm" onclick="showToast('已打开家庭组详情原型')">详情</button></td></tr>`).join('')}</tbody></table></div></div>`}
+function renderReviews(){document.getElementById('page-reviews').innerHTML=`<div class="card panel"><div class="panel-head"><div><div class="panel-title">继承授权审核</div><div class="panel-desc">失能/身故证明必须人工审核，审核通过需记录审计日志</div></div><div class="filters"><select id="reviewStatus" class="select" onchange="renderReviewCards()"><option value="">全部状态</option><option>待审核</option><option>待补充</option><option>已通过</option><option>已拒绝</option></select></div></div><div id="reviewContainer"></div></div>`;renderReviewCards()}
+function reviewList(compact=false){const list=reviews.filter(r=>r.status==='待审核').slice(0,compact?2:99);return list.length?list.map(r=>reviewCard(r,compact)).join(''):'<div class="empty">暂无待审核事项</div>'}
+function renderReviewCards(){const sel=document.getElementById('reviewStatus');const status=sel?sel.value:'';const list=reviews.filter(r=>!status||r.status===status);document.getElementById('reviewContainer').innerHTML=list.length?list.map(r=>reviewCard(r,false)).join(''):'<div class="empty">暂无符合条件的审核申请</div>'}
+function reviewCard(r,compact){return `<div class="review-card ${r.level==='death'?'death':''}"><div class="review-top"><div><div class="review-title">${r.type}申请 #${r.id}</div><div class="review-meta">提交时间：${r.time}</div></div>${statusTag(r.status)}</div><div class="review-grid"><div><strong>申请人：</strong>${r.applicant}（${r.relation}）· ${r.phone}</div><div><strong>被继承人：</strong>${r.owner} · ${r.ownerPhone}</div><div><strong>继承条件：</strong>${r.type}</div><div><strong>可继承账户：</strong>${r.accounts}</div></div><div class="muted" style="margin-top:8px;line-height:1.6">${r.desc}</div><div class="proof-list">${r.docs.map(d=>`<button class="proof" onclick="previewDoc('${r.id}','${d}')">${icon('file')}${d}</button>`).join('')}</div>${compact?'':`<div class="review-actions"><button class="btn green" onclick="reviewAction('${r.id}','已通过')">通过</button><button class="btn red" onclick="reviewAction('${r.id}','已拒绝')">拒绝</button><button class="btn" onclick="reviewAction('${r.id}','待补充')">要求补充材料</button></div>`}</div>`}
+function reviewAction(id,status){reviews=reviews.map(r=>r.id===id?{...r,status}:r);renderReviewCards();showToast('审核状态已更新为：'+status)}
+function previewDoc(id,doc){openModal('证明材料预览',`<div class="doc-preview"><div class="doc-card"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9l-6-6z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg><h3>${doc}</h3><p class="muted" style="margin-top:8px">申请单：${id}</p><p class="muted" style="margin-top:8px">原型中以模拟预览展示证明材料；真实系统将加载附件图片/PDF。</p></div></div>`)}
+function renderStats(){document.getElementById('page-stats').innerHTML=`<div class="grid-4">${statCard('月新增用户','642','环比 +21.4%','#dbeafe')}${statCard('月收入','¥8,236','个人版/家庭版订阅','#dcfce7')}${statCard('继承申请','18','本月累计','#fef3c7')}${statCard('异常账户','469','可能遗忘状态','#fee2e2','','danger')}</div><div class="grid-2" style="margin-top:16px"><div class="card panel"><div class="panel-title">收入趋势</div><div class="chart" style="margin-top:16px">${[34,42,51,63,72,84,96].map((h,i)=>`<div class="chart-col"><div class="chart-bar" style="height:${h}%;background:linear-gradient(180deg,#34d399,#16a34a)"></div><div class="chart-label">${i+1}月</div></div>`).join('')}</div></div><div class="card panel"><div class="panel-title">账户类型分布</div><div class="progress-list" style="margin-top:20px">${progress('银行账户',38,'#2563eb','5,940')}${progress('社交平台',22,'#16a34a','3,439')}${progress('社保医保',16,'#d97706','2,501')}${progress('支付账户',14,'#0891b2','2,188')}${progress('邮箱/其他',10,'#7c3aed','1,564')}</div></div></div>`}
+function renderSettings(){document.getElementById('page-settings').innerHTML=`<div class="card settings-block"><div class="panel-head"><div><div class="panel-title">活跃度检测配置</div><div class="panel-desc">默认阈值可被用户在个人端覆盖</div></div></div><div class="form-grid"><div class="form-label">低活跃阈值</div><div><input class="input" value="30" style="width:90px"><span class="hint">天</span></div><div class="form-label">长期未登录阈值</div><div><input class="input" value="90" style="width:90px"><span class="hint">天</span></div><div class="form-label">可能遗忘阈值</div><div><input class="input" value="180" style="width:90px"><span class="hint">天</span></div><div class="form-label">默认检测周期</div><div><select class="select"><option>每日</option><option selected>每周</option><option>每月</option></select></div></div></div><div class="card settings-block"><div class="panel-title" style="margin-bottom:16px">订阅价格配置</div><div class="form-grid"><div class="form-label">个人版月价</div><div><input class="input" value="9" style="width:90px"><span class="hint">元/月</span></div><div class="form-label">家庭版月价</div><div><input class="input" value="19" style="width:90px"><span class="hint">元/月</span></div><div class="form-label">家庭版成员上限</div><div><input class="input" value="6" style="width:90px"><span class="hint">人</span></div><div class="form-label">自动续费</div><div><button class="switch on" onclick="this.classList.toggle('on')"></button></div></div></div><div class="card settings-block"><div class="panel-title" style="margin-bottom:16px">继承审核规则</div><div class="form-grid"><div class="form-label">审核时限</div><div><input class="input" value="48" style="width:90px"><span class="hint">小时</span></div><div class="form-label">双人确认</div><div><button class="switch on" onclick="this.classList.toggle('on')"></button><span class="hint">身故/失能申请必须双人确认</span></div><div class="form-label">拒绝原因必填</div><div><button class="switch on" onclick="this.classList.toggle('on')"></button></div></div></div><div style="display:flex;justify-content:flex-end;gap:10px"><button class="btn">取消</button><button class="btn primary" onclick="showToast('系统设置已保存')">保存设置</button></div>`}
+function openModal(title,html){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=html;document.getElementById('modalBackdrop').classList.add('show')}
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
+renderDashboard();renderUsers();renderFamilies();renderReviews();renderStats();renderSettings();
+</script>
+</body>
+</html>

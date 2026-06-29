@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>换班申请 Widget 原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f0f2f5; display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; padding: 20px; }
+.widget-box { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); max-width: 375px; }
+.widget-title { font-size: 14px; color: #999; margin-bottom: 16px; text-align: center; }
+.phone-screen { width: 320px; height: 520px; border-radius: 24px; border: 3px solid #333; overflow: hidden; margin: 0 auto; background: #f5f5f5; }
+.nav-bar { height: 44px; background: #FF8C42; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; font-weight: 600; }
+.content { height: calc(100% - 44px); overflow-y: auto; }
+.form-section { background: #fff; margin: 10px; border-radius: 12px; padding: 14px; }
+.form-label { font-size: 13px; color: #666; margin-bottom: 8px; display: block; }
+.required { color: #F44336; font-size: 11px; }
+.form-input { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 13px; background: #fafafa; }
+.tag { display: inline-block; padding: 5px 12px; border-radius: 14px; font-size: 12px; cursor: pointer; margin-right: 6px; margin-bottom: 6px; }
+.tag-active { background: #FFF3E0; color: #FF8C42; border: 1px solid #FF8C42; }
+.tag-inactive { background: #f5f5f5; color: #666; border: 1px solid #e0e0e0; }
+.member-item { display: flex; align-items: center; padding: 10px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #e0e0e0; cursor: pointer; }
+.member-item.selected { border-color: #FF8C42; background: #FFF8F3; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600; }
+.member-name { margin-left: 10px; font-size: 13px; color: #333; flex: 1; }
+.member-avail { font-size: 10px; color: #4CAF50; }
+.btn { display: block; width: calc(100% - 20px); margin: 10px; padding: 12px; border-radius: 24px; font-size: 14px; font-weight: 600; text-align: center; border: none; cursor: pointer; }
+.btn-primary { background: #FF8C42; color: #fff; }
+.btn-disabled { background: #e0e0e0; color: #999; }
+.desc-card { background: #f9f9f9; border-radius: 12px; padding: 16px; margin-top: 16px; max-width: 375px; }
+.desc-card h3 { font-size: 14px; color: #333; margin-bottom: 8px; }
+.desc-card ul { font-size: 12px; color: #666; line-height: 1.8; margin-left: 16px; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="widget-box">
+    <div class="widget-title">发起换班申请</div>
+    <div class="phone-screen">
+      <div class="nav-bar">发起换班</div>
+      <div class="content">
+        <div class="form-section">
+          <label class="form-label">选择换班日期 <span class="required">*必填</span></label>
+          <div class="form-input" style="color:#333;display:flex;justify-content:space-between;align-items:center;">
+            <span>📅 2026年6月17日（周三）</span>
+            <span style="color:#999;">›</span>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label">选择换班对象 <span class="required">*必填</span></label>
+          <div class="member-item selected">
+            <div class="avatar" style="background:#4CAF50;">二</div>
+            <div class="member-name">
+              <div>张二弟</div>
+              <div class="member-avail">✓ 当日可照护</div>
+            </div>
+            <span style="color:#FF8C42;font-size:16px;">✓</span>
+          </div>
+          <div class="member-item">
+            <div class="avatar" style="background:#2196F3;">三</div>
+            <div class="member-name">
+              <div>张三妹</div>
+              <div style="font-size:10px;color:#F44336;">✗ 当日不可</div>
+            </div>
+          </div>
+          <div class="member-item">
+            <div class="avatar" style="background:#9C27B0;">四</div>
+            <div class="member-name">
+              <div>张四弟</div>
+              <div class="member-avail">✓ 当日可照护</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#999;margin-top:4px;">💡 灰色成员当日已有排班或已设置不可照护</div>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label">换班原因 <span class="required">*必填</span></label>
+          <div>
+            <span class="tag tag-active">出差</span>
+            <span class="tag tag-inactive">生病</span>
+            <span class="tag tag-inactive">工作忙</span>
+            <span class="tag tag-inactive">家庭事务</span>
+            <span class="tag tag-inactive">其他</span>
+          </div>
+          <textarea class="form-input" rows="2" placeholder="补充说明（选填）" style="resize:none;margin-top:6px;"></textarea>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label">换班类型</label>
+          <div style="display:flex;gap:8px;">
+            <span class="tag tag-active" style="flex:1;text-align:center;">🔄 互换班</span>
+            <span class="tag tag-inactive" style="flex:1;text-align:center;">👥 请代班</span>
+          </div>
+          <div style="font-size:11px;color:#999;margin-top:6px;">
+            互换班：双方日期互换<br>
+            请代班：仅请对方替自己照护
+          </div>
+        </div>
+
+        <button class="btn btn-primary">提交换班申请</button>
+        <div style="text-align:center;font-size:11px;color:#999;padding:0 10px 10px;">
+          提交后对方需在24小时内确认
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="desc-card">
+    <h3>换班规则</h3>
+    <ul>
+      <li>换班需选择具体日期和换班对象</li>
+      <li>原因必填，可选预设原因或自定义</li>
+      <li>对方需在24小时内确认，超时自动过期</li>
+      <li>同一日期不可有多个换班申请</li>
+      <li>不能与自己换班</li>
+      <li>系统自动显示对方当日是否可照护</li>
+    </ul>
+  </div>
+</div>
+
+<div>
+  <div class="widget-box">
+    <div class="widget-title">换班结果通知 & 记录</div>
+    <div class="phone-screen">
+      <div class="nav-bar">换班记录</div>
+      <div class="content">
+        <div style="padding:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag tag-active">全部(4)</span>
+          <span class="tag tag-inactive">待确认(1)</span>
+          <span class="tag tag-inactive">已完成(2)</span>
+          <span class="tag tag-inactive">已拒绝(1)</span>
+        </div>
+
+        <!-- 待确认 -->
+        <div class="form-section" style="border-left:3px solid #FF8C42;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:600;color:#333;">6月17日（周三）</span>
+            <span class="tag tag-active" style="margin:0;">⏳ 待确认</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span>张大姐</span>
+            <span style="color:#FF8C42;font-size:16px;">⇄</span>
+            <span>张二弟</span>
+          </div>
+          <div style="font-size:12px;color:#999;margin-top:6px;">原因：出差 | 提交于 6月15日 14:30</div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-primary" style="flex:1;margin:0;padding:8px;font-size:12px;">✓ 同意</button>
+            <button style="flex:1;padding:8px;border-radius:20px;border:1px solid #e0e0e0;background:#fff;font-size:12px;color:#666;cursor:pointer;">✗ 拒绝</button>
+          </div>
+        </div>
+
+        <!-- 已同意 -->
+        <div class="form-section" style="border-left:3px solid #4CAF50;opacity:0.85;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:600;color:#333;">6月10日（周四）</span>
+            <span class="tag" style="margin:0;background:#E8F5E9;color:#4CAF50;">✓ 已完成</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span>张大姐</span>
+            <span style="color:#4CAF50;font-size:16px;">⇄</span>
+            <span>张三妹</span>
+          </div>
+          <div style="font-size:12px;color:#999;margin-top:6px;">原因：工作忙 | 6月8日 确认完成</div>
+        </div>
+
+        <!-- 已拒绝 -->
+        <div class="form-section" style="border-left:3px solid #F44336;opacity:0.7;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:600;color:#333;">6月5日（周六）</span>
+            <span class="tag" style="margin:0;background:#FFEBEE;color:#F44336;">✗ 已拒绝</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span>张四弟</span>
+            <span style="color:#F44336;font-size:16px;">⇄</span>
+            <span>张三妹</span>
+          </div>
+          <div style="font-size:12px;color:#999;margin-top:6px;">原因：生病 | 对方已拒绝</div>
+        </div>
+
+        <!-- 已过期 -->
+        <div class="form-section" style="border-left:3px solid #999;opacity:0.6;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:600;color:#333;">5月28日（周四）</span>
+            <span class="tag" style="margin:0;background:#F5F5F5;color:#999;">⏰ 已过期</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span>张二弟</span>
+            <span style="color:#999;font-size:16px;">⇄</span>
+            <span>张四弟</span>
+          </div>
+          <div style="font-size:12px;color:#999;margin-top:6px;">原因：出差 | 超时未处理</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="desc-card">
+    <h3>换班状态说明</h3>
+    <ul>
+      <li><span style="color:#FF8C42;">⏳ 待确认</span>：等待对方处理，橙色标识</li>
+      <li><span style="color:#4CAF50;">✓ 已完成</span>：对方同意，排班已更新，绿色标识</li>
+      <li><span style="color:#F44336;">✗ 已拒绝</span>：对方拒绝，保持原排班，红色标识</li>
+      <li><span style="color:#999;">⏰ 已过期</span>：24小时内未处理，自动过期，灰色标识</li>
+      <li>所有换班记录永久保留，方便追溯</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

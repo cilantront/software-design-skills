@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>邻里工具共享与借用管理 · 用户端小程序全站原型</title>
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-2: #14b8a6;
+      --primary-soft: #ccfbf1;
+      --blue: #0369a1;
+      --amber: #d97706;
+      --red: #dc2626;
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #e2e8f0;
+      --bg: #f0fdfa;
+      --card: #ffffff;
+      --shadow: 0 24px 60px rgba(15, 23, 42, .16);
+      --shadow-sm: 0 10px 28px rgba(15, 23, 42, .10);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(20, 184, 166, .22), transparent 28%),
+        radial-gradient(circle at 86% 12%, rgba(3, 105, 161, .14), transparent 30%),
+        linear-gradient(135deg, #f0fdfa 0%, #f8fafc 52%, #eff6ff 100%);
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .sr-only { position: absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    .stage {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 420px) minmax(390px, 430px) minmax(280px, 420px);
+      gap: 34px;
+      align-items: center;
+      justify-content: center;
+      padding: 34px;
+    }
+    .intro-card, .notes-card {
+      border: 1px solid rgba(20, 184, 166, .18);
+      border-radius: 32px;
+      padding: 26px;
+      background: rgba(255, 255, 255, .74);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(18px);
+    }
+    .intro-kicker { color: var(--primary); font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .intro-card h1 { margin: 10px 0 12px; font-size: 34px; line-height: 1.08; letter-spacing: -.05em; }
+    .intro-card p, .notes-card p { color: var(--muted); line-height: 1.7; }
+    .principles { display: grid; gap: 12px; margin-top: 22px; }
+    .principle { display: flex; gap: 12px; align-items: flex-start; padding: 13px; border-radius: 18px; background: #fff; border: 1px solid var(--line); }
+    .principle svg { width: 22px; height: 22px; color: var(--primary); flex: 0 0 auto; }
+    .principle strong { display: block; font-size: 14px; }
+    .principle span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    .phone-shell {
+      width: 410px;
+      height: 844px;
+      position: relative;
+      border-radius: 48px;
+      padding: 12px;
+      background: linear-gradient(145deg, #101827, #273449);
+      box-shadow: 0 34px 100px rgba(15, 23, 42, .32), inset 0 0 0 1px rgba(255,255,255,.12);
+    }
+    .phone {
+      width: 100%; height: 100%; overflow: hidden; position: relative;
+      border-radius: 38px;
+      background: #f8fafc;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+    }
+    .statusbar {
+      height: 44px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 20;
+    }
+    .wechat-top {
+      height: 44px;
+      padding: 0 14px 0 18px;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) 66px;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 20;
+    }
+    .wx-title { text-align: center; font-size: 16px; font-weight: 900; }
+    .wx-back, .wx-capsule { color: #334155; }
+    .wx-capsule { height: 30px; border: 1px solid #cbd5e1; border-radius: 999px; display: flex; align-items: center; justify-content: space-around; background: rgba(255,255,255,.64); }
+    .wx-capsule span { width: 4px; height: 4px; border-radius: 50%; background: currentColor; box-shadow: 8px 0 currentColor, 16px 0 currentColor; }
+    .wx-capsule b { width: 14px; height: 14px; border: 2px solid currentColor; border-radius: 50%; }
+
+    .screen {
+      height: calc(100% - 88px);
+      position: relative;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+    .page {
+      position: absolute; inset: 0;
+      overflow-y: auto;
+      padding-bottom: 96px;
+      display: none;
+      animation: slideIn .24s ease both;
+    }
+    .page.active { display: block; }
+    @keyframes slideIn { from { opacity: .35; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
+
+    .hero {
+      padding: 22px 20px 18px;
+      color: white;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,.28), transparent 30%),
+        linear-gradient(135deg, #0f766e, #14b8a6 58%, #0369a1);
+      border-radius: 0 0 32px 32px;
+      box-shadow: 0 18px 36px rgba(15, 118, 110, .24);
+    }
+    .location { display: flex; align-items: center; gap: 8px; font-size: 13px; opacity: .92; }
+    .hero h2 { margin: 12px 0 6px; font-size: 25px; letter-spacing: -.04em; }
+    .hero p { margin: 0; font-size: 13px; opacity: .86; }
+    .search-row { margin-top: 16px; display: flex; gap: 10px; }
+    .search-box { flex: 1; min-height: 46px; border-radius: 999px; display: flex; align-items: center; gap: 9px; padding: 0 14px; color: #64748b; background: rgba(255,255,255,.94); }
+    .scan-btn { width: 46px; height: 46px; border: 0; border-radius: 16px; display: grid; place-items: center; color: var(--primary); background: white; box-shadow: 0 10px 20px rgba(15, 23, 42, .12); }
+
+    .section { padding: 18px 18px 0; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .section-head h3 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+    .section-head a { color: var(--primary); font-size: 12px; font-weight: 800; text-decoration: none; }
+    .chips { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 3px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip { flex: 0 0 auto; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 7px; color: #334155; background: white; font-size: 13px; font-weight: 800; transition: background .2s ease, border .2s ease, color .2s ease; }
+    .chip.active { color: white; border-color: transparent; background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: 0 10px 20px rgba(15,118,110,.18); }
+
+    .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .quick-card { min-height: 76px; padding: 10px 8px; border: 1px solid var(--line); border-radius: 20px; background: white; text-align: center; box-shadow: 0 8px 18px rgba(15,23,42,.05); }
+    .quick-icon { width: 34px; height: 34px; margin: 0 auto 6px; border-radius: 13px; display: grid; place-items: center; color: var(--primary); background: var(--primary-soft); }
+    .quick-card span { font-size: 12px; font-weight: 850; }
+
+    .item-list { display: grid; gap: 12px; }
+    .item-card { border: 1px solid rgba(226,232,240,.92); border-radius: 24px; padding: 12px; display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; background: rgba(255,255,255,.94); box-shadow: 0 12px 26px rgba(15,23,42,.08); transition: transform .2s ease, box-shadow .2s ease; }
+    .item-card:active { transform: scale(.99); }
+    .item-photo { position: relative; height: 96px; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #99f6e4, #0f766e); display: grid; place-items: center; color: #064e3b; }
+    .item-photo.blue { background: linear-gradient(135deg, #dbeafe, #0369a1); color: #0c4a6e; }
+    .item-photo.amber { background: linear-gradient(135deg, #fef3c7, #d97706); color: #78350f; }
+    .item-photo.red { background: linear-gradient(135deg, #fee2e2, #dc2626); color: #7f1d1d; }
+    .item-photo svg { width: 42px; height: 42px; }
+    .item-info { min-width: 0; }
+    .item-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .item-name { margin: 0; font-size: 16px; font-weight: 900; letter-spacing: -.02em; }
+    .item-desc { margin: 5px 0 8px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill { min-height: 24px; padding: 0 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 850; }
+    .pill.green { color: #047857; background: #d1fae5; }
+    .pill.amber { color: #92400e; background: #fef3c7; }
+    .pill.red { color: #991b1b; background: #fee2e2; }
+    .pill.gray { color: #475569; background: #f1f5f9; }
+    .borrow-mini { min-height: 34px; padding: 0 12px; border: 0; border-radius: 999px; color: white; font-size: 12px; font-weight: 850; background: linear-gradient(135deg, var(--primary), var(--primary-2)); }
+
+    .detail-hero { height: 292px; position: relative; padding: 18px; display: flex; flex-direction: column; justify-content: flex-end; color: white; background: linear-gradient(135deg, #99f6e4 0%, #0f766e 58%, #0369a1 100%); }
+    .detail-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgba(15,23,42,.42)); }
+    .detail-tool { position: relative; z-index: 1; align-self: center; margin-bottom: 26px; color: rgba(255,255,255,.86); }
+    .detail-title { position: relative; z-index: 1; }
+    .detail-title h2 { margin: 0 0 7px; font-size: 26px; letter-spacing: -.04em; }
+    .detail-content { padding: 18px; display: grid; gap: 14px; }
+    .info-card { padding: 16px; border-radius: 22px; border: 1px solid var(--line); background: white; box-shadow: 0 10px 24px rgba(15,23,42,.06); }
+    .info-card h3 { margin: 0 0 8px; font-size: 15px; }
+    .info-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat-tile { padding: 13px 10px; border-radius: 18px; background: #f8fafc; text-align: center; }
+    .stat-tile strong { display: block; font-size: 17px; }
+    .stat-tile span { color: var(--muted); font-size: 11px; }
+
+    .form-page { padding: 18px; display: grid; gap: 14px; }
+    .summary-card { display: flex; gap: 12px; padding: 14px; border-radius: 24px; background: linear-gradient(135deg, #ecfeff, #fff); border: 1px solid rgba(20,184,166,.22); }
+    .field-card { padding: 14px; border-radius: 20px; background: white; border: 1px solid var(--line); }
+    .field-card label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 850; }
+    .field-card input, .field-card textarea { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; }
+    .field-card textarea { min-height: 80px; resize: none; }
+    .date-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .date-option { min-height: 50px; border: 1px solid var(--line); border-radius: 16px; background: white; color: #334155; font-weight: 850; }
+    .date-option.active { color: white; border-color: transparent; background: linear-gradient(135deg, var(--primary), var(--primary-2)); }
+
+    .borrow-list { display: grid; gap: 12px; padding: 18px; }
+    .borrow-card { position: relative; padding: 14px; border-radius: 24px; background: white; border: 1px solid var(--line); box-shadow: 0 10px 24px rgba(15,23,42,.06); }
+    .borrow-card.warning { background: linear-gradient(135deg, #fffbeb, #fff); border-color: #fde68a; }
+    .borrow-card.danger { background: linear-gradient(135deg, #fef2f2, #fff); border-color: #fecaca; }
+    .borrow-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .borrow-main { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 11px; }
+    .time-line { margin-top: 12px; height: 8px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+    .time-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--primary), var(--primary-2)); }
+    .time-fill.red { background: linear-gradient(90deg, #ef4444, #dc2626); }
+
+    .message-list { padding: 18px; display: grid; gap: 12px; }
+    .message-card { position: relative; padding: 14px; border-radius: 22px; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; border: 1px solid var(--line); background: white; box-shadow: 0 10px 22px rgba(15,23,42,.05); }
+    .msg-icon { width: 44px; height: 44px; border-radius: 16px; display: grid; place-items: center; color: var(--primary); background: var(--primary-soft); }
+    .unread { position: absolute; right: 14px; top: 14px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 4px rgba(220,38,38,.12); }
+    .message-card h4 { margin: 0 0 4px; font-size: 14px; }
+    .message-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .message-card time { display: block; margin-top: 6px; color: #94a3b8; font-size: 11px; }
+
+    .profile-hero { padding: 24px 18px; color: white; background: linear-gradient(135deg, #0f766e, #14b8a6); border-radius: 0 0 32px 32px; }
+    .profile-main { display: flex; align-items: center; gap: 14px; }
+    .avatar { width: 70px; height: 70px; border-radius: 26px; background: linear-gradient(135deg,#fff,#ccfbf1); box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+    .profile-main h2 { margin: 0 0 5px; }
+    .profile-main p { margin: 0; opacity: .86; font-size: 13px; }
+    .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+    .profile-stat { padding: 12px; border-radius: 18px; background: rgba(255,255,255,.18); text-align: center; }
+    .profile-stat strong { display: block; font-size: 18px; }
+    .profile-stat span { font-size: 11px; opacity: .84; }
+    .menu-list { padding: 18px; display: grid; gap: 10px; }
+    .menu-row { min-height: 56px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; border-radius: 18px; background: white; border: 1px solid var(--line); box-shadow: 0 8px 18px rgba(15,23,42,.04); font-weight: 850; }
+    .menu-row small { color: #94a3b8; font-weight: 700; }
+
+    .bottom-nav { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 30; height: 72px; border-radius: 26px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 8px; background: rgba(255,255,255,.84); backdrop-filter: blur(18px); box-shadow: 0 -10px 30px rgba(15,23,42,.12); border: 1px solid rgba(226,232,240,.86); }
+    .tab { border: 0; border-radius: 20px; display: grid; place-items: center; gap: 2px; color: #64748b; background: transparent; transition: background .2s ease, color .2s ease; min-height: 54px; }
+    .tab svg { width: 21px; height: 21px; }
+    .tab span { font-size: 11px; font-weight: 850; }
+    .tab.active { color: var(--primary); background: #ccfbf1; }
+
+    .float-action { position: absolute; right: 24px; bottom: 96px; z-index: 22; width: 58px; height: 58px; border: 0; border-radius: 22px; display: grid; place-items: center; color: white; background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: 0 18px 32px rgba(15,118,110,.28); }
+    .primary-action { width: 100%; min-height: 54px; border: 0; border-radius: 20px; color: white; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: 0 14px 26px rgba(15,118,110,.22); }
+    .ghost-action { width: 100%; min-height: 50px; border: 1px solid var(--line); border-radius: 18px; color: #334155; font-weight: 850; background: white; }
+
+    .toast { position: absolute; left: 50%; bottom: 92px; z-index: 100; transform: translate(-50%, 16px); min-width: 210px; padding: 12px 14px; border-radius: 999px; color: white; background: rgba(15,23,42,.92); text-align: center; font-size: 13px; font-weight: 850; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .notes-card h2 { margin: 0 0 14px; font-size: 20px; }
+    .flow-list { display: grid; gap: 12px; }
+    .flow-step { display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 12px; align-items: start; }
+    .flow-no { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--primary); font-size: 12px; font-weight: 900; }
+    .flow-step strong { display: block; }
+    .flow-step span { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; line-height: 1.5; }
+
+    @media (max-width: 1180px) {
+      .stage { grid-template-columns: 1fr; }
+      .intro-card, .notes-card { max-width: 760px; width: 100%; margin: 0 auto; }
+      .phone-shell { margin: 0 auto; }
+    }
+    @media (max-width: 480px) {
+      .stage { padding: 14px; }
+      .phone-shell { width: 100%; height: min(844px, calc(100vh - 28px)); }
+      .intro-card, .notes-card { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <aside class="intro-card">
+      <div class="intro-kicker">Mini Program Prototype</div>
+      <h1>把邻里共享工具，做成可信赖的轻量借用体验</h1>
+      <p>原型采用真实小程序单机交互：底部 Tab、页面跳转、借用确认、超期提醒与 Toast 反馈均可点击体验。</p>
+      <div class="principles">
+        <div class="principle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg><div><strong>3步完成借用</strong><span>浏览列表 → 查看详情 → 选择归还时间确认借用。</span></div></div>
+        <div class="principle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg><div><strong>可信留痕</strong><span>借出、归还、超期、损坏均有状态提示与记录入口。</span></div></div>
+        <div class="principle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16"/><path d="M12 4v16"/></svg><div><strong>社区绿视觉体系</strong><span>以信任、环保、邻里互助为主视觉情绪。</span></div></div>
+      </div>
+    </aside>
+
+    <div class="phone-shell" role="application" aria-label="用户端小程序全站原型">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G</span><span>100%</span></div>
+        <div class="wechat-top"><button class="wx-back" id="backBtn" type="button" aria-label="返回" style="border:0;background:transparent"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button><div class="wx-title" id="wxTitle">邻里工具共享</div><div class="wx-capsule" aria-hidden="true"><span></span><b></b></div></div>
+        <main class="screen">
+          <section class="page active" id="homePage">
+            <div class="hero">
+              <div class="location"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>阳光花园小区 · 共享工具柜</div>
+              <h2>今天需要借点什么？</h2>
+              <p>156 件共享物品在线，89 件当前可借</p>
+              <div class="search-row"><button class="search-box" type="button" data-page="searchPage"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>搜索电钻、梯子、吸尘器</button><button class="scan-btn" type="button" data-toast="扫码借用将在第二期完整打通" aria-label="扫码"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg></button></div>
+            </div>
+            <div class="section"><div class="section-head"><h3>快捷入口</h3><a href="#" data-toast="已刷新社区服务入口">管理更多</a></div><div class="quick-grid"><button class="quick-card" data-page="borrowPage"><div class="quick-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V5a2 2 0 0 0-2-2h-6c-.552 0-1 .448-1 1"/><path d="M3 12c-.552 0-1 .448-1 1v6a2 2 0 0 0 2 2h6c.552 0 1-.448 1-1"/></svg></div><span>立即借用</span></button><button class="quick-card" data-page="borrowListPage"><div class="quick-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg></div><span>我的借用</span></button><button class="quick-card" data-page="profilePage"><div class="quick-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M5 16h14"/></svg></div><span>我的发布</span></button><button class="quick-card" data-page="messagePage"><div class="quick-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg></div><span>消息提醒</span></button></div></div>
+            <div class="section"><div class="section-head"><h3>热门工具</h3><a href="#" data-toast="已切换到全部物品">全部物品</a></div><div class="chips"><button class="chip active">全部</button><button class="chip">工具类</button><button class="chip">电器类</button><button class="chip">厨房类</button><button class="chip">运动类</button></div></div>
+            <div class="section"><div class="item-list" id="homeItems"></div></div>
+            <button class="float-action" type="button" data-page="editItemPage" aria-label="发布物品"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+          </section>
+
+          <section class="page" id="detailPage">
+            <div class="detail-hero"><div class="detail-tool"><svg viewBox="0 0 24 24" width="118" height="118" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a6 6 0 0 1-7.9 7.9l-6 6a2 2 0 0 1-2.8-2.8l6-6a6 6 0 0 1 7.9-7.9Z"/></svg></div><div class="detail-title"><span class="pill green">当前可借</span><h2>博世冲击电钻</h2><p style="margin:0;opacity:.9">3号楼502鞋柜 · 已被借用 12 次</p></div></div>
+            <div class="detail-content"><div class="stats-row"><div class="stat-tile"><strong>¥299</strong><span>购入价格</span></div><div class="stat-tile"><strong>7天</strong><span>默认可借</span></div><div class="stat-tile"><strong>4.9</strong><span>好用评分</span></div></div><div class="info-card"><h3>使用说明</h3><p>适用于墙壁、木材、金属打孔。使用前请检查钻头是否牢固，佩戴护目镜；归还时请清理灰尘并放回原存放位置。</p></div><div class="info-card"><h3>责任提示</h3><p>借出后系统记录借用人、借出时间与预计归还时间；如发现损坏，管理员可关联本次借用记录拍照留痕。</p></div><button class="primary-action" type="button" data-page="borrowPage">填写借用信息</button><button class="ghost-action" type="button" data-toast="存放位置已复制">复制存放位置</button></div>
+          </section>
+
+          <section class="page" id="borrowPage">
+            <div class="form-page"><div class="summary-card"><div class="item-photo" style="width:76px;height:76px"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a6 6 0 0 1-7.9 7.9l-6 6a2 2 0 0 1-2.8-2.8l6-6a6 6 0 0 1 7.9-7.9Z"/></svg></div><div><h3 style="margin:4px 0 5px">博世冲击电钻</h3><p style="margin:0;color:var(--muted);font-size:12px;line-height:1.5">3号楼502鞋柜 · 预计归还前会自动提醒</p></div></div><div class="field-card"><label>预计归还时间</label><div class="date-options"><button class="date-option active">3天后</button><button class="date-option">7天后</button><button class="date-option">自定义</button></div></div><div class="field-card"><label>借用用途（选填）</label><textarea placeholder="例如：安装窗帘、维修柜门..."></textarea></div><div class="info-card"><h3>借用承诺</h3><p>我已阅读使用说明，承诺按时归还并保持物品完好；如有损坏将配合管理员进行责任确认。</p></div><button class="primary-action" type="button" data-page="successPage">确认借用</button></div>
+          </section>
+
+          <section class="page" id="successPage">
+            <div style="height:100%;display:grid;place-items:center;padding:24px;text-align:center"><div><div style="width:96px;height:96px;margin:0 auto 20px;border-radius:32px;display:grid;place-items:center;color:white;background:linear-gradient(135deg,var(--primary),var(--primary-2));box-shadow:0 18px 34px rgba(15,118,110,.28)"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><h2 style="margin:0 0 8px">借用成功</h2><p style="color:var(--muted);line-height:1.7">你已成功借用「博世冲击电钻」<br>预计 2026-07-02 前归还</p><div style="display:grid;gap:10px;margin-top:24px"><button class="primary-action" data-page="borrowListPage">查看我的借用</button><button class="ghost-action" data-page="homePage">返回首页</button></div></div></div>
+          </section>
+
+          <section class="page" id="borrowListPage"><div class="section"><div class="chips"><button class="chip active">借用中 3</button><button class="chip">历史记录</button><button class="chip">已超期 1</button></div></div><div class="borrow-list"><div class="borrow-card danger"><div class="borrow-head"><strong>博世冲击电钻</strong><span class="pill red">超期2天</span></div><div class="borrow-main"><div class="item-photo" style="height:58px"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a6 6 0 0 1-7.9 7.9l-6 6a2 2 0 0 1-2.8-2.8l6-6a6 6 0 0 1 7.9-7.9Z"/></svg></div><div><p style="margin:0;color:var(--muted);font-size:12px;line-height:1.6">借出：06-20 10:18<br>应还：06-27 18:00</p></div></div><div class="time-line"><div class="time-fill red" style="width:100%"></div></div><button class="primary-action" style="margin-top:12px" data-toast="已提交归还确认，等待管理员复核">确认归还</button></div><div class="borrow-card warning"><div class="borrow-head"><strong>无线吸尘器</strong><span class="pill amber">剩余3天</span></div><div class="borrow-main"><div class="item-photo blue" style="height:58px"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M7 11h10"/></svg></div><div><p style="margin:0;color:var(--muted);font-size:12px;line-height:1.6">借出：06-25 09:40<br>应还：07-02 18:00</p></div></div><div class="time-line"><div class="time-fill" style="width:62%"></div></div><button class="ghost-action" style="margin-top:12px" data-toast="续借功能将在第二期开放">申请续借</button></div></div></section>
+
+          <section class="page" id="messagePage"><div class="section"><div class="section-head"><h3>消息中心</h3><a href="#" data-toast="已全部标记为已读">全部已读</a></div></div><div class="message-list"><div class="message-card"><span class="unread"></span><div class="msg-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg></div><div><h4>超期提醒</h4><p>你借用的电钻已超期 2 天，请尽快归还或联系管理员说明情况。</p><time>2分钟前</time></div></div><div class="message-card"><span class="unread"></span><div class="msg-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg></div><div><h4>归还提醒</h4><p>无线吸尘器将在 3 天后到期，请提前安排归还。</p><time>1小时前</time></div></div><div class="message-card"><div class="msg-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><div><h4>借用成功</h4><p>你已成功借用博世冲击电钻，系统已生成借用记录。</p><time>3天前</time></div></div></div></section>
+
+          <section class="page" id="profilePage"><div class="profile-hero"><div class="profile-main"><div class="avatar"></div><div><h2>张三</h2><p>138****1234 · 3号楼502室</p></div></div><div class="profile-stats"><div class="profile-stat"><strong>5</strong><span>借用次数</span></div><div class="profile-stat"><strong>80%</strong><span>按时归还</span></div><div class="profile-stat"><strong>2</strong><span>发布物品</span></div></div></div><div class="menu-list"><button class="menu-row" data-toast="进入个人资料编辑"><span>个人资料</span><small>已完善</small></button><button class="menu-row" data-page="editItemPage"><span>我的发布</span><small>2 件物品</small></button><button class="menu-row" data-toast="信用积分将在第三期上线"><span>信用积分</span><small>即将上线</small></button><button class="menu-row" data-toast="打开关于我们"><span>关于我们</span><small>版本 V1.0</small></button></div></section>
+
+          <section class="page" id="searchPage"><div class="section"><div class="field-card" style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="输入关键词搜索" value="电钻" /></div></div><div class="section"><div class="section-head"><h3>搜索结果</h3></div><div class="item-list"><div class="item-card" data-page="detailPage"><div class="item-photo"><svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a6 6 0 0 1-7.9 7.9l-6 6a2 2 0 0 1-2.8-2.8l6-6a6 6 0 0 1 7.9-7.9Z"/></svg></div><div class="item-info"><h4 class="item-name">博世冲击电钻</h4><p class="item-desc">工具类 · 3号楼502鞋柜</p><span class="pill green">可借</span></div></div></div></div></section>
+
+          <section class="page" id="editItemPage"><div class="form-page"><div class="field-card"><label>物品照片</label><div style="height:120px;border:1px dashed #94a3b8;border-radius:18px;display:grid;place-items:center;color:var(--primary);background:#f8fafc"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div></div><div class="field-card"><label>物品名称</label><input value="便携工具箱" /></div><div class="field-card"><label>物品类别</label><select><option>工具类</option><option>电器类</option></select></div><div class="field-card"><label>使用说明</label><textarea>请填写使用注意事项、存放位置与归还要求。</textarea></div><button class="primary-action" data-toast="已提交物品，等待管理员审核">提交发布</button></div></section>
+
+          <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        </main>
+        <nav class="bottom-nav" aria-label="小程序底部导航"><button class="tab active" data-page="homePage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg><span>首页</span></button><button class="tab" data-page="borrowListPage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg><span>借用</span></button><button class="tab" data-page="messagePage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><span>消息</span></button><button class="tab" data-page="profilePage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg><span>我的</span></button></nav>
+      </div>
+    </div>
+
+    <aside class="notes-card">
+      <h2>可点击交互说明</h2>
+      <div class="flow-list">
+        <div class="flow-step"><span class="flow-no">1</span><div><strong>底部 Tab 切换</strong><span>首页、借用、消息、我的均在同一个小程序壳内切换。</span></div></div>
+        <div class="flow-step"><span class="flow-no">2</span><div><strong>核心借用链路</strong><span>点击热门工具卡片进入详情，再进入借用确认，最终展示借用成功页。</span></div></div>
+        <div class="flow-step"><span class="flow-no">3</span><div><strong>状态反馈</strong><span>超期、即将到期、可借、已借出使用不同色彩与卡片层级表达。</span></div></div>
+        <div class="flow-step"><span class="flow-no">4</span><div><strong>移动端质感</strong><span>采用微信顶栏、玻璃底部导航、卡片化内容与微动效。</span></div></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const pageTitles = {
+      homePage: '邻里工具共享', detailPage: '物品详情', borrowPage: '确认借用', successPage: '借用成功',
+      borrowListPage: '我的借用', messagePage: '消息中心', profilePage: '个人中心', searchPage: '搜索物品', editItemPage: '发布物品'
+    };
+    const pages = [...document.querySelectorAll('.page')];
+    const tabs = [...document.querySelectorAll('.tab')];
+    const wxTitle = document.getElementById('wxTitle');
+    const historyStack = ['homePage'];
+    function showPage(id, push = true) {
+      pages.forEach(p => p.classList.toggle('active', p.id === id));
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.page === id));
+      wxTitle.textContent = pageTitles[id] || '邻里工具共享';
+      if (push && historyStack[historyStack.length - 1] !== id) historyStack.push(id);
+      const screen = document.querySelector('.screen');
+      screen.scrollTop = 0;
+    }
+    document.querySelectorAll('[data-page]').forEach(el => el.addEventListener('click', (event) => { event.preventDefault(); showPage(el.dataset.page); }));
+    document.getElementById('backBtn').addEventListener('click', () => {
+      if (historyStack.length > 1) { historyStack.pop(); showPage(historyStack[historyStack.length - 1], false); }
+      else showToast('已经在首页');
+    });
+
+    const tools = [
+      ['博世冲击电钻','工具类 · 3号楼502鞋柜','可借','green',''],
+      ['折叠梯子','工具类 · 预计明天归还','已借出','amber','amber'],
+      ['无线吸尘器','电器类 · 5号楼服务台','可借','green','blue'],
+      ['便携烧烤架','厨房类 · 共享活动室','可借','green','red']
+    ];
+    const iconMap = {
+      '': '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a6 6 0 0 1-7.9 7.9l-6 6a2 2 0 0 1-2.8-2.8l6-6a6 6 0 0 1 7.9-7.9Z"/>',
+      amber: '<path d="M12 2v20"/><path d="M5 8h14"/><path d="M5 14h14"/><path d="M5 20h14"/>',
+      blue: '<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M7 11h10"/><path d="M9 7h6"/>',
+      red: '<path d="M4 19h16"/><path d="M4 15h16"/><path d="M8 15V7a4 4 0 0 1 8 0v8"/>'
+    };
+    document.getElementById('homeItems').innerHTML = tools.map(t => `
+      <article class="item-card" data-page="detailPage">
+        <div class="item-photo ${t[4]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconMap[t[4]]}</svg></div>
+        <div class="item-info"><div class="item-top"><h4 class="item-name">${t[0]}</h4><span class="pill ${t[3]}">${t[2]}</span></div><p class="item-desc">${t[1]} · 已借用 12 次</p><div class="meta-row"><span class="pill gray">使用说明完整</span><button class="borrow-mini" type="button" data-page="${t[2] === '可借' ? 'borrowPage' : 'detailPage'}">${t[2] === '可借' ? '借用' : '看详情'}</button></div></div>
+      </article>`).join('');
+    document.querySelectorAll('#homeItems [data-page]').forEach(el => el.addEventListener('click', (event) => { event.stopPropagation(); showPage(el.dataset.page); }));
+
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      if (navigator.vibrate) navigator.vibrate(10);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+    document.querySelectorAll('[data-toast]').forEach(el => el.addEventListener('click', (event) => { event.preventDefault(); showToast(el.dataset.toast); }));
+  </script>
+</body>
+</html>

@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>咖损管家 — 移动端原型（宫格展示）</title>
+<style>
+  :root {
+    --green: #10B981;
+    --yellow: #F59E0B;
+    --orange: #F97316;
+    --red: #EF4444;
+    --blue: #3B82F6;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --gray-900: #111827;
+    --coffee: #8B5E3C;
+    --coffee-light: #D4A574;
+    --coffee-bg: #FDF8F0;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #f0f2f5;
+    padding: 20px;
+  }
+
+  /* 站点头部 */
+  .site-header { text-align: center; margin-bottom: 30px; }
+  .site-title { font-size: 24px; font-weight: 700; color: var(--coffee); }
+  .site-desc { font-size: 14px; color: var(--gray-400); margin-top: 8px; }
+
+  /* 宫格布局 */
+  .screen-grid { display: grid; grid-template-columns: repeat(3, 375px); gap: 30px; justify-content: center; padding: 20px; }
+
+  /* 手机模拟器 */
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; }
+  .phone {
+    width: 375px;
+    height: 750px;
+    background: var(--gray-50);
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    position: relative;
+    border: 8px solid var(--gray-800);
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-label { text-align: center; margin-top: 12px; font-size: 14px; font-weight: 600; color: var(--gray-800); }
+  .phone-sublabel { text-align: center; font-size: 12px; color: var(--gray-400); }
+
+  /* 状态栏 */
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 20px; font-size: 12px; font-weight: 600;
+    background: white; flex-shrink: 0;
+  }
+
+  /* 导航头部 */
+  .nav-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; background: white;
+    border-bottom: 1px solid var(--gray-100); flex-shrink: 0;
+  }
+  .nav-header h1 { font-size: 18px; font-weight: 700; color: var(--gray-800); }
+  .nav-header .shop-name { font-size: 14px; color: var(--coffee); font-weight: 600; }
+  .nav-back { font-size: 20px; cursor: pointer; padding: 4px 8px; color: var(--gray-600); }
+
+  /* 底部标签栏 */
+  .tab-bar {
+    display: flex; background: white;
+    border-top: 1px solid var(--gray-200);
+    padding: 6px 0 20px;
+    flex-shrink: 0;
+    z-index: 100;
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 4px 0; transition: all 0.2s;
+  }
+  .tab-item .tab-icon { font-size: 22px; margin-bottom: 2px; color: var(--gray-400); }
+  .tab-item .tab-label { font-size: 10px; color: var(--gray-400); }
+  .tab-item.active .tab-icon, .tab-item.active .tab-label { color: var(--coffee); font-weight: 600; }
+
+  /* 可滚动内容区 */
+  .content { flex: 1; overflow-y: auto; position: relative; }
+
+  /* ===== HOME SCREEN ===== */
+  .home-header {
+    background: linear-gradient(135deg, var(--coffee) 0%, #6B4226 100%);
+    padding: 20px 20px 24px;
+    color: white; flex-shrink: 0;
+  }
+  .home-header .greeting { font-size: 20px; font-weight: 700; }
+  .home-header .date { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+  .alert-bar {
+    display: flex; gap: 8px; padding: 0 16px;
+    margin-top: -12px; overflow-x: auto; flex-shrink: 0;
+    padding-bottom: 4px;
+  }
+  .alert-chip {
+    display: flex; align-items: center; gap: 4px;
+    background: white; border-radius: 20px;
+    padding: 8px 14px; white-space: nowrap;
+    font-size: 13px; font-weight: 600;
+    box-shadow: var(--shadow-md);
+    flex-shrink: 0;
+  }
+  .alert-chip .count { font-size: 16px; }
+  .alert-chip.urgent { color: var(--red); }
+  .alert-chip.warning { color: var(--orange); }
+  .alert-chip.info { color: var(--yellow); }
+
+  .quick-actions {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; padding: 0 16px; margin-top: 16px;
+    flex-shrink: 0;
+  }
+  .quick-btn {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 20px 12px;
+    background: white; border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .quick-btn .icon { font-size: 32px; margin-bottom: 8px; }
+  .quick-btn .label { font-size: 14px; font-weight: 600; color: var(--gray-700); }
+
+  .card {
+    background: white; border-radius: var(--radius);
+    padding: 16px; margin: 12px 16px;
+    box-shadow: var(--shadow); flex-shrink: 0;
+  }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; }
+
+  .expiry-item {
+    display: flex; align-items: center; padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .expiry-item:last-child { border-bottom: none; }
+  .expiry-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; }
+  .expiry-dot.red { background: var(--red); }
+  .expiry-dot.orange { background: var(--orange); }
+  .expiry-dot.yellow { background: var(--yellow); }
+  .expiry-info { flex: 1; }
+  .expiry-name { font-size: 14px; font-weight: 500; color: var(--gray-800); }
+  .expiry-detail { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .expiry-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .expiry-badge.red { background: #FEE2E2; color: var(--red); }
+  .expiry-badge.orange { background: #FFF7ED; color: var(--orange); }
+
+  /* ===== INVENTORY SCREEN ===== */
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; background: white; flex-shrink: 0;
+  }
+  .search-input {
+    flex: 1; padding: 10px 14px; border-radius: 20px;
+    border: 1px solid var(--gray-200); font-size: 14px;
+    background: var(--gray-50); outline: none;
+  }
+  .filter-tabs {
+    display: flex; gap: 0; padding: 0 16px;
+    background: white; border-bottom: 1px solid var(--gray-100);
+    flex-shrink: 0; overflow-x: auto;
+  }
+  .filter-tab {
+    padding: 10px 14px; font-size: 13px;
+    color: var(--gray-500); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .filter-tab.active { color: var(--coffee); border-bottom-color: var(--coffee); font-weight: 600; }
+  .filter-tab .badge {
+    display: inline-block; padding: 1px 6px; border-radius: 10px;
+    font-size: 11px; margin-left: 4px; background: var(--gray-200);
+  }
+  .filter-tab.active .badge { background: var(--coffee-light); color: white; }
+
+  .inventory-item {
+    display: flex; align-items: center; padding: 14px 16px;
+    background: white; border-bottom: 1px solid var(--gray-100);
+  }
+  .inv-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-right: 12px; flex-shrink: 0;
+  }
+  .inv-icon.beans { background: #FEF3C7; }
+  .inv-icon.milk { background: #DBEAFE; }
+  .inv-icon.syrup { background: #FCE7F3; }
+  .inv-icon.tea { background: #D1FAE5; }
+  .inv-info { flex: 1; min-width: 0; }
+  .inv-name { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+  .inv-detail { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .inv-progress { width: 100%; height: 4px; border-radius: 2px; background: var(--gray-200); margin-top: 6px; }
+  .inv-progress-fill { height: 100%; border-radius: 2px; }
+  .inv-right { text-align: right; margin-left: 12px; flex-shrink: 0; }
+  .inv-qty { font-size: 18px; font-weight: 700; color: var(--gray-800); }
+  .inv-unit { font-size: 12px; color: var(--gray-400); }
+  .inv-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-top: 4px; display: inline-block; }
+  .inv-status.green { background: #D1FAE5; color: #065F46; }
+  .inv-status.yellow { background: #FEF3C7; color: #92400E; }
+  .inv-status.orange { background: #FFF7ED; color: #9A3412; }
+  .inv-status.red { background: #FEE2E2; color: #991B1B; }
+
+  .fab {
+    position: absolute; bottom: 70px; right: 20px;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--coffee); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; box-shadow: var(--shadow-lg);
+    z-index: 50;
+  }
+
+  /* ===== SCAN SCREEN ===== */
+  .scan-screen { background: #000; display: flex; flex-direction: column; height: 100%; }
+  .scan-close {
+    position: absolute; top: 12px; right: 16px;
+    color: white; font-size: 24px; cursor: pointer;
+    z-index: 10; padding: 8px;
+  }
+  .scan-area {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px; position: relative;
+  }
+  .scan-frame {
+    width: 220px; height: 220px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 16px; position: relative;
+  }
+  .scan-frame::before {
+    content: ''; position: absolute;
+    top: -2px; left: 20%; right: 20%;
+    height: 2px; background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: scanLine 2s ease-in-out infinite;
+  }
+  @keyframes scanLine {
+    0%, 100% { top: -2px; }
+    50% { top: calc(100% - 2px); }
+  }
+  .scan-corner { position: absolute; width: 24px; height: 24px; }
+  .scan-corner.tl { top: -2px; left: -2px; border-top: 3px solid var(--coffee-light); border-left: 3px solid var(--coffee-light); border-radius: 4px 0 0 0; }
+  .scan-corner.tr { top: -2px; right: -2px; border-top: 3px solid var(--coffee-light); border-right: 3px solid var(--coffee-light); border-radius: 0 4px 0 0; }
+  .scan-corner.bl { bottom: -2px; left: -2px; border-bottom: 3px solid var(--coffee-light); border-left: 3px solid var(--coffee-light); border-radius: 0 0 0 4px; }
+  .scan-corner.br { bottom: -2px; right: -2px; border-bottom: 3px solid var(--coffee-light); border-right: 3px solid var(--coffee-light); border-radius: 0 0 4px 0; }
+  .scan-hint { color: rgba(255,255,255,0.7); font-size: 14px; margin-top: 24px; }
+  .scan-manual {
+    color: var(--coffee-light); font-size: 14px;
+    margin-top: 32px; cursor: pointer;
+    padding: 10px 24px; border: 1px solid var(--coffee-light);
+    border-radius: 20px;
+  }
+  .scan-bottom {
+    display: flex; justify-content: space-around; padding: 24px; color: white; flex-shrink: 0;
+  }
+  .scan-bottom-item { text-align: center; }
+  .scan-bottom-item .icon { font-size: 28px; margin-bottom: 4px; }
+  .scan-bottom-item .label { font-size: 12px; opacity: 0.7; }
+
+  /* ===== CONFIRM SCREEN ===== */
+  .confirm-material {
+    background: white; margin: 16px; border-radius: var(--radius);
+    padding: 16px; box-shadow: var(--shadow); flex-shrink: 0;
+  }
+  .confirm-label { font-size: 12px; color: var(--gray-400); margin-bottom: 4px; }
+  .confirm-value { font-size: 16px; font-weight: 600; color: var(--gray-800); }
+  .confirm-row { display: flex; gap: 16px; margin-top: 12px; }
+  .confirm-field { flex: 1; }
+  .confirm-field label { display: block; font-size: 13px; color: var(--gray-500); margin-bottom: 6px; }
+  .confirm-field input, .confirm-field select {
+    width: 100%; padding: 10px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-200); font-size: 15px;
+    outline: none; background: white;
+  }
+  .confirm-field input:focus { border-color: var(--coffee); }
+
+  .submit-btn {
+    display: block; width: calc(100% - 32px);
+    margin: 20px 16px; padding: 16px;
+    background: var(--coffee); color: white;
+    border: none; border-radius: var(--radius);
+    font-size: 16px; font-weight: 600;
+    box-shadow: var(--shadow-md); text-align: center;
+  }
+
+  /* ===== SHELF LIFE SCREEN ===== */
+  .shelf-stats {
+    display: flex; gap: 12px; padding: 12px 16px;
+    background: white; flex-shrink: 0;
+  }
+  .shelf-stat {
+    flex: 1; text-align: center; padding: 10px;
+    border-radius: var(--radius-sm); background: var(--gray-50);
+  }
+  .shelf-stat .num { font-size: 24px; font-weight: 700; }
+  .shelf-stat .num.red { color: var(--red); }
+  .shelf-stat .num.orange { color: var(--orange); }
+  .shelf-stat .num.green { color: var(--green); }
+  .shelf-stat .label { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+
+  .shelf-section { padding: 8px 16px; }
+  .shelf-section-title {
+    font-size: 13px; font-weight: 600; color: var(--gray-500);
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+
+  .shelf-card {
+    background: white; border-radius: var(--radius-sm);
+    padding: 14px; margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid;
+  }
+  .shelf-card.critical { border-left-color: var(--red); }
+  .shelf-card.warning { border-left-color: var(--orange); }
+  .shelf-card.normal { border-left-color: var(--green); }
+  .shelf-card-header { display: flex; justify-content: space-between; align-items: center; }
+  .shelf-card-name { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+  .shelf-card-days { font-size: 13px; font-weight: 700; }
+  .shelf-card-days.red { color: var(--red); }
+  .shelf-card-days.orange { color: var(--orange); }
+  .shelf-card-days.green { color: var(--green); }
+  .shelf-card-meta { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+  .shelf-card-bar { height: 6px; border-radius: 3px; background: var(--gray-200); margin-top: 8px; }
+  .shelf-card-bar-fill { height: 100%; border-radius: 3px; }
+  .shelf-card-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .shelf-card-btn {
+    padding: 6px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 500;
+    border: none; cursor: pointer;
+  }
+  .shelf-card-btn.primary { background: var(--coffee); color: white; }
+  .shelf-card-btn.secondary { background: var(--gray-100); color: var(--gray-600); }
+
+  /* ===== LOSS SCREEN ===== */
+  .loss-summary {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; padding: 16px;
+    background: white; flex-shrink: 0;
+  }
+  .loss-metric {
+    text-align: center; padding: 12px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--coffee-bg);
+  }
+  .loss-metric .value { font-size: 20px; font-weight: 700; color: var(--coffee); }
+  .loss-metric .label { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+
+  .loss-chart {
+    padding: 12px 16px; background: white; margin-bottom: 8px; flex-shrink: 0;
+  }
+  .loss-chart-title { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+  .loss-chart-body { display: flex; gap: 16px; align-items: center; }
+  .loss-legend { flex: 1; }
+  .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 12px; color: var(--gray-600); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.red { background: var(--red); }
+  .legend-dot.orange { background: var(--orange); }
+  .legend-dot.yellow { background: var(--yellow); }
+  .donut { width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--red) 0% 62%, var(--orange) 62% 87%, var(--yellow) 87% 100%); flex-shrink: 0; }
+
+  .loss-toggle {
+    display: flex; gap: 4px; padding: 0 16px; flex-shrink: 0;
+  }
+  .loss-toggle span {
+    padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer;
+  }
+  .loss-toggle .active { background: var(--coffee); color: white; }
+  .loss-toggle .inactive { color: var(--gray-400); }
+
+  .loss-item {
+    display: flex; align-items: center; padding: 12px 16px;
+    background: white; border-bottom: 1px solid var(--gray-100);
+  }
+  .loss-item-info { flex: 1; }
+  .loss-item-name { font-size: 14px; font-weight: 500; color: var(--gray-800); }
+  .loss-item-detail { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .loss-item-right { text-align: right; }
+  .loss-item-amount { font-size: 14px; font-weight: 600; color: var(--red); }
+  .loss-reason-tag {
+    padding: 4px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+  }
+  .loss-reason-tag.expired { background: #FEE2E2; color: var(--red); }
+  .loss-reason-tag.spoiled { background: #FFF7ED; color: var(--orange); }
+  .loss-reason-tag.mistake { background: #FEF3C7; color: #92400E; }
+
+  /* ===== SALES SCREEN ===== */
+  .drink-row {
+    display: flex; align-items: center; padding: 12px 16px;
+    background: white; border-bottom: 1px solid var(--gray-100);
+  }
+  .drink-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--gray-800); }
+  .drink-counter {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .counter-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--gray-300); background: white;
+    font-size: 18px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    color: var(--gray-600);
+  }
+  .counter-num { font-size: 18px; font-weight: 700; color: var(--gray-800); min-width: 24px; text-align: center; }
+
+  .ingredient-preview {
+    background: var(--coffee-bg); margin: 12px 16px; border-radius: var(--radius);
+    padding: 16px; flex-shrink: 0;
+  }
+  .ingredient-preview .title { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+  .ingredient-preview .items { font-size: 13px; color: var(--gray-600); line-height: 1.8; }
+
+  /* ===== PROFILE SCREEN ===== */
+  .profile-header {
+    background: linear-gradient(135deg, var(--coffee) 0%, #6B4226 100%);
+    padding: 24px 20px; color: white; text-align: center; flex-shrink: 0;
+  }
+  .profile-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(255,255,255,0.2); margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+  }
+  .profile-name { font-size: 18px; font-weight: 600; }
+  .profile-role { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+  .profile-badge {
+    margin-top: 12px; padding: 6px 16px; background: rgba(255,255,255,0.15);
+    border-radius: 12px; display: inline-block; font-size: 12px;
+  }
+
+  .menu-list {
+    background: white; margin: 12px 16px; border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow); flex-shrink: 0;
+  }
+  .menu-item {
+    padding: 14px 16px; border-bottom: 1px solid var(--gray-100);
+    display: flex; align-items: center;
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-icon { margin-right: 12px; font-size: 18px; }
+  .menu-label { flex: 1; font-size: 14px; color: var(--gray-700); }
+  .menu-arrow { color: var(--gray-400); }
+  .menu-badge { padding: 1px 6px; background: var(--coffee); color: white; border-radius: 8px; font-size: 10px; margin-right: 6px; }
+
+  .data-stats {
+    display: flex; justify-content: space-around; text-align: center;
+    padding: 16px; background: white; margin: 12px 16px;
+    border-radius: var(--radius); box-shadow: var(--shadow); flex-shrink: 0;
+  }
+  .data-stat .value { font-size: 20px; font-weight: 700; }
+  .data-stat .value.coffee { color: var(--coffee); }
+  .data-stat .value.green { color: var(--green); }
+  .data-stat .value.blue { color: var(--blue); }
+  .data-stat .label { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+
+  .version-info { text-align: center; padding: 20px 16px; flex-shrink: 0; }
+  .version-info .text { font-size: 12px; color: var(--gray-400); }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="site-title">☕ 咖损管家 — 移动端原型（宫格展示）</div>
+  <div class="site-desc">独立咖啡店原料损耗管理工具 · 共 8 个核心页面</div>
+</div>
+
+<div class="screen-grid">
+
+  <!-- Screen 1: 首页看板 -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status-bar" style="background:transparent;color:white;">
+        <span>09:41</span>
+        <span>📶 🔋</span>
+      </div>
+      <div class="home-header" style="padding-top:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div class="greeting">☕ 早上好，小林</div>
+            <div class="date">2026年6月29日 周一</div>
+          </div>
+          <div class="shop-name">小林的店 ▾</div>
+        </div>
+      </div>
+      <div class="content" style="background:var(--gray-50);">
+        <div class="alert-bar">
+          <div class="alert-chip urgent">
+            <span class="count">3</span> 个临期
+          </div>
+          <div class="alert-chip warning">
+            <span class="count">1</span> 个库存不足
+          </div>
+          <div class="alert-chip info">
+            <span class="count">2</span> 个待处理
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <div class="quick-btn">
+            <div class="icon">📷</div>
+            <div class="label">扫码入库</div>
+          </div>
+          <div class="quick-btn">
+            <div class="icon">📤</div>
+            <div class="label">扫码出库</div>
+          </div>
+          <div class="quick-btn">
+            <div class="icon">📉</div>
+            <div class="label">损耗登记</div>
+          </div>
+          <div class="quick-btn">
+            <div class="icon">📅</div>
+            <div class="label">开封登记</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⚠️ 临期原料提醒</div>
+          <div class="expiry-item">
+            <div class="expiry-dot red"></div>
+            <div class="expiry-info">
+              <div class="expiry-name">明治鲜牛奶</div>
+              <div class="expiry-detail">开封 6/25 · 今天到期</div>
+            </div>
+            <div class="expiry-badge red">今天</div>
+          </div>
+          <div class="expiry-item">
+            <div class="expiry-dot red"></div>
+            <div class="expiry-info">
+              <div class="expiry-name">淡奶油</div>
+              <div class="expiry-detail">开封 6/26 · 剩余1天</div>
+            </div>
+            <div class="expiry-badge red">1天</div>
+          </div>
+          <div class="expiry-item">
+            <div class="expiry-dot orange"></div>
+            <div class="expiry-info">
+              <div class="expiry-name">燕麦奶</div>
+              <div class="expiry-detail">开封 6/25 · 剩余2天</div>
+            </div>
+            <div class="expiry-badge orange">2天</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 本月损耗概况</div>
+          <div style="display:flex;justify-content:space-around;text-align:center;">
+            <div>
+              <div style="font-size:24px;font-weight:700;color:var(--coffee);">¥328</div>
+              <div style="font-size:11px;color:var(--gray-400);margin-top:4px;">损耗金额</div>
+            </div>
+            <div>
+              <div style="font-size:24px;font-weight:700;color:var(--green);">4.2%</div>
+              <div style="font-size:11px;color:var(--gray-400);margin-top:4px;">损耗率</div>
+            </div>
+            <div>
+              <div style="font-size:24px;font-weight:700;color:var(--gray-700);">8</div>
+              <div style="font-size:11px;color:var(--gray-400);margin-top:4px;">损耗笔数</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📦 库存预警</div>
+          <div style="display:flex;align-items:center;padding:8px 0;">
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;">香草糖浆</div>
+              <div style="font-size:12px;color:var(--gray-400);">当前 1 瓶 · 安全库存 3 瓶</div>
+            </div>
+            <div class="inv-status yellow">库存不足</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item active">
+          <div class="tab-icon">🏠</div>
+          <div class="tab-label">首页</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📦</div>
+          <div class="tab-label">库存</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📅</div>
+          <div class="tab-label">保质期</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📉</div>
+          <div class="tab-label">损耗</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">👤</div>
+          <div class="tab-label">我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">首页看板</div>
+    <div class="phone-sublabel">预警/快捷操作/损耗概况</div>
+  </div>
+
+  <!-- Screen 2: 库存列表 -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status-bar">
+        <span>09:41</span>
+        <span>📶 🔋</span>
+      </div>
+      <div class="nav-header">
+        <h1>库存管理</h1>
+        <span style="font-size:13px;color:var(--coffee);">共 18 种</span>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" placeholder="🔍 搜索原料名称 / 条码" readonly />
+      </div>
+      <div class="filter-tabs">
+        <div class="filter-tab active">全部 <span class="badge">18</span></div>
+        <div class="filter-tab">正常 <span class="badge">12</span></div>
+        <div class="filter-tab">临期 <span class="badge">3</span></div>
+        <div class="filter-tab">不足 <span class="badge">2</span></div>
+      </div>
+      <div class="content" style="background:var(--gray-50);">
+        <div class="inventory-item">
+          <div class="inv-icon beans">☕</div>
+          <div class="inv-info">
+            <div class="inv-name">旺意阿拉比卡咖啡豆</div>
+            <div class="inv-detail">咖啡豆 · 1kg/袋</div>
+            <div class="inv-progress"><div class="inv-progress-fill" style="width:78%;background:var(--green);"></div></div>
+          </div>
+          <div class="inv-right">
+            <div class="inv-qty">3.5</div>
+            <div class="inv-unit">kg</div>
+            <div class="inv-status green">正常</div>
+          </div>
+        </div>
+        <div class="inventory-item">
+          <div class="inv-icon milk">🥛</div>
+          <div class="inv-info">
+            <div class="inv-name">明治鲜牛奶</div>
+            <div class="inv-detail">牛奶 · 1L/盒</div>
+            <div class="inv-progress"><div class="inv-progress-fill" style="width:30%;background:var(--red);"></div></div>
+          </div>
+          <div class="inv-right">
+            <div class="inv-qty">2</div>
+            <div class="inv-unit">L</div>
+            <div class="inv-status red">临期</div>
+          </div>
+        </div>
+        <div class="inventory-item">
+          <div class="inv-icon milk">🥛</div>
+          <div class="inv-info">
+            <div class="inv-name">淡奶油</div>
+            <div class="inv-detail">牛奶 · 250ml/盒</div>
+            <div class="inv-progress"><div class="inv-progress-fill" style="width:20%;background:var(--red);"></div></div>
+          </div>
+          <div class="inv-right">
+            <div class="inv-qty">1</div>
+            <div class="inv-unit">盒</div>
+            <div class="inv-status red">临期</div>
+          </div>
+        </div>
+        <div class="inventory-item">
+          <div class="inv-icon milk">🥛</div>
+          <div class="inv-info">
+            <div class="inv-name">Oatly燕麦奶</div>
+            <div class="inv-detail">牛奶 · 1L/盒</div>
+            <div class="inv-progress"><div class="inv-progress-fill" style="width:55%;background:var(--orange);"></div></div>
+          </div>
+          <div class="inv-right">
+            <div class="inv-qty">3</div>
+            <div class="inv-unit">L</div>
+            <div class="inv-status orange">临期</div>
+          </div>
+        </div>
+        <div class="inventory-item">
+          <div class="inv-icon syrup">🍯</div>
+          <div class="inv-info">
+            <div class="inv-name">Monin香草糖浆</div>
+            <div class="inv-detail">糖浆 · 700ml/瓶</div>
+            <div class="inv-progress"><div class="inv-progress-fill" style="width:15%;background:var(--yellow);"></div></div>
+          </div>
+          <div class="inv-right">
+            <div class="inv-qty">1</div>
+            <div class="inv-unit">瓶</div>
+            <div class="inv-status yellow">不足</div>
+          </div>
+        </div>
+        <div class="inventory-item">
+          <div class="inv-icon syrup">🍯</div>
+          <div class="inv-info">
+            <div class="inv-name">Monin焦糖糖浆</div>
+            <div class="inv-detail">糖浆 · 700ml/瓶</div>
+            <div class="inv-progress"><div class="inv-progress-fill" style="width:60%;background:var(--green);"></div></div>
+          </div>
+          <div class="inv-right">
+            <div class="inv-qty">2</div>
+            <div class="inv-unit">瓶</div>
+            <div class="inv-status green">正常</div>
+          </div>
+        </div>
+        <div class="inventory-item">
+          <div class="inv-icon tea">🍵</div>
+          <div class="inv-info">
+            <div class="inv-name">宇治抹茶粉</div>
+            <div class="inv-detail">茶叶 · 100g/袋</div>
+            <div class="inv-progress"><div class="inv-progress-fill" style="width:70%;background:var(--green);"></div></div>
+          </div>
+          <div class="inv-right">
+            <div class="inv-qty">3</div>
+            <div class="inv-unit">袋</div>
+            <div class="inv-status green">正常</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fab">+</div>
+
+      <div class="tab-bar">
+        <div class="tab-item">
+          <div class="tab-icon">🏠</div>
+          <div class="tab-label">首页</div>
+        </div>
+        <div class="tab-item active">
+          <div class="tab-icon">📦</div>
+          <div class="tab-label">库存</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📅</div>
+          <div class="tab-label">保质期</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📉</div>
+          <div class="tab-label">损耗</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">👤</div>
+          <div class="tab-label">我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">库存列表</div>
+    <div class="phone-sublabel">搜索/筛选/库存状态</div>
+  </div>
+
+  <!-- Screen 3: 扫码入库 -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="scan-screen">
+        <div class="status-bar" style="background:transparent;color:white;flex-shrink:0;">
+          <span class="nav-back" style="color:white;">‹</span>
+          <span>09:41</span>
+          <span>📶 🔋</span>
+        </div>
+        <div style="padding:16px;color:white;text-align:center;flex-shrink:0;">
+          <div style="font-size:16px;font-weight:600;">扫码入库</div>
+          <div style="font-size:13px;opacity:0.7;margin-top:4px;">将条码对准框内自动识别</div>
+        </div>
+        <div class="scan-area">
+          <div class="scan-frame">
+            <div class="scan-corner tl"></div>
+            <div class="scan-corner tr"></div>
+            <div class="scan-corner bl"></div>
+            <div class="scan-corner br"></div>
+          </div>
+          <div class="scan-hint">将商品条码对准方框，自动识别</div>
+          <div class="scan-manual">手动输入条码</div>
+        </div>
+        <div class="scan-bottom">
+          <div class="scan-bottom-item">
+            <div class="icon">⚡</div>
+            <div class="label">连续扫码</div>
+          </div>
+          <div class="scan-bottom-item">
+            <div class="icon">🔦</div>
+            <div class="label">闪光灯</div>
+          </div>
+          <div class="scan-bottom-item">
+            <div class="icon">📋</div>
+            <div class="label">手动选择</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">扫码入库</div>
+    <div class="phone-sublabel">相机扫码/手动输入</div>
+  </div>
+
+  <!-- Screen 4: 入库确认 -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status-bar">
+        <span>09:41</span>
+        <span>📶 🔋</span>
+      </div>
+      <div class="nav-header">
+        <span class="nav-back">‹</span>
+        <h1>入库确认</h1>
+        <span></span>
+      </div>
+      <div class="content" style="background:var(--gray-50);">
+        <div class="confirm-material">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:48px;height:48px;border-radius:12px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:24px;">☕</div>
+            <div>
+              <div style="font-size:16px;font-weight:600;color:var(--gray-800);">旺意阿拉比卡咖啡豆</div>
+              <div style="font-size:12px;color:var(--gray-400);">条码：6901234567890 · 自动识别</div>
+            </div>
+          </div>
+          <div class="confirm-row">
+            <div class="confirm-field">
+              <label>品牌</label>
+              <input value="旺意" readonly style="background:var(--gray-50);"/>
+            </div>
+            <div class="confirm-field">
+              <label>规格</label>
+              <input value="1kg/袋" readonly style="background:var(--gray-50);"/>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <div class="confirm-field">
+              <label>分类</label>
+              <select><option>咖啡豆</option><option>牛奶</option><option>糖浆</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="confirm-material">
+          <div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:12px;">📝 入库信息</div>
+          <div class="confirm-row">
+            <div class="confirm-field">
+              <label>入库数量 *</label>
+              <input type="number" value="2" placeholder="输入数量"/>
+            </div>
+            <div class="confirm-field">
+              <label>单位</label>
+              <input value="袋" readonly style="background:var(--gray-50);"/>
+            </div>
+          </div>
+          <div class="confirm-row">
+            <div class="confirm-field">
+              <label>生产日期</label>
+              <input type="date" value="2026-06-28"/>
+            </div>
+            <div class="confirm-field">
+              <label>批次号</label>
+              <input placeholder="选填"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="confirm-material" style="background:var(--coffee-bg);">
+          <div style="font-size:13px;color:var(--gray-500);margin-bottom:8px;">📊 库存变化预览</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14px;color:var(--gray-600);">当前库存</span>
+            <span style="font-size:16px;font-weight:600;">3.5 kg → <span style="color:var(--coffee);">5.5 kg</span></span>
+          </div>
+        </div>
+
+        <div class="confirm-material">
+          <div style="font-size:13px;color:var(--gray-500);margin-bottom:8px;">📋 最近入库记录</div>
+          <div style="font-size:13px;color:var(--gray-600);padding:4px 0;display:flex;justify-content:space-between;">
+            <span>2026-06-15 · 入库 2 袋</span><span style="color:var(--gray-400);">小林</span>
+          </div>
+          <div style="font-size:13px;color:var(--gray-600);padding:4px 0;display:flex;justify-content:space-between;">
+            <span>2026-05-28 · 入库 3 袋</span><span style="color:var(--gray-400);">小林</span>
+          </div>
+        </div>
+
+        <button class="submit-btn">✅ 确认入库</button>
+      </div>
+    </div>
+    <div class="phone-label">入库确认</div>
+    <div class="phone-sublabel">识别信息/填写数量/确认</div>
+  </div>
+
+  <!-- Screen 5: 保质期管理 -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status-bar">
+        <span>09:41</span>
+        <span>📶 🔋</span>
+      </div>
+      <div class="nav-header">
+        <h1>保质期管理</h1>
+        <span style="font-size:13px;color:white;background:var(--coffee);padding:4px 12px;border-radius:12px;">+ 开封登记</span>
+      </div>
+      <div class="content" style="background:var(--gray-50);">
+        <div class="shelf-stats">
+          <div class="shelf-stat">
+            <div class="num red">1</div>
+            <div class="label">已过期</div>
+          </div>
+          <div class="shelf-stat">
+            <div class="num orange">2</div>
+            <div class="label">临期(≤3天)</div>
+          </div>
+          <div class="shelf-stat">
+            <div class="num green">8</div>
+            <div class="label">正常</div>
+          </div>
+        </div>
+
+        <div class="shelf-section">
+          <div class="shelf-section-title">🔴 紧急处理</div>
+          <div class="shelf-card critical">
+            <div class="shelf-card-header">
+              <div class="shelf-card-name">明治鲜牛奶（批次A）</div>
+              <div class="shelf-card-days red">已过期</div>
+            </div>
+            <div class="shelf-card-meta">开封 6/20 · 到期 6/24 · 已过期5天</div>
+            <div class="shelf-card-bar"><div class="shelf-card-bar-fill" style="width:100%;background:var(--red);"></div></div>
+            <div class="shelf-card-actions">
+              <button class="shelf-card-btn primary">📉 立即报损</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="shelf-section">
+          <div class="shelf-section-title">🟠 临期关注</div>
+          <div class="shelf-card warning">
+            <div class="shelf-card-header">
+              <div class="shelf-card-name">明治鲜牛奶（批次B）</div>
+              <div class="shelf-card-days orange">今天到期</div>
+            </div>
+            <div class="shelf-card-meta">开封 6/25 · 到期 6/29 · 剩余约 800ml</div>
+            <div class="shelf-card-bar"><div class="shelf-card-bar-fill" style="width:95%;background:var(--orange);"></div></div>
+            <div class="shelf-card-actions">
+              <button class="shelf-card-btn primary">✅ 已安排使用</button>
+              <button class="shelf-card-btn secondary">报损</button>
+            </div>
+          </div>
+          <div class="shelf-card warning">
+            <div class="shelf-card-header">
+              <div class="shelf-card-name">淡奶油</div>
+              <div class="shelf-card-days orange">剩余1天</div>
+            </div>
+            <div class="shelf-card-meta">开封 6/26 · 到期 6/30 · 剩余约 150ml</div>
+            <div class="shelf-card-bar"><div class="shelf-card-bar-fill" style="width:90%;background:var(--orange);"></div></div>
+            <div class="shelf-card-actions">
+              <button class="shelf-card-btn primary">✅ 已安排促销</button>
+              <button class="shelf-card-btn secondary">报损</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="shelf-section">
+          <div class="shelf-section-title">🟢 正常</div>
+          <div class="shelf-card normal">
+            <div class="shelf-card-header">
+              <div class="shelf-card-name">咖啡豆（已开封）</div>
+              <div class="shelf-card-days green">剩余45天</div>
+            </div>
+            <div class="shelf-card-meta">开封 5/15 · 到期 8/13 · 剩余 2.0 kg</div>
+            <div class="shelf-card-bar"><div class="shelf-card-bar-fill" style="width:30%;background:var(--green);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item">
+          <div class="tab-icon">🏠</div>
+          <div class="tab-label">首页</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📦</div>
+          <div class="tab-label">库存</div>
+        </div>
+        <div class="tab-item active">
+          <div class="tab-icon">📅</div>
+          <div class="tab-label">保质期</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📉</div>
+          <div class="tab-label">损耗</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">👤</div>
+          <div class="tab-label">我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">保质期管理</div>
+    <div class="phone-sublabel">临期预警/开封追踪</div>
+  </div>
+
+  <!-- Screen 6: 损耗管理 -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status-bar">
+        <span>09:41</span>
+        <span>📶 🔋</span>
+      </div>
+      <div class="nav-header">
+        <h1>损耗管理</h1>
+        <span style="font-size:13px;color:white;background:var(--coffee);padding:4px 12px;border-radius:12px;">+ 新增损耗</span>
+      </div>
+      <div class="content" style="background:var(--gray-50);">
+        <div class="loss-summary">
+          <div class="loss-metric">
+            <div class="value">¥328</div>
+            <div class="label">本月损耗金额</div>
+          </div>
+          <div class="loss-metric">
+            <div class="value">4.2%</div>
+            <div class="label">损耗率</div>
+          </div>
+          <div class="loss-metric">
+            <div class="value">8</div>
+            <div class="label">损耗笔数</div>
+          </div>
+        </div>
+
+        <div class="loss-chart">
+          <div class="loss-chart-title">损耗原因分布</div>
+          <div class="loss-chart-body">
+            <div class="loss-legend">
+              <div class="legend-item"><div class="legend-dot red"></div>过期 62%</div>
+              <div class="legend-item"><div class="legend-dot orange"></div>变质 25%</div>
+              <div class="legend-item"><div class="legend-dot yellow"></div>操作失误 13%</div>
+            </div>
+            <div class="donut"></div>
+          </div>
+        </div>
+
+        <div style="padding:12px 16px;background:white;flex-shrink:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:600;color:var(--gray-700);">损耗记录</div>
+            <div class="loss-toggle">
+              <span class="active">日</span>
+              <span class="inactive">周</span>
+              <span class="inactive">月</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="loss-item">
+          <div class="loss-item-info">
+            <div class="loss-item-name">明治鲜牛奶</div>
+            <div class="loss-item-detail">6/29 09:15 · 1.0L · 小林</div>
+          </div>
+          <div class="loss-item-right">
+            <div class="loss-item-amount">¥12.8</div>
+            <div class="loss-reason-tag expired">过期</div>
+          </div>
+        </div>
+        <div class="loss-item">
+          <div class="loss-item-info">
+            <div class="loss-item-name">淡奶油</div>
+            <div class="loss-item-detail">6/28 18:30 · 250ml · 小王</div>
+          </div>
+          <div class="loss-item-right">
+            <div class="loss-item-amount">¥8.5</div>
+            <div class="loss-reason-tag spoiled">变质</div>
+          </div>
+        </div>
+        <div class="loss-item">
+          <div class="loss-item-info">
+            <div class="loss-item-name">全脂牛奶</div>
+            <div class="loss-item-detail">6/27 14:20 · 500ml · 小林</div>
+          </div>
+          <div class="loss-item-right">
+            <div class="loss-item-amount">¥6.4</div>
+            <div class="loss-reason-tag expired">过期</div>
+          </div>
+        </div>
+        <div class="loss-item">
+          <div class="loss-item-info">
+            <div class="loss-item-name">旺意咖啡豆</div>
+            <div class="loss-item-detail">6/25 11:00 · 50g · 小王</div>
+          </div>
+          <div class="loss-item-right">
+            <div class="loss-item-amount">¥15.0</div>
+            <div class="loss-reason-tag mistake">操作失误</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item">
+          <div class="tab-icon">🏠</div>
+          <div class="tab-label">首页</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📦</div>
+          <div class="tab-label">库存</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📅</div>
+          <div class="tab-label">保质期</div>
+        </div>
+        <div class="tab-item active">
+          <div class="tab-icon">📉</div>
+          <div class="tab-label">损耗</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">👤</div>
+          <div class="tab-label">我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">损耗管理</div>
+    <div class="phone-sublabel">统计/原因分布/记录</div>
+  </div>
+
+  <!-- Screen 7: 销售录入 -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status-bar">
+        <span>09:41</span>
+        <span>📶 🔋</span>
+      </div>
+      <div class="nav-header">
+        <h1>销售录入</h1>
+        <span style="font-size:13px;color:var(--coffee);">2026-06-29</span>
+      </div>
+      <div class="content" style="background:var(--gray-50);">
+        <div class="card" style="margin:12px 16px;">
+          <div class="card-title">📝 今日饮品销售</div>
+          <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px;">点击 + / - 调整杯数</div>
+        </div>
+
+        <div class="drink-row">
+          <div class="drink-name">☕ 美式咖啡</div>
+          <div class="drink-counter">
+            <button class="counter-btn">−</button>
+            <span class="counter-num">10</span>
+            <button class="counter-btn">+</button>
+          </div>
+        </div>
+        <div class="drink-row">
+          <div class="drink-name">🥛 拿铁</div>
+          <div class="drink-counter">
+            <button class="counter-btn">−</button>
+            <span class="counter-num">20</span>
+            <button class="counter-btn">+</button>
+          </div>
+        </div>
+        <div class="drink-row">
+          <div class="drink-name">☕ 卡布奇诺</div>
+          <div class="drink-counter">
+            <button class="counter-btn">−</button>
+            <span class="counter-num">8</span>
+            <button class="counter-btn">+</button>
+          </div>
+        </div>
+        <div class="drink-row">
+          <div class="drink-name">🍫 摩卡</div>
+          <div class="drink-counter">
+            <button class="counter-btn">−</button>
+            <span class="counter-num">5</span>
+            <button class="counter-btn">+</button>
+          </div>
+        </div>
+        <div class="drink-row">
+          <div class="drink-name">🍯 香草拿铁</div>
+          <div class="drink-counter">
+            <button class="counter-btn">−</button>
+            <span class="counter-num">12</span>
+            <button class="counter-btn">+</button>
+          </div>
+        </div>
+        <div class="drink-row">
+          <div class="drink-name">🍵 抹茶拿铁</div>
+          <div class="drink-counter">
+            <button class="counter-btn">−</button>
+            <span class="counter-num">6</span>
+            <button class="counter-btn">+</button>
+          </div>
+        </div>
+
+        <div class="ingredient-preview">
+          <div class="title">🔄 原料自动换算</div>
+          <div class="items">
+            ☕ 咖啡豆：61杯 × 18g = <b>1,098g</b><br>
+            🥛 牛奶：30杯 × 200ml = <b>6,000ml (6L)</b><br>
+            🍯 糖浆：17杯 × 15ml = <b>255ml</b><br>
+            🍵 抹茶粉：6杯 × 3g = <b>18g</b>
+          </div>
+        </div>
+
+        <button class="submit-btn">💾 保存今日销售</button>
+      </div>
+    </div>
+    <div class="phone-label">销售录入</div>
+    <div class="phone-sublabel">饮品杯数/原料换算</div>
+  </div>
+
+  <!-- Screen 8: 我的 -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status-bar">
+        <span>09:41</span>
+        <span>📶 🔋</span>
+      </div>
+      <div class="profile-header">
+        <div class="profile-avatar">☕</div>
+        <div class="profile-name">小林</div>
+        <div class="profile-role">小林的咖啡店 · 店主</div>
+        <div class="profile-badge">Pro版 · 到期 2026-12-31</div>
+      </div>
+      <div class="content" style="background:var(--gray-50);">
+        <div class="data-stats">
+          <div class="data-stat">
+            <div class="value coffee">18</div>
+            <div class="label">原料品项</div>
+          </div>
+          <div class="data-stat">
+            <div class="value green">4.2%</div>
+            <div class="label">本月损耗率</div>
+          </div>
+          <div class="data-stat">
+            <div class="value blue">156</div>
+            <div class="label">今日销售</div>
+          </div>
+        </div>
+
+        <div class="menu-list">
+          <div class="menu-item">
+            <span class="menu-icon">📋</span>
+            <span class="menu-label">原料档案管理</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">👥</span>
+            <span class="menu-label">成员管理</span>
+            <span style="font-size:12px;color:var(--gray-400);margin-right:8px;">3人</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">🔔</span>
+            <span class="menu-label">消息通知设置</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">⚙️</span>
+            <span class="menu-label">系统设置</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">📜</span>
+            <span class="menu-label">饮品配方管理</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">💎</span>
+            <span class="menu-label">订阅与套餐</span>
+            <span class="menu-badge">Pro版</span>
+            <span class="menu-arrow">›</span>
+          </div>
+        </div>
+
+        <div class="version-info">
+          <div class="text">咖损管家 V1.0</div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item">
+          <div class="tab-icon">🏠</div>
+          <div class="tab-label">首页</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📦</div>
+          <div class="tab-label">库存</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📅</div>
+          <div class="tab-label">保质期</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">📉</div>
+          <div class="tab-label">损耗</div>
+        </div>
+        <div class="tab-item active">
+          <div class="tab-icon">👤</div>
+          <div class="tab-label">我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">我的</div>
+    <div class="phone-sublabel">个人中心/设置/数据</div>
+  </div>
+
+</div>
+
+</body>
+</html>

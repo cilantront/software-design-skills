@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理 WEB - 单页原型</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #e6f7fb; color: #164e63; height: 100vh; overflow: hidden; }
+button, input, select, textarea { font-family: inherit; }
+.app { height: 100vh; display: flex; flex-direction: column; background: #f8fdff; }
+.topbar { height: 56px; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .2px; }
+.logo { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg,#0891b2,#22c55e); display:flex; align-items:center; justify-content:center; color:#fff; font-size: 14px; font-weight: 800; }
+.top-actions { display:flex; align-items:center; gap: 16px; font-size: 13px; color:#cbd5e1; }
+.top-actions .avatar { width: 30px; height: 30px; border-radius: 50%; background:#164e63; display:flex; align-items:center; justify-content:center; color:#a5f3fc; font-weight:700; }
+.shell { flex: 1; display: flex; min-height: 0; }
+.sidebar { width: 228px; background: #ffffff; border-right: 1px solid #d7edf2; padding: 16px 12px; flex-shrink: 0; }
+.nav-title { font-size: 12px; color:#64748b; padding: 0 12px 8px; }
+.nav-item { width:100%; display:flex; align-items:center; gap:10px; padding:11px 12px; border:0; background:transparent; border-radius:10px; color:#315a68; font-size:14px; cursor:pointer; margin-bottom:4px; text-align:left; transition: background .18s, color .18s; }
+.nav-item:hover { background:#ecfeff; color:#0891b2; }
+.nav-item.active { background:#cffafe; color:#0e7490; font-weight:700; }
+.nav-icon { width:22px; height:22px; color: currentColor; flex-shrink:0; }
+.main { flex:1; min-width:0; display:flex; flex-direction:column; }
+.content-header { height: 72px; border-bottom:1px solid #d7edf2; background: #fff; padding: 14px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.page-title { font-size: 20px; font-weight: 800; color:#164e63; }
+.page-subtitle { font-size: 12px; color:#64748b; margin-top:4px; }
+.header-tools { display:flex; gap:10px; align-items:center; }
+.content { flex:1; min-height:0; overflow:auto; padding:20px 24px; background: linear-gradient(180deg,#f8fdff,#eefbff); }
+.panel { display:none; }
+.panel.active { display:block; }
+.grid-kpi { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:14px; margin-bottom:18px; }
+.card { background:#fff; border:1px solid #d7edf2; border-radius:14px; box-shadow: 0 2px 8px rgba(8,145,178,.05); }
+.kpi { padding:16px; }
+.kpi .label { font-size:12px; color:#64748b; display:flex; justify-content:space-between; align-items:center; }
+.kpi .value { font-size:30px; font-weight:800; color:#164e63; margin-top:8px; letter-spacing:-.5px; }
+.kpi .trend { font-size:12px; color:#16a34a; margin-top:6px; }
+.kpi.alert .trend { color:#dc2626; }
+.section-grid { display:grid; grid-template-columns: 1.45fr .9fr; gap:16px; margin-bottom:16px; }
+.card-header { padding:14px 16px; border-bottom:1px solid #e2f3f7; display:flex; justify-content:space-between; align-items:center; }
+.card-title { font-size:15px; font-weight:800; color:#164e63; }
+.card-body { padding:16px; }
+.table-wrap { overflow:auto; }
+table { width:100%; border-collapse:collapse; white-space:nowrap; }
+th { background:#f0fbfd; color:#475569; font-size:12px; font-weight:700; text-align:left; padding:11px 12px; border-bottom:1px solid #d7edf2; }
+td { padding:12px; border-bottom:1px solid #edf7fa; color:#164e63; font-size:13px; }
+tr:hover td { background:#f8fdff; }
+.toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
+.filters { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.input, .select, .textarea { height:36px; border:1px solid #cde8ee; background:#fff; border-radius:8px; padding:0 10px; font-size:13px; color:#164e63; outline:none; }
+.input:focus, .select:focus, .textarea:focus { border-color:#0891b2; box-shadow:0 0 0 3px rgba(8,145,178,.12); }
+.input { min-width:220px; }
+.textarea { height:74px; padding:10px; resize:vertical; }
+.btn { height:36px; padding:0 14px; border-radius:8px; border:1px solid #cde8ee; background:#fff; color:#164e63; font-size:13px; font-weight:700; cursor:pointer; transition: background .18s, border-color .18s, color .18s; }
+.btn:hover { background:#ecfeff; border-color:#0891b2; }
+.btn.primary { background:#0891b2; border-color:#0891b2; color:#fff; }
+.btn.primary:hover { background:#0e7490; }
+.btn.success { background:#22c55e; border-color:#22c55e; color:#fff; }
+.btn.danger { color:#dc2626; border-color:#fecaca; }
+.tag { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:12px; font-weight:700; }
+.tag.green { background:#dcfce7; color:#166534; }
+.tag.blue { background:#dbeafe; color:#1d4ed8; }
+.tag.cyan { background:#cffafe; color:#0e7490; }
+.tag.orange { background:#ffedd5; color:#c2410c; }
+.tag.red { background:#fee2e2; color:#b91c1c; }
+.tag.gray { background:#f1f5f9; color:#475569; }
+.link { color:#0891b2; font-weight:700; cursor:pointer; text-decoration:none; }
+.link:hover { text-decoration:underline; }
+.chart-bars { display:flex; align-items:end; gap:10px; height:210px; padding:14px 4px 4px; border-bottom:1px solid #d7edf2; }
+.bar { flex:1; min-width:26px; background:linear-gradient(180deg,#22d3ee,#0891b2); border-radius:8px 8px 0 0; position:relative; }
+.bar::after { content:attr(data-label); position:absolute; bottom:-24px; left:50%; transform:translateX(-50%); font-size:11px; color:#64748b; }
+.bar::before { content:attr(data-value); position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:11px; color:#164e63; font-weight:700; }
+.donut { width:180px; height:180px; border-radius:50%; background: conic-gradient(#0891b2 0 44%, #22c55e 44% 72%, #f97316 72% 88%, #ef4444 88% 100%); margin:auto; position:relative; }
+.donut::after { content:"456\A订单"; white-space:pre; width:102px; height:102px; background:#fff; border-radius:50%; position:absolute; top:39px; left:39px; display:flex; align-items:center; justify-content:center; text-align:center; font-weight:800; color:#164e63; line-height:1.35; }
+.legend { display:grid; gap:8px; margin-top:14px; font-size:12px; color:#475569; }
+.legend-item { display:flex; align-items:center; gap:8px; }
+.dot { width:10px; height:10px; border-radius:50%; }
+.package-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:16px; }
+.package { padding:18px; position:relative; }
+.package.active { border-color:#0891b2; box-shadow:0 0 0 3px rgba(8,145,178,.08); }
+.pkg-title { font-size:18px; font-weight:800; color:#164e63; }
+.pkg-price { font-size:32px; font-weight:900; color:#0891b2; margin:10px 0; }
+.pkg-price span { font-size:13px; color:#64748b; font-weight:500; }
+.feature-list { list-style:none; margin:14px 0; display:grid; gap:9px; font-size:13px; color:#475569; }
+.feature-list li { display:flex; align-items:center; gap:8px; }
+.feature-list li:before { content:""; width:16px; height:16px; border-radius:50%; background:#dcfce7; }
+.setting-grid { display:grid; grid-template-columns: 260px 1fr; gap:16px; }
+.setting-tabs { padding:10px; }
+.setting-tab { display:block; width:100%; padding:11px 12px; border:0; border-radius:8px; background:transparent; text-align:left; cursor:pointer; color:#475569; font-weight:700; margin-bottom:4px; }
+.setting-tab.active, .setting-tab:hover { background:#ecfeff; color:#0891b2; }
+.form-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+.form-item label { display:block; font-size:12px; color:#64748b; margin-bottom:6px; font-weight:700; }
+.form-item .input, .form-item .select, .form-item .textarea { width:100%; }
+.drawer { position:fixed; top:56px; right:0; bottom:0; width:420px; background:#fff; border-left:1px solid #d7edf2; box-shadow:-8px 0 24px rgba(15,23,42,.12); transform:translateX(100%); transition:transform .25s ease; z-index:20; display:flex; flex-direction:column; }
+.drawer.open { transform:translateX(0); }
+.drawer-header { padding:18px; border-bottom:1px solid #e2f3f7; display:flex; justify-content:space-between; align-items:center; }
+.drawer-body { padding:18px; overflow:auto; }
+.timeline { display:grid; gap:12px; margin-top:12px; }
+.timeline-item { display:flex; gap:10px; font-size:13px; }
+.timeline-dot { width:10px; height:10px; border-radius:50%; background:#0891b2; margin-top:4px; flex-shrink:0; }
+.hidden { display:none !important; }
+.toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#0f172a; color:#fff; padding:10px 16px; border-radius:999px; font-size:13px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:50; }
+.toast.show { opacity:1; }
+@media (max-width: 960px) { .grid-kpi { grid-template-columns: repeat(2,1fr); } .section-grid, .package-grid, .setting-grid { grid-template-columns:1fr; } .sidebar { width:190px; } .drawer { width:90vw; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo">PET</div><span>宠物家庭寄养交接与日志助手 · 后台管理</span></div>
+    <div class="top-actions"><span>最后同步：2026-06-29 14:45</span><div class="avatar">管</div><span>运营管理员</span></div>
+  </header>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="nav-title">运营菜单</div>
+      <button class="nav-item active" data-panel="dashboard"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z"/></svg>工作台</button>
+      <button class="nav-item" data-panel="hosts"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>寄养人管理</button>
+      <button class="nav-item" data-panel="packages"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/></svg>套餐配置</button>
+      <button class="nav-item" data-panel="orders"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>寄养订单</button>
+      <button class="nav-item" data-panel="stats"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>数据统计</button>
+      <button class="nav-item" data-panel="settings"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1.82V22a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1.82-.33H2a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 0 1 7.04 4.3l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .33-1.82V2a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.31.36.58.6 1 .24.42.61.68 1.01.76H22a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z"/></svg>系统设置</button>
+    </aside>
+    <main class="main">
+      <div class="content-header">
+        <div><div class="page-title" id="pageTitle">工作台</div><div class="page-subtitle" id="pageSubtitle">查看平台核心运营指标与待处理事项</div></div>
+        <div class="header-tools"><button class="btn" id="exportBtn">导出</button><button class="btn primary" id="refreshBtn">刷新数据</button></div>
+      </div>
+      <section class="content">
+        <div id="dashboard" class="panel active">
+          <div class="grid-kpi">
+            <div class="card kpi"><div class="label">注册寄养人 <span class="tag cyan">累计</span></div><div class="value">128</div><div class="trend">较上月 +12%</div></div>
+            <div class="card kpi"><div class="label">寄养订单总数 <span class="tag blue">全部</span></div><div class="value">456</div><div class="trend">较上月 +8%</div></div>
+            <div class="card kpi"><div class="label">进行中寄养 <span class="tag green">实时</span></div><div class="value">23</div><div class="trend">今日新增 6 单</div></div>
+            <div class="card kpi alert"><div class="label">异常订单 <span class="tag red">待处理</span></div><div class="value">7</div><div class="trend">需运营跟进</div></div>
+          </div>
+          <div class="section-grid">
+            <div class="card"><div class="card-header"><div class="card-title">近 7 日寄养订单趋势</div><span class="tag cyan">自动刷新</span></div><div class="card-body"><div class="chart-bars"><div class="bar" style="height:42%" data-label="6/23" data-value="18"></div><div class="bar" style="height:55%" data-label="6/24" data-value="24"></div><div class="bar" style="height:48%" data-label="6/25" data-value="21"></div><div class="bar" style="height:72%" data-label="6/26" data-value="32"></div><div class="bar" style="height:64%" data-label="6/27" data-value="28"></div><div class="bar" style="height:88%" data-label="6/28" data-value="39"></div><div class="bar" style="height:78%" data-label="6/29" data-value="34"></div></div></div></div>
+            <div class="card"><div class="card-header"><div class="card-title">待处理事项</div><span class="tag orange">14 项</span></div><div class="card-body"><table><tbody><tr><td><span class="tag red">异常</span></td><td>7 个异常订单待跟进</td></tr><tr><td><span class="tag orange">退回</span></td><td>4 个交接单被主人退回</td></tr><tr><td><span class="tag blue">报告</span></td><td>3 个报告待主人确认</td></tr><tr><td><span class="tag green">套餐</span></td><td>今日新增 5 个付费订阅</td></tr></tbody></table></div></div>
+          </div>
+          <div class="card"><div class="card-header"><div class="card-title">最新寄养订单</div><a class="link" data-jump="orders">查看全部</a></div><div class="table-wrap"><table><thead><tr><th>订单号</th><th>宠物</th><th>寄养人</th><th>主人</th><th>寄养日期</th><th>状态</th><th>费用</th><th>操作</th></tr></thead><tbody><tr><td>HY20260625001</td><td>豆豆 / 柯基</td><td>小王</td><td>陈女士</td><td>6/25-7/2</td><td><span class="tag green">寄养中</span></td><td>690元</td><td><a class="link order-detail">详情</a></td></tr><tr><td>HY20260628004</td><td>咪咪 / 英短</td><td>张阿姨</td><td>刘先生</td><td>6/28-7/5</td><td><span class="tag orange">待确认</span></td><td>560元</td><td><a class="link order-detail">详情</a></td></tr><tr><td>HY20260626007</td><td>球球 / 泰迪</td><td>李叔叔</td><td>周女士</td><td>6/26-7/3</td><td><span class="tag red">异常跟进</span></td><td>630元</td><td><a class="link order-detail">详情</a></td></tr></tbody></table></div></div>
+        </div>
+        <div id="hosts" class="panel">
+          <div class="toolbar"><div class="filters"><input class="input" placeholder="搜索姓名 / 手机号 / 地址"><select class="select"><option>全部套餐</option><option>免费版</option><option>家庭寄养版</option></select><select class="select"><option>全部状态</option><option>正常</option><option>已禁用</option></select><button class="btn primary">查询</button><button class="btn">重置</button></div><button class="btn">导出寄养人</button></div>
+          <div class="card"><div class="table-wrap"><table><thead><tr><th>寄养人</th><th>手机号</th><th>寄养地址</th><th>注册时间</th><th>订单数</th><th>平均评分</th><th>套餐</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>小王</td><td>138****8888</td><td>XX小区</td><td>2026-01-15</td><td>12</td><td>4.9</td><td><span class="tag gray">免费版</span></td><td><span class="tag green">正常</span></td><td><a class="link host-detail">详情</a> · <a class="link">禁用</a></td></tr><tr><td>张阿姨</td><td>139****6666</td><td>YY花园</td><td>2026-02-03</td><td>8</td><td>5.0</td><td><span class="tag blue">家庭寄养版</span></td><td><span class="tag green">正常</span></td><td><a class="link host-detail">详情</a> · <a class="link">禁用</a></td></tr><tr><td>李叔叔</td><td>137****5555</td><td>ZZ公寓</td><td>2026-03-10</td><td>5</td><td>4.7</td><td><span class="tag gray">免费版</span></td><td><span class="tag green">正常</span></td><td><a class="link host-detail">详情</a> · <a class="link">禁用</a></td></tr><tr><td>赵小姐</td><td>136****3333</td><td>AA大厦</td><td>2026-04-22</td><td>3</td><td>4.5</td><td><span class="tag gray">免费版</span></td><td><span class="tag red">已禁用</span></td><td><a class="link host-detail">详情</a> · <a class="link">启用</a></td></tr></tbody></table></div></div>
+        </div>
+        <div id="packages" class="panel">
+          <div class="package-grid"><div class="card package"><div class="pkg-title">免费版</div><div class="pkg-price">¥0 <span>/永久</span></div><p style="font-size:13px;color:#64748b;">适合偶尔提供寄养服务的个人。</p><ul class="feature-list"><li>宠物档案上限 3 只</li><li>基础日志功能</li><li>交接单生成与确认</li><li>主人端 H5 查看</li><li>基础数据统计</li></ul><button class="btn primary">编辑权益</button></div><div class="card package active"><span class="tag cyan" style="position:absolute;right:18px;top:18px;">推荐</span><div class="pkg-title">家庭寄养版</div><div class="pkg-price">¥19 <span>/月</span></div><p style="font-size:13px;color:#64748b;">适合专业家庭寄养人。</p><ul class="feature-list"><li>宠物档案不限数量</li><li>照片 / 视频日志</li><li>主人端小程序</li><li>自动费用结算</li><li>完整寄养报告</li><li>优先客服支持</li></ul><button class="btn primary">编辑权益</button></div></div>
+        </div>
+        <div id="orders" class="panel">
+          <div class="toolbar"><div class="filters"><input class="input" placeholder="搜索订单号 / 寄养人 / 主人"><select class="select"><option>全部状态</option><option>待确认</option><option>寄养中</option><option>待确认报告</option><option>已完成</option><option>异常跟进</option></select><select class="select"><option>近30天</option><option>近7天</option><option>近90天</option></select><button class="btn primary">查询</button><button class="btn">重置</button></div><button class="btn">导出订单</button></div>
+          <div class="card"><div class="table-wrap"><table><thead><tr><th>订单号</th><th>宠物</th><th>寄养人</th><th>宠物主人</th><th>寄养日期</th><th>状态</th><th>异常</th><th>费用</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr><td>HY20260625001</td><td>豆豆 / 柯基</td><td>小王</td><td>陈女士</td><td>6/25-7/2</td><td><span class="tag green">寄养中</span></td><td><span class="tag gray">无</span></td><td>690元</td><td>14:20</td><td><a class="link order-detail">详情</a></td></tr><tr><td>HY20260628004</td><td>咪咪 / 英短</td><td>张阿姨</td><td>刘先生</td><td>6/28-7/5</td><td><span class="tag orange">待确认</span></td><td><span class="tag gray">无</span></td><td>560元</td><td>13:10</td><td><a class="link order-detail">详情</a></td></tr><tr><td>HY20260626007</td><td>球球 / 泰迪</td><td>李叔叔</td><td>周女士</td><td>6/26-7/3</td><td><span class="tag red">异常跟进</span></td><td><span class="tag red">软便/拒食</span></td><td>630元</td><td>11:42</td><td><a class="link order-detail">详情</a></td></tr><tr><td>HY20260620003</td><td>旺财 / 金毛</td><td>小王</td><td>赵先生</td><td>6/20-6/27</td><td><span class="tag blue">待确认报告</span></td><td><span class="tag gray">无</span></td><td>780元</td><td>09:58</td><td><a class="link order-detail">详情</a></td></tr></tbody></table></div></div>
+        </div>
+        <div id="stats" class="panel">
+          <div class="toolbar"><div class="filters"><select class="select" id="rangeSelect"><option>近30天</option><option>近7天</option><option>近90天</option><option>自定义</option></select><button class="btn primary">应用筛选</button></div><button class="btn">导出 CSV</button></div>
+          <div class="grid-kpi"><div class="card kpi"><div class="label">日志提交率</div><div class="value">93%</div><div class="trend">较上期 +3%</div></div><div class="card kpi"><div class="label">报告确认率</div><div class="value">88%</div><div class="trend">较上期 +5%</div></div><div class="card kpi"><div class="label">套餐转化率</div><div class="value">18%</div><div class="trend">新增 5 个付费订阅</div></div><div class="card kpi alert"><div class="label">异常订单率</div><div class="value">1.5%</div><div class="trend">需持续关注</div></div></div>
+          <div class="section-grid"><div class="card"><div class="card-header"><div class="card-title">订单趋势</div><span class="tag cyan">近30天</span></div><div class="card-body"><div class="chart-bars"><div class="bar" style="height:38%" data-label="第1周" data-value="82"></div><div class="bar" style="height:56%" data-label="第2周" data-value="121"></div><div class="bar" style="height:73%" data-label="第3周" data-value="158"></div><div class="bar" style="height:90%" data-label="第4周" data-value="195"></div></div></div></div><div class="card"><div class="card-header"><div class="card-title">订单状态分布</div></div><div class="card-body"><div class="donut"></div><div class="legend"><div class="legend-item"><span class="dot" style="background:#0891b2"></span>已完成 44%</div><div class="legend-item"><span class="dot" style="background:#22c55e"></span>寄养中 28%</div><div class="legend-item"><span class="dot" style="background:#f97316"></span>待确认 16%</div><div class="legend-item"><span class="dot" style="background:#ef4444"></span>异常 12%</div></div></div></div></div>
+        </div>
+        <div id="settings" class="panel">
+          <div class="setting-grid"><div class="card setting-tabs"><button class="setting-tab active" data-setting="basic">基础参数</button><button class="setting-tab" data-setting="message">消息模板</button><button class="setting-tab" data-setting="upload">文件上传限制</button><button class="setting-tab" data-setting="permission">管理员与权限</button><button class="setting-tab" data-setting="logs">操作日志</button></div><div class="card"><div class="card-header"><div class="card-title" id="settingTitle">基础参数</div><button class="btn primary" id="saveSetting">保存配置</button></div><div class="card-body"><div class="setting-pane" id="basic"><div class="form-grid"><div class="form-item"><label>异常类型</label><input class="input" value="拒食、软便、呕吐、受伤、主人投诉"></div><div class="form-item"><label>费用项</label><input class="input" value="寄养费、加餐费、用品费、其他费用"></div><div class="form-item"><label>订单状态</label><input class="input" value="待确认、寄养中、待确认报告、已完成、异常跟进"></div><div class="form-item"><label>评价标签</label><input class="input" value="照顾细心、记录及时、环境干净、沟通顺畅"></div></div></div><div class="setting-pane hidden" id="message"><div class="form-item"><label>异常提醒模板</label><textarea class="textarea">{{pet_name}} 今日出现 {{abnormal_type}}，寄养人已记录处理情况，请及时查看。</textarea></div><div class="form-item"><label>交接单待确认模板</label><textarea class="textarea">{{host_name}} 已为 {{pet_name}} 生成寄养交接单，请确认宠物信息和费用约定。</textarea></div></div><div class="setting-pane hidden" id="upload"><div class="form-grid"><div class="form-item"><label>单张图片最大</label><input class="input" value="10MB"></div><div class="form-item"><label>单条视频最大</label><input class="input" value="100MB"></div><div class="form-item"><label>视频最长</label><input class="input" value="60秒"></div><div class="form-item"><label>允许格式</label><input class="input" value="jpg,png,webp,mp4,mov"></div></div></div><div class="setting-pane hidden" id="permission"><table><thead><tr><th>账号</th><th>角色</th><th>状态</th><th>最后登录</th><th>操作</th></tr></thead><tbody><tr><td>admin</td><td>超级管理员</td><td><span class="tag green">启用</span></td><td>2026-06-29 14:30</td><td><a class="link">编辑</a></td></tr><tr><td>ops01</td><td>运营管理员</td><td><span class="tag green">启用</span></td><td>2026-06-29 09:12</td><td><a class="link">编辑</a></td></tr><tr><td>viewer</td><td>只读观察员</td><td><span class="tag gray">禁用</span></td><td>2026-06-20 18:03</td><td><a class="link">启用</a></td></tr></tbody></table></div><div class="setting-pane hidden" id="logs"><table><thead><tr><th>时间</th><th>操作人</th><th>操作内容</th><th>对象</th></tr></thead><tbody><tr><td>2026-06-29 14:20</td><td>admin</td><td>修改文件上传限制</td><td>系统设置</td></tr><tr><td>2026-06-29 13:42</td><td>ops01</td><td>添加异常订单备注</td><td>HY20260626007</td></tr><tr><td>2026-06-28 18:30</td><td>admin</td><td>修改家庭寄养版权益</td><td>套餐配置</td></tr></tbody></table></div></div></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<div class="drawer" id="drawer"><div class="drawer-header"><div><div class="card-title" id="drawerTitle">订单详情</div><div class="page-subtitle">同页抽屉展示，不跳出单页后台</div></div><button class="btn" id="closeDrawer">关闭</button></div><div class="drawer-body" id="drawerBody"></div></div>
+<div class="toast" id="toast">已刷新</div>
+<script>
+const meta={dashboard:['工作台','查看平台核心运营指标与待处理事项'],hosts:['寄养人管理','检索寄养人、查看资料、管理账号状态'],packages:['套餐配置','维护免费版与家庭寄养版权益和价格'],orders:['寄养订单','查询订单、跟进异常、查看交接与日志'],stats:['数据统计','查看订单、日志、套餐转化等运营指标'],settings:['系统设置','维护基础参数、消息模板、权限和操作日志']};
+const navs=[...document.querySelectorAll('.nav-item')]; const panels=[...document.querySelectorAll('.panel')];
+function showPanel(id){navs.forEach(n=>n.classList.toggle('active',n.dataset.panel===id));panels.forEach(p=>p.classList.toggle('active',p.id===id));document.getElementById('pageTitle').textContent=meta[id][0];document.getElementById('pageSubtitle').textContent=meta[id][1];closeDrawer();}
+navs.forEach(n=>n.addEventListener('click',()=>showPanel(n.dataset.panel)));
+document.querySelectorAll('[data-jump]').forEach(a=>a.addEventListener('click',()=>showPanel(a.dataset.jump)));
+const drawer=document.getElementById('drawer'); const body=document.getElementById('drawerBody');
+function openDrawer(type){document.getElementById('drawerTitle').textContent=type==='host'?'寄养人详情':'寄养订单详情';body.innerHTML= type==='host'?`<div class="card" style="padding:16px"><div class="card-title">小王</div><p class="page-subtitle">家庭寄养人 · 138****8888 · XX小区</p><div class="grid-kpi" style="grid-template-columns:repeat(2,1fr);margin-top:12px"><div class="card kpi"><div class="label">总订单</div><div class="value">12</div></div><div class="card kpi"><div class="label">平均评分</div><div class="value">4.9</div></div></div></div><div class="card" style="margin-top:14px"><div class="card-header"><div class="card-title">历史寄养记录</div></div><table><tbody><tr><td>HY20260625001</td><td>豆豆</td><td><span class="tag green">寄养中</span></td></tr><tr><td>HY20260510003</td><td>咪咪</td><td><span class="tag blue">已完成</span></td></tr></tbody></table></div>`:`<div class="card" style="padding:16px"><div class="card-title">HY20260625001 · 豆豆</div><p class="page-subtitle">寄养人：小王｜主人：陈女士｜6/25-7/2｜费用 690 元</p><div style="margin-top:12px"><span class="tag green">寄养中</span> <span class="tag gray">无异常</span></div></div><div class="card" style="margin-top:14px"><div class="card-header"><div class="card-title">交接单摘要</div></div><div class="card-body"><p>疫苗已完成；每天早晚各一次肠胃药；不能吃鸡肉；晚上需开小夜灯。</p></div></div><div class="card" style="margin-top:14px"><div class="card-header"><div class="card-title">状态流转</div></div><div class="card-body"><div class="timeline"><div class="timeline-item"><span class="timeline-dot"></span><div>6/25 09:00 创建交接单</div></div><div class="timeline-item"><span class="timeline-dot"></span><div>6/25 10:30 主人确认交接单</div></div><div class="timeline-item"><span class="timeline-dot"></span><div>6/29 14:20 最新日志已同步</div></div></div></div></div><div class="form-item" style="margin-top:14px"><label>运营备注</label><textarea class="textarea" placeholder="仅后台可见"></textarea></div><button class="btn primary" style="margin-top:10px">保存备注</button>`;drawer.classList.add('open');}
+function closeDrawer(){drawer.classList.remove('open');}
+document.getElementById('closeDrawer').addEventListener('click',closeDrawer);
+document.querySelectorAll('.order-detail').forEach(a=>a.addEventListener('click',()=>openDrawer('order')));document.querySelectorAll('.host-detail').forEach(a=>a.addEventListener('click',()=>openDrawer('host')));
+document.querySelectorAll('.setting-tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.setting-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.setting-pane').forEach(p=>p.classList.add('hidden'));document.getElementById(t.dataset.setting).classList.remove('hidden');document.getElementById('settingTitle').textContent=t.textContent;}));
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1600);}document.getElementById('refreshBtn').addEventListener('click',()=>toast('数据已刷新'));document.getElementById('exportBtn').addEventListener('click',()=>toast('已生成导出任务'));document.getElementById('saveSetting').addEventListener('click',()=>toast('配置已保存'));
+</script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平台概览卡片</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #EEF2FF;
+            --bg: #F9FAFB;
+            --surface: #FFFFFF;
+            --border: #E5E7EB;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --xiaohongshu: #FF2442;
+            --bilibili: #FB7299;
+            --douyin: #000000;
+            --wechat-mp: #07C160;
+            --shipinhao: #FA9D3B;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg);
+            color: var(--text-primary);
+            padding: var(--spacing-md);
+        }
+
+        .platform-overview {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .overview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .overview-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-md);
+        }
+
+        .platform-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .platform-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .platform-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .platform-info {
+            flex: 1;
+        }
+
+        .platform-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .platform-status {
+            font-size: 12px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-xs) 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-value.highlight {
+            color: var(--primary);
+        }
+
+        .warning-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #FEF3C7;
+            color: #92400E;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: var(--spacing-xs);
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 12px;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="platform-overview">
+        <div class="overview-header">
+            <h2 class="overview-title">📊 平台概览</h2>
+            <button style="padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; font-size: 13px;">
+                查看全部平台 →
+            </button>
+        </div>
+
+        <div class="cards-grid">
+            <!-- Xiaohongshu Card -->
+            <div class="platform-card">
+                <div class="card-top">
+                    <div class="platform-icon" style="background: var(--xiaohongshu);">小红</div>
+                    <div class="platform-info">
+                        <div class="platform-name">小红书</div>
+                        <div class="platform-status">
+                            <span class="status-dot"></span>
+                            正常运行
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-row">
+                        <span class="stat-label">本周发布</span>
+                        <span class="stat-value highlight">8 条</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">待发布</span>
+                        <span class="stat-value">12 条</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">最近发布</span>
+                        <span class="stat-value">2天前</span>
+                    </div>
+                    <div style="margin-top: var(--spacing-xs);">
+                        <span class="trend-indicator trend-up">↑ 15% 较上周</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bilibili Card -->
+            <div class="platform-card">
+                <div class="card-top">
+                    <div class="platform-icon" style="background: var(--bilibili);">B站</div>
+                    <div class="platform-info">
+                        <div class="platform-name">哔哩哔哩</div>
+                        <div class="platform-status">
+                            <span class="status-dot"></span>
+                            正常运行
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-row">
+                        <span class="stat-label">本周发布</span>
+                        <span class="stat-value highlight">5 条</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">待发布</span>
+                        <span class="stat-value">8 条</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">最近发布</span>
+                        <span class="stat-value">1天前</span>
+                    </div>
+                    <div style="margin-top: var(--spacing-xs);">
+                        <span class="trend-indicator trend-up">↑ 8% 较上周</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Douyin Card -->
+            <div class="platform-card">
+                <div class="card-top">
+                    <div class="platform-icon" style="background: var(--douyin);">抖音</div>
+                    <div class="platform-info">
+                        <div class="platform-name">抖音</div>
+                        <div class="platform-status">
+                            <span class="status-dot"></span>
+                            正常运行
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-row">
+                        <span class="stat-label">本周发布</span>
+                        <span class="stat-value highlight">10 条</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">待发布</span>
+                        <span class="stat-value">15 条</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">最近发布</span>
+                        <span class="stat-value">今天</span>
+                    </div>
+                    <div style="margin-top: var(--spacing-xs);">
+                        <span class="trend-indicator trend-up">↑ 22% 较上周</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WeChat MP Card -->
+            <div class="platform-card" style="border-color: var(--warning);">
+                <div class="card-top">
+                    <div class="platform-icon" style="background: var(--wechat-mp);">公众</div>
+                    <div class="platform-info">
+                        <div class="platform-name">公众号</div>
+                        <div class="platform-status" style="color: var(--warning);">
+                            <span class="status-dot" style="background: var(--warning);"></span>
+                            需注意
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-row">
+                        <span class="stat-label">本周发布</span>
+                        <span class="stat-value highlight">3 条</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">待发布</span>
+                        <span class="stat-value">5 条</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">最近发布</span>
+                        <span class="stat-value">9天前</span>
+                    </div>
+                    <div class="warning-badge">
+                        ⚠️ 已超过7天未发布
+                    </div>
+                    <div style="margin-top: var(--spacing-xs);">
+                        <span class="trend-indicator trend-down">↓ 12% 较上周</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add hover effects and interactivity
+        document.querySelectorAll('.platform-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const platformName = this.querySelector('.platform-name').textContent;
+                alert(`查看 ${platformName} 详细数据\n\n（原型演示功能）`);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>选片助手 - 工作室团队管理</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; color: #333; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #1a1a2e; color: #fff; padding: 20px 0; }
+.sidebar .logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 18px; font-weight: 600; }
+.sidebar .logo span { color: #e94560; }
+.sidebar .studio-name { padding: 12px 20px; font-size: 12px; color: rgba(255,255,255,0.4); border-bottom: 1px solid rgba(255,255,255,0.05); }
+.sidebar nav { margin-top: 12px; }
+.sidebar nav a { display: flex; align-items: center; padding: 12px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; }
+.sidebar nav a:hover, .sidebar nav a.active { background: rgba(233,69,96,0.15); color: #fff; border-right: 3px solid #e94560; }
+.sidebar nav a .icon { width: 20px; margin-right: 10px; text-align: center; }
+.main { flex: 1; padding: 24px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.header h1 { font-size: 22px; }
+.btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; }
+.btn-primary { background: #e94560; color: #fff; }
+.btn-outline { background: #fff; border: 1px solid #ddd; color: #666; }
+.btn-outline:hover { border-color: #e94560; color: #e94560; }
+.team-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.stat-card .label { font-size: 13px; color: #999; margin-bottom: 6px; }
+.stat-card .value { font-size: 24px; font-weight: 700; }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.member-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 16px; align-items: flex-start; }
+.member-card .avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600; color: #fff; flex-shrink: 0; }
+.member-card .info { flex: 1; }
+.member-card .name { font-size: 16px; font-weight: 600; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+.member-card .role { font-size: 12px; color: #999; }
+.member-card .stats { display: flex; gap: 16px; margin-top: 10px; }
+.member-card .stat { font-size: 13px; color: #666; }
+.member-card .stat strong { color: #333; }
+.member-card .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.status-active { background: #52c41a; }
+.status-inactive { background: #ddd; }
+.member-card .actions { display: flex; gap: 8px; margin-top: 10px; }
+.member-card .actions a { font-size: 12px; color: #1890ff; text-decoration: none; }
+.invite-section { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.invite-section h2 { font-size: 16px; margin-bottom: 12px; }
+.invite-methods { display: flex; gap: 16px; }
+.invite-method { flex: 1; border: 2px dashed #eee; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.invite-method:hover { border-color: #e94560; background: rgba(233,69,96,0.02); }
+.invite-method .icon { font-size: 32px; margin-bottom: 8px; }
+.invite-method .title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.invite-method .desc { font-size: 12px; color: #999; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 12px; padding: 28px; width: 420px; }
+.modal h2 { font-size: 18px; margin-bottom: 20px; }
+.modal .form-group { margin-bottom: 16px; }
+.modal .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 4px; }
+.modal .form-group input, .modal .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+.modal .btn-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.link-box { background: #f5f7fa; border-radius: 6px; padding: 10px; font-size: 13px; color: #666; word-break: break-all; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.link-box .copy { color: #e94560; cursor: pointer; white-space: nowrap; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">选片<span>助手</span></div>
+    <div class="studio-name">🏢 萌宠时光摄影工作室</div>
+    <nav>
+      <a href="#"><span class="icon">📊</span>数据概览</a>
+      <a href="#" class="active"><span class="icon"> 👥</span>团队管理</a>
+      <a href="#"><span class="icon">🎨</span>品牌设置</a>
+      <a href="#"><span class="icon">📁</span>客户总库</a>
+      <a href="#"><span class="icon">📈</span>经营数据</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="header">
+      <h1> 👥 团队管理</h1>
+      <button class="btn btn-primary" onclick="showModal()">+ 邀请摄影师</button>
+    </div>
+    <div class="team-stats">
+      <div class="stat-card"><div class="label">团队成员</div><div class="value">3</div></div>
+      <div class="stat-card"><div class="label">本月拍摄</div><div class="value">12</div></div>
+      <div class="stat-card"><div class="label">待处理选片</div><div class="value">4</div></div>
+      <div class="stat-card"><div class="label">本月超片收入</div><div class="value" style="color:#e94560">¥1,850</div></div>
+    </div>
+    <div class="team-grid">
+      <div class="member-card">
+        <div class="avatar" style="background:#e94560">赵</div>
+        <div class="info">
+          <div class="name">赵摄影师 <span style="font-size:11px;color:#999;font-weight:normal">管理员</span></div>
+          <div class="role"><span class="status-dot status-active"></span>在线 · 加入于 2026-01-15</div>
+          <div class="stats"><span class="stat"><strong>5</strong> 本月拍摄</span><span class="stat"><strong>¥800</strong> 超片收入</span></div>
+          <div class="actions"><a href="#">查看数据</a><a href="#">编辑</a></div>
+        </div>
+      </div>
+      <div class="member-card">
+        <div class="avatar" style="background:#1890ff">孙</div>
+        <div class="info">
+          <div class="name">孙摄影师 <span style="font-size:11px;color:#999;font-weight:normal">摄影师</span></div>
+          <div class="role"><span class="status-dot status-active"></span>在线 · 加入于 2026-03-01</div>
+          <div class="stats"><span class="stat"><strong>4</strong> 本月拍摄</span><span class="stat"><strong>¥650</strong> 超片收入</span></div>
+          <div class="actions"><a href="#">查看数据</a><a href="#">编辑</a></div>
+        </div>
+      </div>
+      <div class="member-card">
+        <div class="avatar" style="background:#52c41a">周</div>
+        <div class="info">
+          <div class="name">周摄影师 <span style="font-size:11px;color:#999;font-weight:normal">摄影师</span></div>
+          <div class="role"><span class="status-dot status-inactive"></span>离线 · 加入于 2026-04-10</div>
+          <div class="stats"><span class="stat"><strong>3</strong> 本月拍摄</span><span class="stat"><strong>¥400</strong> 超片收入</span></div>
+          <div class="actions"><a href="#">查看数据</a><a href="#">编辑</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="invite-section">
+      <h2>📨 邀请新成员</h2>
+      <div class="invite-methods">
+        <div class="invite-method" onclick="showModal()">
+          <div class="icon">📱</div>
+          <div class="title">手机号邀请</div>
+          <div class="desc">输入摄影师手机号发送邀请</div>
+        </div>
+        <div class="invite-method" onclick="showLinkModal()">
+          <div class="icon">🔗</div>
+          <div class="title">邀请链接</div>
+          <div class="desc">生成邀请链接分享给摄影师</div>
+        </div>
+        <div class="invite-method">
+          <div class="icon">📧</div>
+          <div class="title">邮件邀请</div>
+          <div class="desc">通过邮件发送邀请</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>邀请摄影师</h2>
+    <div class="form-group"><label>摄影师手机号 *</label><input type="tel" placeholder="请输入手机号"></div>
+    <div class="form-group"><label>摄影师姓名</label><input type="text" placeholder="选填"></div>
+    <div class="form-group"><label>角色</label><select><option>摄影师</option><option>高级摄影师</option></select></div>
+    <div class="btn-row">
+      <button class="btn" style="background:#f0f0f0" onclick="hideModal()">取消</button>
+      <button class="btn btn-primary" onclick="hideModal()">发送邀请</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="linkModal">
+  <div class="modal">
+    <h2>邀请链接</h2>
+    <p style="font-size:14px;color:#666;margin-bottom:12px">将此链接分享给摄影师，他们点击后即可加入工作室</p>
+    <div class="link-box">
+      <span>https://shootpick.com/join/studio_abc123?token=xyz789</span>
+      <span class="copy" onclick="alert('已复制！')">复制</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#999">链接有效期：7天 · 最多可邀请10人</div>
+    <div class="btn-row" style="margin-top:20px">
+      <button class="btn btn-primary" onclick="hideLinkModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showModal() { document.getElementById('modal').classList.add('show'); }
+function hideModal() { document.getElementById('modal').classList.remove('show'); }
+function showLinkModal() { document.getElementById('linkModal').classList.add('show'); }
+function hideLinkModal() { document.getElementById('linkModal').classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+</script>
+</body>
+</html>

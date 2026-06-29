@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>选片助手 - 品牌设置</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; color: #333; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #1a1a2e; color: #fff; padding: 20px 0; }
+.sidebar .logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 18px; font-weight: 600; }
+.sidebar .logo span { color: #e94560; }
+.sidebar .studio-name { padding: 12px 20px; font-size: 12px; color: rgba(255,255,255,0.4); border-bottom: 1px solid rgba(255,255,255,0.05); }
+.sidebar nav { margin-top: 12px; }
+.sidebar nav a { display: flex; align-items: center; padding: 12px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; }
+.sidebar nav a:hover, .sidebar nav a.active { background: rgba(233,69,96,0.15); color: #fff; border-right: 3px solid #e94560; }
+.sidebar nav a .icon { width: 20px; margin-right: 10px; text-align: center; }
+.main { flex: 1; padding: 24px; max-width: 900px; }
+.header { margin-bottom: 24px; }
+.header h1 { font-size: 22px; margin-bottom: 4px; }
+.header .desc { font-size: 14px; color: #999; }
+.section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.section h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500; }
+.form-group input[type="text"], .form-group input[type="number"], .form-group select { width: 100%; max-width: 400px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+.form-group .hint { font-size: 12px; color: #999; margin-top: 4px; }
+.upload-logo { display: flex; align-items: center; gap: 16px; }
+.upload-logo .preview { width: 80px; height: 80px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #999; cursor: pointer; }
+.upload-logo .preview img { max-width: 100%; max-height: 100%; }
+.upload-logo .info { font-size: 13px; color: #999; }
+.position-grid { display: grid; grid-template-columns: repeat(3, 48px); gap: 4px; }
+.position-cell { width: 48px; height: 36px; border: 2px solid #eee; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; transition: all 0.2s; }
+.position-cell:hover { border-color: #e94560; }
+.position-cell.selected { border-color: #e94560; background: rgba(233,69,96,0.05); color: #e94560; }
+.slider-group { display: flex; align-items: center; gap: 12px; max-width: 400px; }
+.slider-group input[type="range"] { flex: 1; }
+.slider-group .value { font-size: 14px; font-weight: 500; min-width: 40px; }
+.watermark-preview-box { width: 100%; max-width: 500px; aspect-ratio: 16/10; background: #2a2a2a; border-radius: 8px; position: relative; overflow: hidden; margin-top: 16px; }
+.watermark-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+.watermark-preview-box .wm-text { position: absolute; color: rgba(255,255,255,0.5); font-size: 18px; font-weight: 600; pointer-events: none; }
+.wm-center { top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); }
+.wm-bottom-right { bottom: 12px; right: 12px; }
+.template-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.template-card { border: 2px solid #eee; border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+.template-card:hover { border-color: #e94560; }
+.template-card.selected { border-color: #e94560; }
+.template-card .preview { height: 120px; display: flex; align-items: center; justify-content: center; }
+.template-card .name { padding: 10px; text-align: center; font-size: 13px; font-weight: 500; }
+.color-scheme { display: flex; gap: 12px; margin-top: 8px; }
+.color-dot { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.2s; }
+.color-dot:hover, .color-dot.selected { border-color: #333; transform: scale(1.1); }
+.btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; }
+.btn-primary { background: #e94560; color: #fff; }
+.btn-outline { background: #fff; border: 1px solid #ddd; color: #666; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">选片<span>助手</span></div>
+    <div class="studio-name">🏢 萌宠时光摄影工作室</div>
+    <nav>
+      <a href="#"><span class="icon">📊</span>数据概览</a>
+      <a href="#"><span class="icon"> 👥</span>团队管理</a>
+      <a href="#" class="active"><span class="icon">🎨</span>品牌设置</a>
+      <a href="#"><span class="icon">📁</span>客户总库</a>
+      <a href="#"><span class="icon">📈</span>经营数据</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="header">
+      <h1>🎨 品牌设置</h1>
+      <div class="desc">设置工作室统一的品牌元素，所有摄影师创建的画廊将默认使用这些设置</div>
+    </div>
+
+    <!-- Watermark Settings -->
+    <div class="section">
+      <h2>💧 品牌水印</h2>
+      <div class="form-group">
+        <label>Logo 上传</label>
+        <div class="upload-logo">
+          <div class="preview" onclick="alert('原型演示：选择Logo文件')">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect fill='%23e94560' rx='8' width='60' height='60'/%3E%3Ctext x='30' y='35' text-anchor='middle' fill='white' font-size='10' font-weight='bold'%3E萌宠%3C/text%3E%3C/svg%3E" alt="">
+          </div>
+          <div class="info">
+            <div>PNG透明底，≤2MB</div>
+            <div style="color:#e94560;cursor:pointer;margin-top:4px">更换Logo</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>水印文字</label>
+        <input type="text" value="萌宠时光摄影" placeholder="输入工作室名称">
+        <div class="hint">将显示在预览图上，增强品牌辨识度</div>
+      </div>
+      <div class="form-group">
+        <label>水印位置</label>
+        <div class="position-grid">
+          <div class="position-cell" onclick="selectPos(this)">左上</div>
+          <div class="position-cell" onclick="selectPos(this)">上中</div>
+          <div class="position-cell" onclick="selectPos(this)">右上</div>
+          <div class="position-cell" onclick="selectPos(this)">左中</div>
+          <div class="position-cell selected" onclick="selectPos(this)">居中</div>
+          <div class="position-cell" onclick="selectPos(this)">右中</div>
+          <div class="position-cell" onclick="selectPos(this)">左下</div>
+          <div class="position-cell" onclick="selectPos(this)">下中</div>
+          <div class="position-cell" onclick="selectPos(this)">右下</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>水印透明度</label>
+        <div class="slider-group">
+          <input type="range" min="10" max="80" value="40" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="value">40%</span>
+        </div>
+      </div>
+      <div class="watermark-preview-box">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='312'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f8e8d4'/%3E%3Cstop offset='1' stop-color='%23e8d0b8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23g)' width='500' height='312'/%3E%3Ctext x='250' y='150' text-anchor='middle' fill='%23c4a882' font-size='16'%3E预览照片%3C/text%3E%3C/svg%3E" alt="">
+        <div class="wm-text wm-center" style="opacity:0.4">萌宠时光摄影</div>
+      </div>
+    </div>
+
+    <!-- Gallery Template -->
+    <div class="section">
+      <h2>🖼️ 画廊模板</h2>
+      <div class="form-group">
+        <label>默认布局</label>
+        <div class="template-grid">
+          <div class="template-card selected" onclick="selectTemplate(this)">
+            <div class="preview" style="background:#f5f5f5;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:8px">
+              <div style="background:#ddd;border-radius:2px"></div>
+              <div style="background:#ddd;border-radius:2px"></div>
+              <div style="background:#ddd;border-radius:2px"></div>
+              <div style="background:#ddd;border-radius:2px"></div>
+              <div style="background:#ddd;border-radius:2px"></div>
+              <div style="background:#ddd;border-radius:2px"></div>
+            </div>
+            <div class="name">网格视图</div>
+          </div>
+          <div class="template-card" onclick="selectTemplate(this)">
+            <div class="preview" style="background:#f5f5f5;padding:12px;display:flex;flex-direction:column;gap:6px">
+              <div style="background:#ddd;height:20px;border-radius:2px"></div>
+              <div style="background:#ddd;height:30px;border-radius:2px"></div>
+              <div style="background:#ddd;height:25px;border-radius:2px"></div>
+            </div>
+            <div class="name">时间线</div>
+          </div>
+          <div class="template-card" onclick="selectTemplate(this)">
+            <div class="preview" style="background:#f5f5f5;padding:12px;display:flex;flex-direction:column;gap:4px">
+              <div style="background:#ddd;height:40px;border-radius:4px"></div>
+              <div style="background:#ddd;height:60px;border-radius:4px"></div>
+            </div>
+            <div class="name">故事线</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>主题配色</label>
+        <div class="color-scheme">
+          <div class="color-dot selected" style="background:#1a1a2e" title="深色" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#ffffff;border:1px solid #ddd" title="浅色" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#2c3e50" title="深蓝" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#1a3a2a" title="墨绿" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#3a1a2a" title="酒红" onclick="selectColor(this)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gallery Page Branding -->
+    <div class="section">
+      <h2>📱 画廊页面品牌</h2>
+      <div class="form-group">
+        <label>画廊页面背景色</label>
+        <div class="color-scheme">
+          <div class="color-dot selected" style="background:#0a0a0a" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#1a1a2e" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#f5f5f5;border:1px solid #ddd" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#faf8f5;border:1px solid #ddd" onclick="selectColor(this)"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>画廊顶部展示文案</label>
+        <input type="text" value="萌宠时光 · 用镜头记录每一份爱" placeholder="展示在画廊页面顶部">
+        <div class="hint">客户打开画廊时看到的品牌标语</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline">恢复默认</button>
+      <button class="btn btn-primary">保存设置</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function selectPos(el) {
+  document.querySelectorAll('.position-cell').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectTemplate(el) {
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectColor(el) {
+  const siblings = el.parentElement.querySelectorAll('.color-dot');
+  siblings.forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

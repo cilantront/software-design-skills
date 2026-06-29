@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>合同条款风险扫描助手 - 小程序端原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; }
+
+.page-title { text-align: center; padding: 24px; font-size: 20px; color: #1a365d; font-weight: 700; }
+.page-desc { text-align: center; font-size: 14px; color: #888; margin-bottom: 24px; }
+
+/* Grid of phone screens */
+.phones-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; padding: 0 24px 40px; }
+
+/* Phone frame */
+.phone-frame {
+  width: 280px; height: 560px; border-radius: 36px; border: 8px solid #1a1a1a;
+  background: white; overflow: hidden; position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.phone-frame::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 100px; height: 24px; background: #1a1a1a; border-radius: 0 0 16px 16px; z-index: 10;
+}
+.phone-label { text-align: center; margin-top: 12px; font-size: 13px; color: #666; font-weight: 600; }
+
+/* WeChat status bar */
+.wx-status-bar {
+  height: 44px; background: white; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 16px; font-size: 12px; color: #333;
+  padding-top: 24px;
+}
+.wx-status-bar .time { font-weight: 600; }
+.wx-status-bar .icons { display: flex; gap: 4px; font-size: 10px; }
+
+/* WeChat nav bar */
+.wx-nav {
+  height: 44px; background: white; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 12px; border-bottom: 1px solid #f0f0f0;
+}
+.wx-nav .back { font-size: 18px; color: #333; cursor: pointer; }
+.wx-nav .title { font-size: 16px; font-weight: 600; color: #333; }
+.wx-nav .more { font-size: 14px; color: #666; }
+
+/* Screen content area */
+.screen-content {
+  height: calc(100% - 44px - 44px); overflow-y: auto; background: #f5f7fa;
+}
+
+/* Tab bar */
+.tab-bar {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 50px;
+  background: white; border-top: 1px solid #f0f0f0; display: flex;
+  align-items: center; justify-content: space-around;
+  padding-bottom: 8px;
+}
+.tab-item { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+.tab-item .tab-icon { font-size: 20px; }
+.tab-item .tab-label { font-size: 10px; color: #999; }
+.tab-item.active .tab-label { color: #07c160; }
+
+/* ===== Screen 1: Home ===== */
+.home-screen .screen-content { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.upload-hero {
+  background: linear-gradient(135deg, #3182ce, #1a365d); border-radius: 16px;
+  padding: 24px; text-align: center; color: white;
+}
+.upload-hero h3 { font-size: 18px; margin-bottom: 6px; }
+.upload-hero p { font-size: 12px; opacity: 0.8; margin-bottom: 16px; }
+.upload-hero .big-btn {
+  background: white; color: #1a365d; border: none; padding: 12px 32px;
+  border-radius: 24px; font-size: 15px; font-weight: 600; cursor: pointer;
+  margin-bottom: 12px;
+}
+.upload-hero .sub-btns { display: flex; gap: 8px; justify-content: center; }
+.upload-hero .sub-btns button {
+  background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px;
+  border-radius: 12px; font-size: 11px; cursor: pointer;
+}
+.info-card {
+  background: white; border-radius: 12px; padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.info-card h4 { font-size: 13px; color: #1a365d; margin-bottom: 8px; }
+.info-card .stats { display: flex; gap: 12px; }
+.info-card .stat { flex: 1; text-align: center; background: #f7fafc; border-radius: 8px; padding: 8px; }
+.info-card .stat .val { font-size: 18px; font-weight: 700; color: #3182ce; }
+.info-card .stat .label { font-size: 10px; color: #888; }
+.recent-title { font-size: 14px; font-weight: 600; color: #1a365d; padding: 0 4px; }
+.recent-item {
+  background: white; border-radius: 10px; padding: 12px; display: flex;
+  align-items: center; gap: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.recent-item .ri-icon { width: 32px; height: 32px; border-radius: 6px; background: #fed7d7; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.recent-item .ri-info { flex: 1; }
+.recent-item .ri-info h5 { font-size: 12px; color: #333; }
+.recent-item .ri-info p { font-size: 10px; color: #999; }
+.recent-item .ri-score { padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; }
+.recent-item .ri-score.high { background: #fed7d7; color: #c53030; }
+
+/* ===== Screen 2: Scanning ===== */
+.scan-screen .screen-content { display: flex; flex-direction: column; align-items: center; padding: 32px 16px; }
+.scan-ring { width: 100px; height: 100px; border-radius: 50%; border: 6px solid #edf2f7; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 16px; }
+.scan-ring::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 6px solid transparent; border-top-color: #3182ce; border-right-color: #3182ce; animation: spin 2s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.scan-ring .pct { font-size: 24px; font-weight: 700; color: #3182ce; }
+.scan-screen h3 { font-size: 16px; color: #1a365d; margin-bottom: 6px; }
+.scan-screen .sub { font-size: 12px; color: #888; margin-bottom: 20px; }
+.scan-steps { width: 100%; }
+.s-step { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.s-step .dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.s-step .dot.done { background: #c6f6d5; color: #276749; }
+.s-step .dot.active { background: #bee3f8; color: #2b6cb0; }
+.s-step .dot.pending { background: #edf2f7; color: #999; }
+.s-step .s-text { font-size: 12px; }
+.s-step .s-text.done { color: #276749; }
+.s-step .s-text.active { color: #2b6cb0; font-weight: 600; }
+.s-step .s-text.pending { color: #999; }
+
+/* ===== Screen 3: Report ===== */
+.report-screen .screen-content { padding: 0; }
+.report-top { background: white; padding: 16px; }
+.report-score { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+.score-circle { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #fed7d7, #fff5f5); border: 3px solid #e53e3e; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.score-circle .num { font-size: 22px; font-weight: 700; color: #e53e3e; }
+.score-circle .lbl { font-size: 9px; color: #e53e3e; }
+.score-stats { display: flex; gap: 12px; flex: 1; }
+.ss-item { text-align: center; }
+.ss-item .n { font-size: 18px; font-weight: 700; }
+.ss-item .l { font-size: 10px; color: #888; }
+.ss-item.high .n { color: #e53e3e; }
+.ss-item.med .n { color: #dd9a1d; }
+.ss-item.low .n { color: #3182ce; }
+.report-actions { display: flex; gap: 8px; }
+.report-actions button { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 11px; background: white; cursor: pointer; }
+.report-actions button.primary { background: #3182ce; color: white; border: none; }
+.report-body { padding: 12px; }
+.risk-mini { background: white; border-radius: 10px; padding: 12px; margin-bottom: 8px; border-left: 3px solid; }
+.risk-mini.high { border-left-color: #e53e3e; }
+.risk-mini.medium { border-left-color: #dd9a1d; }
+.risk-mini .rm-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.risk-mini .rm-tag { padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; }
+.risk-mini.high .rm-tag { background: #fed7d7; color: #c53030; }
+.risk-mini.medium .rm-tag { background: #fefcbf; color: #975a16; }
+.risk-mini .rm-type { font-size: 13px; font-weight: 600; color: #1a365d; }
+.risk-mini .rm-quote { font-size: 11px; color: #666; background: #f7fafc; padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; line-height: 1.5; border-left: 2px solid #e2e8f0; }
+.risk-mini .rm-interp { font-size: 11px; color: #555; line-height: 1.5; margin-bottom: 8px; }
+.risk-mini .rm-suggest { font-size: 11px; color: #276749; background: #f0fff4; padding: 6px 8px; border-radius: 6px; line-height: 1.5; }
+.risk-mini .rm-copy { font-size: 10px; color: #3182ce; text-align: right; margin-top: 4px; cursor: pointer; }
+
+/* ===== Screen 4: Profile ===== */
+.profile-screen .screen-content { padding: 16px; }
+.profile-card { background: white; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.p-avatar { width: 44px; height: 44px; border-radius: 50%; background: #4299e1; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
+.p-info h4 { font-size: 14px; color: #333; }
+.p-info p { font-size: 11px; color: #888; }
+.p-stats { display: flex; gap: 8px; margin-bottom: 12px; }
+.p-stat { flex: 1; background: white; border-radius: 10px; padding: 12px; text-align: center; }
+.p-stat .v { font-size: 20px; font-weight: 700; color: #3182ce; }
+.p-stat .l { font-size: 10px; color: #888; }
+.p-menu { background: white; border-radius: 12px; overflow: hidden; }
+.p-menu-item { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f5f5f5; font-size: 13px; color: #333; cursor: pointer; }
+.p-menu-item:last-child { border-bottom: none; }
+.p-menu-item .arrow { color: #ccc; }
+
+/* ===== Screen 5: Purchase ===== */
+.purchase-screen .screen-content { padding: 16px; }
+.purchase-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.purchase-card h4 { font-size: 15px; color: #1a365d; margin-bottom: 12px; }
+.qty-options { display: flex; gap: 8px; margin-bottom: 12px; }
+.qty-opt { flex: 1; padding: 12px 8px; border: 2px solid #eee; border-radius: 10px; text-align: center; cursor: pointer; }
+.qty-opt.active { border-color: #3182ce; background: #ebf8ff; }
+.qty-opt .price { font-size: 18px; font-weight: 700; color: #3182ce; }
+.qty-opt .per { font-size: 10px; color: #888; }
+.qty-opt .save { font-size: 9px; color: #38a169; background: #c6f6d5; padding: 1px 4px; border-radius: 3px; margin-top: 2px; display: inline-block; }
+.pay-btn { width: 100%; padding: 12px; background: #07c160; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+/* ===== Screen 6: History ===== */
+.history-screen .screen-content { padding: 12px; }
+.search-bar { background: white; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.search-bar input { border: none; outline: none; flex: 1; font-size: 13px; }
+.filter-row { display: flex; gap: 6px; margin-bottom: 12px; }
+.filter-tag { padding: 4px 10px; background: white; border-radius: 12px; font-size: 11px; color: #666; cursor: pointer; }
+.filter-tag.active { background: #3182ce; color: white; }
+.hist-item { background: white; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.hist-item .hi-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.hist-item .hi-icon.pdf { background: #fed7d7; }
+.hist-item .hi-info { flex: 1; }
+.hist-item .hi-info h5 { font-size: 12px; color: #333; }
+.hist-item .hi-info p { font-size: 10px; color: #999; }
+.hist-item .hi-score { padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600; }
+.hist-item .hi-score.high { background: #fed7d7; color: #c53030; }
+.hist-item .hi-score.med { background: #fefcbf; color: #975a16; }
+.hist-item .hi-score.low { background: #bee3f8; color: #2b6cb0; }
+</style>
+</head>
+<body>
+
+<div class="page-title">📱 合同条款风险扫描助手 - 小程序端原型</div>
+<div class="page-desc">宫格布局展示小程序各页面，点击可交互</div>
+
+<div class="phones-grid">
+
+  <!-- Screen 1: Home -->
+  <div>
+    <div class="phone-frame">
+      <div class="wx-status-bar">
+        <span class="time">14:30</span>
+        <span class="icons">📶 🔋</span>
+      </div>
+      <div class="wx-nav">
+        <span class="back">‹</span>
+        <span class="title">合同风险扫描</span>
+        <span class="more">···</span>
+      </div>
+      <div class="screen-content home-screen" style="padding:12px;display:flex;flex-direction:column;gap:12px">
+        <div style="background:linear-gradient(135deg,#3182ce,#1a365d);border-radius:14px;padding:20px;text-align:center;color:white">
+          <h3 style="font-size:16px;margin-bottom:4px">上传合同，AI扫描风险</h3>
+          <p style="font-size:11px;opacity:0.8;margin-bottom:12px">60秒出报告，通俗解读每条风险</p>
+          <button style="background:white;color:#1a365d;border:none;padding:10px 28px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px">📄 上传合同文件</button>
+          <div style="display:flex;gap:6px;justify-content:center">
+            <button style="background:rgba(255,255,255,0.2);color:white;border:none;padding:5px 10px;border-radius:10px;font-size:10px;cursor:pointer">📷 拍照上传</button>
+            <button style="background:rgba(255,255,255,0.2);color:white;border:none;padding:5px 10px;border-radius:10px;font-size:10px;cursor:pointer">💬 从聊天选择</button>
+          </div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:12px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;text-align:center;background:#f7fafc;border-radius:8px;padding:8px">
+              <div style="font-size:16px;font-weight:700;color:#3182ce">0</div>
+              <div style="font-size:9px;color:#888">免费剩余</div>
+            </div>
+            <div style="flex:1;text-align:center;background:#f7fafc;border-radius:8px;padding:8px">
+              <div style="font-size:16px;font-weight:700;color:#38a169">5</div>
+              <div style="font-size:9px;color:#888">已购份数</div>
+            </div>
+            <div style="flex:1;text-align:center;background:#f7fafc;border-radius:8px;padding:8px">
+              <div style="font-size:16px;font-weight:700;color:#dd9a1d">12</div>
+              <div style="font-size:9px;color:#888">已扫描</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#1a365d">最近扫描</div>
+        <div style="background:white;border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px">
+          <div style="width:28px;height:28px;border-radius:4px;background:#fed7d7;display:flex;align-items:center;justify-content:center;font-size:14px">📕</div>
+          <div style="flex:1"><div style="font-size:11px;color:#333">办公室租赁合同</div><div style="font-size:9px;color:#999">6月28日 · 8页</div></div>
+          <span style="padding:2px 6px;border-radius:6px;font-size:9px;font-weight:600;background:#fed7d7;color:#c53030">35分</span>
+        </div>
+        <div style="background:white;border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px">
+          <div style="width:28px;height:28px;border-radius:4px;background:#fefcbf;display:flex;align-items:center;justify-content:center;font-size:14px">📄</div>
+          <div style="flex:1"><div style="font-size:11px;color:#333">供应商合作协议</div><div style="font-size:9px;color:#999">6月25日 · 12页</div></div>
+          <span style="padding:2px 6px;border-radius:6px;font-size:9px;font-weight:600;background:#fefcbf;color:#975a16">58分</span>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item active"><span class="tab-icon">🏠</span><span class="tab-label">首页</span></div>
+        <div class="tab-item"><span class="tab-icon">📋</span><span class="tab-label">历史</span></div>
+        <div class="tab-item"><span class="tab-icon">👤</span><span class="tab-label">我的</span></div>
+      </div>
+    </div>
+    <div class="phone-label">首页</div>
+  </div>
+
+  <!-- Screen 2: Scanning -->
+  <div>
+    <div class="phone-frame">
+      <div class="wx-status-bar">
+        <span class="time">14:31</span>
+        <span class="icons">📶 🔋</span>
+      </div>
+      <div class="wx-nav">
+        <span class="back">‹</span>
+        <span class="title">扫描中</span>
+        <span class="more"></span>
+      </div>
+      <div class="screen-content" style="display:flex;flex-direction:column;align-items:center;padding:28px 16px">
+        <div class="scan-ring">
+          <span class="pct">68</span>
+        </div>
+        <h3 style="font-size:15px;color:#1a365d;margin-bottom:4px">正在扫描您的合同...</h3>
+        <p style="font-size:11px;color:#888;margin-bottom:16px">预计剩余 15 秒</p>
+        <div style="width:100%">
+          <div class="s-step"><div class="dot done">✓</div><span class="s-text done">文件上传完成</span></div>
+          <div class="s-step"><div class="dot done">✓</div><span class="s-text done">文本提取完成</span></div>
+          <div class="s-step"><div class="dot active">⚡</div><span class="s-text active">AI 风险识别中...</span></div>
+          <div class="s-step"><div class="dot pending">4</div><span class="s-text pending">生成通俗解读</span></div>
+          <div class="s-step"><div class="dot pending">5</div><span class="s-text pending">生成修改建议</span></div>
+          <div class="s-step"><div class="dot pending">6</div><span class="s-text pending">计算风险评分</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">扫描进度</div>
+  </div>
+
+  <!-- Screen 3: Report -->
+  <div>
+    <div class="phone-frame">
+      <div class="wx-status-bar">
+        <span class="time">14:32</span>
+        <span class="icons">📶 🔋</span>
+      </div>
+      <div class="wx-nav">
+        <span class="back">‹</span>
+        <span class="title">风险报告</span>
+        <span class="more">···</span>
+      </div>
+      <div class="screen-content" style="background:#f5f7fa">
+        <div style="background:white;padding:12px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div class="score-circle"><span class="num">35</span><span class="lbl">高风险</span></div>
+            <div style="flex:1;display:flex;gap:8px">
+              <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:#e53e3e">3</div><div style="font-size:9px;color:#888">高风险</div></div>
+              <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:#dd9a1d">5</div><div style="font-size:9px;color:#888">中风险</div></div>
+              <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:#3182ce">2</div><div style="font-size:9px;color:#888">低风险</div></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button style="flex:1;padding:6px;border:1px solid #ddd;border-radius:6px;font-size:10px;background:white;cursor:pointer">📤 分享</button>
+            <button style="flex:1;padding:6px;border:none;border-radius:6px;font-size:10px;background:#3182ce;color:white;cursor:pointer">📄 导出</button>
+          </div>
+          <div style="font-size:10px;color:#999;background:#f7fafc;padding:4px 8px;border-radius:4px;margin-top:8px">⚠️ AI辅助分析结果，仅供参考</div>
+        </div>
+        <div style="padding:10px">
+          <div class="risk-mini high">
+            <div class="rm-header"><span class="rm-tag">高风险</span><span class="rm-type">违约金过高</span></div>
+            <div class="rm-quote">"乙方提前解除需支付剩余租期租金200%..."</div>
+            <div class="rm-interp">提前退租需赔偿剩余租期租金的<strong>两倍</strong>，金额明显过高...</div>
+            <div class="rm-suggest">建议改为：支付一个月租金作为违约金</div>
+            <div class="rm-copy">📋 复制建议</div>
+          </div>
+          <div class="risk-mini medium">
+            <div class="rm-header"><span class="rm-tag">中风险</span><span class="rm-type">管辖权不利</span></div>
+            <div class="rm-quote">"争议由甲方所在地法院管辖..."</div>
+            <div class="rm-interp">需异地诉讼，成本较高...</div>
+            <div class="rm-copy">📋 复制建议</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">风险报告</div>
+  </div>
+
+  <!-- Screen 4: Profile -->
+  <div>
+    <div class="phone-frame">
+      <div class="wx-status-bar">
+        <span class="time">14:35</span>
+        <span class="icons">📶 🔋</span>
+      </div>
+      <div class="wx-nav">
+        <span class="back"></span>
+        <span class="title">个人中心</span>
+        <span class="more"></span>
+      </div>
+      <div class="screen-content" style="padding:12px">
+        <div style="background:white;border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="width:40px;height:40px;border-radius:50%;background:#4299e1;display:flex;align-items:center;justify-content:center;color:white;font-size:16px">张</div>
+          <div><div style="font-size:14px;font-weight:600;color:#333">张小明</div><div style="font-size:11px;color:#888">微信已绑定</div></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <div style="flex:1;background:white;border-radius:8px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#3182ce">0</div><div style="font-size:9px;color:#888">免费剩余</div></div>
+          <div style="flex:1;background:white;border-radius:8px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#38a169">5</div><div style="font-size:9px;color:#888">已购份数</div></div>
+          <div style="flex:1;background:white;border-radius:8px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#dd9a1d">12</div><div style="font-size:9px;color:#888">已扫描</div></div>
+        </div>
+        <div style="background:white;border-radius:10px;overflow:hidden">
+          <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f5f5f5;font-size:12px"><span>💰 购买扫描份数</span><span style="color:#ccc">›</span></div>
+          <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f5f5f5;font-size:12px"><span>📋 扫描历史</span><span style="color:#ccc">›</span></div>
+          <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f5f5f5;font-size:12px"><span>📊 消费记录</span><span style="color:#ccc">›</span></div>
+          <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f5f5f5;font-size:12px"><span>🧾 申请发票</span><span style="color:#ccc">›</span></div>
+          <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;font-size:12px"><span>⚙️ 设置</span><span style="color:#ccc">›</span></div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-label">首页</span></div>
+        <div class="tab-item"><span class="tab-icon">📋</span><span class="tab-label">历史</span></div>
+        <div class="tab-item active"><span class="tab-icon">👤</span><span class="tab-label">我的</span></div>
+      </div>
+    </div>
+    <div class="phone-label">个人中心</div>
+  </div>
+
+  <!-- Screen 5: Purchase -->
+  <div>
+    <div class="phone-frame">
+      <div class="wx-status-bar">
+        <span class="time">14:36</span>
+        <span class="icons">📶 🔋</span>
+      </div>
+      <div class="wx-nav">
+        <span class="back">‹</span>
+        <span class="title">购买扫描份数</span>
+        <span class="more"></span>
+      </div>
+      <div class="screen-content" style="padding:12px">
+        <div style="background:white;border-radius:10px;padding:14px;margin-bottom:10px">
+          <h4 style="font-size:14px;color:#1a365d;margin-bottom:10px">选择购买份数</h4>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <div style="flex:1;padding:10px 6px;border:2px solid #eee;border-radius:8px;text-align:center">
+              <div style="font-size:14px;font-weight:700;color:#3182ce">¥19</div>
+              <div style="font-size:10px;color:#888">1份</div>
+            </div>
+            <div style="flex:1;padding:10px 6px;border:2px solid #3182ce;border-radius:8px;text-align:center;background:#ebf8ff">
+              <div style="font-size:14px;font-weight:700;color:#3182ce">¥54.15</div>
+              <div style="font-size:10px;color:#888">3份</div>
+              <span style="font-size:8px;color:#38a169;background:#c6f6d5;padding:1px 3px;border-radius:2px">主推·95折</span>
+            </div>
+            <div style="flex:1;padding:10px 6px;border:2px solid #eee;border-radius:8px;text-align:center">
+              <div style="font-size:14px;font-weight:700;color:#3182ce">¥85.5</div>
+              <div style="font-size:10px;color:#888">5份</div>
+              <span style="font-size:8px;color:#38a169;background:#c6f6d5;padding:1px 3px;border-radius:2px">9折</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;justify-content:center">
+            <div style="width:25%;padding:10px 6px;border:2px solid #eee;border-radius:8px;text-align:center">
+              <div style="font-size:14px;font-weight:700;color:#3182ce">¥152</div>
+              <div style="font-size:10px;color:#888">10份</div>
+              <span style="font-size:8px;color:#38a169;background:#c6f6d5;padding:1px 3px;border-radius:2px">8折</span>
+            </div>
+          </div>
+          <div style="font-size:10px;color:#999;margin-bottom:12px">* 扫描份数有效期 1 年</div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:14px;margin-bottom:16px">
+          <h4 style="font-size:14px;color:#1a365d;margin-bottom:8px">每份包含</h4>
+          <div style="font-size:11px;color:#555;line-height:1.8">
+            ✅ 完整 AI 风险扫描报告<br>
+            ✅ 通俗化条款解读<br>
+            ✅ 修改建议 + 协商话术<br>
+            ✅ PDF 报告导出
+          </div>
+        </div>
+        <button style="width:100%;padding:12px;background:#07c160;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">💬 微信支付 ¥54.15</button>
+      </div>
+    </div>
+    <div class="phone-label">快速购买</div>
+  </div>
+
+  <!-- Screen 6: History -->
+  <div>
+    <div class="phone-frame">
+      <div class="wx-status-bar">
+        <span class="time">14:38</span>
+        <span class="icons">📶 🔋</span>
+      </div>
+      <div class="wx-nav">
+        <span class="back">‹</span>
+        <span class="title">扫描历史</span>
+        <span class="more"></span>
+      </div>
+      <div class="screen-content" style="padding:10px">
+        <div style="background:white;border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          <span style="font-size:12px;color:#999">🔍</span>
+          <span style="font-size:12px;color:#bbb">搜索合同名称</span>
+        </div>
+        <div style="display:flex;gap:4px;margin-bottom:8px">
+          <span style="padding:3px 8px;background:#3182ce;color:white;border-radius:10px;font-size:10px">全部</span>
+          <span style="padding:3px 8px;background:white;border-radius:10px;font-size:10px;color:#666">高风险</span>
+          <span style="padding:3px 8px;background:white;border-radius:10px;font-size:10px;color:#666">中风险</span>
+          <span style="padding:3px 8px;background:white;border-radius:10px;font-size:10px;color:#666">低风险</span>
+        </div>
+        <div style="background:white;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:4px;background:#fed7d7;display:flex;align-items:center;justify-content:center;font-size:14px">📕</div>
+          <div style="flex:1"><div style="font-size:11px">办公室租赁合同</div><div style="font-size:9px;color:#999">6月28日</div></div>
+          <span style="padding:2px 6px;border-radius:6px;font-size:9px;font-weight:600;background:#fed7d7;color:#c53030">35分</span>
+        </div>
+        <div style="background:white;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:4px;background:#fefcbf;display:flex;align-items:center;justify-content:center;font-size:14px">📄</div>
+          <div style="flex:1"><div style="font-size:11px">供应商合作协议</div><div style="font-size:9px;color:#999">6月25日</div></div>
+          <span style="padding:2px 6px;border-radius:6px;font-size:9px;font-weight:600;background:#fefcbf;color:#975a16">58分</span>
+        </div>
+        <div style="background:white;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:4px;background:#bee3f8;display:flex;align-items:center;justify-content:center;font-size:14px">📄</div>
+          <div style="flex:1"><div style="font-size:11px">设计师服务合同</div><div style="font-size:9px;color:#999">6月20日</div></div>
+          <span style="padding:2px 6px;border-radius:6px;font-size:9px;font-weight:600;background:#bee3f8;color:#2b6cb0">82分</span>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-label">首页</span></div>
+        <div class="tab-item active"><span class="tab-icon">📋</span><span class="tab-label">历史</span></div>
+        <div class="tab-item"><span class="tab-icon">👤</span><span class="tab-label">我的</span></div>
+      </div>
+    </div>
+    <div class="phone-label">扫描历史</div>
+  </div>
+
+</div>
+
+</body>
+</html>

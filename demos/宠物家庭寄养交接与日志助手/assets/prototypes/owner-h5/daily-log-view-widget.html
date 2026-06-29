@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>主人端日志查看 Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: #fdf6f0; padding: 16px; max-width: 375px; margin: 0 auto; }
+.widget { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(139,90,60,0.08); }
+.widget-title { font-size: 18px; font-weight: 600; color: #8b5a3c; margin-bottom: 4px; }
+.widget-subtitle { font-size: 12px; color: #888; margin-bottom: 12px; }
+.pet-header { display: flex; align-items: center; gap: 10px; padding: 10px; background: #fff8ed; border-radius: 12px; margin-bottom: 12px; }
+.pet-avatar { width: 44px; height: 44px; border-radius: 10px; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.pet-name { font-size: 16px; font-weight: 600; color: #8b5a3c; }
+.pet-status { font-size: 11px; color: #07c160; }
+.date-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; }
+.date-tabs::-webkit-scrollbar { display: none; }
+.date-tab { padding: 6px 12px; background: #fff; border-radius: 16px; font-size: 12px; white-space: nowrap; cursor: pointer; border: 1px solid #f0e8e0; color: #888; }
+.date-tab.active { background: #d97706; color: #fff; border-color: #d97706; }
+.timeline { position: relative; padding-left: 20px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: #f0e8e0; }
+.timeline-item { position: relative; margin-bottom: 14px; }
+.timeline-item::before { content: ''; position: absolute; left: -16px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: #d97706; border: 2px solid #fff; box-shadow: 0 0 0 2px #d97706; }
+.timeline-item.abnormal::before { background: #ef4444; box-shadow: 0 0 0 2px #ef4444; }
+.timeline-date { font-size: 13px; font-weight: 600; color: #8b5a3c; margin-bottom: 6px; }
+.timeline-today { display: inline-block; background: #d97706; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-left: 6px; }
+.log-card { background: #fff; border-radius: 10px; padding: 12px; border: 1px solid #f5f0eb; }
+.log-card.abnormal { border-color: #fecaca; background: #fffbfb; }
+.dim-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; padding: 3px 0; }
+.dim-row .icon { font-size: 15px; }
+.photo-row { display: flex; gap: 4px; margin-top: 8px; }
+.photo-thumb { width: 48px; height: 48px; border-radius: 6px; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+.abnormal-box { background: #fee2e2; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: #ef4444; margin: 6px 0; display: flex; align-items: flex-start; gap: 6px; }
+.abnormal-box .icon { font-size: 14px; }
+.refresh-hint { text-align: center; font-size: 11px; color: #888; padding: 8px; background: #f7f7f7; border-radius: 8px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="widget-title">📖 每日日志实时查看</div>
+  <div class="widget-subtitle">主人端 H5 · 核心功能 Widget</div>
+
+  <div class="pet-header">
+    <div class="pet-avatar">🐕</div>
+    <div style="flex:1;">
+      <div class="pet-name">豆豆</div>
+      <div class="pet-status">寄养中 · 第 4 天</div>
+    </div>
+    <div style="font-size:11px;color:#888;">寄养人：小王</div>
+  </div>
+
+  <div class="refresh-hint">↓ 下拉刷新获取最新日志 · 最新日志在最上方 ↓</div>
+
+  <div class="date-tabs">
+    <div class="date-tab">6/25</div>
+    <div class="date-tab">6/26</div>
+    <div class="date-tab">6/27</div>
+    <div class="date-tab active">6/28</div>
+    <div class="date-tab">6/29</div>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-date">2026-06-28 · 星期六 <span class="timeline-today">今日</span></div>
+      <div class="log-card">
+        <div class="dim-row"><span class="icon">🍖</span> 狗粮 · 食量正常 · 饮水 500ml</div>
+        <div class="dim-row"><span class="icon">🚶</span> 散步 30 分钟 · 活泼</div>
+        <div class="dim-row"><span class="icon">💩</span> 排便 3 次 · 正常</div>
+        <div class="dim-row"><span class="icon">😊</span> 情绪：开心</div>
+        <div class="photo-row">
+          <div class="photo-thumb">🐕</div>
+          <div class="photo-thumb">🐕</div>
+          <div class="photo-thumb">🎬</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-date">2026-06-27 · 星期五</div>
+      <div class="log-card">
+        <div class="dim-row"><span class="icon">🍖</span> 狗粮 · 食量正常 · 饮水 450ml</div>
+        <div class="dim-row"><span class="icon">🚶</span> 散步 25 分钟</div>
+        <div class="dim-row"><span class="icon">💩</span> 排便 2 次 · 正常</div>
+        <div class="dim-row"><span class="icon">😐</span> 情绪：正常</div>
+        <div class="photo-row">
+          <div class="photo-thumb">🐕</div>
+          <div class="photo-thumb">🐕</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-item abnormal">
+      <div class="timeline-date">2026-06-26 · 星期四</div>
+      <div class="log-card abnormal">
+        <div class="dim-row"><span class="icon">🍖</span> 狗粮 · 食量偏少 · 饮水 300ml</div>
+        <div class="dim-row"><span class="icon">🚶</span> 散步 20 分钟</div>
+        <div class="dim-row"><span class="icon">💩</span> 排便 1 次 · 软便</div>
+        <div class="dim-row"><span class="icon">😰</span> 情绪：紧张</div>
+        <div class="abnormal-box">
+          <span class="icon">⚠️</span>
+          <span>异常：下午有轻微呕吐，已减少喂食量。如有疑问请联系寄养人。</span>
+        </div>
+        <div class="photo-row">
+          <div class="photo-thumb">🐕</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

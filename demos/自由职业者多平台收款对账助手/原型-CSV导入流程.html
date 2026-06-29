@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV 导入流程 - 原型</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #1f2937; }
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; background: #1e293b; color: #94a3b8; padding: 20px 0; flex-shrink: 0; }
+  .sidebar-logo { color: #fff; font-size: 16px; font-weight: 600; padding: 0 20px 20px; border-bottom: 1px solid #334155; }
+  .sidebar-logo span { color: #3b82f6; }
+  .sidebar-menu { list-style: none; margin-top: 12px; }
+  .sidebar-menu li { padding: 10px 20px; cursor: pointer; transition: all 0.2s; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-menu li:hover { background: #334155; color: #fff; }
+  .sidebar-menu li.active { background: #3b82f6; color: #fff; }
+  .sidebar-menu li .icon { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; }
+  .main { flex: 1; padding: 24px; overflow-y: auto; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .page-title { font-size: 22px; font-weight: 600; }
+  .breadcrumb { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+  .steps { display: flex; align-items: center; margin-bottom: 32px; background: #fff; border-radius: 8px; padding: 16px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .step { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: #e5e7eb; color: #6b7280; }
+  .step.active .step-num { background: #3b82f6; color: #fff; }
+  .step.done .step-num { background: #10b981; color: #fff; }
+  .step-text { font-size: 13px; color: #6b7280; }
+  .step.active .step-text { color: #1f2937; font-weight: 500; }
+  .step-line { flex: 0 0 40px; height: 2px; background: #e5e7eb; margin: 0 8px; }
+  .step.done + .step-line, .step-line.done { background: #10b981; }
+  .card { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .upload-area { border: 2px dashed #d1d5db; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafbfc; }
+  .upload-area:hover, .upload-area.dragover { border-color: #3b82f6; background: #eff6ff; }
+  .upload-icon { font-size: 40px; margin-bottom: 12px; }
+  .upload-text { font-size: 14px; color: #6b7280; margin-bottom: 8px; }
+  .upload-hint { font-size: 12px; color: #9ca3af; }
+  .template-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .template-card { border: 2px solid #e5e7eb; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .template-card:hover { border-color: #93c5fd; }
+  .template-card.selected { border-color: #3b82f6; background: #eff6ff; }
+  .template-icon { font-size: 28px; margin-bottom: 8px; }
+  .template-name { font-size: 13px; font-weight: 500; }
+  .mapping-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mapping-table th { background: #f9fafb; padding: 10px 12px; text-align: left; font-weight: 500; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+  .mapping-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; }
+  .mapping-table select { width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; }
+  .mapping-table .required::after { content: " *"; color: #ef4444; }
+  .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  .preview-table th { background: #f9fafb; padding: 8px 10px; text-align: left; font-weight: 500; color: #374151; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+  .preview-table td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; white-space: nowrap; }
+  .preview-table tr:hover { background: #f9fafb; }
+  .preview-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+  .badge-success { background: #d1fae5; color: #065f46; }
+  .badge-warn { background: #fef3c7; color: #92400e; }
+  .progress-section { text-align: center; padding: 20px 0; }
+  .progress-bar { width: 100%; max-width: 400px; height: 8px; background: #e5e7eb; border-radius: 4px; margin: 16px auto; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 4px; transition: width 0.5s; }
+  .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+  .result-item { text-align: center; padding: 16px; background: #f9fafb; border-radius: 8px; }
+  .result-num { font-size: 28px; font-weight: 700; }
+  .result-num.green { color: #10b981; }
+  .result-num.red { color: #ef4444; }
+  .result-num.gray { color: #6b7280; }
+  .result-label { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+  .btn-outline:hover { background: #f9fafb; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-group { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+  .file-list { margin-top: 12px; }
+  .file-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #f9fafb; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
+  .file-item .file-icon { font-size: 18px; }
+  .file-item .file-name { flex: 1; }
+  .file-item .file-size { color: #9ca3af; font-size: 12px; }
+  .file-item .file-remove { cursor: pointer; color: #9ca3af; }
+  .file-item .file-remove:hover { color: #ef4444; }
+  .upgrade-banner { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .upgrade-banner .badge { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+  .hidden { display: none; }
+  .version-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; background: #fef3c7; color: #92400e; margin-left: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo"><span>⚡</span> 对账助手</div>
+    <ul class="sidebar-menu">
+      <li><span class="icon">📊</span> 对账看板</li>
+      <li class="active"><span class="icon">📥</span> CSV 导入</li>
+      <li><span class="icon">📋</span> 应收管理</li>
+      <li><span class="icon">🔍</span> 对账明细</li>
+      <li><span class="icon">📄</span> 月度报告</li>
+      <li><span class="icon">🧾</span> 报税导出 <span class="version-tag">PRO</span></li>
+      <li><span class="icon">⚙️</span> 账户设置</li>
+    </ul>
+  </div>
+  <div class="main">
+    <div class="breadcrumb">首页 / CSV 导入</div>
+    <div class="page-header">
+      <div class="page-title">📥 多渠道 CSV 导入</div>
+      <div style="font-size: 13px; color: #6b7280;">本月已导入 <b style="color: #3b82f6;">12</b>/50 笔</div>
+    </div>
+
+    <!-- Steps indicator -->
+    <div class="steps" id="steps-bar">
+      <div class="step active" data-step="1"><div class="step-num">1</div><div class="step-text">选择模板</div></div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2"><div class="step-num">2</div><div class="step-text">上传文件</div></div>
+      <div class="step-line"></div>
+      <div class="step" data-step="3"><div class="step-num">3</div><div class="step-text">字段映射</div></div>
+      <div class="step-line"></div>
+      <div class="step" data-step="4"><div class="step-num">4</div><div class="step-text">预览确认</div></div>
+      <div class="step-line"></div>
+      <div class="step" data-step="5"><div class="step-num">5</div><div class="step-text">导入完成</div></div>
+    </div>
+
+    <!-- Step 1: Choose Template -->
+    <div class="card step-panel" id="step1">
+      <div class="card-title">选择收款渠道模板</div>
+      <div class="template-select">
+        <div class="template-card selected" onclick="selectTemplate(this, 'wechat')">
+          <div class="template-icon">💚</div>
+          <div class="template-name">微信支付</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this, 'alipay')">
+          <div class="template-icon">💙</div>
+          <div class="template-name">支付宝</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this, 'stripe')">
+          <div class="template-icon">🟣</div>
+          <div class="template-name">Stripe</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this, 'paypal')">
+          <div class="template-icon">🔵</div>
+          <div class="template-name">PayPal</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this, 'bank')">
+          <div class="template-icon">🏦</div>
+          <div class="template-name">银行转账</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this, 'custom')">
+          <div class="template-icon">✏️</div>
+          <div class="template-name">自定义模板</div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="goStep(2)">下一步 →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Upload Files -->
+    <div class="card step-panel hidden" id="step2">
+      <div class="card-title">上传 CSV 文件</div>
+      <div class="upload-area" id="uploadArea" onclick="simulateUpload()">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">点击或拖拽 CSV 文件到此处</div>
+        <div class="upload-hint">支持 .csv 格式，单文件最大 10MB</div>
+      </div>
+      <div class="file-list" id="fileList">
+        <div class="file-item">
+          <span class="file-icon">📄</span>
+          <span class="file-name">微信收款_2026年6月.csv</span>
+          <span class="file-size">24.5 KB</span>
+          <span class="file-remove" onclick="this.parentElement.remove()">✕</span>
+        </div>
+        <div class="file-item">
+          <span class="file-icon">📄</span>
+          <span class="file-name">支付宝交易_202606.csv</span>
+          <span class="file-size">18.2 KB</span>
+          <span class="file-remove" onclick="this.parentElement.remove()">✕</span>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline" onclick="goStep(1)">← 上一步</button>
+        <button class="btn btn-primary" onclick="goStep(3)">下一步 →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Field Mapping -->
+    <div class="card step-panel hidden" id="step3">
+      <div class="card-title">字段映射确认</div>
+      <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">请确认系统自动识别的字段映射关系，必要时可手动调整</p>
+      <table class="mapping-table">
+        <thead>
+          <tr>
+            <th>系统字段</th>
+            <th>CSV 列名</th>
+            <th>示例数据</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="required">交易时间</td>
+            <td><select><option>交易时间 ✓</option><option>创建时间</option></select></td>
+            <td>2026-06-15 14:30:22</td>
+            <td><span class="preview-badge badge-success">✓ 已匹配</span></td>
+          </tr>
+          <tr>
+            <td class="required">交易金额</td>
+            <td><select><option>金额(元) ✓</option><option>交易金额</option></select></td>
+            <td>+2,500.00</td>
+            <td><span class="preview-badge badge-success">✓ 已匹配</span></td>
+          </tr>
+          <tr>
+            <td>交易对象</td>
+            <td><select><option>付款方备注 ✓</option><option>交易对方</option></select></td>
+            <td>张先生</td>
+            <td><span class="preview-badge badge-success">✓ 已匹配</span></td>
+          </tr>
+          <tr>
+            <td>交易备注</td>
+            <td><select><option>商品说明 ✓</option><option>备注</option></select></td>
+            <td>品牌设计尾款</td>
+            <td><span class="preview-badge badge-success">✓ 已匹配</span></td>
+          </tr>
+          <tr>
+            <td>交易ID</td>
+            <td><select><option>商户订单号 ✓</option><option>交易号</option></select></td>
+            <td>4200001234567890</td>
+            <td><span class="preview-badge badge-success">✓ 已匹配</span></td>
+          </tr>
+          <tr>
+            <td>币种</td>
+            <td><select><option>-- 未匹配 --</option><option>币种</option></select></td>
+            <td>-</td>
+            <td><span class="preview-badge badge-warn">默认 CNY</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="btn-group">
+        <button class="btn btn-outline" onclick="goStep(2)">← 上一步</button>
+        <button class="btn btn-primary" onclick="goStep(4)">预览数据 →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Preview -->
+    <div class="card step-panel hidden" id="step4">
+      <div class="card-title">数据预览（前 10 条）</div>
+      <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">请确认解析结果无误后点击"确认导入"</p>
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>交易时间</th>
+            <th>金额</th>
+            <th>交易对象</th>
+            <th>备注</th>
+            <th>交易ID</th>
+            <th>重复检测</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>2026-06-01 09:15</td><td style="color:#10b981;">+¥3,200.00</td><td>杭州某某科技</td><td>UI设计首付款</td><td>4200...7801</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+          <tr><td>2</td><td>2026-06-02 14:30</td><td style="color:#10b981;">+¥1,500.00</td><td>李先生</td><td>品牌Logo设计</td><td>4200...7802</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+          <tr><td>3</td><td>2026-06-03 11:22</td><td style="color:#10b981;">+¥800.00</td><td>王女士</td><td>海报设计费</td><td>4200...7803</td><td><span class="preview-badge badge-warn">疑似重复</span></td></tr>
+          <tr><td>4</td><td>2026-06-05 16:45</td><td style="color:#10b981;">+¥5,000.00</td><td>深圳某某传媒</td><td>VI设计项目尾款</td><td>4200...7804</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+          <tr><td>5</td><td>2026-06-07 10:00</td><td style="color:#10b981;">+¥2,000.00</td><td>赵先生</td><td>APP界面设计</td><td>4200...7805</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+          <tr><td>6</td><td>2026-06-08 13:18</td><td style="color:#10b981;">+¥680.00</td><td>刘先生</td><td>名片设计</td><td>4200...7806</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+          <tr><td>7</td><td>2026-06-10 09:30</td><td style="color:#10b981;">+¥4,500.00</td><td>北京某某教育</td><td>课程PPT设计</td><td>4200...7807</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+          <tr><td>8</td><td>2026-06-12 15:40</td><td style="color:#10b981;">+¥1,200.00</td><td>陈女士</td><td>电商Banner</td><td>4200...7808</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+          <tr><td>9</td><td>2026-06-15 14:30</td><td style="color:#10b981;">+¥2,500.00</td><td>张先生</td><td>品牌设计尾款</td><td>4200...7809</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+          <tr><td>10</td><td>2026-06-18 11:00</td><td style="color:#10b981;">+¥3,800.00</td><td>杭州某某网络</td><td>官网改版设计</td><td>4200...7810</td><td><span class="preview-badge badge-success">新记录</span></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 16px; padding: 12px; background: #fef3c7; border-radius: 6px; font-size: 13px; color: #92400e;">
+        ⚠️ 检测到 1 条疑似重复记录（第3条），将自动跳过。
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline" onclick="goStep(3)">← 上一步</button>
+        <button class="btn btn-primary" onclick="goStep(5)">✅ 确认导入</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Import Complete -->
+    <div class="card step-panel hidden" id="step5">
+      <div class="card-title" style="justify-content: center;">导入完成 🎉</div>
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="result-num green">9</div>
+          <div class="result-label">成功导入</div>
+        </div>
+        <div class="result-item">
+          <div class="result-num red">0</div>
+          <div class="result-label">导入失败</div>
+        </div>
+        <div class="result-item">
+          <div class="result-num gray">1</div>
+          <div class="result-label">重复跳过</div>
+        </div>
+      </div>
+      <div style="margin-top: 20px; padding: 12px; background: #d1fae5; border-radius: 6px; font-size: 13px; color: #065f46; text-align: center;">
+        ✓ 匹配引擎已自动运行，发现 <b>7</b> 笔高置信度匹配，<b>2</b> 笔待人工确认
+      </div>
+      <div class="btn-group" style="justify-content: center;">
+        <button class="btn btn-primary" onclick="goStep(1)">继续导入</button>
+        <button class="btn btn-outline" onclick="alert('跳转到对账看板')">前往对账看板 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+function goStep(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.add('hidden'));
+  document.getElementById('step' + n).classList.remove('hidden');
+  document.querySelectorAll('.step').forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (sn < n) s.classList.add('done');
+    else if (sn === n) s.classList.add('active');
+  });
+  currentStep = n;
+}
+function selectTemplate(el, type) {
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function simulateUpload() {
+  // Simulate file selection
+}
+</script>
+</body>
+</html>

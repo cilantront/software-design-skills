@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>短视频评论区精华提取器 - 全站点原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: #1a1a2e;
+    color: #fff;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 16px;
+  }
+  .sidebar-logo h1 {
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-logo p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 4px;
+  }
+  .nav-section {
+    padding: 0 12px;
+    margin-bottom: 16px;
+  }
+  .nav-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    padding: 8px;
+    letter-spacing: 0.5px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 2px;
+  }
+  .nav-item:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+  }
+  .nav-item.active {
+    background: #6366f1;
+    color: #fff;
+  }
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .nav-badge {
+    margin-left: auto;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.2);
+  }
+  .nav-badge.pro {
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+    color: #fff;
+  }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .user-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .user-mini-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  /* Main Content */
+  .main-content {
+    margin-left: 240px;
+    flex: 1;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  .page-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .breadcrumb {
+    font-size: 13px;
+    color: #6b7280;
+  }
+  .breadcrumb strong { color: #1a1a2e; }
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Page Content */
+  .page-content { display: none; }
+  .page-content.active { display: block; }
+
+  /* Common Card */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-outline { background: #fff; color: #6366f1; border: 1px solid #6366f1; }
+  .btn-outline:hover { background: #f0f0ff; }
+  .btn-ghost { background: transparent; color: #6b7280; }
+  .btn-ghost:hover { background: #f3f4f6; }
+
+  /* === Page: Comment Import === */
+  .import-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .import-tab {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .import-tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+  .upload-zone {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .upload-zone:hover { border-color: #6366f1; background: #f8f8ff; }
+  .upload-icon-lg { font-size: 48px; margin-bottom: 12px; }
+  .upload-text { font-size: 16px; color: #374151; margin-bottom: 8px; }
+  .upload-hint { font-size: 13px; color: #9ca3af; }
+
+  .link-input {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+  }
+  .link-input:focus { outline: none; border-color: #6366f1; }
+  .platform-badges { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .p-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .p-badge-dy { background: #fef2f2; color: #dc2626; }
+  .p-badge-bl { background: #eff6ff; color: #2563eb; }
+  .p-badge-xhs { background: #fef2f2; color: #e11d48; }
+  .p-badge-wx { background: #f0fdf4; color: #16a34a; }
+
+  /* Recent imports list */
+  .recent-list { display: flex; flex-direction: column; gap: 8px; }
+  .recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .recent-item:hover { background: #f0f0ff; }
+  .recent-item-info { display: flex; align-items: center; gap: 10px; }
+  .recent-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .recent-icon.csv { background: #dbeafe; color: #2563eb; }
+  .recent-icon.link { background: #fce7f3; color: #db2777; }
+
+  /* === Page: AI Analysis === */
+  .analysis-banner {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 12px;
+    padding: 24px;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+  .analysis-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    margin: 12px 0;
+  }
+  .analysis-progress-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 4px;
+    width: 72%;
+  }
+  .category-cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .cat-card {
+    padding: 16px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+  }
+  .cat-card:hover { transform: translateY(-2px); }
+  .cat-card.active { border-color: currentColor; }
+  .cat-card .cat-icon { font-size: 24px; margin-bottom: 6px; }
+  .cat-card .cat-count { font-size: 22px; font-weight: 700; }
+  .cat-card .cat-label { font-size: 11px; opacity: 0.8; }
+  .cat-topic { background: #f0f0ff; color: #6366f1; }
+  .cat-faq { background: #eff6ff; color: #2563eb; }
+  .cat-pain { background: #fef2f2; color: #dc2626; }
+  .cat-praise { background: #f0fdf4; color: #16a34a; }
+  .cat-warning { background: #fff7ed; color: #ea580c; }
+
+  .comment-list { display: flex; flex-direction: column; gap: 8px; }
+  .comment-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-radius: 10px;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .comment-item:hover { background: #f0f0ff; }
+  .comment-item.border-topic { border-left-color: #6366f1; }
+  .comment-item.border-faq { border-left-color: #2563eb; }
+  .comment-item.border-pain { border-left-color: #dc2626; }
+  .comment-item.border-praise { border-left-color: #16a34a; }
+  .comment-item.border-warning { border-left-color: #ea580c; }
+  .comment-text { font-size: 14px; color: #1a1a2e; flex: 1; line-height: 1.5; }
+  .comment-meta { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #9ca3af; margin-top: 4px; }
+  .cat-tag {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tag-topic { background: #ede9fe; color: #6366f1; }
+  .tag-faq { background: #dbeafe; color: #2563eb; }
+  .tag-pain { background: #fef2f2; color: #dc2626; }
+  .tag-praise { background: #dcfce7; color: #16a34a; }
+  .tag-warning { background: #ffedd5; color: #ea580c; }
+  .essence-star { color: #d97706; font-size: 12px; }
+
+  /* === Page: Template & Export === */
+  .template-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .template-tab {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+  }
+  .template-tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .template-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .template-card:hover { border-color: #6366f1; box-shadow: 0 2px 8px rgba(99,102,241,0.1); }
+  .template-source { font-size: 12px; color: #9ca3af; margin-bottom: 4px; }
+  .template-original {
+    font-size: 13px;
+    color: #6b7280;
+    font-style: italic;
+    padding: 8px;
+    background: #f9fafb;
+    border-radius: 6px;
+    border-left: 3px solid #d1d5db;
+    margin-bottom: 10px;
+  }
+  .template-reply { font-size: 13px; color: #1a1a2e; line-height: 1.5; }
+  .template-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .action-btn {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+  }
+  .action-btn:hover { border-color: #6366f1; color: #6366f1; }
+
+  .export-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 10px;
+    margin-top: 16px;
+  }
+  .export-bar label { font-size: 13px; font-weight: 500; color: #374151; margin-right: 8px; }
+
+  /* === Page: Account Management === */
+  .account-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .acct-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .acct-card:hover { border-color: #6366f1; }
+  .acct-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .acct-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .acct-avatar.dy { background: linear-gradient(135deg, #fe2c55, #25f4ee); }
+  .acct-avatar.bl { background: linear-gradient(135deg, #fb7299, #23ade5); }
+  .acct-avatar.xhs { background: linear-gradient(135deg, #fe2c55, #ff6b81); }
+  .acct-name { font-size: 14px; font-weight: 500; }
+  .acct-platform { font-size: 12px; color: #9ca3af; }
+  .acct-stats { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #f3f4f6; }
+  .acct-stat-val { font-size: 14px; font-weight: 600; }
+  .acct-stat-lbl { font-size: 11px; color: #9ca3af; }
+
+  .monitor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .monitor-info { display: flex; align-items: center; gap: 10px; }
+  .monitor-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .monitor-name { font-size: 14px; font-weight: 500; }
+  .monitor-detail { font-size: 12px; color: #9ca3af; }
+  .toggle-sw {
+    width: 32px;
+    height: 18px;
+    border-radius: 9px;
+    background: #6366f1;
+    position: relative;
+    cursor: pointer;
+  }
+  .toggle-sw::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+  }
+  .toggle-sw.off { background: #d1d5db; }
+  .toggle-sw.off::after { right: auto; left: 2px; }
+
+  /* === Page: Settings === */
+  .settings-group { margin-bottom: 24px; }
+  .settings-group-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .plan-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .plan-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .plan-card:hover { border-color: #6366f1; }
+  .plan-card.recommended { border-color: #6366f1; }
+  .plan-card.recommended::before {
+    content: '推荐';
+    position: absolute;
+    top: -1px;
+    right: 12px;
+    background: #6366f1;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 0 0 6px 6px;
+    font-size: 11px;
+  }
+  .plan-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .plan-price { font-size: 14px; color: #6366f1; font-weight: 600; margin-bottom: 12px; }
+  .plan-features-list { list-style: none; }
+  .plan-features-list li {
+    font-size: 13px;
+    color: #374151;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .plan-features-list li::before { content: '✓'; color: #16a34a; font-weight: 600; }
+  .plan-features-list li.disabled { color: #9ca3af; }
+  .plan-features-list li.disabled::before { content: '—'; color: #d1d5db; }
+
+  .usage-bar-bg {
+    width: 100%;
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .usage-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  }
+  .usage-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #6b7280;
+  }
+  .usage-info strong { color: #6366f1; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af;
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; margin-bottom: 16px; }
+
+  /* Responsive grid helpers */
+  .row { display: flex; gap: 16px; margin-bottom: 16px; }
+  .col { flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar Navigation -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h1>💎 精华提取器</h1>
+    <p>短视频评论AI分析工具</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">核心功能</div>
+    <div class="nav-item active" onclick="switchPage('import', this)">
+      <span class="nav-icon">📥</span> 评论导入
+    </div>
+    <div class="nav-item" onclick="switchPage('analysis', this)">
+      <span class="nav-icon">🤖</span> AI提取分类
+      <span class="nav-badge">1.2k</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('template', this)">
+      <span class="nav-icon">📝</span> 模板与导出
+      <span class="nav-badge">20</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">管理</div>
+    <div class="nav-item" onclick="switchPage('accounts', this)">
+      <span class="nav-icon">👥</span> 多账号管理
+      <span class="nav-badge pro">PRO</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('settings', this)">
+      <span class="nav-icon">⚙️</span> 设置与账号
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-mini">
+      <div class="user-mini-avatar">小</div>
+      <div>
+        <div style="font-size:13px;">小明同学</div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.5);">专业版 · 剩余110条</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+
+  <!-- ========== PAGE: Comment Import ========== -->
+  <div class="page-content active" id="page-import">
+    <div class="page-header-bar">
+      <div class="breadcrumb">首页 / <strong>评论导入</strong></div>
+      <div class="header-actions">
+        <button class="btn btn-ghost">📖 使用指南</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">📥 导入评论数据</h3>
+      <div class="import-tabs">
+        <div class="import-tab active" onclick="switchImportTab('csv')">📄 CSV文件导入</div>
+        <div class="import-tab" onclick="switchImportTab('link')">🔗 平台链接导入</div>
+      </div>
+
+      <div id="import-csv">
+        <div class="upload-zone">
+          <div class="upload-icon-lg">📄</div>
+          <p class="upload-text">拖拽CSV文件到此处，或点击上传</p>
+          <p class="upload-hint">支持 UTF-8 / GBK 编码，文件大小不超过 50MB</p>
+          <div style="margin-top:16px; display:flex; gap:12px; justify-content:center;">
+            <button class="btn btn-primary">选择文件</button>
+            <button class="btn btn-outline">📥 下载导入模板</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="import-link" style="display:none;">
+        <textarea class="link-input" placeholder="请粘贴短视频平台的分享链接，每行一个&#10;例如：https://v.douyin.com/xxxxxx/"></textarea>
+        <div class="platform-badges">
+          <span class="p-badge p-badge-dy">● 抖音</span>
+          <span class="p-badge p-badge-bl">● B站</span>
+          <span class="p-badge p-badge-xhs">● 小红书</span>
+          <span class="p-badge p-badge-wx">● 视频号</span>
+        </div>
+        <div style="margin-top:16px; display:flex; gap:12px;">
+          <button class="btn btn-primary" style="flex:1;">🚀 开始解析</button>
+          <button class="btn btn-outline">清空</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">📋 最近导入记录</h3>
+      <div class="recent-list">
+        <div class="recent-item">
+          <div class="recent-item-info">
+            <div class="recent-icon csv">📄</div>
+            <div>
+              <div style="font-size:14px; font-weight:500;">夏日穿搭评论数据.csv</div>
+              <div style="font-size:12px; color:#9ca3af;">2026-06-28 15:30 · CSV导入 · 1,286条</div>
+            </div>
+          </div>
+          <button class="btn btn-ghost">查看详情 →</button>
+        </div>
+        <div class="recent-item">
+          <div class="recent-item-info">
+            <div class="recent-icon link">🔗</div>
+            <div>
+              <div style="font-size:14px; font-weight:500;">护肤步骤分享（抖音链接）</div>
+              <div style="font-size:12px; color:#9ca3af;">2026-06-27 20:15 · 链接导入 · 856条</div>
+            </div>
+          </div>
+          <button class="btn btn-ghost">查看详情 →</button>
+        </div>
+        <div class="recent-item">
+          <div class="recent-item-info">
+            <div class="recent-icon csv">📄</div>
+            <div>
+              <div style="font-size:14px; font-weight:500;">产品测评评论.csv</div>
+              <div style="font-size:12px; color:#9ca3af;">2026-06-26 10:00 · CSV导入 · 2,341条</div>
+            </div>
+          </div>
+          <button class="btn btn-ghost">查看详情 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PAGE: AI Analysis ========== -->
+  <div class="page-content" id="page-analysis">
+    <div class="page-header-bar">
+      <div class="breadcrumb">首页 / <strong>AI提取与分类</strong></div>
+      <div class="header-actions">
+        <button class="btn btn-outline">📊 查看统计</button>
+        <button class="btn btn-primary" onclick="switchPage('template', document.querySelectorAll('.nav-item')[2])">生成模板 →</button>
+      </div>
+    </div>
+
+    <div class="analysis-banner">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:16px; font-weight:600;">🤖 AI分析进行中...</span>
+        <span style="font-size:14px; opacity:0.9;">924 / 1,286 条已分析</span>
+      </div>
+      <div class="analysis-progress-bar">
+        <div class="analysis-progress-fill"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; opacity:0.8;">
+        <span>预计剩余约 2 分钟</span>
+        <span style="cursor:pointer; text-decoration:underline;">暂停分析</span>
+      </div>
+    </div>
+
+    <div class="category-cards">
+      <div class="cat-card cat-topic active">
+        <div class="cat-icon">💡</div>
+        <div class="cat-count">186</div>
+        <div class="cat-label">内容选题灵感</div>
+      </div>
+      <div class="cat-card cat-faq">
+        <div class="cat-icon">❓</div>
+        <div class="cat-count">124</div>
+        <div class="cat-label">FAQ补充</div>
+      </div>
+      <div class="cat-card cat-pain">
+        <div class="cat-icon">😣</div>
+        <div class="cat-count">89</div>
+        <div class="cat-label">用户痛点</div>
+      </div>
+      <div class="cat-card cat-praise">
+        <div class="cat-icon">⭐</div>
+        <div class="cat-count">215</div>
+        <div class="cat-label">正面口碑</div>
+      </div>
+      <div class="cat-card cat-warning">
+        <div class="cat-icon">⚠️</div>
+        <div class="cat-count">47</div>
+        <div class="cat-label">负面预警</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <select style="padding:6px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+            <option>全部类别</option>
+            <option>选题灵感</option>
+            <option>FAQ补充</option>
+            <option>用户痛点</option>
+            <option>正面口碑</option>
+            <option>负面预警</option>
+          </select>
+          <select style="padding:6px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+            <option>全部置信度</option>
+            <option>高 (≥80%)</option>
+            <option>中 (50-80%)</option>
+            <option>低 (<50%)</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline">批量修改分类</button>
+          <button class="btn btn-primary">✓ 全部确认</button>
+        </div>
+      </div>
+
+      <div class="comment-list">
+        <div class="comment-item border-topic">
+          <div class="comment-text">
+            <div>能出一期详细的穿搭教程吗？特别是小个子女生怎么穿显高！</div>
+            <div class="comment-meta">
+              <span>@小可爱</span>
+              <span>· 夏日穿搭分享</span>
+              <span>❤️ 328</span>
+              <span class="essence-star">⭐ 精华</span>
+              <span class="cat-tag tag-topic">选题灵感</span>
+              <span style="color:#16a34a;">● 高 92%</span>
+            </div>
+          </div>
+        </div>
+        <div class="comment-item border-faq">
+          <div class="comment-text">
+            <div>这个产品在哪里买的？有链接吗？价格多少？</div>
+            <div class="comment-meta">
+              <span>@小明同学</span>
+              <span>· 夏日穿搭分享</span>
+              <span>❤️ 156</span>
+              <span class="essence-star">⭐ 精华</span>
+              <span class="cat-tag tag-faq">FAQ补充</span>
+              <span style="color:#16a34a;">● 高 88%</span>
+            </div>
+          </div>
+        </div>
+        <div class="comment-item border-pain">
+          <div class="comment-text">
+            <div>价格太贵了，学生党真的伤不起，有没有平价替代品推荐？</div>
+            <div class="comment-meta">
+              <span>@穷学生</span>
+              <span>· 产品测评</span>
+              <span>❤️ 89</span>
+              <span class="essence-star">⭐ 精华</span>
+              <span class="cat-tag tag-pain">用户痛点</span>
+              <span style="color:#ca8a04;">● 中 72%</span>
+            </div>
+          </div>
+        </div>
+        <div class="comment-item border-praise">
+          <div class="comment-text">
+            <div>用了一个月，皮肤真的改善了很多！闺蜜都问我用的是什么，强烈推荐！</div>
+            <div class="comment-meta">
+              <span>@爱美丽</span>
+              <span>· 护肤步骤分享</span>
+              <span>❤️ 245</span>
+              <span class="essence-star">⭐ 精华</span>
+              <span class="cat-tag tag-praise">正面口碑</span>
+              <span style="color:#16a34a;">● 高 95%</span>
+            </div>
+          </div>
+        </div>
+        <div class="comment-item border-warning">
+          <div class="comment-text">
+            <div>用了之后过敏了，脸上起了好多小红点，成分是不是有问题？</div>
+            <div class="comment-meta">
+              <span>@敏感肌</span>
+              <span>· 产品测评</span>
+              <span>❤️ 67</span>
+              <span class="essence-star">⭐ 精华</span>
+              <span class="cat-tag tag-warning">负面预警</span>
+              <span style="color:#16a34a;">● 高 96%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PAGE: Template & Export ========== -->
+  <div class="page-content" id="page-template">
+    <div class="page-header-bar">
+      <div class="breadcrumb">首页 / <strong>模板生成与导出</strong></div>
+      <div class="header-actions">
+        <button class="btn btn-primary">✨ 全部重新生成</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="template-tabs">
+        <div class="template-tab active" onclick="switchTemplateTab('reply')">💬 回复模板 (12)</div>
+        <div class="template-tab" onclick="switchTemplateTab('topic')">💡 选题建议 (8)</div>
+      </div>
+
+      <div id="tmpl-reply">
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px; padding:12px; background:#f9fafb; border-radius:8px;">
+          <label style="font-size:13px; font-weight:500;">语气：</label>
+          <select style="padding:4px 8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+            <option>亲切友好</option>
+            <option>正式专业</option>
+            <option>幽默风趣</option>
+          </select>
+          <label style="font-size:13px; font-weight:500;">长度：</label>
+          <select style="padding:4px 8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+            <option>简短（50字）</option>
+            <option selected>详细（200字）</option>
+          </select>
+        </div>
+
+        <div class="template-grid">
+          <div class="template-card">
+            <div class="template-source">原始评论 · @小明同学</div>
+            <div class="template-original">"这个产品在哪里买的？有链接吗？"</div>
+            <div class="template-reply">
+              <strong>回复要点：</strong> ① 感谢关注 ② 提供购买渠道 ③ 说明价格<br>
+              <strong>参考话术：</strong> "谢谢宝子关注！这款产品我在XX旗舰店入的，链接在主页置顶笔记里～最近还有活动价哦！"
+            </div>
+            <div class="template-actions">
+              <button class="action-btn">✏️ 编辑</button>
+              <button class="action-btn">📋 复制</button>
+              <button class="action-btn">🔄 重新生成</button>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-source">原始评论 · @学无止境</div>
+            <div class="template-original">"能出一期详细教程吗？很想学"</div>
+            <div class="template-reply">
+              <strong>回复要点：</strong> ① 肯定需求 ② 确认计划 ③ 征集内容<br>
+              <strong>参考话术：</strong> "好呀！我也在准备这个教程呢～你最想学哪个步骤？评论区告诉我，优先出大家想看的！"
+            </div>
+            <div class="template-actions">
+              <button class="action-btn">✏️ 编辑</button>
+              <button class="action-btn">📋 复制</button>
+              <button class="action-btn">🔄 重新生成</button>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-source">原始评论 · @敏感肌</div>
+            <div class="template-original">"用了之后过敏了，起了好多小红点"</div>
+            <div class="template-reply">
+              <strong>回复要点：</strong> ① 表达歉意 ② 建议停用 ③ 提供售后联系方式<br>
+              <strong>参考话术：</strong> "很抱歉！建议先停用，严重请尽快就医。请私信订单信息，我帮您联系售后处理。"
+            </div>
+            <div class="template-actions">
+              <button class="action-btn">✏️ 编辑</button>
+              <button class="action-btn">📋 复制</button>
+              <button class="action-btn">🔄 重新生成</button>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-source">原始评论 · @穷学生</div>
+            <div class="template-original">"价格太贵了，有平价替代吗？"</div>
+            <div class="template-reply">
+              <strong>回复要点：</strong> ① 理解立场 ② 推荐平价品 ③ 提供省钱渠道<br>
+              <strong>参考话术：</strong> "完全理解！这个品牌经常有活动，关注直播间有半价哦！我之前出过平价替代合集，去主页看看～"
+            </div>
+            <div class="template-actions">
+              <button class="action-btn">✏️ 编辑</button>
+              <button class="action-btn">📋 复制</button>
+              <button class="action-btn">🔄 重新生成</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tmpl-topic" style="display:none;">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="border:1px solid #e5e7eb; border-radius:10px; padding:16px; display:flex; gap:12px;">
+            <div style="width:32px; height:32px; border-radius:50%; background:#fef2f2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">1</div>
+            <div>
+              <div style="font-size:16px; font-weight:600; margin-bottom:4px;">小个子女生穿搭显高攻略</div>
+              <div style="font-size:13px; color:#6b7280; margin-bottom:6px;">切入角度：针对155cm以下女生的穿搭痛点</div>
+              <div style="font-size:13px; color:#374151;">大纲：① 3个核心原则 ② 5套穿搭对比 ③ 平价单品推荐 ④ 常见误区</div>
+              <div style="font-size:12px; color:#9ca3af; margin-top:6px;">🔥 热度412 · 23条评论 · 置信度92%</div>
+            </div>
+          </div>
+          <div style="border:1px solid #e5e7eb; border-radius:10px; padding:16px; display:flex; gap:12px;">
+            <div style="width:32px; height:32px; border-radius:50%; background:#fef2f2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">2</div>
+            <div>
+              <div style="font-size:16px; font-weight:600; margin-bottom:4px;">百元内平价护肤好物合集</div>
+              <div style="font-size:13px; color:#6b7280; margin-bottom:6px;">切入角度：回应学生党对平价替代品的需求</div>
+              <div style="font-size:13px; color:#374151;">大纲：① 平价≠不好用 ② 5款洁面推荐 ③ 3款精华实测 ④ 学生党routine</div>
+              <div style="font-size:12px; color:#9ca3af; margin-top:6px;">🔥 热度289 · 18条评论 · 置信度88%</div>
+            </div>
+          </div>
+          <div style="border:1px solid #e5e7eb; border-radius:10px; padding:16px; display:flex; gap:12px;">
+            <div style="width:32px; height:32px; border-radius:50%; background:#fff7ed; color:#ea580c; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">3</div>
+            <div>
+              <div style="font-size:16px; font-weight:600; margin-bottom:4px;">男友好礼物指南（节日特辑）</div>
+              <div style="font-size:13px; color:#6b7280; margin-bottom:6px;">切入角度：解决"不知道送什么"的普遍困扰</div>
+              <div style="font-size:13px; color:#374151;">大纲：① 分预算推荐 ② 避雷清单 ③ 包装加分tips</div>
+              <div style="font-size:12px; color:#9ca3af; margin-top:6px;">🔥 热度245 · 15条评论 · 置信度85%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="export-bar">
+        <label>📤 导出为：</label>
+        <button class="btn btn-primary">📘 飞书文档</button>
+        <button class="btn" style="background:#1a1a2e; color:#fff;">📓 Notion</button>
+        <button class="btn" style="background:#16a34a; color:#fff;">📊 Excel</button>
+        <div style="margin-left:auto;">
+          <select style="padding:6px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+            <option>导出范围：全部数据</option>
+            <option>按类别</option>
+            <option>按视频</option>
+            <option>按时间区间</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PAGE: Account Management ========== -->
+  <div class="page-content" id="page-accounts">
+    <div class="page-header-bar">
+      <div class="breadcrumb">首页 / <strong>多账号管理</strong> <span style="background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; margin-left:6px;">PRO</span></div>
+      <div class="header-actions">
+        <button class="btn btn-outline">📊 对比分析</button>
+        <button class="btn btn-primary">+ 添加账号</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="card col" style="text-align:center;">
+        <div style="font-size:28px; font-weight:700; color:#6366f1;">8</div>
+        <div style="font-size:13px; color:#6b7280;">绑定账号数</div>
+      </div>
+      <div class="card col" style="text-align:center;">
+        <div style="font-size:28px; font-weight:700; color:#6366f1;">12,586</div>
+        <div style="font-size:13px; color:#6b7280;">评论总数</div>
+      </div>
+      <div class="card col" style="text-align:center;">
+        <div style="font-size:28px; font-weight:700; color:#6366f1;">3,421</div>
+        <div style="font-size:13px; color:#6b7280;">精华评论数</div>
+      </div>
+      <div class="card col" style="text-align:center;">
+        <div style="font-size:28px; font-weight:700; color:#6366f1;">27.2%</div>
+        <div style="font-size:13px; color:#6b7280;">精华率</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">📱 我的账号</h3>
+      <div class="account-grid">
+        <div class="acct-card">
+          <div class="acct-header">
+            <div class="acct-avatar dy">美</div>
+            <div>
+              <div class="acct-name">美丽日记</div>
+              <div class="acct-platform">抖音 · 已授权</div>
+            </div>
+          </div>
+          <div class="acct-stats">
+            <div><div class="acct-stat-val">5,286</div><div class="acct-stat-lbl">评论</div></div>
+            <div><div class="acct-stat-val">1,456</div><div class="acct-stat-lbl">精华</div></div>
+            <div><div class="acct-stat-val">27.5%</div><div class="acct-stat-lbl">精华率</div></div>
+          </div>
+        </div>
+        <div class="acct-card">
+          <div class="acct-header">
+            <div class="acct-avatar bl">科</div>
+            <div>
+              <div class="acct-name">科技小能手</div>
+              <div class="acct-platform">B站 · 已授权</div>
+            </div>
+          </div>
+          <div class="acct-stats">
+            <div><div class="acct-stat-val">3,892</div><div class="acct-stat-lbl">评论</div></div>
+            <div><div class="acct-stat-val">987</div><div class="acct-stat-lbl">精华</div></div>
+            <div><div class="acct-stat-val">25.4%</div><div class="acct-stat-lbl">精华率</div></div>
+          </div>
+        </div>
+        <div class="acct-card">
+          <div class="acct-header">
+            <div class="acct-avatar xhs">种</div>
+            <div>
+              <div class="acct-name">种草小分队</div>
+              <div class="acct-platform">小红书 · 已授权</div>
+            </div>
+          </div>
+          <div class="acct-stats">
+            <div><div class="acct-stat-val">2,145</div><div class="acct-stat-lbl">评论</div></div>
+            <div><div class="acct-stat-val">645</div><div class="acct-stat-lbl">精华</div></div>
+            <div><div class="acct-stat-val">30.1%</div><div class="acct-stat-lbl">精华率</div></div>
+          </div>
+        </div>
+        <div class="acct-card" style="border-style:dashed; display:flex; align-items:center; justify-content:center; min-height:100px;">
+          <div style="text-align:center; color:#9ca3af;">
+            <div style="font-size:28px;">+</div>
+            <div style="font-size:13px;">添加账号</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">⏰ 定时监控任务</h3>
+      <div class="monitor-item">
+        <div class="monitor-info">
+          <div class="monitor-icon" style="background:#dbeafe; color:#2563eb;">📡</div>
+          <div>
+            <div class="monitor-name">美丽日记 - 每日同步</div>
+            <div class="monitor-detail">上次：06-29 08:00 · 新增45条 · 精华12条</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="padding:2px 8px; border-radius:10px; font-size:11px; background:#dbeafe; color:#2563eb;">每日 08:00</span>
+          <div class="toggle-sw"></div>
+        </div>
+      </div>
+      <div class="monitor-item">
+        <div class="monitor-info">
+          <div class="monitor-icon" style="background:#fce7f3; color:#db2777;">📡</div>
+          <div>
+            <div class="monitor-name">科技小能手 - 每周汇总</div>
+            <div class="monitor-detail">上次：06-23 10:00 · 新增312条 · 精华89条</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="padding:2px 8px; border-radius:10px; font-size:11px; background:#dbeafe; color:#2563eb;">每周一 10:00</span>
+          <div class="toggle-sw"></div>
+        </div>
+      </div>
+      <div class="monitor-item">
+        <div class="monitor-info">
+          <div class="monitor-icon" style="background:#fef2f2; color:#dc2626;">⚠️</div>
+          <div>
+            <div class="monitor-name">负面预警 - 全账号</div>
+            <div class="monitor-detail">监控中 · 近7天负面8条（正常范围）</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="padding:2px 8px; border-radius:10px; font-size:11px; background:#fef2f2; color:#dc2626;">实时</span>
+          <div class="toggle-sw"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PAGE: Settings ========== -->
+  <div class="page-content" id="page-settings">
+    <div class="page-header-bar">
+      <div class="breadcrumb">首页 / <strong>设置与账号</strong></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">👤 个人信息</h3>
+      <div style="display:flex; align-items:center; gap:16px; padding:16px; background:#f9fafb; border-radius:10px;">
+        <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:600;">小</div>
+        <div>
+          <div style="font-size:16px; font-weight:600;">小明同学 <span style="background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:2px 8px; border-radius:10px; font-size:11px;">PRO</span></div>
+          <div style="font-size:13px; color:#6b7280;">xiaoming@example.com · 注册：2026-05-15</div>
+        </div>
+        <button class="btn btn-outline" style="margin-left:auto;">编辑资料</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">💎 套餐管理</h3>
+      <div class="plan-cards">
+        <div class="plan-card">
+          <div class="plan-name">免费版</div>
+          <div class="plan-price">¥0/月</div>
+          <ul class="plan-features-list">
+            <li>每月500条评论分析</li>
+            <li>1个平台账号</li>
+            <li>基础AI分类</li>
+            <li>Excel导出</li>
+            <li class="disabled">多账号管理</li>
+            <li class="disabled">定时监控</li>
+            <li class="disabled">选题日历</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%; margin-top:12px;">当前套餐</button>
+        </div>
+        <div class="plan-card recommended">
+          <div class="plan-name">专业版</div>
+          <div class="plan-price"><strong style="font-size:24px;">¥39</strong>/月</div>
+          <ul class="plan-features-list">
+            <li>不限评论分析额度</li>
+            <li>50个平台账号</li>
+            <li>高级AI分类+置信度</li>
+            <li>飞书/Notion/Excel导出</li>
+            <li>多账号管理+对比</li>
+            <li>定时监控+预警</li>
+            <li>选题日历</li>
+          </ul>
+          <button class="btn btn-primary" style="width:100%; margin-top:12px;">立即升级</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">📊 使用量统计</h3>
+      <div style="padding:16px; background:#f9fafb; border-radius:10px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span style="font-size:14px; font-weight:500;">本月评论分析额度</span>
+          <span style="font-size:12px; color:#9ca3af;">2026年6月 · 剩余2天</span>
+        </div>
+        <div class="usage-bar-bg">
+          <div class="usage-bar-fill" style="width:78%;"></div>
+        </div>
+        <div class="usage-info">
+          <span>已使用 <strong>390</strong> / 500 条</span>
+          <span>剩余 <strong>110</strong> 条</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">🔑 API密钥管理</h3>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#f9fafb; border-radius:8px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:18px;">🎵</span>
+            <div>
+              <div style="font-size:14px; font-weight:500;">抖音开放平台</div>
+              <div style="font-size:12px; color:#9ca3af; font-family:monospace;">sk-****7f3a</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="width:6px; height:6px; border-radius:50%; background:#16a34a;"></span>
+            <span style="font-size:12px; color:#16a34a;">已连通</span>
+            <button class="btn btn-ghost" style="padding:4px 8px; font-size:12px;">测试</button>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#f9fafb; border-radius:8px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:18px;">📺</span>
+            <div>
+              <div style="font-size:14px; font-weight:500;">B站开放平台</div>
+              <div style="font-size:12px; color:#9ca3af;">未配置</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="width:6px; height:6px; border-radius:50%; background:#dc2626;"></span>
+            <span style="font-size:12px; color:#dc2626;">未配置</span>
+            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px;">配置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">🎛️ 偏好设置</h3>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:14px; font-weight:500;">默认导出格式</div>
+            <div style="font-size:12px; color:#9ca3af;">避免每次重复选择</div>
+          </div>
+          <select style="padding:6px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+            <option selected>Excel (.xlsx)</option>
+            <option>飞书文档</option>
+            <option>Notion页面</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:14px; font-weight:500;">自定义分类标签</div>
+            <div style="font-size:12px; color:#9ca3af;">在五大默认类别基础上添加</div>
+          </div>
+          <div class="toggle-sw"></div>
+        </div>
+        <div>
+          <div style="font-size:13px; color:#6b7280; margin-bottom:8px;">已添加的自定义标签：</div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <span style="padding:4px 10px; border-radius:16px; font-size:12px; background:#ede9fe; color:#6366f1;">竞品提及 ×</span>
+            <span style="padding:4px 10px; border-radius:16px; font-size:12px; background:#ede9fe; color:#6366f1;">合作机会 ×</span>
+            <span style="padding:4px 10px; border-radius:16px; font-size:12px; background:#ede9fe; color:#6366f1;">价格敏感 ×</span>
+            <span style="padding:4px 10px; border-radius:16px; font-size:12px; border:1px dashed #d1d5db; color:#6b7280; cursor:pointer;">+ 添加</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+function switchPage(pageId, navEl) {
+  // Update nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  // Update content
+  document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+}
+
+function switchImportTab(tab) {
+  document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('import-csv').style.display = tab === 'csv' ? 'block' : 'none';
+  document.getElementById('import-link').style.display = tab === 'link' ? 'block' : 'none';
+  if (tab === 'csv') document.querySelectorAll('.import-tab')[0].classList.add('active');
+  else document.querySelectorAll('.import-tab')[1].classList.add('active');
+}
+
+function switchTemplateTab(tab) {
+  document.querySelectorAll('.template-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tmpl-reply').style.display = tab === 'reply' ? 'block' : 'none';
+  document.getElementById('tmpl-topic').style.display = tab === 'topic' ? 'block' : 'none';
+  if (tab === 'reply') document.querySelectorAll('.template-tab')[0].classList.add('active');
+  else document.querySelectorAll('.template-tab')[1].classList.add('active');
+}
+
+// Toggle switches
+document.querySelectorAll('.toggle-sw').forEach(sw => {
+  sw.addEventListener('click', function() { this.classList.toggle('off'); });
+});
+
+// Category card selection
+document.querySelectorAll('.cat-card').forEach(card => {
+  card.addEventListener('click', function() {
+    document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

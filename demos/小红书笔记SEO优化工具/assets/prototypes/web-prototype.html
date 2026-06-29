@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>小红书笔记SEO优化工具 - WEB端全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f5f7fa; color: #333; }
+
+/* ===== 顶部导航 ===== */
+.topbar { height: 56px; background: #fff; border-bottom: 1px solid #e8ecf0; display: flex; align-items: center; padding: 0 24px; position: fixed; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,.03); }
+.logo { font-size: 15px; font-weight: 700; color: #ff2442; margin-right: 32px; display: flex; align-items: center; gap: 8px; }
+.logo-icon { font-size: 20px; }
+.nav-tabs { display: flex; gap: 4px; flex: 1; }
+.nav-tab { padding: 8px 16px; font-size: 13px; color: #666; cursor: pointer; border-radius: 6px; transition: all .2s; display: flex; align-items: center; gap: 6px; }
+.nav-tab:hover { background: #f5f7fa; color: #333; }
+.nav-tab.active { background: #fff0f3; color: #ff2442; font-weight: 600; }
+.user-area { display: flex; align-items: center; gap: 12px; }
+.usage-mini { font-size: 11px; color: #e5a000; padding: 4px 8px; background: #fffbea; border-radius: 4px; }
+.user-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #ff2442, #ff6b81); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+/* ===== 主内容区 ===== */
+.main { margin-top: 56px; padding: 24px; min-height: calc(100vh - 56px); }
+.page { display: none; }
+.page.active { display: block; }
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.page-subtitle { font-size: 13px; color: #888; }
+
+/* ===== 通用组件 ===== */
+.card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.04); margin-bottom: 18px; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #ff2442; color: #fff; }
+.btn-primary:hover { background: #e61d3a; }
+.btn-secondary { background: #f0f2f5; color: #555; }
+.btn-secondary:hover { background: #e4e7eb; }
+.btn-ghost { background: transparent; color: #ff2442; }
+.btn-ghost:hover { background: #fff0f3; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+.tag-hot { background: #fee2e2; color: #dc2626; }
+.tag-up { background: #d1fae5; color: #065f46; }
+.tag-down { background: #f3f4f6; color: #6b7280; }
+.tag-stable { background: #e0e7ff; color: #3730a3; }
+.tag-comp-high { background: #fee2e2; color: #991b1b; }
+.tag-comp-mid { background: #fef3c7; color: #92400e; }
+.tag-comp-low { background: #d1fae5; color: #065f46; }
+.tag-level-excellent { background: #d1fae5; color: #065f46; }
+.tag-level-good { background: #dbeafe; color: #1e40af; }
+.tag-level-fair { background: #fef3c7; color: #92400e; }
+.tag-level-poor { background: #fee2e2; color: #991b1b; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #fafbfc; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #e8ecf0; font-size: 12px; color: #666; }
+td { padding: 12px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+tr:hover { background: #fafcff; }
+
+/* ===== PAGE 1: 工作台首页 ===== */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.kpi-card { background: linear-gradient(135deg, #fff5f7, #fff); border: 1px solid #fde2e8; border-radius: 10px; padding: 16px; }
+.kpi-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+.kpi-value { font-size: 28px; font-weight: 700; color: #1a1a1a; }
+.kpi-value .unit { font-size: 13px; color: #888; font-weight: 400; }
+.kpi-sub { font-size: 11px; color: #888; margin-top: 4px; }
+
+.quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+.quick-card { background: #fff; border: 1px solid #e8ecf0; border-radius: 10px; padding: 20px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 14px; }
+.quick-card:hover { border-color: #ff2442; box-shadow: 0 4px 12px rgba(255,36,66,.08); }
+.quick-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.quick-icon-1 { background: linear-gradient(135deg, #fff0f3, #fde2e8); }
+.quick-icon-2 { background: linear-gradient(135deg, #e8efff, #dbeafe); }
+.quick-icon-3 { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+.quick-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.quick-desc { font-size: 12px; color: #888; }
+
+.chart-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-bottom: 24px; }
+.chart-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.chart-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.line-chart { display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0; border-bottom: 1px solid #f0f2f5; }
+.line-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.line-bar-fill { width: 100%; max-width: 28px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, #ff2442, #ff6b81); position: relative; transition: all .3s; cursor: pointer; }
+.line-bar-fill:hover { opacity: .85; }
+.line-bar-val { font-size: 10px; color: #ff2442; font-weight: 600; }
+.line-bar-label { font-size: 10px; color: #aaa; }
+
+.pie-chart { display: flex; align-items: center; gap: 24px; padding: 10px 0; }
+.pie-visual { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(#ff2442 0% 35%, #ff6b81 35% 55%, #ffa07a 55% 72%, #4f7cff 72% 88%, #888 88% 100%); position: relative; }
+.pie-visual::after { content: ''; position: absolute; top: 30px; left: 30px; right: 30px; bottom: 30px; background: #fff; border-radius: 50%; }
+.pie-legend { display: flex; flex-direction: column; gap: 8px; }
+.pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.pie-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+.recent-list { margin-top: 10px; }
+
+/* ===== PAGE 2: 笔记SEO分析页 ===== */
+.analysis-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.input-section { }
+.result-section { }
+.input-group { margin-bottom: 16px; }
+.input-label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; display: flex; justify-content: space-between; }
+.input-label .count { color: #888; font-weight: 400; }
+.input-label .count.warn { color: #ff2442; }
+.title-input { width: 100%; padding: 10px 14px; border: 1px solid #e8ecf0; border-radius: 8px; font-size: 14px; outline: none; transition: border .2s; }
+.title-input:focus { border-color: #ff2442; }
+.content-textarea { width: 100%; padding: 12px 14px; border: 1px solid #e8ecf0; border-radius: 8px; font-size: 13px; min-height: 200px; resize: vertical; outline: none; line-height: 1.8; transition: border .2s; }
+.content-textarea:focus { border-color: #ff2442; }
+.input-tips { font-size: 12px; color: #888; margin-top: 6px; }
+
+/* ===== 分析中状态 ===== */
+.analyzing-state { text-align: center; padding: 60px 20px; }
+.analyzing-spinner { width: 60px; height: 60px; border: 3px solid #fde2e8; border-top-color: #ff2442; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.analyzing-text { font-size: 14px; color: #666; margin-bottom: 8px; }
+.analyzing-step { font-size: 12px; color: #ff2442; }
+.analyzing-progress { width: 200px; height: 4px; background: #f0f2f5; border-radius: 2px; margin: 16px auto 0; overflow: hidden; }
+.analyzing-progress-fill { height: 100%; background: #ff2442; border-radius: 2px; width: 65%; animation: progress-anim 3s ease-in-out infinite; }
+@keyframes progress-anim { 0% { width: 10%; } 50% { width: 80%; } 100% { width: 95%; } }
+
+/* ===== SEO综合评分 ===== */
+.score-overview { text-align: center; padding: 20px 0; }
+.score-ring { width: 140px; height: 140px; margin: 0 auto 16px; position: relative; }
+.score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-ring-bg { fill: none; stroke: #f0f2f5; stroke-width: 10; }
+.score-ring-fill { fill: none; stroke: #22c55e; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 377; stroke-dashoffset: 75; }
+.score-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.score-num { font-size: 36px; font-weight: 700; color: #22c55e; line-height: 1; }
+.score-label { font-size: 12px; color: #22c55e; margin-top: 4px; }
+
+.score-detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.score-item { text-align: center; padding: 14px 10px; border: 1px solid #f0f2f5; border-radius: 10px; }
+.score-item-label { font-size: 12px; color: #888; margin-bottom: 8px; }
+.score-item-bar { height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 6px; overflow: hidden; }
+.score-item-fill { height: 100%; border-radius: 3px; }
+.score-item-val { font-size: 18px; font-weight: 700; }
+
+/* ===== 优化建议 ===== */
+.suggestion-list { display: flex; flex-direction: column; gap: 10px; }
+.suggestion-card { border: 1px solid #f0f2f5; border-radius: 10px; padding: 14px; display: flex; gap: 12px; }
+.suggestion-impact { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; height: fit-content; }
+.suggestion-impact.high { background: #fee2e2; color: #991b1b; }
+.suggestion-impact.mid { background: #fef3c7; color: #92400e; }
+.suggestion-impact.low { background: #e0e7ff; color: #3730a3; }
+.suggestion-body { flex: 1; }
+.suggestion-type { font-size: 11px; color: #888; margin-bottom: 4px; }
+.suggestion-text { font-size: 13px; color: #333; line-height: 1.6; }
+.suggestion-copy { font-size: 11px; color: #ff2442; cursor: pointer; margin-top: 6px; }
+
+/* ===== PAGE 3: 关键词趋势 ===== */
+.category-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.category-tab { padding: 7px 16px; border-radius: 20px; font-size: 13px; background: #f0f2f5; border: 1px solid transparent; cursor: pointer; transition: all .2s; }
+.category-tab:hover { background: #fff0f3; }
+.category-tab.active { background: #ff2442; color: #fff; }
+.time-switch { display: flex; gap: 4px; background: #f0f2f5; padding: 3px; border-radius: 6px; margin-bottom: 16px; }
+.time-switch span { padding: 5px 14px; font-size: 12px; border-radius: 4px; cursor: pointer; color: #666; }
+.time-switch span.active { background: #fff; color: #ff2442; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.time-switch span.pro-locked { color: #ccc; cursor: not-allowed; }
+.trend-table { }
+.trend-keyword { font-weight: 600; color: #333; display: flex; align-items: center; gap: 6px; }
+.trend-hot { color: #dc2626; font-size: 14px; }
+.trend-change { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; }
+.trend-up { color: #22c55e; }
+.trend-down { color: #ef4444; }
+.trend-stable { color: #888; }
+.fav-btn { color: #ccc; cursor: pointer; font-size: 16px; transition: color .2s; }
+.fav-btn:hover { color: #ff2442; }
+.fav-btn.active { color: #ff2442; }
+
+/* ===== PAGE 4: 竞品对比 ===== */
+.compare-search { display: flex; gap: 10px; margin-bottom: 20px; }
+.compare-search input { flex: 1; padding: 10px 14px; border: 1px solid #e8ecf0; border-radius: 8px; font-size: 13px; outline: none; }
+.compare-search input:focus { border-color: #ff2442; }
+.competitor-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.competitor-card { border: 1px solid #e8ecf0; border-radius: 10px; padding: 14px; cursor: pointer; transition: all .2s; }
+.competitor-card:hover { border-color: #ff2442; }
+.competitor-card.selected { border-color: #ff2442; background: #fff5f7; }
+.competitor-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.competitor-meta { display: flex; gap: 10px; font-size: 11px; color: #888; margin-bottom: 8px; }
+.competitor-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.competitor-tag { padding: 1px 6px; background: #f0f2f5; border-radius: 3px; font-size: 10px; color: #666; }
+.compare-result { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.compare-section { }
+.compare-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.compare-label { font-size: 13px; font-weight: 600; }
+.diff-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+.diff-advantage { background: #d1fae5; color: #065f46; }
+.diff-disadvantage { background: #fee2e2; color: #991b1b; }
+.diff-neutral { background: #e0e7ff; color: #3730a3; }
+
+.pro-overlay { position: relative; }
+.pro-overlay::after { content: '🔒 专业版功能'; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,.92); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #666; border-radius: 12px; }
+
+/* ===== PAGE 5: 历史报告 ===== */
+.report-filters { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+.filter-select { padding: 6px 12px; border: 1px solid #e8ecf0; border-radius: 6px; font-size: 12px; outline: none; background: #fff; }
+.report-item { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f0f2f5; }
+.report-score { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: #fff; }
+.report-score.excellent { background: #22c55e; }
+.report-score.good { background: #3b82f6; }
+.report-score.fair { background: #f59e0b; }
+.report-score.poor { background: #ef4444; }
+.report-info { flex: 1; }
+.report-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.report-meta { font-size: 12px; color: #888; }
+.report-actions { display: flex; gap: 8px; }
+
+/* ===== PAGE 6: 个人中心/订阅 ===== */
+.profile-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.profile-info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #fafbfc; font-size: 13px; }
+.profile-info-row:last-child { border-bottom: none; }
+.profile-label { color: #888; }
+.profile-value { color: #333; font-weight: 500; }
+.plan-card { background: linear-gradient(135deg, #fff5f7, #fff); border: 1px solid #fde2e8; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.plan-name { font-size: 18px; font-weight: 700; color: #ff2442; margin-bottom: 4px; }
+.plan-expire { font-size: 12px; color: #888; margin-bottom: 12px; }
+.usage-bar-bg { height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin-bottom: 6px; }
+.usage-bar-fill { height: 100%; border-radius: 5px; transition: width .3s; }
+.usage-bar-fill.free { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.usage-bar-fill.pro { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.usage-text { font-size: 12px; color: #888; display: flex; justify-content: space-between; }
+
+.plan-compare-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+.plan-compare-table th { background: #fafbfc; padding: 10px; font-size: 12px; text-align: center; }
+.plan-compare-table td { padding: 10px; font-size: 12px; text-align: center; border-bottom: 1px solid #f0f2f5; }
+.plan-check { color: #22c55e; font-weight: 700; }
+.plan-cross { color: #ccc; }
+
+.section-divider { height: 1px; background: #f0f2f5; margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-icon">📝</span>
+    小红书SEO助手
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchPage('dashboard')">🏠 工作台</div>
+    <div class="nav-tab" onclick="switchPage('analysis')">🔍 笔记分析</div>
+    <div class="nav-tab" onclick="switchPage('keyword')">🔥 关键词趋势</div>
+    <div class="nav-tab" onclick="switchPage('competitor')">⚔️ 竞品对比</div>
+    <div class="nav-tab" onclick="switchPage('reports')">📋 历史报告</div>
+  </div>
+  <div class="user-area">
+    <span class="usage-mini">剩余 7 次/月</span>
+    <div class="user-avatar" onclick="switchPage('profile')">小</div>
+  </div>
+</div>
+
+<!-- ===== 主内容区 ===== -->
+<div class="main">
+
+  <!-- ===== PAGE 1: 工作台首页 ===== -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-header">
+      <div class="page-title">👋 你好，小优！</div>
+      <div class="page-subtitle">今天也要写出高曝光的好笔记哦～</div>
+    </div>
+
+    <!-- KPI 指标卡 -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">本月分析次数</div>
+        <div class="kpi-value">3 <span class="unit">/ 10次</span></div>
+        <div class="kpi-sub">免费版额度</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">平均SEO评分</div>
+        <div class="kpi-value">72 <span class="unit">分</span></div>
+        <div class="kpi-sub">较上月 ↑ 5分</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">最高评分</div>
+        <div class="kpi-value" style="color:#22c55e;">88</div>
+        <div class="kpi-sub">《秋冬护肤必备好物》</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">收藏关键词</div>
+        <div class="kpi-value">12 <span class="unit">个</span></div>
+        <div class="kpi-sub">近7天新增3个</div>
+      </div>
+    </div>
+
+    <!-- 快捷入口 -->
+    <div class="card">
+      <div class="card-title">⚡ 快捷入口</div>
+      <div class="quick-grid">
+        <div class="quick-card" onclick="switchPage('analysis')">
+          <div class="quick-icon quick-icon-1">📝</div>
+          <div>
+            <div class="quick-name">笔记SEO分析</div>
+            <div class="quick-desc">输入笔记内容，一键获取SEO评分</div>
+          </div>
+        </div>
+        <div class="quick-card" onclick="switchPage('keyword')">
+          <div class="quick-icon quick-icon-2">🔥</div>
+          <div>
+            <div class="quick-name">关键词趋势</div>
+            <div class="quick-desc">查看各品类热门搜索关键词</div>
+          </div>
+        </div>
+        <div class="quick-card" onclick="switchPage('competitor')">
+          <div class="quick-icon quick-icon-3">⚔️</div>
+          <div>
+            <div class="quick-name">竞品对比分析</div>
+            <div class="quick-desc">对比高赞笔记，学习爆款策略</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图表区 -->
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-title">
+          📈 评分趋势（近5次分析）
+        </div>
+        <div class="line-chart">
+          <div class="line-bar">
+            <div class="line-bar-val">65</div>
+            <div class="line-bar-fill" style="height:65%;"></div>
+            <div class="line-bar-label">6/20</div>
+          </div>
+          <div class="line-bar">
+            <div class="line-bar-val">72</div>
+            <div class="line-bar-fill" style="height:72%;"></div>
+            <div class="line-bar-label">6/22</div>
+          </div>
+          <div class="line-bar">
+            <div class="line-bar-val">58</div>
+            <div class="line-bar-fill" style="height:58%;"></div>
+            <div class="line-bar-label">6/24</div>
+          </div>
+          <div class="line-bar">
+            <div class="line-bar-val">88</div>
+            <div class="line-bar-fill" style="height:88%;"></div>
+            <div class="line-bar-label">6/26</div>
+          </div>
+          <div class="line-bar">
+            <div class="line-bar-val">72</div>
+            <div class="line-bar-fill" style="height:72%;"></div>
+            <div class="line-bar-label">6/28</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">📊 品类分析分布</div>
+        <div class="pie-chart">
+          <div class="pie-visual"></div>
+          <div class="pie-legend">
+            <div class="pie-legend-item"><div class="pie-dot" style="background:#ff2442;"></div>美妆 35%</div>
+            <div class="pie-legend-item"><div class="pie-dot" style="background:#ff6b81;"></div>穿搭 20%</div>
+            <div class="pie-legend-item"><div class="pie-dot" style="background:#ffa07a;"></div>美食 17%</div>
+            <div class="pie-legend-item"><div class="pie-dot" style="background:#4f7cff;"></div>旅行 16%</div>
+            <div class="pie-legend-item"><div class="pie-dot" style="background:#888;"></div>其他 12%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 最近分析 -->
+    <div class="card">
+      <div class="card-title">🕐 最近分析</div>
+      <div class="recent-list">
+        <table>
+          <tr>
+            <th>笔记标题</th>
+            <th>品类</th>
+            <th>SEO评分</th>
+            <th>分析时间</th>
+            <th>操作</th>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">秋冬换季敏感肌护肤必备好物清单</td>
+            <td><span class="tag" style="background:#fff0f3;color:#ff2442;">美妆</span></td>
+            <td><span style="color:#22c55e;font-weight:700;">88分</span> <span class="tag tag-level-excellent">优秀</span></td>
+            <td style="color:#888;font-size:12px;">2026-06-28 14:30</td>
+            <td><button class="btn btn-ghost btn-sm">查看详情</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">5个让你显瘦10斤的穿搭技巧</td>
+            <td><span class="tag" style="background:#e8efff;color:#4f7cff;">穿搭</span></td>
+            <td><span style="color:#3b82f6;font-weight:700;">72分</span> <span class="tag tag-level-good">良好</span></td>
+            <td style="color:#888;font-size:12px;">2026-06-26 10:15</td>
+            <td><button class="btn btn-ghost btn-sm">查看详情</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">周末亲子游｜上海迪士尼保姆级攻略</td>
+            <td><span class="tag" style="background:#fef3c7;color:#d97706;">旅行</span></td>
+            <td><span style="color:#3b82f6;font-weight:700;">65分</span> <span class="tag tag-level-fair">一般</span></td>
+            <td style="color:#888;font-size:12px;">2026-06-24 09:00</td>
+            <td><button class="btn btn-ghost btn-sm">查看详情</button></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 2: 笔记SEO分析页 ===== -->
+  <div id="page-analysis" class="page">
+    <div class="page-header">
+      <div class="page-title">📝 笔记SEO分析</div>
+      <div class="page-subtitle">输入你的笔记内容，AI将为你提供专业的SEO优化建议</div>
+    </div>
+
+    <div class="analysis-layout">
+      <!-- 左侧：输入区 -->
+      <div class="input-section">
+        <div class="card">
+          <div class="card-title">📋 笔记内容</div>
+          <div class="input-group">
+            <div class="input-label">
+              笔记标题
+              <span class="count warn">18/20</span>
+            </div>
+            <input type="text" class="title-input" value="秋冬换季敏感肌护肤必备好物清单" placeholder="请输入笔记标题（20字以内）" maxlength="20">
+          </div>
+          <div class="input-group">
+            <div class="input-label">
+              笔记正文
+              <span class="count">386字</span>
+            </div>
+            <textarea class="content-textarea" placeholder="请输入或粘贴笔记正文内容...">姐妹们！秋冬换季皮肤又开始作妖了😭 作为敏感肌星人，今天给大家整理了我亲测有效的护肤好物清单！
+
+🌟 洁面推荐：珂润泡沫洗面奶
+这款真的是敏感肌的救星！氨基酸配方超级温和，洗完脸不紧绷不假滑。泡沫很绵密，用量很省。秋冬用它洗完脸软软嫩嫩的~
+
+🌟 水乳推荐：薇诺娜特护霜
+国货之光！含有青刺果油和马齿苋提取物，修复屏障效果绝了。我换季泛红的时候厚涂一层，第二天就消下去了。质地偏厚重但是很好吸收。
+
+🌟 精华推荐：修丽可色修精华
+这款精华是我用过去红痘印最快的！质地清爽好吸收，坚持用一个月痘印明显淡化。虽然价格小贵但是真的值得！
+
+💡 护肤小tips：
+1. 换季期间精简护肤步骤
+2. 注意保湿，面膜一周2-3次
+3. 防晒不能停！冬天也要涂
+4. 避免频繁更换护肤品</textarea>
+            <div class="input-tips">💡 建议正文100-1000字，内容越丰富分析越准确</div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;" onclick="showAnalysisResult()">
+            🔍 开始SEO分析
+          </button>
+        </div>
+      </div>
+
+      <!-- 右侧：分析结果 -->
+      <div class="result-section" id="analysis-result">
+        <div class="card">
+          <div class="card-title">📊 SEO综合评分</div>
+          <div class="score-overview">
+            <div class="score-ring">
+              <svg viewBox="0 0 120 120">
+                <circle class="score-ring-bg" cx="60" cy="60" r="50"></circle>
+                <circle class="score-ring-fill" cx="60" cy="60" r="50"></circle>
+              </svg>
+              <div class="score-value">
+                <div class="score-num">88</div>
+                <div class="score-label">优秀</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="score-detail-grid">
+            <div class="score-item">
+              <div class="score-item-label">关键词密度</div>
+              <div class="score-item-bar"><div class="score-item-fill" style="width:82%;background:#22c55e;"></div></div>
+              <div class="score-item-val" style="color:#22c55e;">82</div>
+            </div>
+            <div class="score-item">
+              <div class="score-item-label">标题吸引力</div>
+              <div class="score-item-bar"><div class="score-item-fill" style="width:90%;background:#22c55e;"></div></div>
+              <div class="score-item-val" style="color:#22c55e;">90</div>
+            </div>
+            <div class="score-item">
+              <div class="score-item-label">标签匹配度</div>
+              <div class="score-item-bar"><div class="score-item-fill" style="width:78%;background:#3b82f6;"></div></div>
+              <div class="score-item-val" style="color:#3b82f6;">78</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 关键词分析 -->
+        <div class="card">
+          <div class="card-title">🔑 关键词密度分析</div>
+          <table>
+            <tr><th>关键词</th><th>出现次数</th><th>密度</th><th>评估</th></tr>
+            <tr>
+              <td style="font-weight:600;">敏感肌</td>
+              <td>4次</td>
+              <td>2.1%</td>
+              <td><span class="tag tag-comp-low">✓ 合理</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">护肤</td>
+              <td>3次</td>
+              <td>1.6%</td>
+              <td><span class="tag tag-comp-low">✓ 合理</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">换季</td>
+              <td>3次</td>
+              <td>1.6%</td>
+              <td><span class="tag tag-comp-low">✓ 合理</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">好物</td>
+              <td>2次</td>
+              <td>1.0%</td>
+              <td><span class="tag tag-comp-mid">△ 可补充</span></td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- 优化建议 -->
+        <div class="card">
+          <div class="card-title">💡 优化建议</div>
+          <div class="suggestion-list">
+            <div class="suggestion-card">
+              <span class="suggestion-impact high">高影响</span>
+              <div class="suggestion-body">
+                <div class="suggestion-type">🏷️ 标签优化</div>
+                <div class="suggestion-text">建议添加高热度标签：<strong>#敏感肌护肤</strong>（热度98万）、<strong>#秋冬护肤</strong>（热度76万）、<strong>#国货护肤</strong>（热度52万）。建议标签总数6-8个。</div>
+                <div class="suggestion-copy">📋 一键复制建议</div>
+              </div>
+            </div>
+            <div class="suggestion-card">
+              <span class="suggestion-impact high">高影响</span>
+              <div class="suggestion-body">
+                <div class="suggestion-type">📝 标题改写</div>
+                <div class="suggestion-text">参考改写方案：<br>① "敏感肌换季急救！这几款护肤好物真的绝了😭"<br>② "秋冬烂脸救星｜敏感肌亲测的护肤好物清单"<br>③ "换季不烂脸！敏感肌姐妹必囤的3款护肤神器"</div>
+                <div class="suggestion-copy">📋 一键复制建议</div>
+              </div>
+            </div>
+            <div class="suggestion-card">
+              <span class="suggestion-impact mid">中影响</span>
+              <div class="suggestion-body">
+                <div class="suggestion-type">🔑 关键词补充</div>
+                <div class="suggestion-text">建议在正文中补充关键词"护肤品推荐"出现1-2次、"修护"出现1-2次，提升关键词覆盖面。</div>
+                <div class="suggestion-copy">📋 一键复制建议</div>
+              </div>
+            </div>
+            <div class="suggestion-card">
+              <span class="suggestion-impact low">低影响</span>
+              <div class="suggestion-body">
+                <div class="suggestion-type">📐 内容结构</div>
+                <div class="suggestion-text">正文分段清晰，建议在开头增加一句"痛点共鸣"引导句，如"换季又烂脸的姐妹看过来！"，提升阅读完成率。</div>
+                <div class="suggestion-copy">📋 一键复制建议</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 标签推荐 -->
+        <div class="card">
+          <div class="card-title">🏷️ 标签推荐</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <span class="tag" style="background:#fff0f3;color:#ff2442;padding:6px 12px;font-size:12px;">#敏感肌护肤 <small style="color:#888;">🔥98万</small></span>
+            <span class="tag" style="background:#fff0f3;color:#ff2442;padding:6px 12px;font-size:12px;">#秋冬护肤 <small style="color:#888;">🔥76万</small></span>
+            <span class="tag" style="background:#fff0f3;color:#ff2442;padding:6px 12px;font-size:12px;">#国货护肤 <small style="color:#888;">🔥52万</small></span>
+            <span class="tag" style="background:#fff0f3;color:#ff2442;padding:6px 12px;font-size:12px;">#护肤品推荐 <small style="color:#888;">🔥45万</small></span>
+            <span class="tag" style="background:#fff0f3;color:#ff2442;padding:6px 12px;font-size:12px;">#换季护肤 <small style="color:#888;">🔥38万</small></span>
+            <span class="tag" style="background:#fff0f3;color:#ff2442;padding:6px 12px;font-size:12px;">#敏感肌面霜 <small style="color:#888;">🔥28万</small></span>
+            <span class="tag" style="background:#e8efff;color:#4f7cff;padding:6px 12px;font-size:12px;">#修护屏障 <small style="color:#888;">🔥21万</small></span>
+            <span class="tag" style="background:#e8efff;color:#4f7cff;padding:6px 12px;font-size:12px;">#珂润洗面奶 <small style="color:#888;">🔥15万</small></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 3: 关键词趋势 ===== -->
+  <div id="page-keyword" class="page">
+    <div class="page-header">
+      <div class="page-title">🔥 关键词趋势</div>
+      <div class="page-subtitle">查看各品类热门搜索关键词，找到流量密码</div>
+    </div>
+
+    <div class="card">
+      <!-- 品类标签 -->
+      <div class="category-tabs">
+        <div class="category-tab active">美妆</div>
+        <div class="category-tab">穿搭</div>
+        <div class="category-tab">美食</div>
+        <div class="category-tab">旅行</div>
+        <div class="category-tab">家居</div>
+        <div class="category-tab">母婴</div>
+        <div class="category-tab">健身</div>
+        <div class="category-tab">数码</div>
+      </div>
+
+      <!-- 时间范围 -->
+      <div class="time-switch">
+        <span class="active">近7天</span>
+        <span class="pro-locked">近30天 🔒</span>
+      </div>
+
+      <!-- 关键词列表 -->
+      <table class="trend-table">
+        <tr>
+          <th style="width:40%;">关键词</th>
+          <th>搜索热度</th>
+          <th>趋势</th>
+          <th>竞争度</th>
+          <th>操作</th>
+        </tr>
+        <tr>
+          <td>
+            <div class="trend-keyword">
+              <span class="trend-hot">🔥</span> 秋冬换季护肤
+              <span class="tag tag-hot">热</span>
+            </div>
+          </td>
+          <td style="font-weight:600;">98.5万</td>
+          <td><span class="trend-change trend-up">↑ 42%</span></td>
+          <td><span class="tag tag-comp-mid">中</span></td>
+          <td>
+            <span class="fav-btn">☆</span>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('analysis')">分析</button>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="trend-keyword">
+              敏感肌面霜推荐
+              <span class="tag tag-up">↑</span>
+            </div>
+          </td>
+          <td style="font-weight:600;">76.2万</td>
+          <td><span class="trend-change trend-up">↑ 28%</span></td>
+          <td><span class="tag tag-comp-low">低</span></td>
+          <td>
+            <span class="fav-btn active">★</span>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('analysis')">分析</button>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="trend-keyword">
+              国货护肤品测评
+            </div>
+          </td>
+          <td style="font-weight:600;">62.8万</td>
+          <td><span class="trend-change trend-up">↑ 15%</span></td>
+          <td><span class="tag tag-comp-high">高</span></td>
+          <td>
+            <span class="fav-btn">☆</span>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('analysis')">分析</button>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="trend-keyword">
+              <span class="trend-hot">🔥</span> 早C晚A正确顺序
+              <span class="tag tag-hot">热</span>
+            </div>
+          </td>
+          <td style="font-weight:600;">55.3万</td>
+          <td><span class="trend-change trend-up">↑ 35%</span></td>
+          <td><span class="tag tag-comp-mid">中</span></td>
+          <td>
+            <span class="fav-btn">☆</span>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('analysis')">分析</button>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="trend-keyword">
+              干皮补水急救方法
+            </div>
+          </td>
+          <td style="font-weight:600;">48.1万</td>
+          <td><span class="trend-change trend-up">↑ 12%</span></td>
+          <td><span class="tag tag-comp-low">低</span></td>
+          <td>
+            <span class="fav-btn">☆</span>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('analysis')">分析</button>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="trend-keyword">
+              油皮秋冬用什么水乳
+            </div>
+          </td>
+          <td style="font-weight:600;">41.7万</td>
+          <td><span class="trend-change trend-stable">→ 3%</span></td>
+          <td><span class="tag tag-comp-low">低</span></td>
+          <td>
+            <span class="fav-btn">☆</span>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('analysis')">分析</button>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="trend-keyword">
+              抗老精华平价推荐
+            </div>
+          </td>
+          <td style="font-weight:600;">38.9万</td>
+          <td><span class="trend-change trend-down">↓ 5%</span></td>
+          <td><span class="tag tag-comp-high">高</span></td>
+          <td>
+            <span class="fav-btn">☆</span>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('analysis')">分析</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 关键词详情预览 -->
+    <div class="card">
+      <div class="card-title">📈 关键词热度趋势 — <span style="color:#ff2442;">秋冬换季护肤</span></div>
+      <div style="display:flex;gap:24px;align-items:flex-start;">
+        <div style="flex:1;">
+          <div class="line-chart" style="height:140px;">
+            <div class="line-bar">
+              <div class="line-bar-val">45</div>
+              <div class="line-bar-fill" style="height:45%;background:linear-gradient(180deg,#ff2442,#ff6b81);"></div>
+              <div class="line-bar-label">6/22</div>
+            </div>
+            <div class="line-bar">
+              <div class="line-bar-val">52</div>
+              <div class="line-bar-fill" style="height:52%;background:linear-gradient(180deg,#ff2442,#ff6b81);"></div>
+              <div class="line-bar-label">6/23</div>
+            </div>
+            <div class="line-bar">
+              <div class="line-bar-val">61</div>
+              <div class="line-bar-fill" style="height:61%;background:linear-gradient(180deg,#ff2442,#ff6b81);"></div>
+              <div class="line-bar-label">6/24</div>
+            </div>
+            <div class="line-bar">
+              <div class="line-bar-val">68</div>
+              <div class="line-bar-fill" style="height:68%;background:linear-gradient(180deg,#ff2442,#ff6b81);"></div>
+              <div class="line-bar-label">6/25</div>
+            </div>
+            <div class="line-bar">
+              <div class="line-bar-val">78</div>
+              <div class="line-bar-fill" style="height:78%;background:linear-gradient(180deg,#ff2442,#ff6b81);"></div>
+              <div class="line-bar-label">6/26</div>
+            </div>
+            <div class="line-bar">
+              <div class="line-bar-val">88</div>
+              <div class="line-bar-fill" style="height:88%;background:linear-gradient(180deg,#ff2442,#ff6b81);"></div>
+              <div class="line-bar-label">6/27</div>
+            </div>
+            <div class="line-bar">
+              <div class="line-bar-val">98</div>
+              <div class="line-bar-fill" style="height:98%;background:linear-gradient(180deg,#ff2442,#ff6b81);"></div>
+              <div class="line-bar-label">6/28</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:200px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">🔗 相关长尾词</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <span style="font-size:12px;color:#555;padding:4px 8px;background:#f5f7fa;border-radius:4px;">秋冬换季敏感肌怎么办</span>
+            <span style="font-size:12px;color:#555;padding:4px 8px;background:#f5f7fa;border-radius:4px;">换季护肤品推荐清单</span>
+            <span style="font-size:12px;color:#555;padding:4px 8px;background:#f5f7fa;border-radius:4px;">换季烂脸急救方法</span>
+            <span style="font-size:12px;color:#555;padding:4px 8px;background:#f5f7fa;border-radius:4px;">秋冬护肤顺序步骤</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 4: 竞品对比 ===== -->
+  <div id="page-competitor" class="page">
+    <div class="page-header">
+      <div class="page-title">⚔️ 竞品对比分析</div>
+      <div class="page-subtitle">分析同品类高赞笔记的标题结构和标签策略，找到差异化突破口</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔍 搜索竞品笔记</div>
+      <div class="compare-search">
+        <input type="text" placeholder="输入关键词搜索同品类高赞笔记..." value="敏感肌护肤好物">
+        <button class="btn btn-primary">搜索</button>
+      </div>
+
+      <div style="font-size:13px;color:#888;margin-bottom:12px;">找到 12 篇高赞竞品笔记（按互动量排序）</div>
+
+      <!-- 竞品卡片列表 -->
+      <div class="competitor-cards">
+        <div class="competitor-card selected">
+          <div class="competitor-title">敏感肌必看！秋冬换季护肤好物大公开💕亲测有效</div>
+          <div class="competitor-meta">
+            <span>❤️ 2.3万</span>
+            <span>💬 1,856</span>
+            <span>⭐ 8,920</span>
+          </div>
+          <div class="competitor-tags">
+            <span class="competitor-tag">#敏感肌护肤</span>
+            <span class="competitor-tag">#换季护肤</span>
+            <span class="competitor-tag">#好物推荐</span>
+            <span class="competitor-tag">+4</span>
+          </div>
+        </div>
+        <div class="competitor-card">
+          <div class="competitor-title">换季烂脸急救指南｜5款敏感肌必备护肤品</div>
+          <div class="competitor-meta">
+            <span>❤️ 1.8万</span>
+            <span>💬 1,203</span>
+            <span>⭐ 6,540</span>
+          </div>
+          <div class="competitor-tags">
+            <span class="competitor-tag">#换季护肤</span>
+            <span class="competitor-tag">#敏感肌</span>
+            <span class="competitor-tag">#急救护肤</span>
+            <span class="competitor-tag">+3</span>
+          </div>
+        </div>
+        <div class="competitor-card">
+          <div class="competitor-title">敏感肌姐妹看过来！这些国货护肤品真的绝了👏</div>
+          <div class="competitor-meta">
+            <span>❤️ 1.5万</span>
+            <span>💬 987</span>
+            <span>⭐ 5,230</span>
+          </div>
+          <div class="competitor-tags">
+            <span class="competitor-tag">#国货护肤</span>
+            <span class="competitor-tag">#敏感肌</span>
+            <span class="competitor-tag">#平价护肤</span>
+            <span class="competitor-tag">+5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 对比分析结果 -->
+    <div class="card">
+      <div class="card-title">📊 对比分析结果 — vs 《敏感肌必看！秋冬换季护肤好物大公开💕亲测有效》</div>
+
+      <div class="compare-result">
+        <div class="compare-section">
+          <div class="compare-title-row">
+            <span class="compare-label">📝 标题结构对比</span>
+          </div>
+          <div style="font-size:12px;color:#666;margin-bottom:8px;">你的标题：秋冬换季敏感肌护肤必备好物清单</div>
+          <div style="font-size:12px;color:#666;margin-bottom:12px;">竞品标题：敏感肌必看！秋冬换季护肤好物大公开💕亲测有效</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+              <span class="diff-tag diff-advantage">✓ 共有</span>
+              <span>都包含核心关键词"敏感肌""换季""护肤"</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+              <span class="diff-tag diff-disadvantage">✗ 缺少</span>
+              <span>缺少情感触发词（"必看""绝了"等）</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+              <span class="diff-tag diff-disadvantage">✗ 缺少</span>
+              <span>缺少emoji表情符号，降低视觉吸引力</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+              <span class="diff-tag diff-neutral">△ 差异</span>
+              <span>竞品使用"亲测有效"增加信任感</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="compare-section">
+          <div class="compare-title-row">
+            <span class="compare-label">🏷️ 标签策略对比</span>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:12px;color:#888;margin-bottom:4px;">你的标签：</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <span class="tag" style="background:#f0f2f5;color:#666;padding:3px 8px;font-size:11px;">#护肤</span>
+              <span class="tag" style="background:#f0f2f5;color:#666;padding:3px 8px;font-size:11px;">#敏感肌</span>
+              <span class="tag" style="background:#f0f2f5;color:#666;padding:3px 8px;font-size:11px;">#好物清单</span>
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:12px;color:#888;margin-bottom:4px;">竞品标签：</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <span class="tag" style="background:#d1fae5;color:#065f46;padding:3px 8px;font-size:11px;">#敏感肌护肤</span>
+              <span class="tag" style="background:#d1fae5;color:#065f46;padding:3px 8px;font-size:11px;">#换季护肤</span>
+              <span class="tag" style="background:#d1fae5;color:#065f46;padding:3px 8px;font-size:11px;">#好物推荐</span>
+              <span class="tag" style="background:#d1fae5;color:#065f46;padding:3px 8px;font-size:11px;">#亲测有效</span>
+              <span class="tag" style="background:#d1fae5;color:#065f46;padding:3px 8px;font-size:11px;">#秋冬护肤</span>
+              <span class="tag" style="background:#d1fae5;color:#065f46;padding:3px 8px;font-size:11px;">+2</span>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#ff2442;">💡 竞品使用更多标签（7个 vs 你的3个），且标签更精准（长尾词组合）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 差异化建议 -->
+    <div class="card">
+      <div class="card-title">💡 差异化优化建议</div>
+      <div class="suggestion-list">
+        <div class="suggestion-card">
+          <span class="suggestion-impact high">高影响</span>
+          <div class="suggestion-body">
+            <div class="suggestion-type">📝 标题优化</div>
+            <div class="suggestion-text">参考竞品标题策略，建议加入情感词+emoji：<br><strong>"敏感肌换季急救！这些护肤好物真的绝了😭💕"</strong><br>竞品数据表明，含情感词的标题平均互动量高出40%。</div>
+          </div>
+        </div>
+        <div class="suggestion-card">
+          <span class="suggestion-impact high">高影响</span>
+          <div class="suggestion-body">
+            <div class="suggestion-type">🏷️ 标签扩充</div>
+            <div class="suggestion-text">当前标签仅3个，建议扩充至6-8个。补充：<strong>#换季护肤 #好物推荐 #秋冬护肤 #亲测有效</strong>。使用长尾标签组合（如"敏感肌护肤"而非单独的"护肤"）可减少竞争。</div>
+          </div>
+        </div>
+        <div class="suggestion-card">
+          <span class="suggestion-impact mid">中影响</span>
+          <div class="suggestion-body">
+            <div class="suggestion-type">📐 内容结构</div>
+            <div class="suggestion-text">竞品笔记多在开头使用"痛点共鸣"句（如"换季又烂脸的姐妹看过来"），建议你也添加类似引导句，提升3秒停留率。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 5: 历史报告 ===== -->
+  <div id="page-reports" class="page">
+    <div class="page-header">
+      <div class="page-title">📋 历史分析报告</div>
+      <div class="page-subtitle">查看和管理过往的SEO分析报告</div>
+    </div>
+
+    <div class="card">
+      <div class="report-filters">
+        <select class="filter-select">
+          <option>全部等级</option>
+          <option>优秀 (85-100)</option>
+          <option>良好 (70-84)</option>
+          <option>一般 (50-69)</option>
+          <option>需优化 (&lt;50)</option>
+        </select>
+        <select class="filter-select">
+          <option>最近优先</option>
+          <option>评分最高</option>
+          <option>评分最低</option>
+        </select>
+        <span style="flex:1;"></span>
+        <span style="font-size:12px;color:#888;">共 3 份报告（免费版保留近30天）</span>
+      </div>
+
+      <div class="report-item">
+        <div class="report-score excellent">88</div>
+        <div class="report-info">
+          <div class="report-title">秋冬换季敏感肌护肤必备好物清单</div>
+          <div class="report-meta">美妆 · 2026-06-28 14:30 · 关键词密度82 · 标题90 · 标签78</div>
+        </div>
+        <span class="tag tag-level-excellent">优秀</span>
+        <div class="report-actions">
+          <button class="btn btn-ghost btn-sm">查看</button>
+          <button class="btn btn-secondary btn-sm">删除</button>
+        </div>
+      </div>
+
+      <div class="report-item">
+        <div class="report-score good">72</div>
+        <div class="report-info">
+          <div class="report-title">5个让你显瘦10斤的穿搭技巧</div>
+          <div class="report-meta">穿搭 · 2026-06-26 10:15 · 关键词68 · 标题85 · 标签63</div>
+        </div>
+        <span class="tag tag-level-good">良好</span>
+        <div class="report-actions">
+          <button class="btn btn-ghost btn-sm">查看</button>
+          <button class="btn btn-secondary btn-sm">删除</button>
+        </div>
+      </div>
+
+      <div class="report-item">
+        <div class="report-score fair">65</div>
+        <div class="report-info">
+          <div class="report-title">周末亲子游｜上海迪士尼保姆级攻略</div>
+          <div class="report-meta">旅行 · 2026-06-24 09:00 · 关键词55 · 标题78 · 标签62</div>
+        </div>
+        <span class="tag tag-level-fair">一般</span>
+        <div class="report-actions">
+          <button class="btn btn-ghost btn-sm">查看</button>
+          <button class="btn btn-secondary btn-sm">删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 6: 个人中心/订阅 ===== -->
+  <div id="page-profile" class="page">
+    <div class="page-header">
+      <div class="page-title">👤 个人中心</div>
+      <div class="page-subtitle">管理你的账号信息和订阅计划</div>
+    </div>
+
+    <div class="profile-layout">
+      <div>
+        <!-- 个人信息 -->
+        <div class="card">
+          <div class="card-title">📝 基本信息</div>
+          <div class="profile-info-row">
+            <span class="profile-label">昵称</span>
+            <span class="profile-value">小优</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="profile-label">手机号</span>
+            <span class="profile-value">138****8888</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="profile-label">注册时间</span>
+            <span class="profile-value">2026-05-15</span>
+          </div>
+          <div style="margin-top:14px;">
+            <button class="btn btn-secondary btn-sm">修改资料</button>
+            <button class="btn btn-secondary btn-sm">修改密码</button>
+          </div>
+        </div>
+
+        <!-- 当前订阅 -->
+        <div class="card">
+          <div class="card-title">💎 当前订阅</div>
+          <div class="plan-card">
+            <div class="plan-name">免费版</div>
+            <div class="plan-expire">每月1日重置分析额度</div>
+            <div class="usage-bar-bg">
+              <div class="usage-bar-fill free" style="width:30%;"></div>
+            </div>
+            <div class="usage-text">
+              <span>已用 3/10 次</span>
+              <span>剩余 7 次</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;">⬆️ 升级专业版 ¥29/月</button>
+        </div>
+      </div>
+
+      <div>
+        <!-- 计划对比 -->
+        <div class="card">
+          <div class="card-title">📊 免费版 vs 专业版</div>
+          <table class="plan-compare-table">
+            <tr>
+              <th>功能</th>
+              <th>免费版</th>
+              <th style="color:#ff2442;">专业版 ¥29/月</th>
+            </tr>
+            <tr>
+              <td style="text-align:left;">每月分析次数</td>
+              <td>10次</td>
+              <td style="font-weight:600;color:#ff2442;">不限</td>
+            </tr>
+            <tr>
+              <td style="text-align:left;">关键词趋势</td>
+              <td>近7天</td>
+              <td style="font-weight:600;color:#ff2442;">7天+30天</td>
+            </tr>
+            <tr>
+              <td style="text-align:left;">竞品对比分析</td>
+              <td><span class="plan-cross">✗</span></td>
+              <td><span class="plan-check">✓</span></td>
+            </tr>
+            <tr>
+              <td style="text-align:left;">批量笔记优化</td>
+              <td><span class="plan-cross">✗</span></td>
+              <td><span class="plan-check">✓</span></td>
+            </tr>
+            <tr>
+              <td style="text-align:left;">多账号管理</td>
+              <td><span class="plan-cross">✗</span></td>
+              <td><span class="plan-check">✓</span></td>
+            </tr>
+            <tr>
+              <td style="text-align:left;">报告历史</td>
+              <td>近30天</td>
+              <td style="font-weight:600;color:#ff2442;">全部</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- 用量统计 -->
+        <div class="card">
+          <div class="card-title">📈 本月用量统计</div>
+          <div class="profile-info-row">
+            <span class="profile-label">SEO分析</span>
+            <span class="profile-value">3 次</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="profile-label">关键词查询</span>
+            <span class="profile-value">15 次</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="profile-label">竞品对比</span>
+            <span class="profile-value">0 次（专业版功能）</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="profile-label">报告导出</span>
+            <span class="profile-value">1 次</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchPage(pageId) {
+  // 隐藏所有页面
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  // 显示目标页面
+  const pageMap = {
+    'dashboard': 'page-dashboard',
+    'analysis': 'page-analysis',
+    'keyword': 'page-keyword',
+    'competitor': 'page-competitor',
+    'reports': 'page-reports',
+    'profile': 'page-profile'
+  };
+
+  const targetPage = document.getElementById(pageMap[pageId]);
+  if (targetPage) targetPage.classList.add('active');
+
+  // 高亮对应导航
+  const tabIndex = { 'dashboard': 0, 'analysis': 1, 'keyword': 2, 'competitor': 3, 'reports': 4 };
+  if (tabIndex[pageId] !== undefined) {
+    document.querySelectorAll('.nav-tab')[tabIndex[pageId]].classList.add('active');
+  }
+}
+
+function showAnalysisResult() {
+  const result = document.getElementById('analysis-result');
+  result.style.opacity = '1';
+}
+
+// 品类标签切换
+document.querySelectorAll('.category-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// 竞品卡片选择
+document.querySelectorAll('.competitor-card').forEach(card => {
+  card.addEventListener('click', function() {
+    document.querySelectorAll('.competitor-card').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+</script>
+
+</body>
+</html>

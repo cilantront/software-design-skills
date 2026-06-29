@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>照护助手小程序 - 全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; padding: 20px; }
+h1 { text-align: center; color: #333; margin-bottom: 8px; font-size: 24px; }
+.subtitle { text-align: center; color: #999; margin-bottom: 30px; font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
+.phone-frame { background: #fff; border-radius: 32px; border: 3px solid #333; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.12); position: relative; }
+.phone-status-bar { height: 28px; background: #f7f7f7; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 11px; color: #333; border-bottom: 1px solid #eee; }
+.phone-nav-bar { height: 44px; background: #FF8C42; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; font-weight: 600; position: relative; }
+.phone-nav-bar .back-btn { position: absolute; left: 12px; color: #fff; font-size: 20px; cursor: pointer; }
+.phone-content { height: 480px; overflow-y: auto; background: #f5f5f5; }
+.phone-tab-bar { height: 50px; background: #fff; display: flex; border-top: 1px solid #eee; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #999; cursor: pointer; }
+.tab-item.active { color: #FF8C42; }
+.tab-item .tab-icon { font-size: 18px; margin-bottom: 2px; }
+.phone-home-bar { height: 20px; background: #fff; display: flex; align-items: center; justify-content: center; }
+.phone-home-bar::after { content: ''; width: 100px; height: 4px; background: #333; border-radius: 2px; }
+.page-label { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); background: #FF8C42; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 12px; white-space: nowrap; }
+
+/* Common styles */
+.card { background: #fff; border-radius: 12px; padding: 16px; margin: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 12px; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: #FF8C42; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; }
+.avatar-lg { width: 60px; height: 60px; font-size: 24px; }
+.btn { display: inline-block; padding: 10px 24px; border-radius: 24px; font-size: 14px; font-weight: 500; text-align: center; cursor: pointer; border: none; }
+.btn-primary { background: #FF8C42; color: #fff; }
+.btn-outline { border: 1px solid #FF8C42; color: #FF8C42; background: #fff; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.tag-green { background: #E8F5E9; color: #4CAF50; }
+.tag-orange { background: #FFF3E0; color: #FF8C42; }
+.tag-red { background: #FFEBEE; color: #F44336; }
+.tag-gray { background: #F5F5F5; color: #999; }
+.divider { height: 1px; background: #f0f0f0; margin: 12px 0; }
+.section-title { font-size: 14px; color: #666; font-weight: 500; margin: 16px 12px 8px; }
+
+/* Login page */
+.login-page { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: linear-gradient(135deg, #FF8C42, #FFB74D); padding: 40px 24px; }
+.login-logo { width: 80px; height: 80px; background: #fff; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.login-title { color: #fff; font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+.login-desc { color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 40px; text-align: center; }
+.login-btn { width: 100%; padding: 14px; background: #fff; color: #FF8C42; border-radius: 28px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; margin-bottom: 12px; }
+.login-btn-sub { width: 100%; padding: 14px; background: rgba(255,255,255,0.2); color: #fff; border-radius: 28px; font-size: 14px; border: none; cursor: pointer; }
+
+/* Home page */
+.home-header { background: linear-gradient(135deg, #FF8C42, #FFB74D); padding: 16px; color: #fff; }
+.home-group-name { font-size: 16px; font-weight: 600; }
+.home-group-desc { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+.today-card { background: #fff; border-radius: 12px; margin: -20px 12px 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; z-index: 1; }
+.today-label { font-size: 12px; color: #999; }
+.today-name { font-size: 20px; font-weight: 600; color: #333; margin-top: 4px; }
+.today-task { font-size: 13px; color: #666; margin-top: 8px; }
+.quick-entry { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px; }
+.quick-item { display: flex; flex-direction: column; align-items: center; padding: 12px 4px; background: #fff; border-radius: 12px; cursor: pointer; }
+.quick-item .q-icon { font-size: 24px; margin-bottom: 6px; }
+.quick-item .q-text { font-size: 11px; color: #666; }
+.member-strip { display: flex; align-items: center; padding: 12px 16px; background: #fff; margin: 0 12px; border-radius: 12px; }
+.member-avatars { display: flex; margin-left: 12px; }
+.member-avatars .mini-avatar { width: 28px; height: 28px; border-radius: 50%; background: #FF8C42; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-left: -8px; border: 2px solid #fff; }
+
+/* Profile page */
+.profile-header { background: #fff; padding: 16px; display: flex; align-items: center; }
+.profile-info { margin-left: 16px; }
+.profile-name { font-size: 18px; font-weight: 600; color: #333; }
+.profile-meta { font-size: 12px; color: #999; margin-top: 4px; }
+.profile-tabs { display: flex; background: #fff; border-bottom: 1px solid #f0f0f0; }
+.profile-tab { flex: 1; text-align: center; padding: 12px; font-size: 13px; color: #666; cursor: pointer; }
+.profile-tab.active { color: #FF8C42; border-bottom: 2px solid #FF8C42; font-weight: 600; }
+.info-row { display: flex; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #f8f8f8; font-size: 13px; }
+.info-label { color: #999; }
+.info-value { color: #333; }
+
+/* Schedule page */
+.cal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; }
+.cal-month { font-size: 16px; font-weight: 600; color: #333; }
+.cal-nav { display: flex; gap: 16px; }
+.cal-nav span { cursor: pointer; font-size: 18px; color: #999; }
+.cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: #fff; padding: 8px 8px; }
+.cal-weekday { text-align: center; font-size: 11px; color: #999; }
+.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 4px 8px 12px; background: #fff; }
+.cal-day { text-align: center; padding: 6px 2px; border-radius: 8px; font-size: 12px; position: relative; min-height: 48px; }
+.cal-day .day-num { font-size: 13px; color: #333; }
+.cal-day .day-person { font-size: 9px; color: #FF8C42; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-day.today { background: #FFF3E0; }
+.cal-day.empty .day-num { color: #ccc; }
+.cal-day.unassigned .day-person { color: #F44336; }
+
+/* Swap page */
+.swap-form { padding: 16px; }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 13px; color: #666; margin-bottom: 8px; display: block; }
+.form-input { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; background: #fff; }
+.form-select { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; background: #fff; appearance: none; }
+.member-list-item { display: flex; align-items: center; padding: 12px; background: #fff; border-radius: 8px; margin-bottom: 8px; }
+.member-list-item .name { margin-left: 12px; font-size: 14px; color: #333; }
+.member-list-item .role { margin-left: auto; }
+
+/* Log page */
+.log-card { background: #fff; border-radius: 12px; margin: 8px 12px; padding: 14px; }
+.log-header { display: flex; align-items: center; justify-content: space-between; }
+.log-date { font-size: 14px; font-weight: 600; color: #333; }
+.log-author { font-size: 12px; color: #999; }
+.log-body { margin-top: 10px; }
+.log-row { display: flex; align-items: flex-start; margin-bottom: 6px; font-size: 13px; }
+.log-row .log-icon { margin-right: 8px; font-size: 14px; }
+.log-row .log-text { color: #555; flex: 1; }
+.log-footer { display: flex; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+.log-footer .comment-count { font-size: 12px; color: #999; margin-left: 8px; }
+
+/* Log edit page */
+.log-edit-form { padding: 12px; }
+.log-edit-form .form-group { background: #fff; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+.rating-group { display: flex; gap: 8px; margin-top: 8px; }
+.rating-btn { padding: 6px 16px; border-radius: 16px; border: 1px solid #e0e0e0; font-size: 12px; background: #fff; cursor: pointer; }
+.rating-btn.active { background: #FF8C42; color: #fff; border-color: #FF8C42; }
+
+/* Stats page */
+.stats-month { display: flex; align-items: center; justify-content: center; padding: 12px; background: #fff; font-size: 15px; font-weight: 600; color: #333; }
+.stats-month span { margin: 0 16px; cursor: pointer; color: #999; }
+.stats-overview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px; }
+.stats-num-card { background: #fff; border-radius: 12px; padding: 12px; text-align: center; }
+.stats-num { font-size: 22px; font-weight: 700; color: #FF8C42; }
+.stats-num-label { font-size: 11px; color: #999; margin-top: 4px; }
+.pie-chart { width: 120px; height: 120px; border-radius: 50%; margin: 16px auto; background: conic-gradient(#FF8C42 0% 35%, #4CAF50 35% 60%, #2196F3 60% 80%, #9C27B0 80% 100%); position: relative; }
+.pie-chart::after { content: ''; position: absolute; top: 25%; left: 25%; width: 50%; height: 50%; background: #fff; border-radius: 50%; }
+.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 12px; }
+.legend-item { display: flex; align-items: center; font-size: 11px; color: #666; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+.bar-chart { margin: 12px 16px; }
+.bar-row { display: flex; align-items: center; margin-bottom: 10px; }
+.bar-name { width: 48px; font-size: 12px; color: #666; }
+.bar-bg { flex: 1; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin: 0 8px; }
+.bar-fill { height: 100%; border-radius: 10px; background: #FF8C42; }
+.bar-value { font-size: 12px; color: #333; width: 32px; text-align: right; }
+
+/* Notify page */
+.notify-tabs { display: flex; background: #fff; padding: 0 12px; border-bottom: 1px solid #f0f0f0; }
+.notify-tab { padding: 10px 16px; font-size: 13px; color: #666; cursor: pointer; }
+.notify-tab.active { color: #FF8C42; border-bottom: 2px solid #FF8C42; font-weight: 600; }
+.notify-item { display: flex; padding: 14px 16px; background: #fff; border-bottom: 1px solid #f8f8f8; }
+.notify-item.unread { background: #FFF8F3; }
+.notify-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-right: 12px; flex-shrink: 0; }
+.notify-icon.schedule { background: #E3F2FD; }
+.notify-icon.swap { background: #FFF3E0; }
+.notify-icon.log { background: #E8F5E9; }
+.notify-body { flex: 1; }
+.notify-title { font-size: 14px; color: #333; font-weight: 500; }
+.notify-content { font-size: 12px; color: #999; margin-top: 4px; }
+.notify-time { font-size: 11px; color: #ccc; margin-top: 4px; }
+
+/* Mine page */
+.mine-header { background: linear-gradient(135deg, #FF8C42, #FFB74D); padding: 24px 16px; color: #fff; display: flex; align-items: center; }
+.mine-info { margin-left: 16px; }
+.mine-name { font-size: 18px; font-weight: 600; }
+.mine-phone { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+.mine-stats { display: grid; grid-template-columns: repeat(3, 1fr); background: #fff; margin: 12px; border-radius: 12px; padding: 16px; }
+.mine-stat { text-align: center; }
+.mine-stat-num { font-size: 20px; font-weight: 700; color: #FF8C42; }
+.mine-stat-label { font-size: 11px; color: #999; margin-top: 4px; }
+.mine-menu { background: #fff; margin: 0 12px; border-radius: 12px; overflow: hidden; }
+.mine-menu-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f8f8f8; font-size: 14px; color: #333; cursor: pointer; }
+.mine-menu-item:last-child { border-bottom: none; }
+.mine-menu-item .menu-icon { margin-right: 12px; font-size: 18px; }
+.mine-menu-item .arrow { margin-left: auto; color: #ccc; }
+
+/* Group page */
+.group-info-card { background: #fff; margin: 12px; border-radius: 12px; padding: 16px; }
+.group-name-row { display: flex; align-items: center; }
+.group-name-row .name { font-size: 16px; font-weight: 600; color: #333; }
+.group-name-row .tag { margin-left: 8px; }
+.member-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.member-item:last-child { border-bottom: none; }
+.member-detail { margin-left: 12px; flex: 1; }
+.member-detail .m-name { font-size: 14px; color: #333; }
+.member-detail .m-meta { font-size: 11px; color: #999; margin-top: 2px; }
+.invite-btns { display: flex; gap: 8px; margin-top: 12px; }
+
+/* Invite page */
+.invite-qr { width: 160px; height: 160px; background: #f5f5f5; border-radius: 12px; margin: 24px auto; display: flex; align-items: center; justify-content: center; border: 2px dashed #ddd; }
+.invite-qr-inner { width: 120px; height: 120px; background: repeating-conic-gradient(#333 0% 25%, #fff 0% 50%) 50% / 12px 12px; border-radius: 4px; }
+.invite-link-box { background: #f5f5f5; border-radius: 8px; padding: 12px; margin: 0 16px; font-size: 12px; color: #666; word-break: break-all; }
+.invite-actions { display: flex; gap: 12px; padding: 20px 16px; }
+.invite-action-btn { flex: 1; padding: 12px; border-radius: 24px; text-align: center; font-size: 14px; cursor: pointer; }
+
+/* Swap record page */
+.swap-record { background: #fff; border-radius: 12px; margin: 8px 12px; padding: 14px; }
+.swap-record-header { display: flex; justify-content: space-between; align-items: center; }
+.swap-record-date { font-size: 14px; font-weight: 600; color: #333; }
+.swap-record-body { margin-top: 10px; font-size: 13px; color: #666; }
+.swap-arrow { color: #FF8C42; font-size: 16px; margin: 0 4px; }
+
+/* Log detail page */
+.log-detail-card { background: #fff; margin: 12px; border-radius: 12px; padding: 16px; }
+.log-detail-header { display: flex; align-items: center; margin-bottom: 16px; }
+.log-detail-section { margin-bottom: 16px; }
+.log-detail-section .section-label { font-size: 13px; color: #999; margin-bottom: 6px; }
+.log-detail-section .section-content { font-size: 14px; color: #333; line-height: 1.6; }
+.comment-list { margin: 12px; }
+.comment-item { display: flex; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.comment-body { margin-left: 10px; }
+.comment-name { font-size: 12px; color: #333; font-weight: 500; }
+.comment-text { font-size: 13px; color: #666; margin-top: 4px; }
+.comment-time { font-size: 11px; color: #ccc; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>🏠 多子女父母照护排班协作助手</h1>
+<p class="subtitle">微信小程序端 - 全站点交互原型 (MVP V1.0)</p>
+
+<div class="grid">
+
+<!-- 1. 登录页 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">1. 登录页</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-content" style="height: 530px;">
+      <div class="login-page">
+        <div class="login-logo">🏠</div>
+        <div class="login-title">照护排班助手</div>
+        <div class="login-desc">让照护分工公平透明<br>让家庭关系更和谐</div>
+        <button class="login-btn">🟢 微信一键登录</button>
+        <button class="login-btn-sub">使用手机号登录</button>
+      </div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 2. 首页/群组主页 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">2. 首页/群组主页</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-content">
+      <div class="home-header">
+        <div class="home-group-name">🏠 张三家照护群</div>
+        <div class="home-group-desc">照护爸爸 · 4位家庭成员</div>
+      </div>
+      <div class="today-card">
+        <div class="today-label">📅 今日照护人</div>
+        <div class="today-name">张大姐</div>
+        <div class="today-task">📋 今日任务：送药、做饭、陪聊</div>
+      </div>
+      <div class="quick-entry">
+        <div class="quick-item"><span class="q-icon">📅</span><span class="q-text">排班表</span></div>
+        <div class="quick-item"><span class="q-icon">🔄</span><span class="q-text">换班</span></div>
+        <div class="quick-item"><span class="q-icon">📝</span><span class="q-text">记日志</span></div>
+        <div class="quick-item"><span class="q-icon">📊</span><span class="q-text">月统计</span></div>
+      </div>
+      <div class="section-title">被照护人</div>
+      <div class="card" style="display:flex;align-items:center;">
+        <div class="avatar">爸</div>
+        <div style="margin-left:12px;">
+          <div style="font-size:14px;font-weight:600;color:#333;">张爸爸</div>
+          <div style="font-size:12px;color:#999;">78岁 · 高血压、糖尿病</div>
+        </div>
+      </div>
+      <div class="section-title">家庭成员</div>
+      <div class="member-strip">
+        <span style="font-size:12px;color:#999;">成员</span>
+        <div class="member-avatars">
+          <div class="mini-avatar">大</div>
+          <div class="mini-avatar">二</div>
+          <div class="mini-avatar">三</div>
+          <div class="mini-avatar">四</div>
+        </div>
+        <span style="margin-left:auto;font-size:12px;color:#FF8C42;cursor:pointer;">管理 ›</span>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+    <div class="phone-tab-bar">
+      <div class="tab-item active"><span class="tab-icon">🏠</span>首页</div>
+      <div class="tab-item"><span class="tab-icon">📅</span>排班</div>
+      <div class="tab-item"><span class="tab-icon">📝</span>日志</div>
+      <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 3. 被照护人档案 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">3. 被照护人档案</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar"><span class="back-btn">‹</span>被照护人档案</div>
+    <div class="phone-content">
+      <div class="profile-header">
+        <div class="avatar avatar-lg">爸</div>
+        <div class="profile-info">
+          <div class="profile-name">张爸爸</div>
+          <div class="profile-meta">男 · 78岁 · 1948-03-15</div>
+          <div class="profile-meta">📍 北京市朝阳区XX小区</div>
+        </div>
+      </div>
+      <div class="profile-tabs">
+        <div class="profile-tab active">基本信息</div>
+        <div class="profile-tab">健康档案</div>
+        <div class="profile-tab">照护需求</div>
+      </div>
+      <div class="info-row"><span class="info-label">姓名</span><span class="info-value">张爸爸</span></div>
+      <div class="info-row"><span class="info-label">性别</span><span class="info-value">男</span></div>
+      <div class="info-row"><span class="info-label">出生日期</span><span class="info-value">1948-03-15</span></div>
+      <div class="info-row"><span class="info-label">住址</span><span class="info-value">北京市朝阳区XX小区3号楼</span></div>
+      <div class="info-row"><span class="info-label">紧急联系人</span><span class="info-value">张大姐 138****1234</span></div>
+      <div style="padding:12px 16px;">
+        <div style="font-size:13px;color:#999;margin-bottom:8px;">主要疾病</div>
+        <span class="tag tag-orange" style="margin-right:6px;">高血压</span>
+        <span class="tag tag-orange" style="margin-right:6px;">糖尿病</span>
+        <span class="tag tag-orange">关节炎</span>
+      </div>
+      <div style="padding:0 16px 12px;">
+        <div style="font-size:13px;color:#999;margin-bottom:8px;">当前用药</div>
+        <div style="font-size:13px;color:#333;line-height:1.8;">
+          💊 降压药 · 每日1次 · 早饭后<br>
+          💊 降糖药 · 每日2次 · 早晚饭前<br>
+          💊 钙片 · 每日1次 · 晚饭后
+        </div>
+      </div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 4. 排班日历 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">4. 排班日历</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar">照护排班表</div>
+    <div class="phone-content">
+      <div class="cal-header">
+        <div class="cal-month">2026年6月</div>
+        <div class="cal-nav"><span>‹</span><span>周/月</span><span>›</span></div>
+      </div>
+      <div style="padding:8px 12px;">
+        <button class="btn btn-primary" style="width:100%;padding:10px;">✨ 自动生成排班</button>
+      </div>
+      <div class="cal-weekdays">
+        <div class="cal-weekday">日</div>
+        <div class="cal-weekday">一</div>
+        <div class="cal-weekday">二</div>
+        <div class="cal-weekday">三</div>
+        <div class="cal-weekday">四</div>
+        <div class="cal-weekday">五</div>
+        <div class="cal-weekday">六</div>
+      </div>
+      <div class="cal-days">
+        <div class="cal-day empty"><div class="day-num"></div></div>
+        <div class="cal-day"><div class="day-num">1</div><div class="day-person">张大姐</div></div>
+        <div class="cal-day"><div class="day-num">2</div><div class="day-person">张大姐</div></div>
+        <div class="cal-day"><div class="day-num">3</div><div class="day-person">张二弟</div></div>
+        <div class="cal-day"><div class="day-num">4</div><div class="day-person">张二弟</div></div>
+        <div class="cal-day"><div class="day-num">5</div><div class="day-person">张三妹</div></div>
+        <div class="cal-day"><div class="day-num">6</div><div class="day-person">张三妹</div></div>
+        <div class="cal-day"><div class="day-num">7</div><div class="day-person">张四弟</div></div>
+        <div class="cal-day"><div class="day-num">8</div><div class="day-person">张四弟</div></div>
+        <div class="cal-day"><div class="day-num">9</div><div class="day-person">张大姐</div></div>
+        <div class="cal-day today"><div class="day-num">10</div><div class="day-person">张大姐</div></div>
+        <div class="cal-day"><div class="day-num">11</div><div class="day-person">张二弟</div></div>
+        <div class="cal-day"><div class="day-num">12</div><div class="day-person">张二弟</div></div>
+        <div class="cal-day"><div class="day-num">13</div><div class="day-person">张三妹</div></div>
+        <div class="cal-day"><div class="day-num">14</div><div class="day-person">张三妹</div></div>
+        <div class="cal-day"><div class="day-num">15</div><div class="day-person">张四弟</div></div>
+        <div class="cal-day"><div class="day-num">16</div><div class="day-person">张四弟</div></div>
+        <div class="cal-day"><div class="day-num">17</div><div class="day-person">张大姐</div></div>
+        <div class="cal-day"><div class="day-num">18</div><div class="day-person">张大姐</div></div>
+        <div class="cal-day"><div class="day-num">19</div><div class="day-person">张二弟</div></div>
+        <div class="cal-day"><div class="day-num">20</div><div class="day-person">张二弟</div></div>
+        <div class="cal-day unassigned"><div class="day-num">21</div><div class="day-person">待分配</div></div>
+        <div class="cal-day unassigned"><div class="day-num">22</div><div class="day-person">待分配</div></div>
+      </div>
+      <div style="padding:8px 12px;font-size:12px;color:#999;">
+        💡 点击日期可查看详情或手动调整照护人
+      </div>
+    </div>
+    <div class="phone-tab-bar">
+      <div class="tab-item"><span class="tab-icon">🏠</span>首页</div>
+      <div class="tab-item active"><span class="tab-icon">📅</span>排班</div>
+      <div class="tab-item"><span class="tab-icon">📝</span>日志</div>
+      <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 5. 换班申请 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">5. 换班申请</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar"><span class="back-btn">‹</span>发起换班</div>
+    <div class="phone-content">
+      <div class="swap-form">
+        <div class="form-group">
+          <label class="form-label">选择换班日期</label>
+          <div class="form-input" style="color:#333;">📅 2026年6月17日（周三）</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">选择换班对象</label>
+          <div class="member-list-item" style="border:1px solid #FF8C42;border-radius:8px;">
+            <div class="avatar" style="width:32px;height:32px;font-size:13px;">二</div>
+            <span class="name" style="font-weight:600;color:#FF8C42;">张二弟</span>
+            <span class="tag tag-green">已选中</span>
+          </div>
+          <div class="member-list-item" style="opacity:0.6;">
+            <div class="avatar" style="width:32px;height:32px;font-size:13px;background:#4CAF50;">三</div>
+            <span class="name">张三妹</span>
+          </div>
+          <div class="member-list-item" style="opacity:0.6;">
+            <div class="avatar" style="width:32px;height:32px;font-size:13px;background:#2196F3;">四</div>
+            <span class="name">张四弟</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">换班原因</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <span class="tag tag-orange" style="padding:6px 12px;cursor:pointer;">出差</span>
+            <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;cursor:pointer;">生病</span>
+            <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;cursor:pointer;">工作忙</span>
+            <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;cursor:pointer;">其他</span>
+          </div>
+          <textarea class="form-input" rows="2" placeholder="补充说明（选填）" style="resize:none;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">换班类型</label>
+          <div style="display:flex;gap:8px;">
+            <span class="rating-btn active">互换班</span>
+            <span class="rating-btn">请代班</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:16px;padding:14px;">提交换班申请</button>
+      </div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 6. 换班记录 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">6. 换班记录</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar"><span class="back-btn">‹</span>换班记录</div>
+    <div class="phone-content">
+      <div style="padding:12px;">
+        <span class="tag tag-orange" style="padding:6px 12px;margin-right:8px;">全部</span>
+        <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;margin-right:8px;">待确认</span>
+        <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;margin-right:8px;">已完成</span>
+        <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;">已拒绝</span>
+      </div>
+      <div class="swap-record">
+        <div class="swap-record-header">
+          <span class="swap-record-date">6月17日（周三）</span>
+          <span class="tag tag-green">已同意</span>
+        </div>
+        <div class="swap-record-body">
+          <span>张大姐</span> <span class="swap-arrow">⇄</span> <span>张二弟</span>
+          <div style="font-size:12px;color:#999;margin-top:4px;">原因：出差 | 6月15日 14:30</div>
+        </div>
+      </div>
+      <div class="swap-record">
+        <div class="swap-record-header">
+          <span class="swap-record-date">6月10日（周四）</span>
+          <span class="tag tag-orange">待确认</span>
+        </div>
+        <div class="swap-record-body">
+          <span>张三妹</span> <span class="swap-arrow">→</span> <span>张大姐</span>（代班）
+          <div style="font-size:12px;color:#999;margin-top:4px;">原因：工作忙 | 6月9日 20:15</div>
+        </div>
+      </div>
+      <div class="swap-record">
+        <div class="swap-record-header">
+          <span class="swap-record-date">6月5日（周六）</span>
+          <span class="tag tag-red">已拒绝</span>
+        </div>
+        <div class="swap-record-body">
+          <span>张四弟</span> <span class="swap-arrow">⇄</span> <span>张三妹</span>
+          <div style="font-size:12px;color:#999;margin-top:4px;">原因：生病 | 6月3日 09:00</div>
+        </div>
+      </div>
+      <div class="swap-record">
+        <div class="swap-record-header">
+          <span class="swap-record-date">5月28日（周四）</span>
+          <span class="tag tag-gray">已过期</span>
+        </div>
+        <div class="swap-record-body">
+          <span>张二弟</span> <span class="swap-arrow">⇄</span> <span>张四弟</span>
+          <div style="font-size:12px;color:#999;margin-top:4px;">原因：出差 | 5月26日 16:00</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 7. 照护日志列表 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">7. 照护日志列表</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-content">
+      <div style="display:flex;background:#fff;padding:10px 12px;gap:8px;overflow-x:auto;">
+        <span class="tag tag-orange" style="padding:6px 12px;white-space:nowrap;">全部成员</span>
+        <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;white-space:nowrap;">张大姐</span>
+        <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;white-space:nowrap;">张二弟</span>
+        <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;white-space:nowrap;">张三妹</span>
+        <span class="tag" style="padding:6px 12px;background:#f5f5f5;color:#666;white-space:nowrap;">张四弟</span>
+      </div>
+      <div class="log-card">
+        <div class="log-header">
+          <span class="log-date">6月10日 · 周三</span>
+          <span class="log-author">张大姐</span>
+        </div>
+        <div class="log-body">
+          <div class="log-row"><span class="log-icon">💊</span><span class="log-text">用药正常，无异常反应</span></div>
+          <div class="log-row"><span class="log-icon">😊</span><span class="log-text">精神好 · 食欲好 · 睡眠一般</span></div>
+          <div class="log-row"><span class="log-icon">💰</span><span class="log-text">支出 ¥86（医药费 ¥45 + 餐费 ¥41）</span></div>
+        </div>
+        <div class="log-footer">
+          <span style="font-size:14px;">💬</span>
+          <span class="comment-count">2条留言</span>
+          <span style="margin-left:auto;font-size:12px;color:#ccc;">20:30</span>
+        </div>
+      </div>
+      <div class="log-card">
+        <div class="log-header">
+          <span class="log-date">6月9日 · 周二</span>
+          <span class="log-author">张二弟</span>
+        </div>
+        <div class="log-body">
+          <div class="log-row"><span class="log-icon">💊</span><span class="log-text">用药正常</span></div>
+          <div class="log-row"><span class="log-icon">🏥</span><span class="log-text">上午陪同去医院复查，血压正常</span></div>
+          <div class="log-row"><span class="log-icon">😊</span><span class="log-text">精神一般 · 食欲好 · 睡眠好</span></div>
+          <div class="log-row"><span class="log-icon">💰</span><span class="log-text">支出 ¥215（医药费 ¥180 + 交通费 ¥35）</span></div>
+        </div>
+        <div class="log-footer">
+          <span style="font-size:14px;">💬</span>
+          <span class="comment-count">3条留言</span>
+          <span style="margin-left:auto;font-size:12px;color:#ccc;">21:15</span>
+        </div>
+      </div>
+      <div class="log-card">
+        <div class="log-header">
+          <span class="log-date">6月8日 · 周一</span>
+          <span class="log-author">张三妹</span>
+        </div>
+        <div class="log-body">
+          <div class="log-row"><span class="log-icon">💊</span><span class="log-text">有异常：下午忘记吃降糖药，已补服</span></div>
+          <div class="log-row"><span class="log-icon">😊</span><span class="log-text">精神好 · 食欲一般 · 睡眠好</span></div>
+          <div class="log-row"><span class="log-icon">💰</span><span class="log-text">支出 ¥52（餐费 ¥52）</span></div>
+        </div>
+        <div class="log-footer">
+          <span style="font-size:14px;">💬</span>
+          <span class="comment-count">1条留言</span>
+          <span style="margin-left:auto;font-size:12px;color:#ccc;">19:45</span>
+        </div>
+      </div>
+    </div>
+    <div class="phone-tab-bar">
+      <div class="tab-item"><span class="tab-icon">🏠</span>首页</div>
+      <div class="tab-item"><span class="tab-icon">📅</span>排班</div>
+      <div class="tab-item active"><span class="tab-icon">📝</span>日志</div>
+      <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 8. 照护日志编辑 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">8. 照护日志编辑</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar"><span class="back-btn">‹</span>记录照护日志</div>
+    <div class="phone-content" style="background:#f5f5f5;">
+      <div class="log-edit-form">
+        <div class="form-group">
+          <label class="form-label">📅 照护日期</label>
+          <div style="font-size:14px;color:#333;">2026年6月10日（周三）</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">💊 用药情况 <span class="tag tag-red">必填</span></label>
+          <div class="rating-group">
+            <span class="rating-btn active">✅ 正常</span>
+            <span class="rating-btn">⚠️ 有异常</span>
+          </div>
+          <textarea class="form-input" rows="2" placeholder="补充说明（选填）" style="resize:none;margin-top:8px;font-size:13px;">按时服药，无异常</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">😊 身体状态 <span class="tag tag-red">必填</span></label>
+          <div style="margin-bottom:8px;">
+            <span style="font-size:12px;color:#999;">精神状态</span>
+            <div class="rating-group"><span class="rating-btn active">好</span><span class="rating-btn">一般</span><span class="rating-btn">差</span></div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <span style="font-size:12px;color:#999;">食欲</span>
+            <div class="rating-group"><span class="rating-btn active">好</span><span class="rating-btn">一般</span><span class="rating-btn">差</span></div>
+          </div>
+          <div>
+            <span style="font-size:12px;color:#999;">睡眠</span>
+            <div class="rating-group"><span class="rating-btn">好</span><span class="rating-btn active">一般</span><span class="rating-btn">差</span></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">💰 照护支出</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" class="form-input" placeholder="金额" value="86" style="width:100px;">
+            <select class="form-select" style="flex:1;">
+              <option>医药费</option>
+              <option>餐费</option>
+              <option>交通费</option>
+              <option>护理用品</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">📷 照片（选填）</label>
+          <div style="display:flex;gap:8px;">
+            <div style="width:60px;height:60px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#ccc;">+</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:14px;margin-top:8px;">提交日志</button>
+      </div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 9. 月度统计 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">9. 月度统计</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar">月度统计</div>
+    <div class="phone-content">
+      <div class="stats-month"><span>‹</span>2026年6月<span>›</span></div>
+      <div class="stats-overview">
+        <div class="stats-num-card"><div class="stats-num">28</div><div class="stats-num-label">总照护天数</div></div>
+        <div class="stats-num-card"><div class="stats-num">¥856</div><div class="stats-num-label">总支出</div></div>
+        <div class="stats-num-card"><div class="stats-num">4</div><div class="stats-num-label">参与成员</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">照护贡献占比</div>
+        <div class="pie-chart"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#FF8C42;"></div>张大姐 35%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4CAF50;"></div>张二弟 25%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#2196F3;"></div>张三妹 20%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#9C27B0;"></div>张四弟 20%</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">照护天数对比</div>
+        <div class="bar-chart">
+          <div class="bar-row"><span class="bar-name">张大姐</span><div class="bar-bg"><div class="bar-fill" style="width:70%;"></div></div><span class="bar-value">10天</span></div>
+          <div class="bar-row"><span class="bar-name">张二弟</span><div class="bar-bg"><div class="bar-fill" style="width:50%;background:#4CAF50;"></div></div><span class="bar-value">7天</span></div>
+          <div class="bar-row"><span class="bar-name">张三妹</span><div class="bar-bg"><div class="bar-fill" style="width:40%;background:#2196F3;"></div></div><span class="bar-value">6天</span></div>
+          <div class="bar-row"><span class="bar-name">张四弟</span><div class="bar-bg"><div class="bar-fill" style="width:36%;background:#9C27B0;"></div></div><span class="bar-value">5天</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">支出明细</div>
+        <div class="bar-chart">
+          <div class="bar-row"><span class="bar-name">医药费</span><div class="bar-bg"><div class="bar-fill" style="width:60%;background:#F44336;"></div></div><span class="bar-value">¥520</span></div>
+          <div class="bar-row"><span class="bar-name">餐费</span><div class="bar-bg"><div class="bar-fill" style="width:25%;background:#FF9800;"></div></div><span class="bar-value">¥210</span></div>
+          <div class="bar-row"><span class="bar-name">交通费</span><div class="bar-bg"><div class="bar-fill" style="width:12%;background:#4CAF50;"></div></div><span class="bar-value">¥98</span></div>
+          <div class="bar-row"><span class="bar-name">护理品</span><div class="bar-bg"><div class="bar-fill" style="width:5%;background:#2196F3;"></div></div><span class="bar-value">¥28</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 10. 消息中心 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">10. 消息中心</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar">消息中心</div>
+    <div class="phone-content">
+      <div class="notify-tabs">
+        <div class="notify-tab active">全部</div>
+        <div class="notify-tab">排班</div>
+        <div class="notify-tab">换班</div>
+        <div class="notify-tab">日志</div>
+      </div>
+      <div class="notify-item unread">
+        <div class="notify-icon swap">🔄</div>
+        <div class="notify-body">
+          <div class="notify-title">换班申请</div>
+          <div class="notify-content">张三妹请求与您换班（6月15日），请及时处理</div>
+          <div class="notify-time">5分钟前</div>
+        </div>
+      </div>
+      <div class="notify-item unread">
+        <div class="notify-icon log">📝</div>
+        <div class="notify-body">
+          <div class="notify-title">新照护日志</div>
+          <div class="notify-content">张大姐提交了6月10日的照护日志</div>
+          <div class="notify-time">20分钟前</div>
+        </div>
+      </div>
+      <div class="notify-item">
+        <div class="notify-icon schedule">📅</div>
+        <div class="notify-body">
+          <div class="notify-title">排班已发布</div>
+          <div class="notify-content">6月份照护排班表已发布，请查看您的照护安排</div>
+          <div class="notify-time">2小时前</div>
+        </div>
+      </div>
+      <div class="notify-item">
+        <div class="notify-icon swap">✅</div>
+        <div class="notify-body">
+          <div class="notify-title">换班成功</div>
+          <div class="notify-content">您与张二弟的换班申请已通过，排班已更新</div>
+          <div class="notify-time">昨天 14:30</div>
+        </div>
+      </div>
+      <div class="notify-item">
+        <div class="notify-icon log">📝</div>
+        <div class="notify-body">
+          <div class="notify-title">新照护日志</div>
+          <div class="notify-content">张二弟提交了6月9日的照护日志</div>
+          <div class="notify-time">昨天 21:15</div>
+        </div>
+      </div>
+      <div class="notify-item">
+        <div class="notify-icon schedule">🔔</div>
+        <div class="notify-body">
+          <div class="notify-title">照护提醒</div>
+          <div class="notify-content">明天（6月11日）是您照护爸爸的日子，请做好准备</div>
+          <div class="notify-time">昨天 08:00</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 11. 个人中心 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">11. 个人中心</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-content">
+      <div class="mine-header">
+        <div class="avatar avatar-lg" style="background:#fff;color:#FF8C42;">大</div>
+        <div class="mine-info">
+          <div class="mine-name">张大姐</div>
+          <div class="mine-phone">📱 138****1234</div>
+        </div>
+      </div>
+      <div class="mine-stats">
+        <div class="mine-stat"><div class="mine-stat-num">10</div><div class="mine-stat-label">本月照护天数</div></div>
+        <div class="mine-stat"><div class="mine-stat-num">86</div><div class="mine-stat-label">累计照护天数</div></div>
+        <div class="mine-stat"><div class="mine-stat-num">¥256</div><div class="mine-stat-label">本月垫付</div></div>
+      </div>
+      <div class="mine-menu">
+        <div class="mine-menu-item"><span class="menu-icon">🏠</span>我的群组<span style="margin-left:8px;font-size:12px;color:#999;">张三家照护群</span><span class="arrow">›</span></div>
+        <div class="mine-menu-item"><span class="menu-icon">📅</span>我的排班<span class="arrow">›</span></div>
+        <div class="mine-menu-item"><span class="menu-icon">📝</span>我的日志<span class="arrow">›</span></div>
+        <div class="mine-menu-item"><span class="menu-icon">🔄</span>我的换班<span class="arrow">›</span></div>
+      </div>
+      <div style="height:12px;"></div>
+      <div class="mine-menu">
+        <div class="mine-menu-item"><span class="menu-icon">👤</span>个人信息<span class="arrow">›</span></div>
+        <div class="mine-menu-item"><span class="menu-icon">⏰</span>照护偏好设置<span class="arrow">›</span></div>
+        <div class="mine-menu-item"><span class="menu-icon">🔔</span>通知设置<span class="arrow">›</span></div>
+        <div class="mine-menu-item"><span class="menu-icon">❓</span>使用说明<span class="arrow">›</span></div>
+        <div class="mine-menu-item"><span class="menu-icon">💬</span>意见反馈<span class="arrow">›</span></div>
+      </div>
+    </div>
+    <div class="phone-tab-bar">
+      <div class="tab-item"><span class="tab-icon">🏠</span>首页</div>
+      <div class="tab-item"><span class="tab-icon">📅</span>排班</div>
+      <div class="tab-item"><span class="tab-icon">📝</span>日志</div>
+      <div class="tab-item active"><span class="tab-icon">👤</span>我的</div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 12. 群组管理 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">12. 群组管理</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar"><span class="back-btn">‹</span>群组管理</div>
+    <div class="phone-content">
+      <div class="group-info-card">
+        <div class="group-name-row">
+          <span class="name">张三家照护群</span>
+          <span class="tag tag-green">家庭版</span>
+        </div>
+        <div style="font-size:12px;color:#999;margin-top:8px;">创建于 2026-05-01 · 群公告：爸爸本周三去医院复查</div>
+        <div class="invite-btns">
+          <button class="btn btn-primary" style="flex:1;padding:8px;">📎 邀请成员</button>
+          <button class="btn btn-outline" style="flex:1;padding:8px;">✏️ 编辑群信息</button>
+        </div>
+      </div>
+      <div class="section-title">被照护人（1人）</div>
+      <div class="card" style="display:flex;align-items:center;margin:0 12px;">
+        <div class="avatar">爸</div>
+        <div style="margin-left:12px;">
+          <div style="font-size:14px;font-weight:600;color:#333;">张爸爸</div>
+          <div style="font-size:12px;color:#999;">78岁 · 高血压、糖尿病</div>
+        </div>
+        <span style="margin-left:auto;font-size:12px;color:#FF8C42;">编辑 ›</span>
+      </div>
+      <div class="section-title">家庭成员（4人）</div>
+      <div style="background:#fff;margin:0 12px;border-radius:12px;padding:0 16px;">
+        <div class="member-item">
+          <div class="avatar" style="width:36px;height:36px;font-size:14px;">大</div>
+          <div class="member-detail">
+            <div class="m-name">张大姐</div>
+            <div class="m-meta">照护偏好：周一三五晚上、周末全天</div>
+          </div>
+          <span class="tag tag-orange">管理员</span>
+        </div>
+        <div class="member-item">
+          <div class="avatar" style="width:36px;height:36px;font-size:14px;background:#4CAF50;">二</div>
+          <div class="member-detail">
+            <div class="m-name">张二弟</div>
+            <div class="m-meta">照护偏好：周二四全天</div>
+          </div>
+          <span class="tag tag-gray">成员</span>
+        </div>
+        <div class="member-item">
+          <div class="avatar" style="width:36px;height:36px;font-size:14px;background:#2196F3;">三</div>
+          <div class="member-detail">
+            <div class="m-name">张三妹</div>
+            <div class="m-meta">照护偏好：周三五全天</div>
+          </div>
+          <span class="tag tag-gray">成员</span>
+        </div>
+        <div class="member-item">
+          <div class="avatar" style="width:36px;height:36px;font-size:14px;background:#9C27B0;">四</div>
+          <div class="member-detail">
+            <div class="m-name">张四弟</div>
+            <div class="m-meta">照护偏好：周六日全天</div>
+          </div>
+          <span class="tag tag-gray">成员</span>
+        </div>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+<!-- 13. 邀请成员 -->
+<div style="position:relative; margin-top: 30px;">
+  <div class="page-label">13. 邀请成员</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-nav-bar"><span class="back-btn">‹</span>邀请家庭成员</div>
+    <div class="phone-content">
+      <div style="text-align:center;padding:20px 16px 0;font-size:14px;color:#666;">
+        扫描下方二维码或分享邀请链接<br>邀请家人加入照护群
+      </div>
+      <div class="invite-qr">
+        <div class="invite-qr-inner"></div>
+      </div>
+      <div style="text-align:center;font-size:12px;color:#999;margin-bottom:16px;">二维码有效期：7天</div>
+      <div style="padding:0 16px;">
+        <div style="font-size:13px;color:#999;margin-bottom:8px;">邀请链接</div>
+        <div class="invite-link-box">
+          https://care-helper.com/invite/abc123?group=zhangsan
+        </div>
+      </div>
+      <div class="invite-actions">
+        <div class="invite-action-btn btn-primary">📤 分享到微信群</div>
+        <div class="invite-action-btn btn-outline">📋 复制链接</div>
+      </div>
+      <div style="text-align:center;padding:8px;font-size:12px;color:#999;">
+        或直接通过手机号添加
+      </div>
+      <div style="padding:8px 16px;">
+        <div style="display:flex;gap:8px;">
+          <input type="text" class="form-input" placeholder="输入家人手机号" style="flex:1;">
+          <button class="btn btn-outline" style="padding:10px 16px;">添加</button>
+        </div>
+      </div>
+    </div>
+    <div class="phone-home-bar"></div>
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center;padding:40px;color:#999;font-size:13px;">
+  多子女父母照护排班协作助手 · 小程序端全站点原型 · V1.0 MVP<br>
+  共13个核心页面 · 暖橙色主题设计 · 温馨家庭风格
+</div>
+
+</body>
+</html>

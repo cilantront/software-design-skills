@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模板生成与导出页 - Widget原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    padding: 24px;
+  }
+  .widget-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 32px;
+  }
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .page-title { font-size: 20px; font-weight: 600; color: #1a1a2e; }
+  .export-btn-group {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-feishu { background: #3370ff; color: #fff; }
+  .btn-feishu:hover { background: #245bdb; }
+  .btn-notion { background: #1a1a2e; color: #fff; }
+  .btn-notion:hover { background: #000; }
+  .btn-excel { background: #16a34a; color: #fff; }
+  .btn-excel:hover { background: #15803d; }
+
+  /* Tabs */
+  .main-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .main-tab {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .main-tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+  .main-tab:hover:not(.active) { color: #374151; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Generation Controls */
+  .gen-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 10px;
+  }
+  .gen-controls label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+  }
+  .gen-select {
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    background: #fff;
+  }
+  .gen-btn {
+    margin-left: auto;
+  }
+
+  /* Template Cards */
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .template-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .template-card:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.1);
+  }
+  .template-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .template-source {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+  .template-original {
+    font-size: 13px;
+    color: #6b7280;
+    font-style: italic;
+    padding: 8px 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    border-left: 3px solid #d1d5db;
+    margin-bottom: 12px;
+  }
+  .template-reply {
+    font-size: 14px;
+    color: #1a1a2e;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .template-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .template-tag {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tag-tone { background: #ede9fe; color: #6366f1; }
+  .tag-length { background: #dbeafe; color: #2563eb; }
+  .tag-cat { background: #fef3c7; color: #d97706; }
+  .template-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .action-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+    transition: all 0.2s;
+  }
+  .action-btn:hover { border-color: #6366f1; color: #6366f1; }
+
+  /* Topic Suggestions */
+  .topic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .topic-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .topic-card:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.1);
+  }
+  .topic-priority {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .priority-high { background: #fef2f2; color: #dc2626; }
+  .priority-mid { background: #fff7ed; color: #ea580c; }
+  .priority-low { background: #f0fdf4; color: #16a34a; }
+  .topic-content { flex: 1; }
+  .topic-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+  .topic-angle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 8px;
+  }
+  .topic-outline {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .topic-outline li {
+    margin-left: 16px;
+    margin-bottom: 2px;
+  }
+  .topic-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+  .topic-heat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #dc2626;
+    font-weight: 500;
+  }
+  .topic-calendar-btn {
+    padding: 4px 10px;
+    border: 1px solid #6366f1;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #6366f1;
+    cursor: pointer;
+    background: #fff;
+    margin-top: 8px;
+  }
+  .topic-calendar-btn:hover { background: #f0f0ff; }
+  .pro-badge {
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+  }
+
+  /* Export Modal */
+  .export-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+  .export-option {
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .export-option:hover { border-color: #6366f1; background: #f0f0ff; }
+  .export-option.selected { border-color: #6366f1; background: #ede9fe; }
+  .export-option-icon { font-size: 28px; margin-bottom: 8px; }
+  .export-option-name { font-size: 14px; font-weight: 500; color: #1a1a2e; }
+  .export-option-desc { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+  .scope-selector {
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+  .scope-title { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+  .scope-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .scope-chip {
+    padding: 4px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.2s;
+  }
+  .scope-chip.active { border-color: #6366f1; background: #ede9fe; color: #6366f1; }
+</style>
+</head>
+<body>
+<div class="widget-container">
+  <div class="page-header">
+    <h2 class="page-title">模板生成与导出</h2>
+    <div class="export-btn-group">
+      <button class="btn btn-feishu">📘 导出飞书</button>
+      <button class="btn btn-notion">📓 导出Notion</button>
+      <button class="btn btn-excel">📊 导出Excel</button>
+    </div>
+  </div>
+
+  <div class="main-tabs">
+    <div class="main-tab active" onclick="switchMainTab('reply')">💬 回复模板 (12)</div>
+    <div class="main-tab" onclick="switchMainTab('topic')">💡 选题建议 (8)</div>
+  </div>
+
+  <!-- Reply Templates Panel -->
+  <div class="tab-panel active" id="panel-reply">
+    <div class="gen-controls">
+      <label>语气风格：</label>
+      <select class="gen-select">
+        <option>亲切友好</option>
+        <option>正式专业</option>
+        <option>幽默风趣</option>
+      </select>
+      <label>回复长度：</label>
+      <select class="gen-select">
+        <option>简短（50字）</option>
+        <option selected>详细（200字）</option>
+      </select>
+      <label>类别筛选：</label>
+      <select class="gen-select">
+        <option>全部</option>
+        <option>提问类</option>
+        <option>产品反馈类</option>
+      </select>
+      <button class="btn btn-primary gen-btn">✨ 重新生成</button>
+    </div>
+
+    <div class="template-grid">
+      <div class="template-card">
+        <div class="template-card-header">
+          <div>
+            <div class="template-source">原始评论 · @小明同学</div>
+          </div>
+          <span class="template-tag tag-cat">提问类</span>
+        </div>
+        <div class="template-original">"这个产品在哪里买的？有链接吗？价格多少？"</div>
+        <div class="template-reply">
+          <strong>回复要点：</strong><br>
+          ① 感谢关注 ② 提供购买渠道信息 ③ 说明价格区间 ④ 引导关注获取更多优惠<br><br>
+          <strong>参考话术：</strong><br>
+          "谢谢宝子的关注！这款产品我在XX旗舰店入的，链接我放在主页置顶笔记里啦～价格大概在XX-XX之间，最近好像还有活动价哦！关注我，后续会出详细测评～"
+        </div>
+        <div class="template-tags">
+          <span class="template-tag tag-tone">亲切友好</span>
+          <span class="template-tag tag-length">详细</span>
+        </div>
+        <div class="template-actions">
+          <button class="action-btn">✏️ 编辑</button>
+          <button class="action-btn">📋 复制</button>
+          <button class="action-btn">🔄 重新生成</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-card-header">
+          <div>
+            <div class="template-source">原始评论 · @学无止境</div>
+          </div>
+          <span class="template-tag tag-cat">提问类</span>
+        </div>
+        <div class="template-original">"能出一期详细教程吗？很想学这个化妆技巧"</div>
+        <div class="template-reply">
+          <strong>回复要点：</strong><br>
+          ① 肯定用户需求 ② 确认教程计划 ③ 征集具体想学的内容 ④ 引导关注等更新<br><br>
+          <strong>参考话术：</strong><br>
+          "好呀好呀！我也一直在准备这个教程呢～你最想学哪个步骤呀？评论区告诉我，我优先出大家最想看的！记得关注我不然刷不到更新哦～"
+        </div>
+        <div class="template-tags">
+          <span class="template-tag tag-tone">亲切友好</span>
+          <span class="template-tag tag-length">详细</span>
+        </div>
+        <div class="template-actions">
+          <button class="action-btn">✏️ 编辑</button>
+          <button class="action-btn">📋 复制</button>
+          <button class="action-btn">🔄 重新生成</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-card-header">
+          <div>
+            <div class="template-source">原始评论 · @敏感肌</div>
+          </div>
+          <span class="template-tag tag-cat" style="background:#fef2f2; color:#dc2626;">负面反馈</span>
+        </div>
+        <div class="template-original">"用了之后过敏了，脸上起了好多小红点"</div>
+        <div class="template-reply">
+          <strong>回复要点：</strong><br>
+          ① 表达歉意和关心 ② 建议立即停用 ③ 提供售后联系方式 ④ 承诺反馈给品牌方<br><br>
+          <strong>参考话术：</strong><br>
+          "真的很抱歉听到这个消息！建议您先停用产品，如果严重的话请尽快就医。请私信我您的订单信息，我会第一时间帮您联系售后处理，也会把这个情况反馈给品牌方。非常感谢您的反馈！"
+        </div>
+        <div class="template-tags">
+          <span class="template-tag tag-tone">正式专业</span>
+          <span class="template-tag tag-length">详细</span>
+        </div>
+        <div class="template-actions">
+          <button class="action-btn">✏️ 编辑</button>
+          <button class="action-btn">📋 复制</button>
+          <button class="action-btn">🔄 重新生成</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-card-header">
+          <div>
+            <div class="template-source">原始评论 · @穷学生</div>
+          </div>
+          <span class="template-tag tag-cat" style="background:#fff7ed; color:#ea580c;">痛点反馈</span>
+        </div>
+        <div class="template-original">"价格太贵了，学生党伤不起，有平价替代吗？"</div>
+        <div class="template-reply">
+          <strong>回复要点：</strong><br>
+          ① 理解用户立场 ② 推荐平价替代品 ③ 提供省钱购买渠道 ④ 预告平价专题<br><br>
+          <strong>参考话术：</strong><br>
+          "完全理解！学生党确实要精打细算～其实这个品牌经常有活动，关注直播间会有半价哦！另外我之前出过一期平价替代合集，可以去主页看看～后面我还会专门出一期百元内好物推荐！"
+        </div>
+        <div class="template-tags">
+          <span class="template-tag tag-tone">亲切友好</span>
+          <span class="template-tag tag-length">详细</span>
+        </div>
+        <div class="template-actions">
+          <button class="action-btn">✏️ 编辑</button>
+          <button class="action-btn">📋 复制</button>
+          <button class="action-btn">🔄 重新生成</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic Suggestions Panel -->
+  <div class="tab-panel" id="panel-topic">
+    <div class="gen-controls">
+      <label>选题数量：</label>
+      <select class="gen-select">
+        <option>5个</option>
+        <option selected>8个</option>
+        <option>10个</option>
+      </select>
+      <label>排序方式：</label>
+      <select class="gen-select">
+        <option selected>按热度优先</option>
+        <option>按相关性优先</option>
+        <option>按时间优先</option>
+      </select>
+      <button class="btn btn-primary gen-btn">✨ 重新生成</button>
+    </div>
+
+    <div class="topic-list">
+      <div class="topic-card">
+        <div class="topic-priority priority-high">1</div>
+        <div class="topic-content">
+          <div class="topic-title">小个子女生穿搭显高攻略</div>
+          <div class="topic-angle">切入角度：从评论区高频提问出发，针对155cm以下女生的穿搭痛点</div>
+          <div class="topic-outline">
+            <strong>内容大纲：</strong>
+            <ol>
+              <li>显高穿搭的3个核心原则（提高腰线/色彩统一/适当露肤）</li>
+              <li>5套实测穿搭对比（同一套衣服不同搭配的视觉效果）</li>
+              <li>平价单品推荐（全部百元内）</li>
+              <li>常见误区纠正（ oversize不是万能公式）</li>
+            </ol>
+          </div>
+          <div class="topic-meta">
+            <span class="topic-heat">🔥 热度 412</span>
+            <span>相关评论 23条</span>
+            <span>置信度 92%</span>
+          </div>
+          <button class="topic-calendar-btn">📅 加入选题日历 <span class="pro-badge">PRO</span></button>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-priority priority-high">2</div>
+        <div class="topic-content">
+          <div class="topic-title">百元内平价护肤好物合集</div>
+          <div class="topic-angle">切入角度：回应学生党用户对平价替代品的需求</div>
+          <div class="topic-outline">
+            <strong>内容大纲：</strong>
+            <ol>
+              <li>为什么平价≠不好用（成分解析）</li>
+              <li>5款百元内洁面推荐（按肤质分类）</li>
+              <li>3款平价精华实测对比</li>
+              <li>学生党护肤routine分享</li>
+            </ol>
+          </div>
+          <div class="topic-meta">
+            <span class="topic-heat">🔥 热度 289</span>
+            <span>相关评论 18条</span>
+            <span>置信度 88%</span>
+          </div>
+          <button class="topic-calendar-btn">📅 加入选题日历 <span class="pro-badge">PRO</span></button>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-priority priority-mid">3</div>
+        <div class="topic-content">
+          <div class="topic-title">男友好礼物指南（节日特辑）</div>
+          <div class="topic-angle">切入角度：节日送礼场景，解决"不知道送什么"的普遍困扰</div>
+          <div class="topic-outline">
+            <strong>内容大纲：</strong>
+            <ol>
+              <li>不同预算档位的礼物推荐（100/300/500）</li>
+              <li>避雷清单（这些礼物千万别送）</li>
+              <li>礼物包装和仪式感加分tips</li>
+            </ol>
+          </div>
+          <div class="topic-meta">
+            <span class="topic-heat">🔥 热度 245</span>
+            <span>相关评论 15条</span>
+            <span>置信度 85%</span>
+          </div>
+          <button class="topic-calendar-btn">📅 加入选题日历 <span class="pro-badge">PRO</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Options Section -->
+  <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">📤 导出设置</h3>
+    <div class="export-options">
+      <div class="export-option selected">
+        <div class="export-option-icon">📘</div>
+        <div class="export-option-name">飞书文档</div>
+        <div class="export-option-desc">推送到飞书空间</div>
+      </div>
+      <div class="export-option">
+        <div class="export-option-icon">📓</div>
+        <div class="export-option-name">Notion页面</div>
+        <div class="export-option-desc">保留分类和层级</div>
+      </div>
+      <div class="export-option">
+        <div class="export-option-icon">📊</div>
+        <div class="export-option-name">Excel表格</div>
+        <div class="export-option-desc">自定义字段导出</div>
+      </div>
+    </div>
+    <div class="scope-selector">
+      <div class="scope-title">导出范围</div>
+      <div class="scope-options">
+        <div class="scope-chip active">全部数据</div>
+        <div class="scope-chip">按类别</div>
+        <div class="scope-chip">按视频</div>
+        <div class="scope-chip">按时间区间</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchMainTab(tab) {
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  if (tab === 'reply') {
+    document.querySelectorAll('.main-tab')[0].classList.add('active');
+    document.getElementById('panel-reply').classList.add('active');
+  } else {
+    document.querySelectorAll('.main-tab')[1].classList.add('active');
+    document.getElementById('panel-topic').classList.add('active');
+  }
+}
+document.querySelectorAll('.export-option').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('.export-option').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+document.querySelectorAll('.scope-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.scope-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

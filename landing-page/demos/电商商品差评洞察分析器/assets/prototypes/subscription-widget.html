@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>套餐管理 - Widget原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; padding: 24px; color: #333; }
+.widget-container { background: #fff; border-radius: 12px; padding: 24px; max-width: 780px; margin: 0 auto; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+h3 { font-size: 16px; margin-bottom: 16px; }
+
+.current-plan { background: linear-gradient(135deg, #f8faff, #fff); border: 1px solid #e0e8ff; border-radius: 10px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.plan-info h4 { font-size: 14px; color: #666; margin-bottom: 4px; font-weight: 400; }
+.plan-name { font-size: 22px; font-weight: 700; color: #4f7cff; margin-bottom: 8px; }
+.plan-meta { font-size: 12px; color: #888; display: flex; gap: 16px; }
+.plan-meta strong { color: #444; }
+
+.usage-card { border: 1px solid #e8ecf0; border-radius: 10px; padding: 18px; margin-bottom: 20px; }
+.usage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.usage-title { font-size: 14px; font-weight: 600; }
+.usage-period { font-size: 12px; color: #888; }
+.usage-bar-bg { height: 12px; background: #f0f2f5; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+.usage-bar-fill { height: 100%; background: linear-gradient(90deg, #e5a000, #fbbf24); border-radius: 6px; width: 84%; }
+.usage-stats { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+.usage-stats strong { color: #e5a000; }
+
+.alert-banner { background: #fffbea; border: 1px solid #fef3c7; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.alert-banner .icon { font-size: 18px; }
+.alert-banner strong { color: #92400e; }
+
+.plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.plan-option { border: 1px solid #e8ecf0; border-radius: 10px; padding: 18px; position: relative; }
+.plan-option.recommended { border-color: #4f7cff; background: linear-gradient(135deg, #f8faff, #fff); }
+.plan-badge { position: absolute; top: -10px; right: 16px; background: #4f7cff; color: #fff; font-size: 11px; padding: 2px 10px; border-radius: 10px; }
+.plan-option h5 { font-size: 14px; margin-bottom: 6px; }
+.plan-price { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+.plan-price small { font-size: 12px; font-weight: 400; color: #888; }
+.plan-features { list-style: none; margin-bottom: 14px; }
+.plan-features li { font-size: 12px; color: #555; padding: 3px 0; display: flex; align-items: center; gap: 6px; }
+.plan-features li::before { content: "✓"; color: #38a169; font-weight: 700; }
+.plan-features li.disabled { color: #bbb; }
+.plan-features li.disabled::before { content: "—"; color: #ccc; }
+.btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; width: 100%; }
+.btn-primary { background: #4f7cff; color: #fff; }
+.btn-primary:hover { background: #3b6be8; }
+.btn-secondary { background: #f0f2f5; color: #555; }
+.btn-current { background: #f0f2f5; color: #888; cursor: default; }
+</style>
+</head>
+<body>
+<div class="widget-container">
+  <h3>💳 套餐与用量管理</h3>
+
+  <div class="current-plan">
+    <div class="plan-info">
+      <h4>当前套餐</h4>
+      <div class="plan-name">免费版</div>
+      <div class="plan-meta">
+        <span>激活时间：<strong>2026-05-01</strong></span>
+        <span>下次结算：<strong>2026-07-01</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="usage-card">
+    <div class="usage-header">
+      <span class="usage-title">本月用量</span>
+      <span class="usage-period">2026-06-01 ~ 2026-06-30</span>
+    </div>
+    <div class="usage-bar-bg">
+      <div class="usage-bar-fill"></div>
+    </div>
+    <div class="usage-stats">
+      <span>已使用 <strong>420 条</strong></span>
+      <span>剩余 <strong>80 条</strong> / 总额度 500 条</span>
+    </div>
+  </div>
+
+  <div class="alert-banner">
+    <span class="icon">⚠️</span>
+    <span>您本月免费额度已使用 <strong>84%</strong>，即将耗尽。建议升级专业版，享受无限分析额度。</span>
+  </div>
+
+  <div class="plans-grid">
+    <div class="plan-option">
+      <h5>免费版</h5>
+      <div class="plan-price">¥0<small>/月</small></div>
+      <ul class="plan-features">
+        <li>每月分析 500 条差评</li>
+        <li>基础洞察报告</li>
+        <li>CSV文件导入</li>
+        <li class="disabled">竞品对比分析</li>
+        <li class="disabled">趋势分析</li>
+        <li class="disabled">团队协作</li>
+      </ul>
+      <button class="btn btn-current">当前方案</button>
+    </div>
+
+    <div class="plan-option recommended">
+      <span class="plan-badge">推荐</span>
+      <h5>专业版</h5>
+      <div class="plan-price">¥79<small>/月</small></div>
+      <ul class="plan-features">
+        <li><strong>不限差评分析数量</strong></li>
+        <li>完整洞察报告 + 趋势分析</li>
+        <li>CSV + 平台API双导入</li>
+        <li>竞品对比分析</li>
+        <li>优先改进追踪</li>
+        <li>团队协作（最多5人）</li>
+      </ul>
+      <button class="btn btn-primary">立即升级</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

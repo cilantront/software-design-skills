@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导出与发布原型</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; padding: 32px; }
+        .widget-container { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 720px; margin: 0 auto; }
+        .widget-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #333; }
+
+        .export-section { margin-bottom: 24px; }
+        .section-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .pro-badge { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+
+        .platform-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+        .platform-card { border: 2px solid #f0f0f0; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .platform-card:hover { border-color: #667eea; }
+        .platform-card.selected { border-color: #667eea; background: #f8f9ff; }
+        .platform-icon { font-size: 32px; margin-bottom: 8px; }
+        .platform-name { font-size: 13px; color: #333; font-weight: 500; }
+        .platform-count { font-size: 11px; color: #999; margin-top: 4px; }
+
+        .export-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+        .export-option { border: 1px solid #f0f0f0; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+        .export-option:hover { border-color: #667eea; background: #f8f9ff; }
+        .export-option.disabled { opacity: 0.5; cursor: not-allowed; }
+        .export-option.selected { border-color: #667eea; background: #f8f9ff; }
+        .export-icon { font-size: 24px; }
+        .export-info { flex: 1; }
+        .export-name { font-size: 14px; font-weight: 500; color: #333; }
+        .export-desc { font-size: 12px; color: #999; margin-top: 2px; }
+
+        .publish-section { border-top: 1px solid #f0f0f0; padding-top: 20px; }
+        .account-bindings { display: grid; gap: 8px; margin-bottom: 16px; }
+        .binding-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fafafa; border-radius: 8px; }
+        .binding-info { display: flex; align-items: center; gap: 12px; }
+        .binding-status { font-size: 12px; padding: 4px 10px; border-radius: 10px; }
+        .bound { background: #f6ffed; color: #52c41a; }
+        .unbound { background: #f5f5f5; color: #999; }
+
+        .action-bar { display: flex; gap: 12px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .btn-primary { background: #667eea; color: #fff; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-secondary { background: #fff; color: #667eea; border: 1px solid #667eea; }
+        .btn-upgrade { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+
+        .upgrade-tip { background: linear-gradient(135deg, #f8f9ff, #fff); border: 1px dashed #667eea; border-radius: 10px; padding: 16px; text-align: center; margin-top: 16px; }
+        .upgrade-text { font-size: 13px; color: #666; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="widget-title">📤 导出与发布</div>
+
+        <div class="export-section">
+            <div class="section-title">① 选择目标平台</div>
+            <div class="platform-grid">
+                <div class="platform-card selected">
+                    <div class="platform-icon">📕</div>
+                    <div class="platform-name">小红书</div>
+                    <div class="platform-count">8 条文案</div>
+                </div>
+                <div class="platform-card selected">
+                    <div class="platform-icon">🎵</div>
+                    <div class="platform-name">抖音</div>
+                    <div class="platform-count">8 条文案</div>
+                </div>
+                <div class="platform-card selected">
+                    <div class="platform-icon">💬</div>
+                    <div class="platform-name">朋友圈</div>
+                    <div class="platform-count">8 条文案</div>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">📺</div>
+                    <div class="platform-name">视频号</div>
+                    <div class="platform-count">8 条文案</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <div class="section-title">② 选择导出方式</div>
+            <div class="export-options">
+                <div class="export-option selected">
+                    <div class="export-icon">📋</div>
+                    <div class="export-info">
+                        <div class="export-name">一键复制</div>
+                        <div class="export-desc">复制文案到剪贴板</div>
+                    </div>
+                </div>
+                <div class="export-option">
+                    <div class="export-icon">📄</div>
+                    <div class="export-info">
+                        <div class="export-name">下载 TXT/MD</div>
+                        <div class="export-desc">下载为文本文件</div>
+                    </div>
+                </div>
+                <div class="export-option disabled">
+                    <div class="export-icon">📦</div>
+                    <div class="export-info">
+                        <div class="export-name">批量打包 ZIP <span class="pro-badge">PRO</span></div>
+                        <div class="export-desc">打包下载所有平台文案</div>
+                    </div>
+                </div>
+                <div class="export-option disabled">
+                    <div class="export-icon">📊</div>
+                    <div class="export-info">
+                        <div class="export-name">导出 Excel <span class="pro-badge">PRO</span></div>
+                        <div class="export-desc">导出为 Excel 表格</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="publish-section">
+            <div class="section-title">③ 多平台同步发布 <span class="pro-badge">PRO</span></div>
+            <div class="account-bindings">
+                <div class="binding-item">
+                    <div class="binding-info">
+                        <span>📕</span>
+                        <span>小红书</span>
+                    </div>
+                    <span class="binding-status unbound">未绑定</span>
+                </div>
+                <div class="binding-item">
+                    <div class="binding-info">
+                        <span>🎵</span>
+                        <span>抖音</span>
+                    </div>
+                    <span class="binding-status unbound">未绑定</span>
+                </div>
+                <div class="binding-item">
+                    <div class="binding-info">
+                        <span>📺</span>
+                        <span>视频号</span>
+                    </div>
+                    <span class="binding-status unbound">未绑定</span>
+                </div>
+            </div>
+
+            <div class="upgrade-tip">
+                <div class="upgrade-text">升级专业版，解锁批量导出和多平台同步发布功能</div>
+                <button class="btn btn-upgrade">立即升级 ¥39/月</button>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-secondary">取消</button>
+            <button class="btn btn-primary">📋 一键复制选中平台文案</button>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.platform-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+        document.querySelectorAll('.export-option:not(.disabled)').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.export-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

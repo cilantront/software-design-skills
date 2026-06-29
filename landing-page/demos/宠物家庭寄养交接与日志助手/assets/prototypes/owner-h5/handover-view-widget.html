@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>主人端交接单查看 Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: #fdf6f0; padding: 16px; max-width: 375px; margin: 0 auto; }
+.widget { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(139,90,60,0.08); }
+.widget-title { font-size: 18px; font-weight: 600; color: #8b5a3c; margin-bottom: 4px; }
+.widget-subtitle { font-size: 12px; color: #888; margin-bottom: 14px; }
+.handover-header { background: linear-gradient(135deg, #d97706, #b45309); padding: 16px; color: #fff; border-radius: 12px; margin-bottom: 12px; text-align: center; }
+.handover-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.handover-id { font-size: 11px; opacity: 0.9; }
+.pet-card { display: flex; gap: 12px; align-items: center; padding: 12px; background: #fff; border-radius: 12px; margin-bottom: 10px; border: 1px solid #f5f0eb; }
+.pet-avatar { width: 52px; height: 52px; border-radius: 12px; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.pet-name { font-size: 17px; font-weight: 600; color: #8b5a3c; }
+.pet-detail { font-size: 12px; color: #888; margin-top: 2px; }
+.info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f5f0eb; font-size: 13px; }
+.info-row:last-child { border-bottom: none; }
+.info-row .label { color: #888; }
+.info-row .value { color: #333; font-weight: 500; }
+.info-row .value.highlight { color: #d97706; font-weight: 600; }
+.req-card { background: #fff8ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 12px; margin: 10px 0; }
+.req-title { font-size: 13px; font-weight: 600; color: #d97706; margin-bottom: 6px; }
+.req-item { font-size: 12px; color: #333; padding: 3px 0; }
+.host-card { display: flex; align-items: center; gap: 10px; padding: 10px; background: #f0fdf4; border-radius: 10px; margin: 10px 0; }
+.host-avatar { width: 36px; height: 36px; border-radius: 50%; background: #dcfce7; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.host-name { font-size: 13px; font-weight: 600; }
+.host-detail { font-size: 11px; color: #888; }
+.actions { display: flex; gap: 10px; margin-top: 14px; }
+.btn { flex: 1; padding: 12px; border-radius: 24px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; text-align: center; }
+.btn-warm { background: #d97706; color: #fff; }
+.btn-outline { background: #fff; color: #d97706; border: 1px solid #d97706; }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="widget-title">📋 交接单查看</div>
+  <div class="widget-subtitle">主人端 H5 · 核心功能 Widget</div>
+
+  <div class="handover-header">
+    <div class="handover-title">🐾 寄养交接单</div>
+    <div class="handover-id">编号：HY20260625001</div>
+  </div>
+
+  <div class="pet-card">
+    <div class="pet-avatar">🐕</div>
+    <div>
+      <div class="pet-name">豆豆</div>
+      <div class="pet-detail">柯基 · 公 · 3岁 · 12kg</div>
+    </div>
+  </div>
+
+  <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #f5f0eb;margin-bottom:10px;">
+    <div style="font-size:14px;font-weight:600;color:#8b5a3c;margin-bottom:8px;">📋 健康信息</div>
+    <div class="info-row"><span class="label">疫苗接种</span><span class="value">已完成三针 ✓</span></div>
+    <div class="info-row"><span class="label">绝育状态</span><span class="value">已绝育</span></div>
+    <div class="info-row"><span class="label">过敏史</span><span class="value">无</span></div>
+    <div class="info-row"><span class="label">既往病史</span><span class="value">无</span></div>
+  </div>
+
+  <div class="req-card">
+    <div class="req-title">⚠ 特殊要求（请仔细阅读）</div>
+    <div class="req-item">💊 喂药：每天早晚各一次肠胃药</div>
+    <div class="req-item">🚫 饮食禁忌：不能吃鸡肉</div>
+    <div class="req-item">💤 生活习惯：晚上需开小夜灯</div>
+  </div>
+
+  <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #f5f0eb;">
+    <div style="font-size:14px;font-weight:600;color:#8b5a3c;margin-bottom:8px;">📅 寄养安排</div>
+    <div class="info-row"><span class="label">寄养日期</span><span class="value">2026.06.25 - 07.02</span></div>
+    <div class="info-row"><span class="label">寄养天数</span><span class="value">8 天</span></div>
+    <div class="info-row"><span class="label">寄养费用</span><span class="value highlight">80 元/天</span></div>
+    <div class="info-row"><span class="label">预计总额</span><span class="value highlight" style="font-size:16px;">640 元</span></div>
+  </div>
+
+  <div class="host-card">
+    <div class="host-avatar">👤</div>
+    <div>
+      <div class="host-name">寄养人：小王</div>
+      <div class="host-detail">138****8888 · XX小区</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-outline">退回修改</button>
+    <button class="btn btn-warm">确认无误</button>
+  </div>
+</div>
+</body>
+</html>

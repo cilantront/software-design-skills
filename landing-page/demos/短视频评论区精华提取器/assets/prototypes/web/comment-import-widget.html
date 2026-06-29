@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>评论导入页 - Widget原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    padding: 24px;
+  }
+  .widget-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 32px;
+  }
+  .widget-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+  .widget-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 24px;
+  }
+  .import-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .import-tab {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .import-tab.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+  }
+  .import-tab:hover:not(.active) {
+    color: #374151;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* CSV Upload Area */
+  .upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fafbfc;
+  }
+  .upload-area:hover, .upload-area.dragover {
+    border-color: #6366f1;
+    background: #f0f0ff;
+  }
+  .upload-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    color: #6366f1;
+  }
+  .upload-text {
+    font-size: 16px;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+  .upload-hint {
+    font-size: 13px;
+    color: #9ca3af;
+  }
+  .upload-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: #6366f1;
+    color: #fff;
+  }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-outline {
+    background: #fff;
+    color: #6366f1;
+    border: 1px solid #6366f1;
+  }
+  .btn-outline:hover { background: #f0f0ff; }
+
+  /* Link Import */
+  .link-input-group {
+    margin-bottom: 16px;
+  }
+  .link-input-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+  .link-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1a1a2e;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .link-textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+  .link-textarea::placeholder { color: #9ca3af; }
+  .platform-tags {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .platform-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-douyin { background: #fef2f2; color: #dc2626; }
+  .tag-bilibili { background: #eff6ff; color: #2563eb; }
+  .tag-xiaohongshu { background: #fef2f2; color: #e11d48; }
+  .tag-weishi { background: #f0fdf4; color: #16a34a; }
+
+  /* Preview Table */
+  .preview-section {
+    margin-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 24px;
+  }
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .preview-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+  .preview-stats {
+    font-size: 13px;
+    color: #6b7280;
+  }
+  .preview-stats span { color: #16a34a; font-weight: 600; }
+  .preview-stats .error { color: #dc2626; }
+  .preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .preview-table th {
+    background: #f9fafb;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 500;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .preview-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .preview-table tr.error-row {
+    background: #fef2f2;
+  }
+  .preview-table tr.error-row td {
+    color: #dc2626;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .status-ok { background: #dcfce7; color: #16a34a; }
+  .status-error { background: #fef2f2; color: #dc2626; }
+
+  /* Recent Imports */
+  .recent-section {
+    margin-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 24px;
+  }
+  .recent-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 16px;
+  }
+  .recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .recent-item:hover { background: #f0f0ff; }
+  .recent-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .recent-source-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .source-csv { background: #dbeafe; color: #2563eb; }
+  .source-link { background: #fce7f3; color: #db2777; }
+  .recent-item-info h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a2e;
+  }
+  .recent-item-info p {
+    font-size: 12px;
+    color: #9ca3af;
+  }
+  .recent-item-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: #6366f1;
+  }
+</style>
+</head>
+<body>
+<div class="widget-container">
+  <h2 class="widget-title">评论数据导入</h2>
+  <p class="widget-subtitle">通过CSV文件上传或平台分享链接导入短视频评论数据</p>
+
+  <div class="import-tabs">
+    <div class="import-tab active" onclick="switchTab('csv')">📄 CSV文件导入</div>
+    <div class="import-tab" onclick="switchTab('link')">🔗 平台链接导入</div>
+  </div>
+
+  <!-- CSV Tab -->
+  <div class="tab-content active" id="tab-csv">
+    <div class="upload-area" id="uploadArea">
+      <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 16V4m0 0L8 8m4-4l4 4M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4"/>
+      </svg>
+      <p class="upload-text">拖拽CSV文件到此处，或点击上传</p>
+      <p class="upload-hint">支持 UTF-8 / GBK 编码，文件大小不超过 50MB</p>
+      <div class="upload-actions">
+        <button class="btn btn-primary">选择文件</button>
+        <button class="btn btn-outline">📥 下载导入模板</button>
+      </div>
+    </div>
+
+    <!-- Preview Section (shown after upload) -->
+    <div class="preview-section">
+      <div class="preview-header">
+        <span class="preview-title">数据预览（前20条）</span>
+        <span class="preview-stats">共 <span>1,286</span> 条评论，<span class="error">3</span> 条异常</span>
+      </div>
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>评论内容</th>
+            <th>评论者</th>
+            <th>评论时间</th>
+            <th>视频标题</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>这个产品在哪里买的？求链接！</td>
+            <td>小明同学</td>
+            <td>2026-06-28 14:30</td>
+            <td>夏日穿搭分享</td>
+            <td><span class="status-badge status-ok">正常</span></td>
+          </tr>
+          <tr>
+            <td>用了一个月，真的很推荐，皮肤改善很明显</td>
+            <td>爱美丽</td>
+            <td>2026-06-28 13:15</td>
+            <td>夏日穿搭分享</td>
+            <td><span class="status-badge status-ok">正常</span></td>
+          </tr>
+          <tr>
+            <td>价格太贵了，学生党伤不起</td>
+            <td>穷学生</td>
+            <td>2026-06-28 12:00</td>
+            <td>夏日穿搭分享</td>
+            <td><span class="status-badge status-ok">正常</span></td>
+          </tr>
+          <tr class="error-row">
+            <td>（空内容）</td>
+            <td>匿名用户</td>
+            <td>格式错误</td>
+            <td>夏日穿搭分享</td>
+            <td><span class="status-badge status-error">缺少评论内容</span></td>
+          </tr>
+          <tr>
+            <td>能出一期详细教程吗？很想学</td>
+            <td>学无止境</td>
+            <td>2026-06-28 10:45</td>
+            <td>护肤步骤分享</td>
+            <td><span class="status-badge status-ok">正常</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Link Tab -->
+  <div class="tab-content" id="tab-link">
+    <div class="link-input-group">
+      <label>粘贴短视频分享链接（每行一个，支持批量导入）</label>
+      <textarea class="link-textarea" placeholder="请粘贴短视频平台的分享链接，例如：&#10;https://v.douyin.com/xxxxxx/&#10;https://www.bilibili.com/video/BVxxxxxx&#10;https://www.xiaohongshu.com/explore/xxxxxx"></textarea>
+      <div class="platform-tags">
+        <span class="platform-tag tag-douyin">● 抖音</span>
+        <span class="platform-tag tag-bilibili">● B站</span>
+        <span class="platform-tag tag-xiaohongshu">● 小红书</span>
+        <span class="platform-tag tag-weishi">● 视频号</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:16px;">
+      <button class="btn btn-primary" style="flex:1;">🚀 开始解析</button>
+      <button class="btn btn-outline">清空</button>
+    </div>
+  </div>
+
+  <!-- Recent Imports -->
+  <div class="recent-section">
+    <h3 class="recent-title">最近导入记录</h3>
+    <div class="recent-list">
+      <div class="recent-item">
+        <div class="recent-item-left">
+          <div class="recent-source-icon source-csv">📄</div>
+          <div class="recent-item-info">
+            <h4>夏日穿搭评论数据.csv</h4>
+            <p>2026-06-28 15:30 · CSV导入</p>
+          </div>
+        </div>
+        <span class="recent-item-count">1,286 条</span>
+      </div>
+      <div class="recent-item">
+        <div class="recent-item-left">
+          <div class="recent-source-icon source-link">🔗</div>
+          <div class="recent-item-info">
+            <h4>护肤步骤分享（抖音链接）</h4>
+            <p>2026-06-27 20:15 · 链接导入</p>
+          </div>
+        </div>
+        <span class="recent-item-count">856 条</span>
+      </div>
+      <div class="recent-item">
+        <div class="recent-item-left">
+          <div class="recent-source-icon source-csv">📄</div>
+          <div class="recent-item-info">
+            <h4>产品测评评论.csv</h4>
+            <p>2026-06-26 10:00 · CSV导入</p>
+          </div>
+        </div>
+        <span class="recent-item-count">2,341 条</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  if (tab === 'csv') {
+    document.querySelectorAll('.import-tab')[0].classList.add('active');
+    document.getElementById('tab-csv').classList.add('active');
+  } else {
+    document.querySelectorAll('.import-tab')[1].classList.add('active');
+    document.getElementById('tab-link').classList.add('active');
+  }
+}
+
+// Drag & drop simulation
+const uploadArea = document.getElementById('uploadArea');
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
+</script>
+</body>
+</html>

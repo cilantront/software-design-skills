@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P3 - 合同详情与关键日期编辑页 - 自由职业者合同关键日期提醒器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f7fa; color: #2c3e50; }
+.topbar { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+.topbar .logo { font-size: 18px; font-weight: 700; color: #4f46e5; display: flex; align-items: center; gap: 8px; }
+.topbar .logo span { font-size: 22px; }
+.topbar .right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.topbar .bell { position: relative; cursor: pointer; font-size: 20px; }
+.topbar .bell .badge { position: absolute; top: -4px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.topbar .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.layout { display: flex; margin-top: 56px; min-height: calc(100vh - 56px); }
+.sidebar { width: 220px; background: #fff; border-right: 1px solid #e2e8f0; padding: 16px 0; position: fixed; top: 56px; bottom: 0; }
+.sidebar a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #64748b; font-size: 14px; text-decoration: none; }
+.sidebar a:hover { background: #f1f5f9; color: #4f46e5; }
+.sidebar a.active { background: #eef2ff; color: #4f46e5; font-weight: 600; border-right: 3px solid #4f46e5; }
+.sidebar a .icon { font-size: 18px; width: 24px; text-align: center; }
+.sidebar a .lock { font-size: 12px; margin-left: auto; color: #94a3b8; }
+.main { margin-left: 220px; flex: 1; padding: 24px; }
+.breadcrumb { font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
+.breadcrumb a { color: #4f46e5; text-decoration: none; }
+
+/* Contract Header */
+.contract-header { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; gap: 20px; }
+.contract-icon { width: 56px; height: 56px; background: linear-gradient(135deg, #e0e7ff, #c7d2fe); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.contract-info { flex: 1; }
+.contract-info h2 { font-size: 20px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
+.contract-info .meta { display: flex; gap: 20px; font-size: 13px; color: #64748b; margin-top: 8px; }
+.contract-info .meta span { display: flex; align-items: center; gap: 4px; }
+.contract-actions { display: flex; gap: 8px; }
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: #4f46e5; color: #fff; }
+.btn-outline { background: #fff; color: #64748b; border: 1px solid #e2e8f0; }
+.btn-outline:hover { background: #f1f5f9; }
+.btn-danger { background: #fff; color: #ef4444; border: 1px solid #fecaca; }
+.btn-danger:hover { background: #fef2f2; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* Info Grid */
+.info-section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.info-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.info-item label { font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px; }
+.info-item .value { font-size: 14px; font-weight: 500; color: #1e293b; }
+.info-item .value a { color: #4f46e5; text-decoration: none; }
+.info-item .value a:hover { text-decoration: underline; }
+
+/* Key Dates */
+.dates-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.date-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; transition: all 0.15s; }
+.date-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.date-card.completed { border-color: #d1fae5; background: #f0fdf4; }
+.date-card-main { display: flex; align-items: center; gap: 16px; }
+.date-card .type-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.type-icon.payment { background: #d1fae5; }
+.type-icon.delivery { background: #dbeafe; }
+.type-icon.renewal { background: #fef3c7; }
+.type-icon.confidential { background: #ede9fe; }
+.type-icon.end { background: #fee2e2; }
+.date-card .date-info { flex: 1; }
+.date-card .date-info .date { font-size: 18px; font-weight: 700; color: #1e293b; }
+.date-card .date-info .type-label { font-size: 12px; color: #64748b; margin-left: 8px; }
+.date-card .date-info .desc { font-size: 14px; color: #64748b; margin-top: 2px; }
+.date-card .amount-tag { font-size: 16px; font-weight: 700; color: #f59e0b; margin-left: auto; }
+.date-card .status-tag { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+.status-tag.pending { background: #f1f5f9; color: #64748b; }
+.status-tag.reminded { background: #fef3c7; color: #92400e; }
+.status-tag.overdue { background: #fee2e2; color: #991b1b; }
+.status-tag.completed { background: #d1fae5; color: #065f46; }
+.date-card .countdown { font-size: 13px; color: #94a3b8; text-align: right; min-width: 80px; }
+.date-card .countdown strong { color: #f59e0b; }
+.date-card .countdown.overdue strong { color: #ef4444; }
+.date-card .actions { display: flex; gap: 6px; margin-left: 12px; }
+.date-card .actions button { padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #64748b; }
+.date-card .actions button:hover { background: #f1f5f9; }
+.date-card .actions button.complete-btn { color: #10b981; border-color: #a7f3d0; }
+.date-card .actions button.complete-btn:hover { background: #f0fdf4; }
+.date-card .original-quote { margin-top: 10px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-size: 12px; color: #94a3b8; font-style: italic; border-left: 3px solid #e2e8f0; }
+
+/* Reminder Section */
+.reminder-section { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.reminder-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.reminder-tag { padding: 6px 12px; border-radius: 20px; font-size: 13px; background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; }
+.reminder-tag.active { background: #4f46e5; color: #fff; }
+.reminder-channels { display: flex; gap: 16px; margin-top: 12px; }
+.channel-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; }
+.channel-item .check { color: #10b981; }
+.channel-item .unchecked { color: #cbd5e1; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><span>📅</span> 合同日期提醒器</div>
+  <div class="right">
+    <div class="bell">🔔<div class="badge">3</div></div>
+    <div class="avatar">林</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <a href="#"><span class="icon">🏠</span> 主页</a>
+    <a href="#" class="active"><span class="icon">📄</span> 合同管理</a>
+    <a href="#"><span class="icon">📆</span> 日历看板</a>
+    <a href="#"><span class="icon">🔔</span> 消息中心</a>
+    <div class="divider"></div>
+    <a href="#"><span class="icon">👥</span> 团队管理 <span class="lock">🔒</span></a>
+    <a href="#"><span class="icon">📊</span> 统计报告 <span class="lock">🔒</span></a>
+    <div class="divider"></div>
+    <a href="#"><span class="icon">⚙️</span> 提醒设置</a>
+    <a href="#"><span class="icon">💎</span> 订阅管理</a>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb"><a href="#">主页</a> / <a href="#">合同管理</a> / 合同详情</div>
+
+    <!-- Contract Header -->
+    <div class="contract-header">
+      <div class="contract-icon">📄</div>
+      <div class="contract-info">
+        <h2>XX品牌设计服务合同</h2>
+        <div class="meta">
+          <span>📋 编号：HT-2026-001</span>
+          <span>🏢 合作方：XX科技有限公司</span>
+          <span>📅 上传时间：2026-06-20</span>
+          <span>📎 关键日期：5 项</span>
+        </div>
+      </div>
+      <div class="contract-actions">
+        <button class="btn btn-outline">✏️ 编辑信息</button>
+        <button class="btn btn-outline">📥 下载原件</button>
+        <button class="btn btn-danger">🗑️ 删除合同</button>
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="info-section">
+      <h3>📋 合同基本信息</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>合同名称</label>
+          <div class="value">XX品牌设计服务合同</div>
+        </div>
+        <div class="info-item">
+          <label>合同编号</label>
+          <div class="value">HT-2026-001</div>
+        </div>
+        <div class="info-item">
+          <label>合作方</label>
+          <div class="value">XX科技有限公司</div>
+        </div>
+        <div class="info-item">
+          <label>上传时间</label>
+          <div class="value">2026-06-20 10:30</div>
+        </div>
+        <div class="info-item">
+          <label>原始文件</label>
+          <div class="value"><a href="#">XX品牌设计服务合同.pdf</a> (2.4 MB)</div>
+        </div>
+        <div class="info-item">
+          <label>合同状态</label>
+          <div class="value"><span style="color:#10b981;">● 执行中</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Dates List -->
+    <div class="info-section">
+      <div class="dates-header">
+        <h3 style="margin-bottom:0;">📅 关键日期列表（5 项）</h3>
+        <button class="btn btn-primary btn-sm">+ 添加关键日期</button>
+      </div>
+
+      <!-- Date 1 - Overdue -->
+      <div class="date-card">
+        <div class="date-card-main">
+          <div class="type-icon payment">💰</div>
+          <div class="date-info">
+            <div><span class="date">2026-06-25</span><span class="type-label">付款节点</span></div>
+            <div class="desc">第一期项目款</div>
+          </div>
+          <div class="amount-tag">¥15,000.00</div>
+          <div class="countdown overdue">逾期 <strong>3 天</strong></div>
+          <span class="status-tag overdue">逾期</span>
+          <div class="actions">
+            <button>✏️ 编辑</button>
+            <button class="complete-btn">✅ 标记完成</button>
+          </div>
+        </div>
+        <div class="original-quote">原文引用："合同签订后5个工作日内支付30%，即 ¥15,000.00"</div>
+      </div>
+
+      <!-- Date 2 - Upcoming -->
+      <div class="date-card">
+        <div class="date-card-main">
+          <div class="type-icon payment">💰</div>
+          <div class="date-info">
+            <div><span class="date">2026-07-15</span><span class="type-label">付款节点</span></div>
+            <div class="desc">第二期项目款</div>
+          </div>
+          <div class="amount-tag">¥20,000.00</div>
+          <div class="countdown">距今 <strong>17 天</strong></div>
+          <span class="status-tag pending">待办</span>
+          <div class="actions">
+            <button>✏️ 编辑</button>
+            <button class="complete-btn">✅ 标记完成</button>
+          </div>
+        </div>
+        <div class="original-quote">原文引用："项目中期交付后15个工作日内支付40%，即 ¥20,000.00，预计2026年7月15日前支付"</div>
+      </div>
+
+      <!-- Date 3 - Delivery -->
+      <div class="date-card">
+        <div class="date-card-main">
+          <div class="type-icon delivery">📦</div>
+          <div class="date-info">
+            <div><span class="date">2026-08-01</span><span class="type-label">交付截止</span></div>
+            <div class="desc">全部设计成果终稿交付</div>
+          </div>
+          <div class="countdown">距今 <strong>34 天</strong></div>
+          <span class="status-tag pending">待办</span>
+          <div class="actions">
+            <button>✏️ 编辑</button>
+            <button class="complete-btn">✅ 标记完成</button>
+          </div>
+        </div>
+        <div class="original-quote">原文引用："乙方应于2026年8月1日前完成全部设计成果的终稿交付"</div>
+      </div>
+
+      <!-- Date 4 - Renewal -->
+      <div class="date-card">
+        <div class="date-card-main">
+          <div class="type-icon renewal">🔄</div>
+          <div class="date-info">
+            <div><span class="date">2026-12-01</span><span class="type-label">续约窗口</span></div>
+            <div class="desc">合同到期前30天，自动续约窗口开始</div>
+          </div>
+          <div class="countdown">距今 <strong>156 天</strong></div>
+          <span class="status-tag pending">待办</span>
+          <div class="actions">
+            <button>✏️ 编辑</button>
+            <button class="complete-btn">✅ 标记完成</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date 5 - Completed -->
+      <div class="date-card completed">
+        <div class="date-card-main">
+          <div class="type-icon end" style="opacity:0.6;">🔴</div>
+          <div class="date-info">
+            <div><span class="date" style="text-decoration:line-through;color:#94a3b8;">2026-12-31</span><span class="type-label">合同到期</span></div>
+            <div class="desc" style="color:#94a3b8;">合同终止日期</div>
+          </div>
+          <span class="status-tag completed">✅ 已完成</span>
+          <div class="actions">
+            <button>✏️ 编辑</button>
+            <button style="color:#64748b;border-color:#e2e8f0;">↩️ 恢复待办</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reminder Settings for this Contract -->
+    <div class="info-section reminder-section">
+      <h3>🔔 本合同提醒设置</h3>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;color:#64748b;display:block;margin-bottom:8px;">提前提醒天数</label>
+        <div class="reminder-tags">
+          <span class="reminder-tag active">提前 30 天</span>
+          <span class="reminder-tag active">提前 7 天</span>
+          <span class="reminder-tag active">提前 3 天</span>
+          <span class="reminder-tag active">到期当天</span>
+          <span class="reminder-tag" style="cursor:pointer;">+ 自定义</span>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#64748b;display:block;margin-bottom:8px;">提醒方式</label>
+        <div class="reminder-channels">
+          <div class="channel-item"><span class="check">✅</span> 站内信</div>
+          <div class="channel-item"><span class="check">✅</span> 邮件提醒</div>
+          <div class="channel-item"><span class="unchecked">☐</span> 微信推送</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-outline btn-sm">⚙️ 自定义提醒设置</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

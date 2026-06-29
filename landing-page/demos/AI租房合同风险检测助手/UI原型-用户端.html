@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI租房合同风险检测助手 - 用户端原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+}
+.prototype-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  max-width: 1400px;
+}
+.screen-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.screen-label {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  background: #fff;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  position: relative;
+  border: 8px solid #1a1a1a;
+}
+.status-bar {
+  height: 44px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  padding: 0 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.screen-content {
+  height: 768px;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+.screen-content::-webkit-scrollbar { display: none; }
+
+/* ===== Screen 1: Home ===== */
+.home-header {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  padding: 30px 20px 40px;
+  color: #fff;
+  text-align: center;
+  border-radius: 0 0 24px 24px;
+}
+.home-logo { font-size: 40px; margin-bottom: 8px; }
+.home-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.home-subtitle { font-size: 13px; opacity: 0.85; }
+.home-cta {
+  margin: -20px 20px 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(37,99,235,0.15);
+  position: relative;
+  z-index: 1;
+}
+.cta-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.cta-price { font-size: 12px; opacity: 0.9; margin-top: 8px; text-align: center; color: #64748b; }
+.flow-section { padding: 24px 20px; }
+.flow-title { font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 16px; }
+.flow-steps { display: flex; justify-content: space-between; }
+.flow-step { text-align: center; flex: 1; }
+.flow-icon {
+  width: 48px; height: 48px;
+  background: #eff6ff;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin: 0 auto 8px;
+}
+.flow-step-name { font-size: 12px; color: #64748b; }
+.flow-arrow { color: #cbd5e1; display: flex; align-items: center; font-size: 18px; }
+.trust-section { padding: 0 20px 20px; }
+.trust-cards { display: flex; gap: 12px; }
+.trust-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #f1f5f9;
+}
+.trust-num { font-size: 22px; font-weight: 700; color: #2563eb; }
+.trust-label { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.disclaimer {
+  margin: 0 20px 20px;
+  padding: 12px;
+  background: #fefce8;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+/* ===== Screen 2: Upload ===== */
+.upload-header { background: #fff; padding: 16px 20px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+.upload-header h3 { font-size: 16px; color: #1e293b; }
+.upload-body { padding: 20px; }
+.upload-methods { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.upload-method {
+  display: flex; align-items: center; gap: 16px;
+  background: #fff; border-radius: 12px; padding: 18px 16px;
+  border: 1.5px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.upload-method:active { border-color: #2563eb; background: #eff6ff; }
+.upload-method-icon { font-size: 28px; }
+.upload-method-info h4 { font-size: 14px; color: #1e293b; margin-bottom: 2px; }
+.upload-method-info p { font-size: 12px; color: #94a3b8; }
+.upload-tips {
+  background: #f0fdf4; border-radius: 12px; padding: 16px;
+  border: 1px solid #bbf7d0;
+}
+.upload-tips h4 { font-size: 13px; color: #166534; margin-bottom: 8px; }
+.upload-tips li { font-size: 12px; color: #4ade80; margin-bottom: 4px; list-style: none; }
+.upload-tips li::before { content: "✓ "; color: #22c55e; }
+
+/* ===== Screen 3: Payment ===== */
+.payment-body { padding: 20px; }
+.payment-contract {
+  background: #fff; border-radius: 12px; padding: 16px;
+  margin-bottom: 16px; border: 1px solid #f1f5f9;
+}
+.payment-contract h4 { font-size: 14px; color: #1e293b; margin-bottom: 12px; }
+.payment-info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.payment-info-label { font-size: 13px; color: #64748b; }
+.payment-info-value { font-size: 13px; color: #1e293b; font-weight: 500; }
+.payment-price-card {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border-radius: 12px; padding: 20px; color: #fff;
+  margin-bottom: 16px;
+}
+.payment-price-label { font-size: 13px; opacity: 0.85; }
+.payment-price-amount { font-size: 32px; font-weight: 700; margin: 4px 0; }
+.payment-price-unit { font-size: 14px; font-weight: 400; }
+.payment-pay-btn {
+  width: 100%; padding: 14px;
+  background: #22c55e; color: #fff;
+  border: none; border-radius: 12px;
+  font-size: 16px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.payment-method { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 12px; }
+.payment-method span { font-size: 13px; color: #94a3b8; }
+
+/* ===== Screen 4: Detection Progress ===== */
+.progress-body {
+  padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+}
+.progress-animation {
+  width: 120px; height: 120px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 50px;
+  margin-bottom: 24px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.progress-status { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+.progress-substatus { font-size: 13px; color: #64748b; margin-bottom: 30px; }
+.progress-bar-container { width: 100%; margin-bottom: 30px; }
+.progress-bar-bg { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; }
+.progress-bar-fill { width: 65%; height: 6px; background: linear-gradient(90deg, #2563eb, #10b981); border-radius: 3px; transition: width 0.5s; }
+.progress-steps { width: 100%; text-align: left; }
+.progress-step-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.progress-step-icon { font-size: 18px; }
+.progress-step-text { font-size: 13px; color: #64748b; }
+.progress-step-text.active { color: #2563eb; font-weight: 600; }
+.progress-step-text.done { color: #22c55e; }
+
+/* ===== Screen 5: Risk Report (Core) ===== */
+.report-header {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  padding: 20px;
+  color: #fff;
+  text-align: center;
+}
+.report-score-ring {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  border: 6px solid #f97316;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+  position: relative;
+}
+.report-score-num { font-size: 32px; font-weight: 700; }
+.report-score-label { font-size: 11px; opacity: 0.8; }
+.report-risk-level {
+  display: inline-block;
+  background: #f97316;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.report-suggestion { font-size: 14px; opacity: 0.9; }
+.report-disclaimer {
+  margin: 12px 20px 0;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+.report-body { padding: 16px; }
+.report-section { margin-bottom: 16px; }
+.report-section-title {
+  font-size: 14px; font-weight: 600; color: #1e293b;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.report-overview-cards { display: flex; gap: 8px; }
+.report-overview-card {
+  flex: 1; border-radius: 10px; padding: 12px; text-align: center;
+}
+.report-overview-card.danger { background: #fef2f2; border: 1px solid #fecaca; }
+.report-overview-card.warning { background: #fff7ed; border: 1px solid #fed7aa; }
+.report-overview-card.caution { background: #fefce8; border: 1px solid #fef08a; }
+.report-overview-count { font-size: 24px; font-weight: 700; }
+.report-overview-card.danger .report-overview-count { color: #ef4444; }
+.report-overview-card.warning .report-overview-count { color: #f97316; }
+.report-overview-card.caution .report-overview-count { color: #eab308; }
+.report-overview-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+/* Risk item card */
+.risk-item {
+  background: #fff; border-radius: 12px; padding: 16px;
+  margin-bottom: 12px; border: 1px solid #f1f5f9;
+  position: relative;
+}
+.risk-item-tag {
+  position: absolute; top: 12px; right: 12px;
+  padding: 2px 10px; border-radius: 10px;
+  font-size: 11px; font-weight: 600; color: #fff;
+}
+.risk-item-tag.high { background: #ef4444; }
+.risk-item-tag.medium { background: #f97316; }
+.risk-item-tag.low { background: #eab308; }
+.risk-item-title { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-right: 50px; }
+.risk-item-section { margin-bottom: 10px; }
+.risk-item-section-label {
+  font-size: 11px; color: #94a3b8; font-weight: 500;
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 4px;
+}
+.risk-item-original {
+  background: #fef2f2; border-left: 3px solid #ef4444;
+  padding: 8px 10px; border-radius: 0 6px 6px 0;
+  font-size: 12px; color: #7f1d1d; line-height: 1.6;
+}
+.risk-item-interpretation {
+  background: #f0fdf4; border-left: 3px solid #22c55e;
+  padding: 8px 10px; border-radius: 0 6px 6px 0;
+  font-size: 12px; color: #14532d; line-height: 1.6;
+}
+.risk-item-suggestion {
+  background: #eff6ff; border-left: 3px solid #2563eb;
+  padding: 8px 10px; border-radius: 0 6px 6px 0;
+  font-size: 12px; color: #1e3a5f; line-height: 1.6;
+}
+.risk-item-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9;
+}
+.risk-item-confidence { font-size: 11px; color: #94a3b8; }
+.risk-item-legal { font-size: 11px; color: #2563eb; }
+.risk-item-ai-badge {
+  font-size: 10px; color: #94a3b8; background: #f1f5f9;
+  padding: 2px 6px; border-radius: 4px;
+}
+
+/* Checklist */
+.checklist-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+}
+.checklist-checkbox {
+  width: 20px; height: 20px; border: 2px solid #cbd5e1;
+  border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+}
+.checklist-text { font-size: 13px; color: #1e293b; line-height: 1.5; }
+.checklist-priority {
+  display: inline-block; font-size: 10px; padding: 1px 6px;
+  border-radius: 4px; margin-left: 4px; font-weight: 600;
+}
+.checklist-priority.high { background: #fef2f2; color: #ef4444; }
+.checklist-priority.medium { background: #fff7ed; color: #f97316; }
+
+/* ===== Screen 6: Personal Center ===== */
+.profile-header {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  padding: 30px 20px;
+  color: #fff;
+  display: flex; align-items: center; gap: 16px;
+}
+.profile-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.profile-name { font-size: 18px; font-weight: 600; }
+.profile-id { font-size: 12px; opacity: 0.8; }
+.profile-stats {
+  display: flex; background: #fff; margin: -16px 20px 16px;
+  border-radius: 12px; padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.profile-stat { flex: 1; text-align: center; }
+.profile-stat-num { font-size: 20px; font-weight: 700; color: #2563eb; }
+.profile-stat-label { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.profile-menu { padding: 0 20px; }
+.profile-menu-group { margin-bottom: 16px; }
+.profile-menu-title { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
+.profile-menu-item {
+  display: flex; align-items: center; gap: 12px;
+  background: #fff; padding: 14px 16px;
+  border-radius: 10px; margin-bottom: 8px;
+  border: 1px solid #f1f5f9;
+}
+.profile-menu-icon { font-size: 20px; }
+.profile-menu-text { flex: 1; font-size: 14px; color: #1e293b; }
+.profile-menu-arrow { color: #cbd5e1; font-size: 16px; }
+
+/* ===== Bottom Nav ===== */
+.bottom-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 60px; background: #fff;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  padding: 0 10px 8px;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  cursor: pointer;
+}
+.nav-icon { font-size: 20px; }
+.nav-label { font-size: 10px; color: #94a3b8; }
+.nav-item.active .nav-label { color: #2563eb; font-weight: 600; }
+
+/* ===== Annotations ===== */
+.annotation {
+  position: absolute;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: #92400e;
+  z-index: 10;
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+<div class="prototype-container">
+
+<!-- Screen 1: Home -->
+<div class="screen-wrapper">
+  <div class="screen-label">首页</div>
+  <div class="phone-frame">
+    <div class="status-bar">AI租房合同风险检测</div>
+    <div class="screen-content">
+      <div class="home-header">
+        <div class="home-logo">🛡️</div>
+        <div class="home-title">AI租房合同风险检测助手</div>
+        <div class="home-subtitle">签约前拍一拍，租房不踩坑</div>
+      </div>
+      <div class="home-cta">
+        <button class="cta-btn">📸 立即检测合同</button>
+        <div class="cta-price">单次检测仅 ¥9.9 · 60秒出结果</div>
+      </div>
+      <div class="flow-section">
+        <div class="flow-title">检测流程</div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-icon">📷</div>
+            <div class="flow-step-name">上传合同</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-icon">🔍</div>
+            <div class="flow-step-name">AI识别</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-icon">⚠️</div>
+            <div class="flow-step-name">风险分析</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-icon">📋</div>
+            <div class="flow-step-name">检测报告</div>
+          </div>
+        </div>
+      </div>
+      <div class="trust-section">
+        <div class="trust-cards">
+          <div class="trust-card">
+            <div class="trust-num">12,863</div>
+            <div class="trust-label">已检测合同</div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-num">3,247</div>
+            <div class="trust-label">发现高风险</div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-num">98.2%</div>
+            <div class="trust-label">用户好评率</div>
+          </div>
+        </div>
+      </div>
+      <div class="disclaimer">
+        ⚠️ 免责声明：检测结果仅供参考，不构成法律意见。重要事项请咨询专业律师。
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">首页</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">报告</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">我的</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 2: Upload -->
+<div class="screen-wrapper">
+  <div class="screen-label">合同上传</div>
+  <div class="phone-frame">
+    <div class="status-bar">上传合同</div>
+    <div class="screen-content">
+      <div class="upload-header">
+        <h3>选择上传方式</h3>
+      </div>
+      <div class="upload-body">
+        <div class="upload-methods">
+          <div class="upload-method">
+            <div class="upload-method-icon">📷</div>
+            <div class="upload-method-info">
+              <h4>拍照上传</h4>
+              <p>拍摄合同页面，支持多页连续拍</p>
+            </div>
+          </div>
+          <div class="upload-method">
+            <div class="upload-method-icon">🖼️</div>
+            <div class="upload-method-info">
+              <h4>从相册选择</h4>
+              <p>选择已拍摄的合同照片，支持多选</p>
+            </div>
+          </div>
+          <div class="upload-method">
+            <div class="upload-method-icon">📄</div>
+            <div class="upload-method-info">
+              <h4>文件上传</h4>
+              <p>支持 PDF、Word 格式电子合同</p>
+            </div>
+          </div>
+        </div>
+        <div class="upload-tips">
+          <h4>📌 上传小贴士</h4>
+          <ul>
+            <li>确保合同文字清晰可读</li>
+            <li>拍摄时保持页面平整</li>
+            <li>支持最多30页合同</li>
+            <li>图片≤10MB，文档≤20MB</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">首页</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">报告</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">我的</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 3: Payment -->
+<div class="screen-wrapper">
+  <div class="screen-label">支付确认</div>
+  <div class="phone-frame">
+    <div class="status-bar">确认支付</div>
+    <div class="screen-content">
+      <div class="payment-body">
+        <div class="payment-contract">
+          <h4>📄 合同信息</h4>
+          <div class="payment-info-row">
+            <span class="payment-info-label">文件名称</span>
+            <span class="payment-info-value">租房合同_3页.jpg</span>
+          </div>
+          <div class="payment-info-row">
+            <span class="payment-info-label">合同页数</span>
+            <span class="payment-info-value">3 页</span>
+          </div>
+          <div class="payment-info-row">
+            <span class="payment-info-label">上传时间</span>
+            <span class="payment-info-value">2026-06-29 14:30</span>
+          </div>
+        </div>
+        <div class="payment-price-card">
+          <div class="payment-price-label">检测费用</div>
+          <div class="payment-price-amount">¥9.9<span class="payment-price-unit">/份</span></div>
+          <div style="font-size:12px; opacity:0.8;">一次检测 · 完整风险报告 · 修改建议</div>
+        </div>
+        <button class="payment-pay-btn">💚 微信支付 ¥9.9</button>
+        <div class="payment-method">
+          <span>🔒 安全支付 · 支付后自动开始检测</span>
+        </div>
+        <div class="disclaimer" style="margin-top:20px;">
+          ⚠️ 检测完成后可查看完整报告。如检测失败将自动退款。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 4: Detection Progress -->
+<div class="screen-wrapper">
+  <div class="screen-label">检测进度</div>
+  <div class="phone-frame">
+    <div class="status-bar">检测中...</div>
+    <div class="screen-content">
+      <div class="progress-body">
+        <div class="progress-animation">🔍</div>
+        <div class="progress-status">AI正在逐条扫描条款...</div>
+        <div class="progress-substatus">预计还需20秒，您可以稍后查看</div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill"></div>
+          </div>
+        </div>
+        <div class="progress-steps">
+          <div class="progress-step-item">
+            <div class="progress-step-icon">✅</div>
+            <div class="progress-step-text done">合同已收到</div>
+          </div>
+          <div class="progress-step-item">
+            <div class="progress-step-icon">✅</div>
+            <div class="progress-step-text done">文字识别完成（3页）</div>
+          </div>
+          <div class="progress-step-item">
+            <div class="progress-step-icon">⚡</div>
+            <div class="progress-step-text active">AI风险条款分析中...</div>
+          </div>
+          <div class="progress-step-item">
+            <div class="progress-step-icon">⏳</div>
+            <div class="progress-step-text">生成风险报告</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 5: Risk Report (CORE) -->
+<div class="screen-wrapper">
+  <div class="screen-label">⭐ 风险报告（核心页面）</div>
+  <div class="phone-frame">
+    <div class="status-bar">检测报告</div>
+    <div class="screen-content">
+      <!-- Report Header: Score -->
+      <div class="report-header">
+        <div class="report-score-ring">
+          <div>
+            <div class="report-score-num">62</div>
+            <div class="report-score-label">风险评分</div>
+          </div>
+        </div>
+        <div class="report-risk-level">中风险</div>
+        <div class="report-suggestion">💡 谨慎签约，建议先与房东协商修改高危条款</div>
+        <div class="report-disclaimer">📌 本报告AI生成的解读和建议仅供参考，不构成法律意见。重要事项请咨询专业律师。</div>
+      </div>
+
+      <div class="report-body">
+        <!-- Risk Overview -->
+        <div class="report-section">
+          <div class="report-section-title">📊 风险概览</div>
+          <div class="report-overview-cards">
+            <div class="report-overview-card danger">
+              <div class="report-overview-count">2</div>
+              <div class="report-overview-label">高危条款</div>
+            </div>
+            <div class="report-overview-card warning">
+              <div class="report-overview-count">3</div>
+              <div class="report-overview-label">中危条款</div>
+            </div>
+            <div class="report-overview-card caution">
+              <div class="report-overview-count">1</div>
+              <div class="report-overview-label">低危条款</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Item 1: High -->
+        <div class="report-section">
+          <div class="report-section-title">⚠️ 风险条款详情</div>
+          <div class="risk-item">
+            <span class="risk-item-tag high">高危</span>
+            <div class="risk-item-title">押金退还条件过于苛刻</div>
+            <div class="risk-item-section">
+              <div class="risk-item-section-label">📜 合同原文</div>
+              <div class="risk-item-original">"合同期满后，甲方需对房屋进行全面检查，如有任何损坏或污渍，押金不予退还。"</div>
+            </div>
+            <div class="risk-item-section" style="margin-top:10px;">
+              <div class="risk-item-section-label">💬 白话解读 <span class="risk-item-ai-badge">AI生成</span></div>
+              <div class="risk-item-interpretation">这条对你意味着什么：房东可以用"任何损坏或污渍"为理由扣留你的全部押金。即使只是墙面正常使用的痕迹或家具自然老化，房东也可能以此拒绝退还押金。这是一个非常宽泛且对你不利的条款。</div>
+            </div>
+            <div class="risk-item-section" style="margin-top:10px;">
+              <div class="risk-item-section-label">✏️ 修改建议 <span class="risk-item-ai-badge">AI生成</span></div>
+              <div class="risk-item-suggestion">建议与房东协商修改为："合同期满后，甲方应在3个工作日内退还押金。如因乙方故意或重大过失造成房屋设施损坏（正常磨损除外），甲方可从押金中扣除合理维修费用，并提供维修凭证。"</div>
+            </div>
+            <div class="risk-item-footer">
+              <span class="risk-item-confidence">🎯 置信度 94%</span>
+              <span class="risk-item-legal">📖 《民法典》第714条</span>
+            </div>
+          </div>
+
+          <!-- Risk Item 2: High -->
+          <div class="risk-item">
+            <span class="risk-item-tag high">高危</span>
+            <div class="risk-item-title">提前退租违约金过高</div>
+            <div class="risk-item-section">
+              <div class="risk-item-section-label">📜 合同原文</div>
+              <div class="risk-item-original">"乙方如需提前退租，需支付相当于3个月租金的违约金，且已付押金不予退还。"</div>
+            </div>
+            <div class="risk-item-section" style="margin-top:10px;">
+              <div class="risk-item-section-label">💬 白话解读 <span class="risk-item-ai-badge">AI生成</span></div>
+              <div class="risk-item-interpretation">这条对你意味着什么：如果你因为工作变动等原因需要提前退租，你不仅要赔3个月租金，押金也没了。以月租3000元计算，你可能需要额外支付9000元+损失押金3000元=12000元，代价非常高。</div>
+            </div>
+            <div class="risk-item-section" style="margin-top:10px;">
+              <div class="risk-item-section-label">✏️ 修改建议 <span class="risk-item-ai-badge">AI生成</span></div>
+              <div class="risk-item-suggestion">建议协商修改为："乙方提前退租需提前30天书面通知甲方，并支付相当于1个月租金的违约金，押金在房屋交接后正常退还。"</div>
+            </div>
+            <div class="risk-item-footer">
+              <span class="risk-item-confidence">🎯 置信度 91%</span>
+              <span class="risk-item-legal">📖 《民法典》第585条</span>
+            </div>
+          </div>
+
+          <!-- Risk Item 3: Medium -->
+          <div class="risk-item">
+            <span class="risk-item-tag medium">中危</span>
+            <div class="risk-item-title">自动续约条款</div>
+            <div class="risk-item-section">
+              <div class="risk-item-section-label">📜 合同原文</div>
+              <div class="risk-item-original">"合同到期前如乙方未提前30天书面通知不续约，则合同自动续期一年，租金上调10%。"</div>
+            </div>
+            <div class="risk-item-section" style="margin-top:10px;">
+              <div class="risk-item-section-label">💬 白话解读 <span class="risk-item-ai-badge">AI生成</span></div>
+              <div class="risk-item-interpretation">这条对你意味着什么：如果你忘记在到期前30天书面通知不续约，合同会自动延续一年，而且租金还涨10%。这个"静默续约"条款容易让人措手不及。</div>
+            </div>
+            <div class="risk-item-footer">
+              <span class="risk-item-confidence">🎯 置信度 88%</span>
+              <span class="risk-item-legal">📖 《民法典》第734条</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checklist -->
+        <div class="report-section">
+          <div class="report-section-title">✅ 签约前建议清单</div>
+          <div class="checklist-item">
+            <div class="checklist-checkbox"></div>
+            <div class="checklist-text">与房东协商修改押金退还条件，要求明确"正常磨损"的定义<span class="checklist-priority high">紧急</span></div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-checkbox"></div>
+            <div class="checklist-text">将违约金从3个月租金降低到1个月<span class="checklist-priority high">紧急</span></div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-checkbox"></div>
+            <div class="checklist-text">修改自动续约条款，取消自动涨租10%<span class="checklist-priority medium">重要</span></div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-checkbox"></div>
+            <div class="checklist-text">入住前拍照记录房屋现状，作为退租时的对比依据</div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-checkbox"></div>
+            <div class="checklist-text">确认房东身份信息及房产证信息是否一致</div>
+          </div>
+        </div>
+
+        <!-- Share -->
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button style="flex:1; padding:12px; background:#2563eb; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:600;">📤 分享报告</button>
+          <button style="flex:1; padding:12px; background:#fff; color:#2563eb; border:1.5px solid #2563eb; border-radius:10px; font-size:14px; font-weight:600;">📥 导出PDF</button>
+        </div>
+
+        <div class="disclaimer" style="margin-top:16px;">
+          ⚠️ 本报告由AI自动生成，仅供参考，不构成法律意见。标有"AI生成"的内容为AI解读，建议核实重要信息。如有疑问请咨询专业律师。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 6: Personal Center -->
+<div class="screen-wrapper">
+  <div class="screen-label">个人中心</div>
+  <div class="phone-frame">
+    <div class="status-bar">我的</div>
+    <div class="screen-content">
+      <div class="profile-header">
+        <div class="profile-avatar">👤</div>
+        <div>
+          <div class="profile-name">小明同学</div>
+          <div class="profile-id">ID: 10086</div>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-num">5</div>
+          <div class="profile-stat-label">检测次数</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num">¥49.5</div>
+          <div class="profile-stat-label">累计消费</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num">3</div>
+          <div class="profile-stat-label">风险报告</div>
+        </div>
+      </div>
+      <div class="profile-menu">
+        <div class="profile-menu-group">
+          <div class="profile-menu-title">检测服务</div>
+          <div class="profile-menu-item">
+            <div class="profile-menu-icon">📋</div>
+            <div class="profile-menu-text">我的报告</div>
+            <div class="profile-menu-arrow">›</div>
+          </div>
+          <div class="profile-menu-item">
+            <div class="profile-menu-icon">💰</div>
+            <div class="profile-menu-text">消费记录</div>
+            <div class="profile-menu-arrow">›</div>
+          </div>
+        </div>
+        <div class="profile-menu-group">
+          <div class="profile-menu-title">账号设置</div>
+          <div class="profile-menu-item">
+            <div class="profile-menu-icon">📱</div>
+            <div class="profile-menu-text">手机号绑定</div>
+            <div class="profile-menu-arrow">›</div>
+          </div>
+          <div class="profile-menu-item">
+            <div class="profile-menu-icon">❓</div>
+            <div class="profile-menu-text">常见问题</div>
+            <div class="profile-menu-arrow">›</div>
+          </div>
+          <div class="profile-menu-item">
+            <div class="profile-menu-icon">💬</div>
+            <div class="profile-menu-text">意见反馈</div>
+            <div class="profile-menu-arrow">›</div>
+          </div>
+          <div class="profile-menu-item">
+            <div class="profile-menu-icon">🎧</div>
+            <div class="profile-menu-text">联系客服</div>
+            <div class="profile-menu-arrow">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">首页</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">报告</div>
+      </div>
+      <div class="nav-item active">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">我的</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

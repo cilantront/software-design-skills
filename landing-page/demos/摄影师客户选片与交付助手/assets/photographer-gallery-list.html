@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>选片助手 - 画廊列表</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: #f5f7fa; color: #333; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #1a1a2e; color: #fff; padding: 20px 0; flex-shrink: 0; }
+.sidebar .logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 18px; font-weight: 600; }
+.sidebar .logo span { color: #e94560; }
+.sidebar nav { margin-top: 20px; }
+.sidebar nav a { display: flex; align-items: center; padding: 12px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; transition: all 0.2s; }
+.sidebar nav a:hover, .sidebar nav a.active { background: rgba(233,69,96,0.15); color: #fff; border-right: 3px solid #e94560; }
+.sidebar nav a .icon { width: 20px; margin-right: 10px; text-align: center; }
+.main { flex: 1; padding: 24px; overflow-y: auto; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.header h1 { font-size: 22px; font-weight: 600; }
+.btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+.btn-primary { background: #e94560; color: #fff; }
+.btn-primary:hover { background: #d63851; }
+.btn-outline { background: #fff; border: 1px solid #ddd; color: #666; }
+.btn-outline:hover { border-color: #e94560; color: #e94560; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.stat-card .label { font-size: 13px; color: #999; margin-bottom: 8px; }
+.stat-card .value { font-size: 28px; font-weight: 700; color: #333; }
+.stat-card .change { font-size: 12px; color: #52c41a; margin-top: 4px; }
+.filter-bar { display: flex; gap: 12px; margin-bottom: 20px; background: #fff; padding: 16px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.filter-bar select, .filter-bar input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+.filter-bar input { flex: 1; }
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.gallery-card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+.gallery-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.gallery-card .cover { height: 180px; background: #f0f0f0; position: relative; overflow: hidden; }
+.gallery-card .cover img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-card .status-tag { position: absolute; top: 10px; right: 10px; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #fff; }
+.status-selecting { background: #1890ff; }
+.status-confirmed { background: #52c41a; }
+.status-draft { background: #999; }
+.status-completed { background: #722ed1; }
+.gallery-card .info { padding: 16px; }
+.gallery-card .info h3 { font-size: 15px; margin-bottom: 8px; }
+.gallery-card .info .meta { display: flex; justify-content: space-between; color: #999; font-size: 13px; }
+.gallery-card .info .progress { margin-top: 10px; }
+.progress-bar { height: 4px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+.progress-bar .fill { height: 100%; background: #e94560; border-radius: 2px; }
+.progress-text { font-size: 12px; color: #999; margin-top: 4px; }
+.gallery-card .actions { display: flex; border-top: 1px solid #f0f0f0; }
+.gallery-card .actions a { flex: 1; text-align: center; padding: 10px; font-size: 13px; color: #666; text-decoration: none; transition: background 0.2s; }
+.gallery-card .actions a:hover { background: #f5f7fa; color: #e94560; }
+.gallery-card .actions a + a { border-left: 1px solid #f0f0f0; }
+.topbar { display: flex; justify-content: flex-end; align-items: center; padding: 0 0 16px; }
+.topbar .user { display: flex; align-items: center; gap: 8px; }
+.topbar .avatar { width: 32px; height: 32px; border-radius: 50%; background: #e94560; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">选片<span>助手</span></div>
+    <nav>
+      <a href="#"><span class="icon">📊</span>工作台</a>
+      <a href="#" class="active"><span class="icon">🖼️</span>画廊管理</a>
+      <a href="#"><span class="icon">📋</span>选片报告</a>
+      <a href="#"><span class="icon"> 👥</span>客户管理</a>
+      <a href="#"><span class="icon">💎</span>套餐与账单</a>
+      <a href="#"><span class="icon">⚙️</span>设置</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="user">
+        <span style="font-size:13px;color:#666">李明摄影</span>
+        <div class="avatar">李</div>
+      </div>
+    </div>
+    <div class="header">
+      <h1>画廊管理</h1>
+      <button class="btn btn-primary">+ 新建画廊</button>
+    </div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="label">本周拍摄</div>
+        <div class="value">3</div>
+        <div class="change">↑ 较上周+1</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">待选片</div>
+        <div class="value">2</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">待交付</div>
+        <div class="value">1</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">本月超片收入</div>
+        <div class="value">¥650</div>
+        <div class="change">↑ 12%</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <select>
+        <option>全部状态</option>
+        <option>选片中</option>
+        <option>已确认</option>
+        <option>已交付</option>
+        <option>已过期</option>
+      </select>
+      <select>
+        <option>全部类型</option>
+        <option>婚纱</option>
+        <option>亲子</option>
+        <option>宠物</option>
+        <option>人像</option>
+      </select>
+      <input type="text" placeholder="搜索客户名/画廊名...">
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-card">
+        <div class="cover">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='240'%3E%3Crect fill='%23f8e8d4' width='400' height='240'/%3E%3Ctext x='200' y='120' text-anchor='middle' fill='%23c4a882' font-size='16'%3E婚纱照%3C/text%3E%3C/svg%3E" alt="">
+          <span class="status-tag status-selecting">选片中</span>
+        </div>
+        <div class="info">
+          <h3>小明&小红 春季婚纱</h3>
+          <div class="meta"><span>客户：张小红</span><span>120张</span></div>
+          <div class="progress">
+            <div class="progress-bar"><div class="fill" style="width:60%"></div></div>
+            <div class="progress-text">已选 15/25张 · 截止 6月30日</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a href="#">查看详情</a>
+          <a href="#">复制链接</a>
+          <a href="#">选片报告</a>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="cover">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='240'%3E%3Crect fill='%23e8f4e8' width='400' height='240'/%3E%3Ctext x='200' y='120' text-anchor='middle' fill='%2382c482' font-size='16'%3E亲子照%3C/text%3E%3C/svg%3E" alt="">
+          <span class="status-tag status-confirmed">已确认</span>
+        </div>
+        <div class="info">
+          <h3>豆豆3岁生日写真</h3>
+          <div class="meta"><span>客户：王女士</span><span>85张</span></div>
+          <div class="progress">
+            <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+            <div class="progress-text">已选 22/20张 · 超片2张 ¥100</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a href="#">查看详情</a>
+          <a href="#">选片报告</a>
+          <a href="#">下载原片</a>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="cover">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='240'%3E%3Crect fill='%23f0e8f8' width='400' height='240'/%3E%3Ctext x='200' y='120' text-anchor='middle' fill='%23a882c4' font-size='16'%3E宠物照%3C/text%3E%3C/svg%3E" alt="">
+          <span class="status-tag status-completed">已交付</span>
+        </div>
+        <div class="info">
+          <h3>柯基"年糕"户外写真</h3>
+          <div class="meta"><span>客户：陈先生</span><span>60张</span></div>
+          <div class="progress">
+            <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+            <div class="progress-text">精修20张已交付</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a href="#">查看详情</a>
+          <a href="#">选片报告</a>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="cover">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='240'%3E%3Crect fill='%23f8f0e0' width='400' height='240'/%3E%3Ctext x='200' y='120' text-anchor='middle' fill='%23c4a860' font-size='16'%3E人像照%3C/text%3E%3C/svg%3E" alt="">
+          <span class="status-tag status-draft">草稿</span>
+        </div>
+        <div class="info">
+          <h3>毕业季 - 小林个人写真</h3>
+          <div class="meta"><span>客户：林同学</span><span>待上传</span></div>
+          <div class="progress">
+            <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+            <div class="progress-text">待上传照片</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a href="#">继续编辑</a>
+          <a href="#">删除</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('.gallery-card .actions a').forEach(a => {
+  a.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+});
+</script>
+</body>
+</html>

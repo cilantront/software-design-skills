@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多平台文案生成原型</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; padding: 32px; }
+        .widget-container { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 960px; margin: 0 auto; }
+        .widget-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #333; }
+
+        .platform-tabs { display: flex; gap: 4px; border-bottom: 2px solid #f0f0f0; margin-bottom: 20px; }
+        .platform-tab { padding: 12px 24px; cursor: pointer; color: #666; font-size: 14px; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.3s; }
+        .platform-tab:hover { color: #667eea; }
+        .platform-tab.active { color: #667eea; border-bottom-color: #667eea; font-weight: 500; }
+
+        .copy-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+
+        .copy-main { }
+        .copy-preview { background: #f8f9ff; border-radius: 12px; padding: 20px; min-height: 300px; margin-bottom: 16px; }
+        .copy-title-text { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 16px; line-height: 1.4; }
+        .copy-body { font-size: 14px; line-height: 2; color: #333; white-space: pre-line; }
+        .copy-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+        .tag { padding: 4px 12px; background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; font-size: 12px; color: #667eea; cursor: pointer; transition: all 0.2s; }
+        .tag:hover { background: #667eea; color: #fff; border-color: #667eea; }
+
+        .action-bar { display: flex; gap: 8px; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+        .btn-primary { background: #667eea; color: #fff; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-secondary { background: #fff; color: #667eea; border: 1px solid #667eea; }
+        .btn-icon { display: flex; align-items: center; gap: 4px; }
+
+        .suggestions { display: grid; gap: 12px; }
+        .suggestion-card { background: #fafafa; border-radius: 10px; padding: 16px; border: 1px solid #f0f0f0; }
+        .suggestion-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .suggestion-icon { font-size: 18px; }
+        .suggestion-title { font-size: 14px; font-weight: 600; color: #667eea; }
+        .suggestion-body { font-size: 13px; color: #666; line-height: 1.6; }
+        .suggestion-body strong { color: #333; }
+
+        .template-selector { background: #f8f9ff; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .template-label { font-size: 13px; color: #666; }
+        .template-select { padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; background: #fff; }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="widget-title">✍️ 多平台文案生成</div>
+
+        <div class="template-selector">
+            <span class="template-label">文案模板：</span>
+            <select class="template-select">
+                <option>默认模板 - 知识分享型</option>
+                <option>轻松幽默型</option>
+                <option>专业严谨型</option>
+                <option>情感共鸣型</option>
+            </select>
+        </div>
+
+        <div class="platform-tabs">
+            <div class="platform-tab active" onclick="switchTab(this)">📕 小红书</div>
+            <div class="platform-tab" onclick="switchTab(this)">🎵 抖音</div>
+            <div class="platform-tab" onclick="switchTab(this)">💬 朋友圈</div>
+            <div class="platform-tab" onclick="switchTab(this)">📺 视频号</div>
+        </div>
+
+        <div class="copy-layout">
+            <div class="copy-main">
+                <div class="copy-preview">
+                    <div class="copy-title-text">🎙️ 播客新手必看！如何开始你的第一档播客</div>
+                    <div class="copy-body">很多朋友问我："我也想做个播客，但不知道从何开始？"
+
+今天分享几个超实用的建议 👇
+
+1️⃣ 先想清楚你要聊什么
+不要盲目跟风，找到你真正热爱且擅长的话题
+
+2️⃣ 设备不用太专业
+手机录音就能开始！内容质量远比音质重要
+
+3️⃣ 坚持比完美更重要
+前几期可能不完美，但坚持录下去就会越来越好
+
+记住：播客不是一个人的独白，而是与听众的对话 💬
+
+想了解更多播客干货？完整节目已上线，快去听吧！</div>
+                    <div class="copy-tags">
+                        <span class="tag">#播客</span>
+                        <span class="tag">#内容创作</span>
+                        <span class="tag">#自媒体</span>
+                        <span class="tag">#播客新手</span>
+                        <span class="tag">#内容创业</span>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button class="btn btn-primary btn-icon">📋 一键复制</button>
+                    <button class="btn btn-secondary btn-icon">🔄 重新生成</button>
+                    <button class="btn btn-secondary btn-icon">✏️ 编辑</button>
+                    <button class="btn btn-secondary btn-icon">💾 保存草稿</button>
+                </div>
+            </div>
+
+            <div class="suggestions">
+                <div class="suggestion-card">
+                    <div class="suggestion-header">
+                        <span class="suggestion-icon">🎨</span>
+                        <span class="suggestion-title">封面图建议</span>
+                    </div>
+                    <div class="suggestion-body">
+                        <strong>推荐文字：</strong>"播客新手指南"<br>
+                        <strong>构图建议：</strong>左侧麦克风图标 + 右侧标题文字<br>
+                        <strong>配色建议：</strong>主色调紫色 #667eea，背景浅灰
+                    </div>
+                </div>
+
+                <div class="suggestion-card">
+                    <div class="suggestion-header">
+                        <span class="suggestion-icon">🏷️</span>
+                        <span class="suggestion-title">标签推荐</span>
+                    </div>
+                    <div class="suggestion-body">
+                        <div class="copy-tags" style="margin-top: 0;">
+                            <span class="tag">#播客</span>
+                            <span class="tag">#内容创作</span>
+                            <span class="tag">#自媒体</span>
+                            <span class="tag">#播客新手</span>
+                            <span class="tag">#音频创作</span>
+                            <span class="tag">#个人品牌</span>
+                            <span class="tag">#知识分享</span>
+                            <span class="tag">#内容创业</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="suggestion-card">
+                    <div class="suggestion-header">
+                        <span class="suggestion-icon">⏰</span>
+                        <span class="suggestion-title">发布时间建议</span>
+                    </div>
+                    <div class="suggestion-body">
+                        <strong>最佳时间段：</strong><br>
+                        • 工作日 12:00-13:00（午休高峰）<br>
+                        • 工作日 20:00-22:00（晚间休闲）<br>
+                        • 周末 10:00-11:00（上午放松）<br><br>
+                        <strong>理由：</strong>目标受众（播客爱好者）在上述时段活跃度最高
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+        }
+    </script>
+</body>
+</html>

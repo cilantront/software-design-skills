@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>直播回放切片助手 - WEB端全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; }
+
+/* Navigation */
+.top-nav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #1a1a2e; color: #fff; display: flex; align-items: center; padding: 0 24px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.top-nav .logo { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.top-nav .logo-icon { width: 28px; height: 28px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.top-nav .nav-links { margin-left: 40px; display: flex; gap: 24px; }
+.top-nav .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; cursor: pointer; padding: 4px 0; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.top-nav .nav-links a.active, .top-nav .nav-links a:hover { color: #fff; border-bottom-color: #667eea; }
+.top-nav .nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.top-nav .nav-right .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+.top-nav .nav-right .badge { background: #ff4757; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+.top-nav .theme-toggle { cursor: pointer; font-size: 16px; opacity: 0.7; transition: opacity 0.2s; }
+.top-nav .theme-toggle:hover { opacity: 1; }
+
+/* Sidebar */
+.sidebar { position: fixed; top: 56px; left: 0; width: 200px; bottom: 0; background: #fff; border-right: 1px solid #e8e8e8; padding: 16px 0; z-index: 50; }
+.sidebar .menu-item { padding: 12px 24px; cursor: pointer; font-size: 14px; color: #555; display: flex; align-items: center; gap: 10px; transition: all 0.2s; border-left: 3px solid transparent; }
+.sidebar .menu-item:hover { background: #f5f5ff; color: #667eea; }
+.sidebar .menu-item.active { background: #f0f0ff; color: #667eea; border-left-color: #667eea; font-weight: 500; }
+.sidebar .menu-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+/* Main Content */
+.main-content { margin-left: 200px; margin-top: 56px; padding: 24px; min-height: calc(100vh - 56px); }
+
+/* Page sections */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Common components */
+.card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.btn { padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+.btn-outline { background: #fff; border: 1px solid #d9d9d9; color: #555; }
+.btn-outline:hover { border-color: #667eea; color: #667eea; }
+.btn-sm { padding: 4px 12px; font-size: 12px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.tag-emotion { background: #fff3e0; color: #e65100; }
+.tag-quote { background: #e8f5e9; color: #2e7d32; }
+.tag-interaction { background: #e3f2fd; color: #1565c0; }
+
+/* Dashboard */
+.dashboard-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.stat-card .stat-label { font-size: 13px; color: #888; margin-bottom: 8px; }
+.stat-card .stat-value { font-size: 28px; font-weight: 700; color: #333; }
+.stat-card .stat-sub { font-size: 12px; color: #aaa; margin-top: 4px; }
+.stat-card .stat-icon { float: right; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+.upload-area-dash { border: 2px dashed #d9d9d9; border-radius: 16px; padding: 60px; text-align: center; cursor: pointer; transition: all 0.3s; background: #fafafa; }
+.upload-area-dash:hover { border-color: #667eea; background: #f5f5ff; }
+.upload-area-dash .upload-icon { font-size: 48px; margin-bottom: 16px; }
+.upload-area-dash .upload-text { font-size: 16px; color: #555; margin-bottom: 8px; }
+.upload-area-dash .upload-hint { font-size: 13px; color: #999; }
+
+/* Video list */
+.video-list-item { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid #f0f0f0; gap: 16px; }
+.video-list-item:last-child { border-bottom: none; }
+.video-thumb { width: 120px; height: 68px; background: #e0e0e0; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; position: relative; }
+.video-thumb .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.7); color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 3px; }
+.video-info { flex: 1; }
+.video-info .video-name { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.video-info .video-meta { font-size: 12px; color: #888; display: flex; gap: 16px; }
+.video-status { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+.status-done { background: #e8f5e9; color: #2e7d32; }
+.status-processing { background: #fff3e0; color: #e65100; }
+.status-failed { background: #ffebee; color: #c62828; }
+.status-uploading { background: #e3f2fd; color: #1565c0; }
+
+/* Upload page */
+.upload-zone { border: 2px dashed #c0c0c0; border-radius: 16px; padding: 80px 40px; text-align: center; transition: all 0.3s; cursor: pointer; }
+.upload-zone.dragover { border-color: #667eea; background: #f0f0ff; }
+.upload-zone .icon { font-size: 56px; margin-bottom: 20px; }
+.upload-zone .title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+.upload-zone .subtitle { font-size: 14px; color: #888; margin-bottom: 20px; }
+.upload-zone .formats { font-size: 12px; color: #aaa; }
+
+/* Processing page */
+.process-steps { display: flex; justify-content: space-between; margin-bottom: 40px; position: relative; }
+.process-steps::before { content: ''; position: absolute; top: 20px; left: 60px; right: 60px; height: 2px; background: #e0e0e0; }
+.process-step { text-align: center; position: relative; z-index: 1; }
+.process-step .step-circle { width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0; color: #999; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-weight: 600; transition: all 0.3s; }
+.process-step .step-circle.active { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.process-step .step-circle.done { background: #4caf50; color: #fff; }
+.process-step .step-label { font-size: 13px; color: #888; }
+.process-step .step-label.active { color: #667eea; font-weight: 500; }
+
+.progress-bar { height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+.progress-bar .fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px; transition: width 0.5s; }
+
+.transcript-panel { background: #f9f9f9; border-radius: 8px; padding: 16px; max-height: 300px; overflow-y: auto; font-size: 13px; line-height: 1.8; }
+.transcript-panel .time-stamp { color: #667eea; font-weight: 500; cursor: pointer; }
+.transcript-panel .highlight-text { background: #fff3cd; padding: 1px 4px; border-radius: 2px; }
+
+/* Highlight clips */
+.clips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.clip-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: all 0.2s; cursor: pointer; border: 2px solid transparent; }
+.clip-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.clip-card.selected { border-color: #667eea; }
+.clip-card .clip-thumb { height: 140px; background: linear-gradient(135deg, #2c3e50, #34495e); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; position: relative; }
+.clip-card .clip-score { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #ffd700; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.clip-card .clip-type { position: absolute; top: 8px; left: 8px; }
+.clip-card .clip-body { padding: 14px; }
+.clip-card .clip-time { font-size: 12px; color: #888; margin-bottom: 6px; }
+.clip-card .clip-desc { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 8px; }
+.clip-card .clip-check { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; }
+
+/* Editor page */
+.editor-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+.editor-main { }
+.editor-sidebar { }
+
+.timeline-container { background: #1a1a2e; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+.timeline-bar { height: 60px; background: #2a2a4a; border-radius: 6px; position: relative; overflow: hidden; }
+.timeline-segment { position: absolute; top: 5px; height: 50px; border-radius: 4px; opacity: 0.8; cursor: pointer; transition: opacity 0.2s; }
+.timeline-segment:hover { opacity: 1; }
+.timeline-segment.emotion { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.timeline-segment.quote { background: linear-gradient(135deg, #26de81, #20bf6b); }
+.timeline-segment.interaction { background: linear-gradient(135deg, #45aaf2, #2d98da); }
+
+.platform-selector { display: flex; gap: 12px; margin-bottom: 20px; }
+.platform-card { flex: 1; padding: 16px; border: 2px solid #e8e8e8; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.platform-card:hover { border-color: #667eea; }
+.platform-card.selected { border-color: #667eea; background: #f5f5ff; }
+.platform-card .platform-icon { font-size: 28px; margin-bottom: 8px; }
+.platform-card .platform-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.platform-card .platform-spec { font-size: 11px; color: #888; }
+
+/* Export page */
+.export-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.export-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.export-card .export-thumb { height: 120px; background: linear-gradient(135deg, #2c3e50, #34495e); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; position: relative; }
+.export-card .export-platform { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+.export-card .export-body { padding: 14px; }
+.export-card .export-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; line-height: 1.4; }
+.export-card .export-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.export-card .export-tag { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #666; }
+.export-card .export-time { font-size: 11px; color: #888; }
+.export-card .export-actions { display: flex; gap: 8px; padding: 0 14px 14px; }
+
+/* Profile page */
+.profile-tabs { display: flex; gap: 0; border-bottom: 1px solid #e8e8e8; margin-bottom: 24px; }
+.profile-tab { padding: 12px 24px; cursor: pointer; font-size: 14px; color: #888; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.profile-tab.active { color: #667eea; border-bottom-color: #667eea; font-weight: 500; }
+.profile-content { }
+
+.plan-card { display: flex; gap: 20px; padding: 24px; border: 2px solid #e8e8e8; border-radius: 12px; margin-bottom: 16px; }
+.plan-card.current { border-color: #667eea; background: #f8f8ff; }
+.plan-card .plan-icon { font-size: 36px; }
+.plan-card .plan-info { flex: 1; }
+.plan-card .plan-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.plan-card .plan-price { font-size: 14px; color: #888; margin-bottom: 8px; }
+.plan-card .plan-features { font-size: 13px; color: #555; line-height: 1.6; }
+
+.usage-bar { height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+.usage-bar .fill { height: 100%; border-radius: 4px; }
+.usage-bar .fill.low { background: #4caf50; }
+.usage-bar .fill.medium { background: #ff9800; }
+.usage-bar .fill.high { background: #f44336; }
+
+.team-member { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+.team-member .member-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
+.team-member .member-info { flex: 1; }
+.team-member .member-name { font-size: 14px; font-weight: 500; }
+.team-member .member-role { font-size: 12px; color: #888; }
+
+.chart-placeholder { height: 200px; background: #f9f9f9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 14px; }
+.chart-bars { display: flex; align-items: end; justify-content: space-around; height: 160px; padding: 0 20px; }
+.chart-bar { width: 30px; background: linear-gradient(to top, #667eea, #764ba2); border-radius: 4px 4px 0 0; transition: height 0.5s; }
+.chart-bar-label { text-align: center; font-size: 11px; color: #888; margin-top: 4px; }
+
+/* Login page */
+.login-page { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.login-box { background: #fff; border-radius: 16px; padding: 48px; width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.login-box .login-title { text-align: center; font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+.login-box .login-subtitle { text-align: center; font-size: 14px; color: #888; margin-bottom: 32px; }
+.login-box .form-group { margin-bottom: 20px; }
+.login-box .form-label { font-size: 13px; color: #555; margin-bottom: 6px; display: block; }
+.login-box .form-input { width: 100%; padding: 10px 14px; border: 1px solid #d9d9d9; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.login-box .form-input:focus { border-color: #667eea; }
+.login-box .login-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 16px; }
+.login-box .login-divider { text-align: center; color: #ccc; font-size: 13px; margin: 20px 0; position: relative; }
+.login-box .login-divider::before, .login-box .login-divider::after { content: ''; position: absolute; top: 50%; width: 35%; height: 1px; background: #e8e8e8; }
+.login-box .login-divider::before { left: 0; }
+.login-box .login-divider::after { right: 0; }
+.login-box .wechat-btn { width: 100%; padding: 10px; border: 1px solid #07c160; border-radius: 8px; background: #fff; color: #07c160; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+/* Notification */
+.notification { position: fixed; top: 72px; right: 24px; background: #fff; border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; z-index: 150; min-width: 300px; animation: slideIn 0.3s; }
+.notification.show { display: flex; align-items: center; gap: 12px; }
+.notification .notif-icon { font-size: 20px; }
+.notification .notif-text { flex: 1; font-size: 13px; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* Dark theme */
+body.dark { background: #1a1a2e; color: #e0e0e0; }
+body.dark .card, body.dark .sidebar, body.dark .stat-card, body.dark .clip-card, body.dark .export-card { background: #16213e; }
+body.dark .video-list-item { border-bottom-color: #2a2a4a; }
+body.dark .upload-area-dash { background: #16213e; border-color: #2a2a4a; }
+body.dark .form-input, body.dark .plan-card { border-color: #2a2a4a; }
+</style>
+</head>
+<body>
+
+<!-- Login Page -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <div class="login-title">🎬 直播回放切片助手</div>
+    <div class="login-subtitle">AI驱动，一键产出多平台短视频</div>
+    <div class="form-group">
+      <label class="form-label">手机号</label>
+      <input class="form-input" type="tel" placeholder="请输入手机号" value="138****8888">
+    </div>
+    <div class="form-group">
+      <label class="form-label">密码</label>
+      <input class="form-input" type="password" placeholder="请输入密码" value="••••••••">
+    </div>
+    <button class="login-btn" onclick="doLogin()">登 录</button>
+    <div class="login-divider">或</div>
+    <button class="wechat-btn" onclick="doLogin()">💬 微信扫码登录</button>
+  </div>
+</div>
+
+<!-- Top Navigation -->
+<nav class="top-nav">
+  <div class="logo">
+    <div class="logo-icon">🎬</div>
+    <span>切片助手</span>
+  </div>
+  <div class="nav-links">
+    <a class="active" onclick="showPage('dashboard')">工作台</a>
+    <a onclick="showPage('upload')">上传</a>
+    <a onclick="showPage('processing')">AI处理</a>
+    <a onclick="showPage('editor')">剪辑</a>
+    <a onclick="showPage('export')">导出</a>
+  </div>
+  <div class="nav-right">
+    <span class="theme-toggle" onclick="toggleTheme()" title="切换主题">🌙</span>
+    <span class="badge">3</span>
+    <div class="avatar" onclick="showPage('profile')">张</div>
+  </div>
+</nav>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="menu-item active" onclick="showPage('dashboard')"><span class="icon">🏠</span>工作台</div>
+  <div class="menu-item" onclick="showPage('upload')"><span class="icon">📤</span>视频上传</div>
+  <div class="menu-item" onclick="showPage('processing')"><span class="icon">🤖</span>AI处理</div>
+  <div class="menu-item" onclick="showPage('editor')"><span class="icon">✂️</span>切片编辑</div>
+  <div class="menu-item" onclick="showPage('export')"><span class="icon">📦</span>导出发布</div>
+  <div class="menu-item" onclick="showPage('profile')"><span class="icon">👤</span>个人中心</div>
+</div>
+
+<!-- Notification -->
+<div class="notification" id="notification">
+  <span class="notif-icon">✅</span>
+  <span class="notif-text" id="notifText">AI处理完成！已识别8个高光片段</span>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+  <!-- Dashboard Page -->
+  <div class="page active" id="page-dashboard">
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32;float:right">📹</div>
+        <div class="stat-label">本月处理视频</div>
+        <div class="stat-value">12</div>
+        <div class="stat-sub">累计时长 18.5 小时</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fff3e0;color:#e65100;float:right">✂️</div>
+        <div class="stat-label">生成切片</div>
+        <div class="stat-value">86</div>
+        <div class="stat-sub">本周 +23</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#e3f2fd;color:#1565c0;float:right">📦</div>
+        <div class="stat-label">导出次数</div>
+        <div class="stat-value">45</div>
+        <div class="stat-sub">本月 +15</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#f3e5f5;color:#7b1fa2;float:right">⏱️</div>
+        <div class="stat-label">剩余可用时长</div>
+        <div class="stat-value">∞</div>
+        <div class="stat-sub">Pro版不限时长</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚡ 快速上传</div>
+      <div class="upload-area-dash" onclick="showPage('upload')">
+        <div class="upload-icon">📤</div>
+        <div class="upload-text">拖拽直播回放视频到这里，或点击上传</div>
+        <div class="upload-hint">支持 MP4/AVI/MOV/FLV 格式，单文件最大 4GB</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 最近处理</div>
+      <div class="video-list-item">
+        <div class="video-thumb" style="background:linear-gradient(135deg,#667eea,#764ba2)">🎬<span class="duration">2:15:30</span></div>
+        <div class="video-info">
+          <div class="video-name">6月28日晚场直播带货回放</div>
+          <div class="video-meta"><span>2小时15分</span><span>1.2GB</span><span>2026-06-28 22:30</span></div>
+        </div>
+        <span class="video-status status-done">已完成</span>
+        <button class="btn btn-sm btn-outline" onclick="showPage('editor')">查看切片</button>
+      </div>
+      <div class="video-list-item">
+        <div class="video-thumb" style="background:linear-gradient(135deg,#26de81,#20bf6b)">🎬<span class="duration">1:45:20</span></div>
+        <div class="video-info">
+          <div class="video-name">知识分享直播-产品设计方法论</div>
+          <div class="video-meta"><span>1小时45分</span><span>860MB</span><span>2026-06-27 21:00</span></div>
+        </div>
+        <span class="video-status status-processing">处理中 65%</span>
+        <button class="btn btn-sm btn-outline" onclick="showPage('processing')">查看进度</button>
+      </div>
+      <div class="video-list-item">
+        <div class="video-thumb" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">🎬<span class="duration">3:02:10</span></div>
+        <div class="video-info">
+          <div class="video-name">6月26日美妆专场直播</div>
+          <div class="video-meta"><span>3小时02分</span><span>1.8GB</span><span>2026-06-26 23:00</span></div>
+        </div>
+        <span class="video-status status-done">已完成</span>
+        <button class="btn btn-sm btn-outline" onclick="showPage('export')">去导出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Page -->
+  <div class="page" id="page-upload">
+    <div class="card">
+      <div class="card-title">📤 上传直播回放视频</div>
+      <div class="upload-zone" id="uploadZone" onclick="simulateUpload()">
+        <div class="icon">📁</div>
+        <div class="title">拖拽文件到此处，或点击选择文件</div>
+        <div class="subtitle">支持批量上传，同时最多3个文件</div>
+        <div class="formats">支持格式：MP4 / AVI / MOV / FLV | 单文件最大 4GB</div>
+      </div>
+    </div>
+
+    <div class="card" id="uploadProgress" style="display:none">
+      <div class="card-title">📊 上传进度</div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:14px;font-weight:500">6月28日晚场直播.mp4</span>
+          <span style="font-size:13px;color:#667eea">78% - 预计剩余 2分钟</span>
+        </div>
+        <div class="progress-bar"><div class="fill" style="width:78%"></div></div>
+        <div style="font-size:12px;color:#888">936MB / 1.2GB · 上传速度 12.5MB/s</div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:14px;font-weight:500">知识分享直播.mp4</span>
+          <span style="font-size:13px;color:#4caf50">✅ 上传完成</span>
+        </div>
+        <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        <div style="font-size:12px;color:#888">860MB · 已自动开始AI处理</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 上传记录</div>
+      <div class="video-list-item">
+        <div class="video-thumb" style="background:linear-gradient(135deg,#667eea,#764ba2)">🎬<span class="duration">2:15:30</span></div>
+        <div class="video-info">
+          <div class="video-name">6月28日晚场直播带货回放</div>
+          <div class="video-meta"><span>2小时15分 · 1.2GB</span><span>2026-06-28 22:30</span></div>
+        </div>
+        <span class="video-status status-done">处理完成</span>
+        <button class="btn btn-sm btn-outline">🗑️</button>
+      </div>
+      <div class="video-list-item">
+        <div class="video-thumb" style="background:linear-gradient(135deg,#26de81,#20bf6b)">🎬<span class="duration">1:45:20</span></div>
+        <div class="video-info">
+          <div class="video-name">知识分享直播-产品设计方法论</div>
+          <div class="video-meta"><span>1小时45分 · 860MB</span><span>2026-06-27 21:00</span></div>
+        </div>
+        <span class="video-status status-processing">处理中</span>
+        <button class="btn btn-sm btn-outline">🗑️</button>
+      </div>
+      <div class="video-list-item">
+        <div class="video-thumb" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">🎬<span class="duration">3:02:10</span></div>
+        <div class="video-info">
+          <div class="video-name">6月26日美妆专场直播</div>
+          <div class="video-meta"><span>3小时02分 · 1.8GB</span><span>2026-06-26 23:00</span></div>
+        </div>
+        <span class="video-status status-done">处理完成</span>
+        <button class="btn btn-sm btn-outline">🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Processing Page -->
+  <div class="page" id="page-processing">
+    <div class="card">
+      <div class="card-title">🤖 AI处理 - 知识分享直播-产品设计方法论</div>
+      <div class="process-steps">
+        <div class="process-step">
+          <div class="step-circle done">✓</div>
+          <div class="step-label">上传完成</div>
+        </div>
+        <div class="process-step">
+          <div class="step-circle done">✓</div>
+          <div class="step-label">ASR转写</div>
+        </div>
+        <div class="process-step">
+          <div class="step-circle active">3</div>
+          <div class="step-label active">高光分析</div>
+        </div>
+        <div class="process-step">
+          <div class="step-circle">4</div>
+          <div class="step-label">生成缩略图</div>
+        </div>
+        <div class="process-step">
+          <div class="step-circle">5</div>
+          <div class="step-label">处理完成</div>
+        </div>
+      </div>
+      <div style="margin-bottom:8px;display:flex;justify-content:space-between">
+        <span style="font-size:14px;font-weight:500">整体进度</span>
+        <span style="font-size:14px;color:#667eea;font-weight:600">65%</span>
+      </div>
+      <div class="progress-bar" style="height:10px"><div class="fill" style="width:65%"></div></div>
+      <div style="font-size:12px;color:#888;margin-top:4px">预计剩余 7 分钟 · 已发现 5 个高光片段</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 转写文字稿（实时）</div>
+      <div class="transcript-panel">
+        <p><span class="time-stamp">[00:00:15]</span> 大家好，欢迎来到今天的直播，今天我们来聊聊<span class="highlight-text">产品设计的方法论</span>。</p>
+        <p><span class="time-stamp">[00:02:30]</span> 首先我想说的是，<span class="highlight-text">好的产品设计一定是以用户为中心的</span>，这不是口号，而是实实在在的方法。</p>
+        <p><span class="time-stamp">[00:05:12]</span> 我们团队在做产品的时候，有一个非常重要的原则，就是<span class="highlight-text">YAGNI原则</span>，You Aren't Gonna Need It。</p>
+        <p><span class="time-stamp">[00:08:45]</span> 很多同学问我，<span class="highlight-text">怎么判断一个需求是不是伪需求？</span> 这个问题问得非常好。</p>
+        <p><span class="time-stamp">[00:12:20]</span> 我的答案是：<span class="highlight-text">看用户是否愿意为这个功能付费</span>，如果答案是肯定的，那就是真需求。</p>
+        <p><span class="time-stamp">[00:15:33]</span> 接下来我们讲第二个重要的方法论，叫做<span class="highlight-text">MVP，最小可行产品</span>。</p>
+        <p><span class="time-stamp">[00:18:10]</span> 什么叫MVP呢？就是<span class="highlight-text">用最少的资源验证最核心的假设</span>。</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎯 已识别的高光片段</div>
+      <div style="display:flex;gap:12px">
+        <div class="clip-card" style="flex:1">
+          <div class="clip-thumb" style="height:100px;background:linear-gradient(135deg,#ff6b6b,#ee5a24)">
+            <span class="clip-type tag tag-emotion">情绪峰值</span>
+            <span class="clip-score">⭐ 92</span>
+            🎤
+          </div>
+          <div class="clip-body">
+            <div class="clip-time">00:05:12 - 00:06:30</div>
+            <div class="clip-desc">讲解YAGNI原则，情绪高涨</div>
+          </div>
+        </div>
+        <div class="clip-card" style="flex:1">
+          <div class="clip-thumb" style="height:100px;background:linear-gradient(135deg,#26de81,#20bf6b)">
+            <span class="clip-type tag tag-quote">卖点金句</span>
+            <span class="clip-score">⭐ 88</span>
+            💡
+          </div>
+          <div class="clip-body">
+            <div class="clip-time">00:12:20 - 00:13:45</div>
+            <div class="clip-desc">如何判断真需求vs伪需求</div>
+          </div>
+        </div>
+        <div class="clip-card" style="flex:1">
+          <div class="clip-thumb" style="height:100px;background:linear-gradient(135deg,#45aaf2,#2d98da)">
+            <span class="clip-type tag tag-interaction">互动热点</span>
+            <span class="clip-score">⭐ 85</span>
+            🔥
+          </div>
+          <div class="clip-body">
+            <div class="clip-time">00:18:10 - 00:19:30</div>
+            <div class="clip-desc">MVP概念讲解，弹幕互动密集</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clip Editor Page -->
+  <div class="page" id="page-editor">
+    <div class="card">
+      <div class="card-title">✂️ 切片编辑 - 6月28日晚场直播带货回放</div>
+      <div class="timeline-container">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="color:#fff;font-size:13px">时间轴 <span style="opacity:0.6">00:00:00 — 02:15:30</span></span>
+          <span style="color:#fff;font-size:12px;opacity:0.6">🔍 缩放 | 拖拽框选添加片段</span>
+        </div>
+        <div class="timeline-bar">
+          <div class="timeline-segment emotion" style="left:5%;width:3%" title="情绪峰值 00:06:42-00:08:15"></div>
+          <div class="timeline-segment quote" style="left:15%;width:4%" title="卖点金句 00:20:30-00:22:10"></div>
+          <div class="timeline-segment emotion" style="left:25%;width:3%" title="情绪峰值 00:34:15-00:35:40"></div>
+          <div class="timeline-segment interaction" style="left:38%;width:5%" title="互动热点 00:51:20-00:53:45"></div>
+          <div class="timeline-segment quote" style="left:52%;width:4%" title="卖点金句 01:10:30-01:12:20"></div>
+          <div class="timeline-segment emotion" style="left:68%;width:3%" title="情绪峰值 01:32:10-01:33:30"></div>
+          <div class="timeline-segment interaction" style="left:80%;width:4%" title="互动热点 01:48:20-01:50:15"></div>
+          <div class="timeline-segment quote" style="left:90%;width:3%" title="卖点金句 02:02:30-02:04:00"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="editor-layout">
+      <div class="editor-main">
+        <div class="card">
+          <div class="card-title" style="justify-content:space-between">
+            <span>🎯 高光片段列表（8个）</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm btn-outline">全选</button>
+              <button class="btn btn-sm btn-outline">反选</button>
+            </div>
+          </div>
+          <div class="clips-grid">
+            <div class="clip-card selected">
+              <div class="clip-thumb">
+                <span class="clip-type tag tag-emotion">情绪峰值</span>
+                <span class="clip-score">⭐ 95</span>
+                🎤
+              </div>
+              <div class="clip-body">
+                <div class="clip-time">00:06:42 - 00:08:15</div>
+                <div class="clip-desc">"这款面霜真的是我自己用了三个月的！效果超级明显！"</div>
+                <div style="margin-top:8px"><label style="font-size:12px;cursor:pointer"><input type="checkbox" checked> 选中此片段</label></div>
+              </div>
+            </div>
+            <div class="clip-card selected">
+              <div class="clip-thumb" style="background:linear-gradient(135deg,#26de81,#20bf6b)">
+                <span class="clip-type tag tag-quote">卖点金句</span>
+                <span class="clip-score">⭐ 91</span>
+                💡
+              </div>
+              <div class="clip-body">
+                <div class="clip-time">00:20:30 - 00:22:10</div>
+                <div class="clip-desc">"买一送一！只有今天直播有这个价格，过了就恢复原价！"</div>
+                <div style="margin-top:8px"><label style="font-size:12px;cursor:pointer"><input type="checkbox" checked> 选中此片段</label></div>
+              </div>
+            </div>
+            <div class="clip-card selected">
+              <div class="clip-thumb" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">
+                <span class="clip-type tag tag-emotion">情绪峰值</span>
+                <span class="clip-score">⭐ 87</span>
+                🎤
+              </div>
+              <div class="clip-body">
+                <div class="clip-time">00:34:15 - 00:35:40</div>
+                <div class="clip-desc">"这个面膜我强烈推荐给敏感肌的姐妹！"</div>
+                <div style="margin-top:8px"><label style="font-size:12px;cursor:pointer"><input type="checkbox" checked> 选中此片段</label></div>
+              </div>
+            </div>
+            <div class="clip-card">
+              <div class="clip-thumb" style="background:linear-gradient(135deg,#45aaf2,#2d98da)">
+                <span class="clip-type tag tag-interaction">互动热点</span>
+                <span class="clip-score">⭐ 82</span>
+                🔥
+              </div>
+              <div class="clip-body">
+                <div class="clip-time">00:51:20 - 00:53:45</div>
+                <div class="clip-desc">观众提问环节，弹幕互动密集</div>
+                <div style="margin-top:8px"><label style="font-size:12px;cursor:pointer"><input type="checkbox"> 选中此片段</label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-sidebar">
+        <div class="card">
+          <div class="card-title">📱 选择平台模板</div>
+          <div class="platform-selector" style="flex-direction:column">
+            <div class="platform-card selected" onclick="this.classList.toggle('selected')">
+              <div class="platform-icon">🎵</div>
+              <div class="platform-name">抖音</div>
+              <div class="platform-spec">竖版9:16 · 15-60秒 · 快节奏</div>
+            </div>
+            <div class="platform-card selected" onclick="this.classList.toggle('selected')">
+              <div class="platform-icon">📕</div>
+              <div class="platform-name">小红书</div>
+              <div class="platform-spec">图文笔记 · 3-6张关键帧</div>
+            </div>
+            <div class="platform-card" onclick="this.classList.toggle('selected')">
+              <div class="platform-icon">📹</div>
+              <div class="platform-name">视频号</div>
+              <div class="platform-spec">横版/竖版 · 30-120秒</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="showPage('export')">
+            ✨ 生成切片（已选3个片段）
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Page -->
+  <div class="page" id="page-export">
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between">
+        <span>📦 导出发布 - 共 6 个切片</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-outline">全选</button>
+          <select class="btn btn-sm btn-outline" style="border:1px solid #d9d9d9;border-radius:8px;background:#fff">
+            <option>导出格式：MP4</option>
+            <option>导出格式：MOV</option>
+          </select>
+          <select class="btn btn-sm btn-outline" style="border:1px solid #d9d9d9;border-radius:8px;background:#fff">
+            <option>分辨率：1080P</option>
+            <option>分辨率：720P</option>
+          </select>
+          <button class="btn btn-sm btn-primary" onclick="showNotification('批量导出已开始，预计需要2分钟')">📥 批量导出</button>
+        </div>
+      </div>
+      <div class="export-grid">
+        <div class="export-card">
+          <div class="export-thumb" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">
+            <span class="export-platform">🎵 抖音</span>
+            🎬
+          </div>
+          <div class="export-body">
+            <div class="export-title">🔥 这款面霜用了3个月效果惊人！姐妹们冲！</div>
+            <div class="export-tags">
+              <span class="export-tag">#面霜推荐</span>
+              <span class="export-tag">#护肤好物</span>
+              <span class="export-tag">#直播带货</span>
+            </div>
+            <div class="export-time">📅 建议发布：今天 20:00</div>
+          </div>
+          <div class="export-actions">
+            <button class="btn btn-sm btn-outline">✏️ 编辑</button>
+            <button class="btn btn-sm btn-outline">👁️ 预览</button>
+          </div>
+        </div>
+        <div class="export-card">
+          <div class="export-thumb" style="background:linear-gradient(135deg,#26de81,#20bf6b)">
+            <span class="export-platform">🎵 抖音</span>
+            🎬
+          </div>
+          <div class="export-body">
+            <div class="export-title">💰 买一送一！今天直播间专属价！</div>
+            <div class="export-tags">
+              <span class="export-tag">#限时优惠</span>
+              <span class="export-tag">#直播回放</span>
+              <span class="export-tag">#好物分享</span>
+            </div>
+            <div class="export-time">📅 建议发布：明天 12:00</div>
+          </div>
+          <div class="export-actions">
+            <button class="btn btn-sm btn-outline">✏️ 编辑</button>
+            <button class="btn btn-sm btn-outline">👁️ 预览</button>
+          </div>
+        </div>
+        <div class="export-card">
+          <div class="export-thumb" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">
+            <span class="export-platform">📕 小红书</span>
+            📝
+          </div>
+          <div class="export-body">
+            <div class="export-title">✨ 敏感肌必入！这款面膜我回购了5次</div>
+            <div class="export-tags">
+              <span class="export-tag">#面膜推荐</span>
+              <span class="export-tag">#敏感肌护肤</span>
+              <span class="export-tag">#好物测评</span>
+              <span class="export-tag">#护肤日常</span>
+            </div>
+            <div class="export-time">📅 建议发布：今天 19:00</div>
+          </div>
+          <div class="export-actions">
+            <button class="btn btn-sm btn-outline">✏️ 编辑</button>
+            <button class="btn btn-sm btn-outline">👁️ 预览</button>
+          </div>
+        </div>
+        <div class="export-card">
+          <div class="export-thumb" style="background:linear-gradient(135deg,#45aaf2,#2d98da)">
+            <span class="export-platform">🎵 抖音</span>
+            🎬
+          </div>
+          <div class="export-body">
+            <div class="export-title">😱 直播间最火的单品竟然是它！</div>
+            <div class="export-tags">
+              <span class="export-tag">#直播高光</span>
+              <span class="export-tag">#好物推荐</span>
+            </div>
+            <div class="export-time">📅 建议发布：明天 18:00</div>
+          </div>
+          <div class="export-actions">
+            <button class="btn btn-sm btn-outline">✏️ 编辑</button>
+            <button class="btn btn-sm btn-outline">👁️ 预览</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📄 文案文档</div>
+      <div style="display:flex;gap:12px">
+        <button class="btn btn-outline" onclick="showNotification('文案文档已开始下载')">📊 导出 Excel 文案文档</button>
+        <button class="btn btn-outline" onclick="showNotification('文案文档已开始下载')">📝 导出 TXT 文案文档</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Page -->
+  <div class="page" id="page-profile">
+    <div class="card">
+      <div class="profile-tabs">
+        <div class="profile-tab active" onclick="showProfileTab('account')">👤 账号管理</div>
+        <div class="profile-tab" onclick="showProfileTab('subscription')">💎 订阅管理</div>
+        <div class="profile-tab" onclick="showProfileTab('team')">👥 团队协作</div>
+        <div class="profile-tab" onclick="showProfileTab('data')">📊 数据看板</div>
+      </div>
+
+      <div class="profile-content" id="profile-account">
+        <div style="display:flex;gap:24px;align-items:center;margin-bottom:24px">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px">张</div>
+          <div>
+            <div style="font-size:18px;font-weight:600">张小明</div>
+            <div style="font-size:13px;color:#888">138****8888 · 已绑定微信</div>
+          </div>
+          <button class="btn btn-outline" style="margin-left:auto">编辑资料</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div><label style="font-size:13px;color:#888;display:block;margin-bottom:4px">昵称</label><input class="form-input" value="张小明" style="width:100%;padding:8px 12px;border:1px solid #d9d9d9;border-radius:6px"></div>
+          <div><label style="font-size:13px;color:#888;display:block;margin-bottom:4px">手机号</label><input class="form-input" value="138****8888" style="width:100%;padding:8px 12px;border:1px solid #d9d9d9;border-radius:6px"></div>
+          <div><label style="font-size:13px;color:#888;display:block;margin-bottom:4px">邮箱</label><input class="form-input" value="xiaoming@example.com" style="width:100%;padding:8px 12px;border:1px solid #d9d9d9;border-radius:6px"></div>
+          <div><label style="font-size:13px;color:#888;display:block;margin-bottom:4px">微信</label><input class="form-input" value="已绑定" disabled style="width:100%;padding:8px 12px;border:1px solid #d9d9d9;border-radius:6px;background:#f5f5f5"></div>
+        </div>
+      </div>
+
+      <div class="profile-content" id="profile-subscription" style="display:none">
+        <div class="plan-card current">
+          <div class="plan-icon">💎</div>
+          <div class="plan-info">
+            <div class="plan-name">Pro 专业版</div>
+            <div class="plan-price">¥99/月 · 到期时间：2026-08-28</div>
+            <div class="plan-features">✅ 不限回放时长 · ✅ 团队协作（10人） · ✅ 多平台模板 · ✅ 数据分析 · ✅ 无水印导出</div>
+          </div>
+          <button class="btn btn-outline">续费</button>
+        </div>
+        <div class="card-title" style="margin-top:24px">📊 本月用量</div>
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;font-size:14px"><span>视频处理时长</span><span style="color:#888">45小时 / ∞（不限）</span></div>
+          <div class="usage-bar"><div class="fill low" style="width:30%"></div></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;font-size:14px"><span>已生成切片</span><span style="color:#888">86 个</span></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:14px"><span>存储空间</span><span style="color:#888">12.5GB / 50GB</span></div>
+          <div class="usage-bar"><div class="fill medium" style="width:25%"></div></div>
+        </div>
+      </div>
+
+      <div class="profile-content" id="profile-team" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <span style="font-size:14px;color:#888">团队成员（4/10）</span>
+          <button class="btn btn-primary">+ 邀请成员</button>
+        </div>
+        <div class="team-member">
+          <div class="member-avatar">张</div>
+          <div class="member-info"><div class="member-name">张小明</div><div class="member-role">管理员 · 本月处理 45 个视频</div></div>
+          <span class="tag" style="background:#e8f5e9;color:#2e7d32">管理员</span>
+        </div>
+        <div class="team-member">
+          <div class="member-avatar" style="background:linear-gradient(135deg,#26de81,#20bf6b)">李</div>
+          <div class="member-info"><div class="member-name">李运营</div><div class="member-role">编辑者 · 本月处理 23 个视频</div></div>
+          <span class="tag" style="background:#e3f2fd;color:#1565c0">编辑者</span>
+        </div>
+        <div class="team-member">
+          <div class="member-avatar" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">王</div>
+          <div class="member-info"><div class="member-name">王助理</div><div class="member-role">编辑者 · 本月处理 12 个视频</div></div>
+          <span class="tag" style="background:#e3f2fd;color:#1565c0">编辑者</span>
+        </div>
+        <div class="team-member">
+          <div class="member-avatar" style="background:linear-gradient(135deg,#45aaf2,#2d98da)">赵</div>
+          <div class="member-info"><div class="member-name">赵实习</div><div class="member-role">查看者 · 本月处理 0 个视频</div></div>
+          <span class="tag" style="background:#f0f0f0;color:#888">查看者</span>
+        </div>
+      </div>
+
+      <div class="profile-content" id="profile-data" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+          <div class="stat-card"><div class="stat-label">累计切片</div><div class="stat-value">328</div></div>
+          <div class="stat-card"><div class="stat-label">累计导出</div><div class="stat-value">156</div></div>
+          <div class="stat-card"><div class="stat-label">累计处理视频</div><div class="stat-value">67</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 平台分布</div>
+          <div style="display:flex;gap:24px;align-items:center">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:12px;height:12px;background:#ff0050;border-radius:50%"></span>抖音 52%（170个）</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:12px;height:12px;background:#ff2442;border-radius:50%"></span>小红书 33%（108个）</div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;background:#07c160;border-radius:50%"></span>视频号 15%（50个）</div>
+            </div>
+            <div style="width:120px;height:120px;border-radius:50%;background:conic-gradient(#ff0050 0% 52%,#ff2442 52% 85%,#07c160 85% 100%)"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📈 近30天处理趋势</div>
+          <div class="chart-bars">
+            <div style="text-align:center"><div class="chart-bar" style="height:60px"></div><div class="chart-bar-label">第1周</div></div>
+            <div style="text-align:center"><div class="chart-bar" style="height:90px"></div><div class="chart-bar-label">第2周</div></div>
+            <div style="text-align:center"><div class="chart-bar" style="height:120px"></div><div class="chart-bar-label">第3周</div></div>
+            <div style="text-align:center"><div class="chart-bar" style="height:80px"></div><div class="chart-bar-label">第4周</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function doLogin() {
+  document.getElementById('loginPage').style.display = 'none';
+}
+
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  document.querySelectorAll('.sidebar .menu-item').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const menuItems = document.querySelectorAll('.sidebar .menu-item');
+  const pageMap = { dashboard: 0, upload: 1, processing: 2, editor: 3, export: 4, profile: 5 };
+  if (pageMap[pageId] !== undefined) menuItems[pageMap[pageId]].classList.add('active');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const navMap = { dashboard: 0, upload: 1, processing: 2, editor: 3, export: 4 };
+  if (navMap[pageId] !== undefined) navLinks[navMap[pageId]].classList.add('active');
+}
+
+function showProfileTab(tab) {
+  document.querySelectorAll('.profile-content').forEach(c => c.style.display = 'none');
+  document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('profile-' + tab).style.display = 'block';
+  event.target.classList.add('active');
+}
+
+function simulateUpload() {
+  document.getElementById('uploadProgress').style.display = 'block';
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  const toggle = document.querySelector('.theme-toggle');
+  toggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+}
+
+function showNotification(text) {
+  const notif = document.getElementById('notification');
+  document.getElementById('notifText').textContent = text;
+  notif.classList.add('show');
+  setTimeout(() => notif.classList.remove('show'), 3000);
+}
+
+// Upload zone drag effect
+const uploadZone = document.getElementById('uploadZone');
+if (uploadZone) {
+  uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', (e) => { e.preventDefault(); uploadZone.classList.remove('dragover'); simulateUpload(); });
+}
+</script>
+</body>
+</html>

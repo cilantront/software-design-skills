@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>洞察报告看板 - Widget原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; padding: 24px; color: #333; }
+.widget-container { background: #fff; border-radius: 12px; padding: 24px; max-width: 1080px; margin: 0 auto; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+h3 { font-size: 18px; }
+.time-switch { display: flex; gap: 4px; background: #f0f2f5; padding: 3px; border-radius: 6px; }
+.time-switch span { padding: 4px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; color: #666; }
+.time-switch span.active { background: #fff; color: #4f7cff; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.kpi-card { background: linear-gradient(135deg, #f8faff, #fff); border: 1px solid #e8ecf0; border-radius: 10px; padding: 16px; }
+.kpi-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+.kpi-value { font-size: 28px; font-weight: 700; color: #1a1a1a; }
+.kpi-sub { font-size: 11px; color: #888; margin-top: 4px; }
+.kpi-sub .up { color: #e53e3e; }
+.kpi-sub .down { color: #38a169; }
+
+.chart-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; margin-bottom: 24px; }
+.chart-card { background: #fafbfc; border: 1px solid #e8ecf0; border-radius: 10px; padding: 16px; }
+.chart-title { font-size: 13px; font-weight: 600; margin-bottom: 14px; color: #444; display: flex; justify-content: space-between; }
+.chart-title span { font-size: 11px; color: #aaa; font-weight: 400; }
+
+/* 柱状图 */
+.bar-chart { display: flex; align-items: flex-end; gap: 14px; height: 180px; padding-top: 10px; }
+.bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bar { width: 100%; max-width: 42px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, #4f7cff, #7ba3ff); position: relative; transition: all .3s; }
+.bar:hover { opacity: .85; }
+.bar-val { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 600; color: #4f7cff; white-space: nowrap; }
+.bar-label { font-size: 11px; color: #666; text-align: center; }
+
+/* 影响矩阵 */
+.matrix { position: relative; height: 200px; background: linear-gradient(135deg, #f0fff4 0%, #fffbea 50%, #fff5f5 100%); border-radius: 8px; border: 1px solid #e8ecf0; }
+.matrix-axis { position: absolute; font-size: 10px; color: #aaa; }
+.matrix-axis.x { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.matrix-axis.y { top: 50%; left: 4px; transform: translateY(-50%) rotate(-90deg); transform-origin: left center; }
+.bubble { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: transform .2s; }
+.bubble:hover { transform: scale(1.1); z-index: 2; }
+.bubble-p0 { background: rgba(229, 62, 62, .85); }
+.bubble-p1 { background: rgba(229, 160, 0, .85); }
+.bubble-p2 { background: rgba(56, 161, 105, .85); }
+.matrix-legend { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; font-size: 10px; }
+.matrix-legend span { display: flex; align-items: center; gap: 3px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.actions { display: flex; gap: 10px; justify-content: flex-end; }
+.btn { padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; }
+.btn-primary { background: #4f7cff; color: #fff; }
+.btn-secondary { background: #f0f2f5; color: #555; }
+</style>
+</head>
+<body>
+<div class="widget-container">
+  <div class="top-bar">
+    <h3>📊 差评洞察报告</h3>
+    <div class="time-switch">
+      <span>近7天</span>
+      <span class="active">近30天</span>
+      <span>近90天</span>
+      <span>自定义</span>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">差评总数</div>
+      <div class="kpi-value">1,000</div>
+      <div class="kpi-sub">较上周期 <span class="up">↑ 12.5%</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">分类类别数</div>
+      <div class="kpi-value">8</div>
+      <div class="kpi-sub">覆盖全部标签体系</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Top 1 问题</div>
+      <div class="kpi-value" style="font-size:20px;color:#e53e3e">产品质量</div>
+      <div class="kpi-sub">占比 34.2% · 342条</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">平均情感强度</div>
+      <div class="kpi-value" style="color:#e53e3e">强负面</div>
+      <div class="kpi-sub">强负面占比 58%</div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">问题频次排行 <span>按分类标签统计</span></div>
+      <div class="bar-chart">
+        <div class="bar-item">
+          <div class="bar" style="height:100%"><span class="bar-val">342</span></div>
+          <div class="bar-label">产品<br>质量</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:58%"><span class="bar-val">198</span></div>
+          <div class="bar-label">物流<br>配送</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:46%"><span class="bar-val">156</span></div>
+          <div class="bar-label">描述<br>不符</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:26%"><span class="bar-val">89</span></div>
+          <div class="bar-label">客服<br>态度</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:21%"><span class="bar-val">72</span></div>
+          <div class="bar-label">价格<br>问题</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:20%"><span class="bar-val">68</span></div>
+          <div class="bar-label">包装<br>破损</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:16%"><span class="bar-val">55</span></div>
+          <div class="bar-label">使用<br>体验</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:6%"><span class="bar-val">20</span></div>
+          <div class="bar-label">其他</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">影响程度矩阵 <span>X轴=频次 Y轴=影响</span></div>
+      <div class="matrix">
+        <div class="matrix-axis x">频次 →</div>
+        <div class="matrix-axis y">影响程度 →</div>
+        <div class="matrix-legend">
+          <span><span class="legend-dot" style="background:#e53e3e"></span>P0 紧急</span>
+          <span><span class="legend-dot" style="background:#e5a000"></span>P1 建议</span>
+          <span><span class="legend-dot" style="background:#38a169"></span>P2 关注</span>
+        </div>
+        <!-- 高频高影响 -->
+        <div class="bubble bubble-p0" style="width:68px;height:68px;top:15px;right:20px">产品质量</div>
+        <!-- 高频中影响 -->
+        <div class="bubble bubble-p0" style="width:52px;height:52px;top:55px;right:110px">物流配送</div>
+        <!-- 中频中影响 -->
+        <div class="bubble bubble-p1" style="width:44px;height:44px;top:80px;left:40%">描述不符</div>
+        <!-- 中频高影响 -->
+        <div class="bubble bubble-p1" style="width:34px;height:34px;top:30px;left:30%">客服态度</div>
+        <!-- 低频低影响 -->
+        <div class="bubble bubble-p2" style="width:28px;height:28px;bottom:40px;left:20%">价格问题</div>
+        <div class="bubble bubble-p2" style="width:26px;height:26px;bottom:50px;left:38%">包装破损</div>
+        <div class="bubble bubble-p2" style="width:22px;height:22px;bottom:60px;left:55%">使用体验</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary">📥 导出 Excel</button>
+    <button class="btn btn-secondary">📄 导出 PDF</button>
+    <button class="btn btn-primary">查看优先改进建议 →</button>
+  </div>
+</div>
+</body>
+</html>

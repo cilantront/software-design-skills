@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月度统计 Widget 原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f0f2f5; display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; padding: 20px; }
+.widget-box { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); max-width: 375px; }
+.widget-title { font-size: 14px; color: #999; margin-bottom: 16px; text-align: center; }
+.phone-screen { width: 320px; height: 520px; border-radius: 24px; border: 3px solid #333; overflow: hidden; margin: 0 auto; background: #f5f5f5; }
+.nav-bar { height: 44px; background: #FF8C42; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; font-weight: 600; }
+.content { height: calc(100% - 44px); overflow-y: auto; }
+.month-selector { display: flex; align-items: center; justify-content: center; padding: 10px; background: #fff; font-size: 15px; font-weight: 600; color: #333; }
+.month-selector span { margin: 0 16px; cursor: pointer; color: #999; font-size: 18px; }
+.overview-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+.overview-card { background: #fff; border-radius: 12px; padding: 12px; text-align: center; }
+.ov-num { font-size: 20px; font-weight: 700; color: #FF8C42; }
+.ov-label { font-size: 10px; color: #999; margin-top: 4px; }
+.card { background: #fff; border-radius: 12px; margin: 8px 10px; padding: 14px; }
+.card-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; }
+.pie-wrap { display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+.pie-chart { width: 110px; height: 110px; border-radius: 50%; background: conic-gradient(#FF8C42 0% 35%, #4CAF50 35% 60%, #2196F3 60% 80%, #9C27B0 80% 100%); position: relative; }
+.pie-chart::after { content: ''; position: absolute; top: 25%; left: 25%; width: 50%; height: 50%; background: #fff; border-radius: 50%; }
+.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 12px; }
+.legend-item { display: flex; align-items: center; font-size: 11px; color: #666; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+.bar-row { display: flex; align-items: center; margin-bottom: 10px; }
+.bar-name { width: 48px; font-size: 12px; color: #666; }
+.bar-bg { flex: 1; height: 18px; background: #f0f0f0; border-radius: 9px; overflow: hidden; margin: 0 8px; }
+.bar-fill { height: 100%; border-radius: 9px; }
+.bar-value { font-size: 12px; color: #333; width: 36px; text-align: right; font-weight: 600; }
+.member-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.member-row:last-child { border-bottom: none; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600; }
+.member-stat { margin-left: 10px; flex: 1; }
+.member-stat .name { font-size: 13px; color: #333; font-weight: 500; }
+.member-stat .detail { font-size: 11px; color: #999; margin-top: 2px; }
+.member-stat .pct { font-size: 14px; font-weight: 700; color: #FF8C42; }
+.desc-card { background: #f9f9f9; border-radius: 12px; padding: 16px; margin-top: 16px; max-width: 375px; }
+.desc-card h3 { font-size: 14px; color: #333; margin-bottom: 8px; }
+.desc-card ul { font-size: 12px; color: #666; line-height: 1.8; margin-left: 16px; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="widget-box">
+    <div class="widget-title">月度统计 — 照护贡献</div>
+    <div class="phone-screen">
+      <div class="nav-bar">月度统计</div>
+      <div class="content">
+        <div class="month-selector">
+          <span>‹</span>
+          2026年6月
+          <span>›</span>
+        </div>
+
+        <div class="overview-cards">
+          <div class="overview-card">
+            <div class="ov-num">28</div>
+            <div class="ov-label">总照护天数</div>
+          </div>
+          <div class="overview-card">
+            <div class="ov-num">¥856</div>
+            <div class="ov-label">总支出</div>
+          </div>
+          <div class="overview-card">
+            <div class="ov-num">4</div>
+            <div class="ov-label">参与成员</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">照护贡献占比</div>
+          <div class="pie-wrap">
+            <div class="pie-chart"></div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#FF8C42;"></div>张大姐 35%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4CAF50;"></div>张二弟 25%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#2196F3;"></div>张三妹 20%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#9C27B0;"></div>张四弟 20%</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">照护天数对比</div>
+          <div style="padding:4px 0;">
+            <div class="bar-row">
+              <span class="bar-name">张大姐</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#FF8C42;"></div></div>
+              <span class="bar-value">10天</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">张二弟</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#4CAF50;"></div></div>
+              <span class="bar-value">7天</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">张三妹</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:43%;background:#2196F3;"></div></div>
+              <span class="bar-value">6天</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">张四弟</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:36%;background:#9C27B0;"></div></div>
+              <span class="bar-value">5天</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">成员贡献明细</div>
+          <div class="member-row">
+            <div class="avatar" style="background:#FF8C42;">大</div>
+            <div class="member-stat">
+              <div class="name">张大姐</div>
+              <div class="detail">10天 · 送药7次 · 做饭10次 · 陪聊8次</div>
+            </div>
+            <div class="pct">35%</div>
+          </div>
+          <div class="member-row">
+            <div class="avatar" style="background:#4CAF50;">二</div>
+            <div class="member-stat">
+              <div class="name">张二弟</div>
+              <div class="detail">7天 · 送药7次 · 做饭7次 · 就医2次</div>
+            </div>
+            <div class="pct">25%</div>
+          </div>
+          <div class="member-row">
+            <div class="avatar" style="background:#2196F3;">三</div>
+            <div class="member-stat">
+              <div class="name">张三妹</div>
+              <div class="detail">6天 · 送药6次 · 做饭6次 · 洗澡2次</div>
+            </div>
+            <div class="pct">20%</div>
+          </div>
+          <div class="member-row">
+            <div class="avatar" style="background:#9C27B0;">四</div>
+            <div class="member-stat">
+              <div class="name">张四弟</div>
+              <div class="detail">5天 · 送药5次 · 做饭5次 · 陪聊4次</div>
+            </div>
+            <div class="pct">20%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="desc-card">
+    <h3>照护贡献统计说明</h3>
+    <ul>
+      <li>按月度统计每位成员的照护天数和占比</li>
+      <li>饼图直观展示各成员贡献比例</li>
+      <li>柱状图横向对比各成员照护天数</li>
+      <li>明细展示各类照护活动的次数</li>
+      <li>数据实时更新，每次日志提交后自动更新</li>
+      <li>支持切换查看最近6个月的历史数据</li>
+    </ul>
+  </div>
+</div>
+
+<div>
+  <div class="widget-box">
+    <div class="widget-title">月度统计 — 支出分析</div>
+    <div class="phone-screen">
+      <div class="nav-bar">月度统计</div>
+      <div class="content">
+        <div class="month-selector">
+          <span>‹</span>
+          2026年6月
+          <span>›</span>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💰 支出概览</div>
+          <div style="display:flex;justify-content:space-around;text-align:center;padding:10px 0;">
+            <div>
+              <div style="font-size:24px;font-weight:700;color:#FF8C42;">¥856</div>
+              <div style="font-size:11px;color:#999;margin-top:4px;">本月总支出</div>
+            </div>
+            <div>
+              <div style="font-size:24px;font-weight:700;color:#4CAF50;">¥214</div>
+              <div style="font-size:11px;color:#999;margin-top:4px;">人均支出</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">支出类别分布</div>
+          <div style="padding:4px 0;">
+            <div class="bar-row">
+              <span class="bar-name">医药费</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:61%;background:#F44336;"></div></div>
+              <span class="bar-value">¥520</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">餐费</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:25%;background:#FF9800;"></div></div>
+              <span class="bar-value">¥210</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">交通费</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:11%;background:#4CAF50;"></div></div>
+              <span class="bar-value">¥98</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">护理品</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:3%;background:#2196F3;"></div></div>
+              <span class="bar-value">¥28</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">各成员垫付金额</div>
+          <div class="member-row">
+            <div class="avatar" style="background:#4CAF50;">二</div>
+            <div class="member-stat">
+              <div class="name">张二弟</div>
+              <div class="detail">医药费¥180 + 交通费¥35</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:#FF8C42;">¥215</div>
+          </div>
+          <div class="member-row">
+            <div class="avatar" style="background:#FF8C42;">大</div>
+            <div class="member-stat">
+              <div class="name">张大姐</div>
+              <div class="detail">医药费¥45 + 餐费¥41 + 护理品¥28</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:#FF8C42;">¥256</div>
+          </div>
+          <div class="member-row">
+            <div class="avatar" style="background:#9C27B0;">四</div>
+            <div class="member-stat">
+              <div class="name">张四弟</div>
+              <div class="detail">餐费¥128 + 交通费¥63</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:#FF8C42;">¥191</div>
+          </div>
+          <div class="member-row">
+            <div class="avatar" style="background:#2196F3;">三</div>
+            <div class="member-stat">
+              <div class="name">张三妹</div>
+              <div class="detail">餐费¥52 + 医药费¥42</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:#FF8C42;">¥194</div>
+          </div>
+          <div style="margin-top:12px;padding:10px;background:#FFF3E0;border-radius:8px;font-size:12px;color:#666;text-align:center;">
+            💡 第二期将支持一键分摊结算功能
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📈 支出趋势（近6个月）</div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-around;height:80px;padding:10px 0;">
+            <div style="text-align:center;">
+              <div style="width:24px;background:#FFE0B2;border-radius:4px 4px 0 0;height:30px;margin:0 auto;"></div>
+              <div style="font-size:9px;color:#999;margin-top:4px;">1月</div>
+              <div style="font-size:9px;color:#666;">¥620</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:24px;background:#FFE0B2;border-radius:4px 4px 0 0;height:40px;margin:0 auto;"></div>
+              <div style="font-size:9px;color:#999;margin-top:4px;">2月</div>
+              <div style="font-size:9px;color:#666;">¥780</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:24px;background:#FFE0B2;border-radius:4px 4px 0 0;height:35px;margin:0 auto;"></div>
+              <div style="font-size:9px;color:#999;margin-top:4px;">3月</div>
+              <div style="font-size:9px;color:#666;">¥710</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:24px;background:#FFE0B2;border-radius:4px 4px 0 0;height:50px;margin:0 auto;"></div>
+              <div style="font-size:9px;color:#999;margin-top:4px;">4月</div>
+              <div style="font-size:9px;color:#666;">¥920</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:24px;background:#FFE0B2;border-radius:4px 4px 0 0;height:45px;margin:0 auto;"></div>
+              <div style="font-size:9px;color:#999;margin-top:4px;">5月</div>
+              <div style="font-size:9px;color:#666;">¥880</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:24px;background:#FF8C42;border-radius:4px 4px 0 0;height:44px;margin:0 auto;"></div>
+              <div style="font-size:9px;color:#FF8C42;margin-top:4px;font-weight:600;">6月</div>
+              <div style="font-size:9px;color:#FF8C42;font-weight:600;">¥856</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="desc-card">
+    <h3>支出分析说明</h3>
+    <ul>
+      <li>展示月度总支出和人均支出</li>
+      <li>按类别（医药费/餐费/交通费/护理品）分析支出</li>
+      <li>展示各成员垫付金额明细</li>
+      <li>支持查看近6个月的支出趋势</li>
+      <li>第二期将支持一键分摊结算功能</li>
+      <li>所有数据基于照护日志自动汇总</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

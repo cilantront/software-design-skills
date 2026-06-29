@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>系统设置 - Widget原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #F3F4F6; padding: 24px; }
+.widget { background: white; border-radius: 16px; border: 1px solid #E5E7EB; padding: 20px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.widget-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.settings-group { border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+.settings-group h4 { padding: 10px 14px; background: #F9FAFB; font-size: 13px; font-weight: 600; border-bottom: 1px solid #E5E7EB; }
+.setting-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid #F3F4F6; }
+.setting-row:last-child { border-bottom: none; }
+.setting-label { flex: 1; font-size: 14px; }
+.setting-desc { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.toggle { width: 36px; height: 20px; background: #D1D5DB; border-radius: 10px; cursor: pointer; position: relative; }
+.toggle.on { background: #4F46E5; }
+.toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.2s; }
+.toggle.on::after { transform: translateX(16px); }
+.plan-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.plan-card { border: 2px solid #E5E7EB; border-radius: 10px; padding: 16px; text-align: center; }
+.plan-card.current { border-color: #4F46E5; background: #EEF2FF; }
+.plan-name { font-size: 15px; font-weight: 600; }
+.plan-price { font-size: 28px; font-weight: 700; margin: 8px 0; }
+.plan-price .unit { font-size: 13px; font-weight: 400; color: #6B7280; }
+.plan-features { text-align: left; margin: 12px 0; }
+.plan-features li { padding: 3px 0; font-size: 12px; list-style: none; }
+.plan-features li::before { content: '✓'; color: #10B981; margin-right: 6px; font-weight: 600; }
+.btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #E5E7EB; background: white; width: 100%; }
+.btn-primary { background: #4F46E5; color: white; border-color: #4F46E5; }
+.btn-disabled { background: #F3F4F6; color: #9CA3AF; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="widget-title">⚙️ 系统设置</div>
+
+  <div class="plan-compare">
+    <div class="plan-card current">
+      <div class="plan-name">免费版</div>
+      <div class="plan-price">¥0<span class="unit">/月</span></div>
+      <ul class="plan-features">
+        <li>3个平台</li>
+        <li>50条/日私信</li>
+        <li>AI智能分类</li>
+        <li>预设模板</li>
+      </ul>
+      <button class="btn btn-disabled">当前套餐</button>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name" style="color:#4F46E5;">专业版</div>
+      <div class="plan-price" style="color:#4F46E5;">¥49<span class="unit">/月</span></div>
+      <ul class="plan-features">
+        <li>不限平台</li>
+        <li>不限私信量</li>
+        <li>AI摘要+AI回复</li>
+        <li>自定义模板</li>
+        <li>月度报告+导出</li>
+        <li>团队协作</li>
+      </ul>
+      <button class="btn btn-primary">升级专业版</button>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <h4>🔔 通知设置</h4>
+    <div class="setting-row">
+      <div class="setting-label">新私信站内通知<div class="setting-desc">系统内推送提醒</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">高价值商务即时提醒<div class="setting-desc">高价值私信到达时立即推送</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">邮件通知<div class="setting-desc">每日摘要邮件</div></div>
+      <div class="toggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">浏览器推送<div class="setting-desc">允许浏览器弹出通知</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <h4>📊 用量统计</h4>
+    <div class="setting-row">
+      <div class="setting-label">已绑定平台<div class="setting-desc">免费版最多3个</div></div>
+      <div style="font-weight:600;">2 / 3</div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">今日已处理<div class="setting-desc">免费版每日50条</div></div>
+      <div style="font-weight:600;">32 / 50</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

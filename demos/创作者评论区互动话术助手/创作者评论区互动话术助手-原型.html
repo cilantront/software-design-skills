@@ -1,0 +1,2899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>创作者评论区互动话术助手 - UI原型</title>
+<style>
+  /* ========== 基础重置 ========== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #F3F4F6;
+    color: #1F2937;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ========== 设计变量 ========== */
+  :root {
+    --primary: #2563EB;
+    --primary-light: #3B82F6;
+    --primary-bg: #EFF6FF;
+    --success: #10B981;
+    --success-dark: #059669;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --danger-dark: #DC2626;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --gray-900: #111827;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+    --radius-sm: 6px;
+    --radius: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+
+  /* ========== 顶部栏 ========== */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #fff;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--primary);
+    width: 220px;
+  }
+  .topbar-logo .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--primary), #7C3AED);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+  }
+  .topbar-search {
+    flex: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .topbar-search input {
+    width: 100%;
+    height: 36px;
+    border: 1px solid var(--gray-200);
+    border-radius: 18px;
+    padding: 0 16px 0 38px;
+    font-size: 13px;
+    background: var(--gray-50);
+    transition: all 0.2s;
+    outline: none;
+  }
+  .topbar-search input:focus {
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .topbar-search .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 14px;
+  }
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 220px;
+    justify-content: flex-end;
+  }
+  .topbar-actions .notification {
+    position: relative;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-500);
+    transition: all 0.2s;
+  }
+  .topbar-actions .notification:hover {
+    background: var(--gray-100);
+    color: var(--gray-700);
+  }
+  .notification-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background: var(--danger);
+    border-radius: 50%;
+    border: 2px solid #fff;
+  }
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F59E0B, #EF4444);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  /* ========== 左侧导航 ========== */
+  .sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    bottom: 0;
+    width: 220px;
+    background: #fff;
+    border-right: 1px solid var(--gray-200);
+    padding: 16px 0;
+    overflow-y: auto;
+    z-index: 90;
+  }
+  .nav-section {
+    padding: 0 12px;
+    margin-bottom: 8px;
+  }
+  .nav-section-title {
+    font-size: 11px;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px 6px;
+    font-weight: 600;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: var(--gray-600);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .nav-item:hover {
+    background: var(--gray-50);
+    color: var(--gray-800);
+  }
+  .nav-item.active {
+    background: var(--primary-bg);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .nav-item .nav-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 15px;
+  }
+  .nav-item .nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: #fff;
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .nav-item .nav-badge.blue {
+    background: var(--primary);
+  }
+
+  /* ========== 主内容区 ========== */
+  .main-content {
+    margin-left: 220px;
+    margin-top: 56px;
+    padding: 24px;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ========== 页面容器 ========== */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ========== 工作台首页 ========== */
+  .page-header {
+    margin-bottom: 24px;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .page-header p {
+    color: var(--gray-500);
+    font-size: 14px;
+  }
+
+  /* 统计卡片 */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+  }
+  .stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .stat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .stat-card-title {
+    font-size: 13px;
+    color: var(--gray-500);
+    font-weight: 500;
+  }
+  .stat-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .stat-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .stat-card-trend {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .trend-up { color: var(--success); }
+  .trend-down { color: var(--danger); }
+
+  /* 内容区块 */
+  .content-section {
+    background: #fff;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+  .section-body {
+    padding: 20px;
+  }
+
+  /* 快捷操作 */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .quick-action:hover {
+    background: var(--primary-bg);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .quick-action-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .quick-action-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+  }
+
+  /* ========== 评论管理页 ========== */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .filter-label {
+    font-size: 13px;
+    color: var(--gray-500);
+    font-weight: 500;
+  }
+  .filter-tags {
+    display: flex;
+    gap: 4px;
+  }
+  .filter-tag {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    color: var(--gray-600);
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .filter-tag:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .filter-tag.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .filter-select {
+    padding: 5px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--gray-600);
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+  }
+  .filter-select:focus {
+    border-color: var(--primary);
+  }
+  .search-input {
+    padding: 6px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    width: 200px;
+    transition: all 0.2s;
+  }
+  .search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  /* 评论列表 */
+  .comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .comment-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    gap: 14px;
+    position: relative;
+  }
+  .comment-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+    transform: translateX(2px);
+  }
+  .comment-card.selected {
+    border-color: var(--primary);
+    background: var(--primary-bg);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  }
+  .comment-card.priority-high {
+    border-left: 3px solid var(--danger);
+  }
+  .comment-card.priority-medium {
+    border-left: 3px solid var(--warning);
+  }
+  .comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+  }
+  .comment-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .comment-author {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--gray-800);
+  }
+  .comment-platform {
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .platform-xhs {
+    background: #FEE2E2;
+    color: #DC2626;
+  }
+  .platform-dy {
+    background: #E0E7FF;
+    color: #4F46E5;
+  }
+  .platform-bili {
+    background: #DBEAFE;
+    color: #2563EB;
+  }
+  .comment-time {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-left: auto;
+  }
+  .comment-content {
+    font-size: 13.5px;
+    color: var(--gray-700);
+    margin-bottom: 8px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .comment-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sentiment-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .sentiment-positive {
+    background: #D1FAE5;
+    color: #065F46;
+  }
+  .sentiment-neutral {
+    background: #F3F4F6;
+    color: #4B5563;
+  }
+  .sentiment-negative {
+    background: #FEE2E2;
+    color: #991B1B;
+  }
+  .priority-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .priority-high-badge {
+    background: #FEE2E2;
+    color: #DC2626;
+  }
+  .priority-medium-badge {
+    background: #FEF3C7;
+    color: #D97706;
+  }
+  .comment-meta {
+    font-size: 12px;
+    color: var(--gray-400);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .comment-meta span {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .comment-context {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: var(--gray-50);
+    border-radius: 6px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+  .context-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #F59E0B, #EF4444);
+    flex-shrink: 0;
+  }
+  .comment-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .comment-card:hover .comment-actions {
+    opacity: 1;
+  }
+  .comment-action-btn {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    color: var(--gray-600);
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .comment-action-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-bg);
+  }
+  .comment-action-btn.primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .comment-action-btn.primary:hover {
+    background: var(--primary-light);
+  }
+
+  /* ========== 状态分栏与模板页面 ========== */
+  .status-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .status-summary-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .status-summary-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .status-summary-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.1;
+  }
+  .status-summary-label {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 3px;
+  }
+  .batch-toolbar {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .batch-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--gray-600);
+  }
+  .batch-toolbar-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .page-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    background: var(--gray-100);
+    border-radius: 10px;
+    width: fit-content;
+    margin-bottom: 16px;
+  }
+  .page-tab {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .page-tab.active {
+    background: #fff;
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .template-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .template-toolbar .search-input {
+    width: 280px;
+  }
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .template-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .template-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .template-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .template-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .template-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--gray-400);
+  }
+  .template-tag {
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: var(--primary-bg);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .template-content {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    background: var(--gray-50);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    min-height: 86px;
+  }
+  .template-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .market-hero {
+    background: linear-gradient(135deg, var(--primary), #7C3AED);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+  .market-hero h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .market-hero p {
+    opacity: 0.86;
+    margin-bottom: 18px;
+  }
+  .market-search {
+    display: flex;
+    max-width: 560px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+  .market-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 13px 16px;
+    font-size: 14px;
+  }
+  .market-search button {
+    border: none;
+    background: var(--warning);
+    color: #fff;
+    padding: 0 18px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .category-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .category-chip {
+    padding: 7px 13px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 18px;
+    color: var(--gray-600);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .category-chip.active, .category-chip:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .market-card .template-meta {
+    margin-bottom: 8px;
+  }
+  .market-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+  }
+  .author-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), #7C3AED);
+  }
+
+  /* ========== 话术生成面板 ========== */
+  .reply-panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 200;
+    display: none;
+    animation: fadeIn 0.2s ease;
+  }
+  .reply-panel-overlay.show {
+    display: block;
+  }
+  .reply-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 520px;
+    background: #fff;
+    z-index: 201;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reply-panel.show {
+    transform: translateX(0);
+  }
+  .reply-panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .reply-panel-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .reply-panel-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gray-400);
+    transition: all 0.15s;
+  }
+  .reply-panel-close:hover {
+    background: var(--gray-100);
+    color: var(--gray-700);
+  }
+  .reply-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .original-comment {
+    padding: 14px;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    border-left: 3px solid var(--primary);
+  }
+  .original-comment-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .original-comment-text {
+    font-size: 14px;
+    color: var(--gray-800);
+    line-height: 1.6;
+  }
+  .style-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .style-tab {
+    padding: 6px 14px;
+    border-radius: 18px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    color: var(--gray-600);
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .style-tab:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .style-tab.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .reply-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .reply-card {
+    padding: 14px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    transition: all 0.2s;
+    position: relative;
+  }
+  .reply-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+  }
+  .reply-card-style {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: inline-block;
+  }
+  .style-friendly {
+    background: #FCE7F3;
+    color: #BE185D;
+  }
+  .style-humorous {
+    background: #FEF3C7;
+    color: #D97706;
+  }
+  .style-professional {
+    background: #DBEAFE;
+    color: #1D4ED8;
+  }
+  .reply-card-text {
+    font-size: 13.5px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .reply-card-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .reply-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    color: var(--gray-600);
+    transition: all 0.15s;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .reply-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-bg);
+  }
+  .reply-btn.copy-btn {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .reply-btn.copy-btn:hover {
+    background: var(--primary-light);
+  }
+  .reply-btn.copied {
+    background: var(--success);
+    color: #fff;
+    border-color: var(--success);
+  }
+  .reply-panel-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--primary-light);
+    box-shadow: var(--shadow);
+  }
+  .btn-outline {
+    background: #fff;
+    border-color: var(--gray-200);
+    color: var(--gray-600);
+  }
+  .btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-bg);
+  }
+
+  /* ========== 数据看板页 ========== */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .chart-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 20px;
+  }
+  .chart-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .chart-placeholder {
+    height: 200px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 模拟折线图 */
+  .line-chart {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    padding: 20px;
+  }
+  .line-chart svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 模拟饼图 */
+  .pie-chart-container {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    justify-content: center;
+    height: 100%;
+  }
+  .pie-chart {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    position: relative;
+  }
+  .pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pie-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--gray-600);
+  }
+  .pie-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* 模拟柱状图 */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 160px;
+    padding: 0 20px 30px;
+    position: relative;
+  }
+  .bar-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .bar {
+    width: 100%;
+    max-width: 36px;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.5s ease;
+  }
+  .bar-label {
+    font-size: 11px;
+    color: var(--gray-400);
+    position: absolute;
+    bottom: 8px;
+  }
+
+  /* 词云 */
+  .word-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    height: 100%;
+    align-content: center;
+  }
+  .word-cloud-item {
+    padding: 4px 10px;
+    border-radius: 16px;
+    background: var(--primary-bg);
+    color: var(--primary);
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .word-cloud-item:hover {
+    background: var(--primary);
+    color: #fff;
+    transform: scale(1.1);
+  }
+
+  /* ========== 设置页 ========== */
+  .settings-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+  }
+  .settings-nav {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    height: fit-content;
+  }
+  .settings-nav-item {
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--gray-600);
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .settings-nav-item:hover {
+    background: var(--gray-50);
+  }
+  .settings-nav-item.active {
+    background: var(--primary-bg);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .settings-content {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 24px;
+  }
+  .settings-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  /* 账号卡片 */
+  .account-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .account-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+  }
+  .account-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+  }
+  .account-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .account-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .account-name {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .account-platform-label {
+    font-size: 11px;
+    color: var(--gray-400);
+  }
+  .account-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .status-active {
+    background: var(--success);
+  }
+  .status-expiring {
+    background: var(--warning);
+  }
+  .add-account-card {
+    border: 2px dashed var(--gray-200);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--gray-400);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    min-height: 76px;
+  }
+  .add-account-card:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-bg);
+  }
+
+  /* 订阅套餐 */
+  .plan-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .plan-card {
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .plan-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+  .plan-card.current {
+    border-color: var(--primary);
+    background: var(--primary-bg);
+  }
+  .plan-card.recommended {
+    border-color: var(--warning);
+  }
+  .plan-badge {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .plan-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .plan-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 16px;
+  }
+  .plan-price span {
+    font-size: 14px;
+    color: var(--gray-500);
+    font-weight: 400;
+  }
+  .plan-features {
+    list-style: none;
+    margin-bottom: 20px;
+  }
+  .plan-features li {
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .plan-features li::before {
+    content: "✓";
+    color: var(--success);
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .plan-features li.disabled {
+    color: var(--gray-400);
+  }
+  .plan-features li.disabled::before {
+    content: "—";
+    color: var(--gray-300);
+  }
+
+  /* ========== 周报页面 ========== */
+  .weekly-report {
+    background: #fff;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+  }
+  .report-header {
+    background: linear-gradient(135deg, var(--primary), #7C3AED);
+    padding: 24px 28px;
+    color: #fff;
+  }
+  .report-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .report-period {
+    font-size: 13px;
+    opacity: 0.85;
+  }
+  .report-body {
+    padding: 24px 28px;
+  }
+  .report-section {
+    margin-bottom: 24px;
+  }
+  .report-section:last-child {
+    margin-bottom: 0;
+  }
+  .report-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .report-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .report-metric {
+    text-align: center;
+    padding: 16px;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+  }
+  .report-metric-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .report-metric-label {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 4px;
+  }
+  .topic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .topic-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+  }
+  .topic-rank {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .topic-rank.top3 {
+    background: linear-gradient(135deg, #F59E0B, #EF4444);
+  }
+  .topic-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--gray-700);
+  }
+  .topic-count {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 500;
+  }
+
+  /* ========== 动画 ========== */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.5s ease-in-out infinite;
+    border-radius: 4px;
+  }
+
+  /* ========== Toast ========== */
+  .toast {
+    position: fixed;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    padding: 10px 20px;
+    background: var(--gray-800);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-lg);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.success {
+    background: var(--success-dark);
+  }
+
+  /* ========== 底部状态栏 ========== */
+  .statusbar {
+    position: fixed;
+    bottom: 0;
+    left: 220px;
+    right: 0;
+    height: 28px;
+    background: #fff;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 11px;
+    color: var(--gray-400);
+    gap: 16px;
+    z-index: 90;
+  }
+  .statusbar-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  /* ========== 空状态 ========== */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  .empty-state-text {
+    font-size: 15px;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+  }
+
+  /* ========== 生成中状态 ========== */
+  .generating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px;
+    color: var(--gray-400);
+    font-size: 13px;
+  }
+  .generating-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--gray-200);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ========== 响应式 ========== */
+  @media (max-width: 1440px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== 顶部栏 ========== -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-icon">💬</div>
+    <span>CommentAI</span>
+  </div>
+  <div class="topbar-search">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="搜索评论内容、创作者标题...">
+  </div>
+  <div class="topbar-actions">
+    <div class="notification">
+      🔔
+      <div class="notification-badge"></div>
+    </div>
+    <div class="user-avatar">鹿</div>
+  </div>
+</div>
+
+<!-- ========== 左侧导航 ========== -->
+<div class="sidebar">
+  <div class="nav-section">
+    <div class="nav-section-title">概览</div>
+    <div class="nav-item active" onclick="switchPage('dashboard')">
+      <span class="nav-icon">📊</span>
+      <span>工作台</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">评论管理</div>
+    <div class="nav-item" onclick="switchPage('comments')">
+      <span class="nav-icon">💬</span>
+      <span>全部评论</span>
+      <span class="nav-badge blue">128</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('pending')">
+      <span class="nav-icon">⏳</span>
+      <span>待处理</span>
+      <span class="nav-badge">47</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('processed')">
+      <span class="nav-icon">✅</span>
+      <span>已处理</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">数据分析</div>
+    <div class="nav-item" onclick="switchPage('analytics')">
+      <span class="nav-icon">📈</span>
+      <span>互动概览</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('report')">
+      <span class="nav-icon">📋</span>
+      <span>互动周报</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">话术管理</div>
+    <div class="nav-item" onclick="switchPage('templates')">
+      <span class="nav-icon">🎨</span>
+      <span>我的模板</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('market')">
+      <span class="nav-icon">🏪</span>
+      <span>模板市场</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">系统</div>
+    <div class="nav-item" onclick="switchPage('settings')">
+      <span class="nav-icon">⚙️</span>
+      <span>设置</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 主内容区 ========== -->
+<div class="main-content">
+
+  <!-- ===== 工作台首页 ===== -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h1>👋 早上好，小鹿</h1>
+      <p>今天有 <strong>47</strong> 条待处理评论，其中 <strong>12</strong> 条高优先级</p>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-title">今日评论</span>
+          <div class="stat-card-icon" style="background: #EFF6FF; color: #2563EB;">💬</div>
+        </div>
+        <div class="stat-card-value">86</div>
+        <div class="stat-card-trend trend-up">↑ 23% <span style="color: var(--gray-400)">较昨日</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-title">待处理</span>
+          <div class="stat-card-icon" style="background: #FEF3C7; color: #D97706;">⏳</div>
+        </div>
+        <div class="stat-card-value">47</div>
+        <div class="stat-card-trend trend-down">↓ 8% <span style="color: var(--gray-400)">较昨日</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-title">本周回复率</span>
+          <div class="stat-card-icon" style="background: #D1FAE5; color: #059669;">📊</div>
+        </div>
+        <div class="stat-card-value">72%</div>
+        <div class="stat-card-trend trend-up">↑ 5% <span style="color: var(--gray-400)">较上周</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-title">平均回复时长</span>
+          <div class="stat-card-icon" style="background: #FCE7F3; color: #BE185D;">⚡</div>
+        </div>
+        <div class="stat-card-value">2.5h</div>
+        <div class="stat-card-trend trend-up">↑ 12% <span style="color: var(--gray-400)">更快了</span></div>
+      </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="content-section">
+      <div class="section-header">
+        <span class="section-title">快捷操作</span>
+      </div>
+      <div class="section-body">
+        <div class="quick-actions">
+          <div class="quick-action" onclick="switchPage('pending')">
+            <div class="quick-action-icon" style="background: #FEF3C7; color: #D97706;">⏳</div>
+            <span class="quick-action-label">处理待回复</span>
+          </div>
+          <div class="quick-action" onclick="switchPage('pending')">
+            <div class="quick-action-icon" style="background: #FEE2E2; color: #DC2626;">🔥</div>
+            <span class="quick-action-label">高价值评论</span>
+          </div>
+          <div class="quick-action" onclick="switchPage('analytics')">
+            <div class="quick-action-icon" style="background: #D1FAE5; color: #059669;">📈</div>
+            <span class="quick-action-label">查看数据</span>
+          </div>
+          <div class="quick-action" onclick="switchPage('report')">
+            <div class="quick-action-icon" style="background: #DBEAFE; color: #2563EB;">📋</div>
+            <span class="quick-action-label">本周周报</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 最新评论 -->
+    <div class="content-section">
+      <div class="section-header">
+        <span class="section-title">最新评论</span>
+        <span style="font-size: 12px; color: var(--primary); cursor: pointer;" onclick="switchPage('comments')">查看全部 →</span>
+      </div>
+      <div class="section-body">
+        <div class="comment-list" id="dashboard-comments"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 评论管理页 ===== -->
+  <div class="page" id="page-comments">
+    <div class="page-header">
+      <h1>💬 评论管理</h1>
+      <p>统一管理多平台评论，AI 智能分析，一键生成回复话术</p>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">平台：</span>
+        <div class="filter-tags">
+          <span class="filter-tag active">全部</span>
+          <span class="filter-tag">🔴 小红书</span>
+          <span class="filter-tag">🎵 抖音</span>
+          <span class="filter-tag">📺 B站</span>
+        </div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">情感：</span>
+        <div class="filter-tags">
+          <span class="filter-tag active">全部</span>
+          <span class="filter-tag">😊 正面</span>
+          <span class="filter-tag">😐 中性</span>
+          <span class="filter-tag">😠 负面</span>
+        </div>
+      </div>
+      <select class="filter-select">
+        <option>排序：优先级</option>
+        <option>排序：最新</option>
+        <option>排序：最早</option>
+      </select>
+      <select class="filter-select">
+        <option>状态：全部</option>
+        <option>待处理</option>
+        <option>已回复</option>
+        <option>已忽略</option>
+      </select>
+      <input type="text" class="search-input" placeholder="搜索评论内容...">
+    </div>
+
+    <!-- 评论列表 -->
+    <div class="comment-list" id="comment-list"></div>
+  </div>
+
+  <!-- ===== 待处理页 ===== -->
+  <div class="page" id="page-pending">
+    <div class="page-header">
+      <h1>⏳ 待处理评论</h1>
+      <p>聚焦需要回复或确认的评论，优先处理高价值和负面风险内容</p>
+    </div>
+
+    <div class="status-summary-grid">
+      <div class="status-summary-card">
+        <div class="status-summary-icon" style="background:#FEF3C7;color:#D97706;">⏳</div>
+        <div>
+          <div class="status-summary-value">47</div>
+          <div class="status-summary-label">待处理总数</div>
+        </div>
+      </div>
+      <div class="status-summary-card">
+        <div class="status-summary-icon" style="background:#FEE2E2;color:#DC2626;">🔥</div>
+        <div>
+          <div class="status-summary-value">12</div>
+          <div class="status-summary-label">高价值优先</div>
+        </div>
+      </div>
+      <div class="status-summary-card">
+        <div class="status-summary-icon" style="background:#DBEAFE;color:#2563EB;">🤖</div>
+        <div>
+          <div class="status-summary-value">31</div>
+          <div class="status-summary-label">可直接生成话术</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="batch-toolbar">
+      <div class="batch-toolbar-left">
+        <input type="checkbox" aria-label="全选待处理评论">
+        <span>已选择 0 条</span>
+        <span style="color:var(--gray-300);">|</span>
+        <span>按 AI 优先级降序排列</span>
+      </div>
+      <div class="batch-toolbar-actions">
+        <button class="btn btn-outline" onclick="showToast('已批量忽略低价值评论')">批量忽略</button>
+        <button class="btn btn-outline" onclick="showToast('已标记为已回复', true)">标记已回复</button>
+        <button class="btn btn-primary" onclick="openReplyPanel(1)">AI 批量生成话术</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">优先级：</span>
+        <div class="filter-tags">
+          <span class="filter-tag active">全部</span>
+          <span class="filter-tag">🔥 高价值</span>
+          <span class="filter-tag">⚡ 待关注</span>
+        </div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">情感：</span>
+        <div class="filter-tags">
+          <span class="filter-tag active">全部</span>
+          <span class="filter-tag">😊 正面</span>
+          <span class="filter-tag">😐 中性</span>
+          <span class="filter-tag">😠 负面</span>
+        </div>
+      </div>
+      <select class="filter-select">
+        <option>来源：全部平台</option>
+        <option>小红书</option>
+        <option>抖音</option>
+        <option>B站</option>
+      </select>
+      <input type="text" class="search-input" placeholder="搜索待处理评论...">
+    </div>
+
+    <div class="comment-list" id="pending-comment-list"></div>
+  </div>
+
+  <!-- ===== 已处理页 ===== -->
+  <div class="page" id="page-processed">
+    <div class="page-header">
+      <h1>✅ 已处理评论</h1>
+      <p>查看已回复和已忽略记录，支持复盘回复质量与再次复制话术</p>
+    </div>
+
+    <div class="status-summary-grid">
+      <div class="status-summary-card">
+        <div class="status-summary-icon" style="background:#D1FAE5;color:#059669;">✅</div>
+        <div>
+          <div class="status-summary-value">448</div>
+          <div class="status-summary-label">本周已回复</div>
+        </div>
+      </div>
+      <div class="status-summary-card">
+        <div class="status-summary-icon" style="background:#F3F4F6;color:#4B5563;">✕</div>
+        <div>
+          <div class="status-summary-value">28</div>
+          <div class="status-summary-label">本周已忽略</div>
+        </div>
+      </div>
+      <div class="status-summary-card">
+        <div class="status-summary-icon" style="background:#EFF6FF;color:#2563EB;">📋</div>
+        <div>
+          <div class="status-summary-value">72%</div>
+          <div class="status-summary-label">整体回复率</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-tabs">
+      <div class="page-tab active">已回复</div>
+      <div class="page-tab">已忽略</div>
+      <div class="page-tab">全部记录</div>
+    </div>
+
+    <div class="filter-bar">
+      <select class="filter-select">
+        <option>处理时间：近7天</option>
+        <option>今日</option>
+        <option>近30天</option>
+      </select>
+      <select class="filter-select">
+        <option>回复来源：全部</option>
+        <option>AI话术</option>
+        <option>手动回复</option>
+      </select>
+      <input type="text" class="search-input" placeholder="搜索已处理内容...">
+    </div>
+
+    <div class="comment-list" id="processed-comment-list"></div>
+  </div>
+
+  <!-- ===== 我的模板页 ===== -->
+  <div class="page" id="page-templates">
+    <div class="page-header">
+      <h1>🎨 我的模板</h1>
+      <p>管理从 AI 话术收藏而来的个人模板，支持快速复用和编辑</p>
+    </div>
+
+    <div class="template-toolbar">
+      <div class="filter-tags">
+        <span class="filter-tag active">全部 12</span>
+        <span class="filter-tag">亲切型 5</span>
+        <span class="filter-tag">幽默型 3</span>
+        <span class="filter-tag">专业型 4</span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" class="search-input" placeholder="搜索模板名称或内容...">
+        <button class="btn btn-primary" onclick="showToast('新建模板弹窗', true)">新建模板</button>
+      </div>
+    </div>
+
+    <div class="template-grid" id="my-template-grid"></div>
+  </div>
+
+  <!-- ===== 模板市场页 ===== -->
+  <div class="page" id="page-market">
+    <div class="market-hero">
+      <h2>模板市场</h2>
+      <p>发现不同内容领域的高转化评论回复模板，一键安装到「我的模板」</p>
+      <div class="market-search">
+        <input type="text" placeholder="搜索：负面安抚、催更回复、求链接回复...">
+        <button onclick="showToast('已搜索模板市场', true)">搜索</button>
+      </div>
+    </div>
+
+    <div class="category-chips">
+      <span class="category-chip active">精选推荐</span>
+      <span class="category-chip">美妆护肤</span>
+      <span class="category-chip">数码测评</span>
+      <span class="category-chip">知识科普</span>
+      <span class="category-chip">探店种草</span>
+      <span class="category-chip">负面处理</span>
+      <span class="category-chip">粉丝维护</span>
+    </div>
+
+    <div class="template-grid" id="market-template-grid"></div>
+  </div>
+
+  <!-- ===== 数据看板页 ===== -->
+  <div class="page" id="page-analytics">
+    <div class="page-header">
+      <h1>📈 数据中心</h1>
+      <p>全方位了解评论区互动数据和趋势</p>
+    </div>
+
+    <!-- 概览卡片 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-title">本周评论总量</span>
+          <div class="stat-card-icon" style="background: #EFF6FF; color: #2563EB;">📊</div>
+        </div>
+        <div class="stat-card-value">623</div>
+        <div class="stat-card-trend trend-up">↑ 18% <span style="color: var(--gray-400)">较上周</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-title">本周回复率</span>
+          <div class="stat-card-icon" style="background: #D1FAE5; color: #059669;">✅</div>
+        </div>
+        <div class="stat-card-value">72%</div>
+        <div class="stat-card-trend trend-up">↑ 5% <span style="color: var(--gray-400)">较上周</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-title">正面评论占比</span>
+          <div class="stat-card-icon" style="background: #D1FAE5; color: #059669;">😊</div>
+        </div>
+        <div class="stat-card-value">58%</div>
+        <div class="stat-card-trend trend-up">↑ 3% <span style="color: var(--gray-400)">较上周</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-title">话术使用次数</span>
+          <div class="stat-card-icon" style="background: #FCE7F3; color: #BE185D;">🎨</div>
+        </div>
+        <div class="stat-card-value">289</div>
+        <div class="stat-card-trend trend-up">↑ 32% <span style="color: var(--gray-400)">较上周</span></div>
+      </div>
+    </div>
+
+    <!-- 图表区 -->
+    <div class="charts-grid">
+      <!-- 评论趋势 -->
+      <div class="chart-card">
+        <div class="chart-card-title">
+          <span>评论趋势（近7天）</span>
+          <select class="filter-select" style="font-size: 11px;">
+            <option>近7天</option>
+            <option>近30天</option>
+          </select>
+        </div>
+        <div class="chart-placeholder" style="background: var(--gray-50);">
+          <svg viewBox="0 0 400 160" style="width: 100%; height: 100%; padding: 20px;">
+            <defs>
+              <linearGradient id="lineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#2563EB;stop-opacity:0.3" />
+                <stop offset="100%" style="stop-color:#2563EB;stop-opacity:0" />
+              </linearGradient>
+            </defs>
+            <!-- 网格线 -->
+            <line x1="40" y1="20" x2="380" y2="20" stroke="#E5E7EB" stroke-width="0.5" />
+            <line x1="40" y1="50" x2="380" y2="50" stroke="#E5E7EB" stroke-width="0.5" />
+            <line x1="40" y1="80" x2="380" y2="80" stroke="#E5E7EB" stroke-width="0.5" />
+            <line x1="40" y1="110" x2="380" y2="110" stroke="#E5E7EB" stroke-width="0.5" />
+            <!-- 面积 -->
+            <path d="M40,90 L97,70 L154,80 L211,45 L268,55 L325,30 L380,40 L380,120 L40,120 Z" fill="url(#lineGrad)" />
+            <!-- 折线 -->
+            <polyline points="40,90 97,70 154,80 211,45 268,55 325,30 380,40" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <!-- 数据点 -->
+            <circle cx="40" cy="90" r="3.5" fill="#2563EB" />
+            <circle cx="97" cy="70" r="3.5" fill="#2563EB" />
+            <circle cx="154" cy="80" r="3.5" fill="#2563EB" />
+            <circle cx="211" cy="45" r="3.5" fill="#2563EB" />
+            <circle cx="268" cy="55" r="3.5" fill="#2563EB" />
+            <circle cx="325" cy="30" r="3.5" fill="#2563EB" />
+            <circle cx="380" cy="40" r="3.5" fill="#2563EB" />
+            <!-- 标签 -->
+            <text x="40" y="140" text-anchor="middle" fill="#9CA3AF" font-size="10">周一</text>
+            <text x="97" y="140" text-anchor="middle" fill="#9CA3AF" font-size="10">周二</text>
+            <text x="154" y="140" text-anchor="middle" fill="#9CA3AF" font-size="10">周三</text>
+            <text x="211" y="140" text-anchor="middle" fill="#9CA3AF" font-size="10">周四</text>
+            <text x="268" y="140" text-anchor="middle" fill="#9CA3AF" font-size="10">周五</text>
+            <text x="325" y="140" text-anchor="middle" fill="#9CA3AF" font-size="10">周六</text>
+            <text x="380" y="140" text-anchor="middle" fill="#9CA3AF" font-size="10">周日</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 情感分布 -->
+      <div class="chart-card">
+        <div class="chart-card-title">
+          <span>情感分布</span>
+          <select class="filter-select" style="font-size: 11px;">
+            <option>本周</option>
+            <option>本月</option>
+          </select>
+        </div>
+        <div class="chart-placeholder" style="background: var(--gray-50);">
+          <div class="pie-chart-container">
+            <div class="pie-chart" style="background: conic-gradient(#10B981 0deg 209deg, #9CA3AF 209deg 295deg, #EF4444 295deg 360deg);">
+              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; background: var(--gray-50); border-radius: 50%;"></div>
+            </div>
+            <div class="pie-legend">
+              <div class="pie-legend-item">
+                <div class="pie-legend-dot" style="background: #10B981;"></div>
+                <span>正面 58%</span>
+              </div>
+              <div class="pie-legend-item">
+                <div class="pie-legend-dot" style="background: #9CA3AF;"></div>
+                <span>中性 24%</span>
+              </div>
+              <div class="pie-legend-item">
+                <div class="pie-legend-dot" style="background: #EF4444;"></div>
+                <span>负面 18%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 平台分布 -->
+      <div class="chart-card">
+        <div class="chart-card-title">
+          <span>平台分布</span>
+        </div>
+        <div class="chart-placeholder" style="background: var(--gray-50);">
+          <div class="pie-chart-container">
+            <div class="pie-chart" style="background: conic-gradient(#EF4444 0deg 151deg, #4F46E5 151deg 259deg, #2563EB 259deg 360deg);">
+              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; background: var(--gray-50); border-radius: 50%;"></div>
+            </div>
+            <div class="pie-legend">
+              <div class="pie-legend-item">
+                <div class="pie-legend-dot" style="background: #EF4444;"></div>
+                <span>小红书 42%</span>
+              </div>
+              <div class="pie-legend-item">
+                <div class="pie-legend-dot" style="background: #4F46E5;"></div>
+                <span>抖音 30%</span>
+              </div>
+              <div class="pie-legend-item">
+                <div class="pie-legend-dot" style="background: #2563EB;"></div>
+                <span>B站 28%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 高频词云 -->
+      <div class="chart-card">
+        <div class="chart-card-title">
+          <span>高频关键词</span>
+        </div>
+        <div class="chart-placeholder" style="background: var(--gray-50);">
+          <div class="word-cloud">
+            <span class="word-cloud-item" style="font-size: 18px;">好用吗</span>
+            <span class="word-cloud-item" style="font-size: 14px;">求链接</span>
+            <span class="word-cloud-item" style="font-size: 22px;">太好看了</span>
+            <span class="word-cloud-item" style="font-size: 12px;">多少钱</span>
+            <span class="word-cloud-item" style="font-size: 16px;">推荐</span>
+            <span class="word-cloud-item" style="font-size: 20px;">绝绝子</span>
+            <span class="word-cloud-item" style="font-size: 13px;">色号</span>
+            <span class="word-cloud-item" style="font-size: 15px;">好用</span>
+            <span class="word-cloud-item" style="font-size: 11px;">什么时候更新</span>
+            <span class="word-cloud-item" style="font-size: 17px;">爱了爱了</span>
+            <span class="word-cloud-item" style="font-size: 12px;">平替</span>
+            <span class="word-cloud-item" style="font-size: 14px;">教程</span>
+            <span class="word-cloud-item" style="font-size: 13px;">干皮</span>
+            <span class="word-cloud-item" style="font-size: 16px;">回购</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 互动周报页 ===== -->
+  <div class="page" id="page-report">
+    <div class="page-header">
+      <h1>📋 互动周报</h1>
+      <p>每周自动生成评论区互动数据报告</p>
+    </div>
+
+    <div class="weekly-report">
+      <div class="report-header">
+        <div class="report-title">📊 互动周报 · 第25周</div>
+        <div class="report-period">2026年6月22日 - 2026年6月28日</div>
+      </div>
+      <div class="report-body">
+        <!-- 概览数据 -->
+        <div class="report-section">
+          <div class="report-section-title">📌 本周概览</div>
+          <div class="report-metrics">
+            <div class="report-metric">
+              <div class="report-metric-value">623</div>
+              <div class="report-metric-label">评论总量 ↑18%</div>
+            </div>
+            <div class="report-metric">
+              <div class="report-metric-value">448</div>
+              <div class="report-metric-label">已回复数 ↑22%</div>
+            </div>
+            <div class="report-metric">
+              <div class="report-metric-value">72%</div>
+              <div class="report-metric-label">回复率 ↑5%</div>
+            </div>
+            <div class="report-metric">
+              <div class="report-metric-value">2.5h</div>
+              <div class="report-metric-label">平均回复时长 ↓12%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 热门话题 -->
+        <div class="report-section">
+          <div class="report-section-title">🔥 热门话题 TOP5</div>
+          <div class="topic-list">
+            <div class="topic-item">
+              <div class="topic-rank top3">1</div>
+              <span class="topic-text">新品试色反馈</span>
+              <span class="topic-count">89条讨论</span>
+            </div>
+            <div class="topic-item">
+              <div class="topic-rank top3">2</div>
+              <span class="topic-text">夏季护肤routine</span>
+              <span class="topic-count">67条讨论</span>
+            </div>
+            <div class="topic-item">
+              <div class="topic-rank top3">3</div>
+              <span class="topic-text">平价好物推荐</span>
+              <span class="topic-count">52条讨论</span>
+            </div>
+            <div class="topic-item">
+              <div class="topic-rank">4</div>
+              <span class="topic-text">敏感肌护理</span>
+              <span class="topic-count">38条讨论</span>
+            </div>
+            <div class="topic-item">
+              <div class="topic-rank">5</div>
+              <span class="topic-text">妆容教程求更新</span>
+              <span class="topic-count">31条讨论</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI 建议 -->
+        <div class="report-section">
+          <div class="report-section-title">💡 AI 运营建议</div>
+          <div style="padding: 16px; background: var(--primary-bg); border-radius: var(--radius); border-left: 3px solid var(--primary);">
+            <p style="font-size: 13px; color: var(--gray-700); line-height: 1.7;">
+              <strong>1. 内容方向：</strong>"新品试色"和"夏季护肤"是本周粉丝最关注的话题，建议下周制作相关内容，预计可带来 30%+ 的互动提升。<br><br>
+              <strong>2. 回复策略：</strong>本周负面评论占比18%，主要集中在"产品包装"问题。建议发布一条关于包装升级的说明视频，主动回应粉丝关切。<br><br>
+              <strong>3. 互动优化：</strong>发现15条"值得做成新内容的评论素材"，建议查看并选择高互动潜力的评论制作视频回复。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 设置页 ===== -->
+  <div class="page" id="page-settings">
+    <div class="page-header">
+      <h1>⚙️ 设置</h1>
+      <p>管理平台账号、订阅套餐和个人设置</p>
+    </div>
+
+    <div class="settings-layout">
+      <div class="settings-nav">
+        <div class="settings-nav-item active">平台账号</div>
+        <div class="settings-nav-item">订阅管理</div>
+        <div class="settings-nav-item">个人设置</div>
+        <div class="settings-nav-item">消息通知</div>
+      </div>
+      <div class="settings-content">
+        <div class="settings-section-title">已绑定的平台账号</div>
+        <div class="account-cards">
+          <div class="account-card">
+            <div class="account-avatar" style="background: linear-gradient(135deg, #EF4444, #F97316);">📕</div>
+            <div class="account-info">
+              <div class="account-name">
+                小鹿的美妆日记
+                <span class="comment-platform platform-xhs">小红书</span>
+              </div>
+              <div class="account-status">
+                <span class="status-dot status-active"></span>
+                <span style="color: var(--success);">已授权</span>
+                <span style="color: var(--gray-300);">·</span>
+                <span>12万粉丝</span>
+              </div>
+            </div>
+          </div>
+          <div class="account-card">
+            <div class="account-avatar" style="background: linear-gradient(135deg, #4F46E5, #7C3AED);">🎵</div>
+            <div class="account-info">
+              <div class="account-name">
+                小鹿美妆
+                <span class="comment-platform platform-dy">抖音</span>
+              </div>
+              <div class="account-status">
+                <span class="status-dot status-active"></span>
+                <span style="color: var(--success);">已授权</span>
+                <span style="color: var(--gray-300);">·</span>
+                <span>8万粉丝</span>
+              </div>
+            </div>
+          </div>
+          <div class="account-card">
+            <div class="account-avatar" style="background: linear-gradient(135deg, #2563EB, #06B6D4);">📺</div>
+            <div class="account-info">
+              <div class="account-name">
+                小鹿爱化妆
+                <span class="comment-platform platform-bili">B站</span>
+              </div>
+              <div class="account-status">
+                <span class="status-dot status-expiring"></span>
+                <span style="color: var(--warning);">即将过期</span>
+                <span style="color: var(--gray-300);">·</span>
+                <span>5万粉丝</span>
+              </div>
+            </div>
+          </div>
+          <div class="add-account-card" onclick="showToast('平台选择弹窗', true)">
+            <span style="font-size: 20px;">＋</span>
+            <span>绑定新账号</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 32px;">
+          <div class="settings-section-title">订阅套餐</div>
+          <div class="plan-cards">
+            <div class="plan-card current">
+              <div class="plan-badge" style="background: var(--primary);">当前套餐</div>
+              <div class="plan-name">免费版</div>
+              <div class="plan-price">¥0 <span>/月</span></div>
+              <ul class="plan-features">
+                <li>每月 300 条评论处理</li>
+                <li>最多绑定 3 个平台</li>
+                <li>AI 话术生成 300条/月</li>
+                <li>基础数据看板</li>
+                <li class="disabled">互动周报</li>
+                <li class="disabled">评论数据永久保留</li>
+              </ul>
+              <button class="btn btn-outline" style="width: 100%; justify-content: center;" disabled>当前使用中</button>
+            </div>
+            <div class="plan-card recommended">
+              <div class="plan-badge" style="background: var(--warning);">推荐</div>
+              <div class="plan-name">Pro版</div>
+              <div class="plan-price">¥19 <span>/月</span></div>
+              <ul class="plan-features">
+                <li>不限评论处理量</li>
+                <li>不限绑定平台数</li>
+                <li>不限 AI 话术生成</li>
+                <li>完整数据看板</li>
+                <li>互动周报自动生成</li>
+                <li>评论数据永久保留</li>
+              </ul>
+              <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="showToast('已跳转至支付页面', true)">立即升级</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========== 话术生成面板 ========== -->
+<div class="reply-panel-overlay" id="reply-overlay" onclick="closeReplyPanel()"></div>
+<div class="reply-panel" id="reply-panel">
+  <div class="reply-panel-header">
+    <span class="reply-panel-title">🎨 AI 话术生成</span>
+    <div class="reply-panel-close" onclick="closeReplyPanel()">✕</div>
+  </div>
+  <div class="reply-panel-body">
+    <div class="original-comment">
+      <div class="original-comment-label">原始评论</div>
+      <div class="original-comment-text" id="reply-original-text">这个色号太好看了！求链接！黄皮能用吗？</div>
+    </div>
+
+    <div class="style-tabs">
+      <span class="style-tab active">全部风格</span>
+      <span class="style-tab">😊 亲切</span>
+      <span class="style-tab">😄 幽默</span>
+      <span class="style-tab">🎓 专业</span>
+    </div>
+
+    <div class="reply-cards" id="reply-cards">
+      <div class="reply-card">
+        <span class="reply-card-style style-friendly">😊 亲切风格</span>
+        <div class="reply-card-text">宝子眼光太好啦！这个色号真的超显白的～链接我放在评论区置顶啦，黄皮完全可以驾驭，我自己就是黄皮，涂上去气色超好的！有问题随时问我呀 💕</div>
+        <div class="reply-card-actions">
+          <button class="reply-btn copy-btn" onclick="copyReply(this)">📋 复制</button>
+          <button class="reply-btn" onclick="showToast('已保存为模板')">⭐ 收藏</button>
+          <button class="reply-btn">👍</button>
+          <button class="reply-btn">👎</button>
+        </div>
+      </div>
+
+      <div class="reply-card">
+        <span class="reply-card-style style-humorous">😄 幽默风格</span>
+        <div class="reply-card-text">姐妹你这个品味，一看就是被美貌选中的人！黄皮？不存在的！这个色号简直就是给黄皮定制的"一键美白滤镜"😂 链接在置顶，冲就完事了！</div>
+        <div class="reply-card-actions">
+          <button class="reply-btn copy-btn" onclick="copyReply(this)">📋 复制</button>
+          <button class="reply-btn" onclick="showToast('已保存为模板')">⭐ 收藏</button>
+          <button class="reply-btn">👍</button>
+          <button class="reply-btn">👎</button>
+        </div>
+      </div>
+
+      <div class="reply-card">
+        <span class="reply-card-style style-professional">🎓 专业风格</span>
+        <div class="reply-card-text">感谢关注！这款口红色号为#302豆沙红，属于暖调色系，非常适合黄皮。质地为丝绒哑光，持妆约6-8小时。购买链接已置顶在评论区。如需查看更多试色对比，可以查看我主页的合集视频。</div>
+        <div class="reply-card-actions">
+          <button class="reply-btn copy-btn" onclick="copyReply(this)">📋 复制</button>
+          <button class="reply-btn" onclick="showToast('已保存为模板')">⭐ 收藏</button>
+          <button class="reply-btn">👍</button>
+          <button class="reply-btn">👎</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="reply-panel-footer">
+    <button class="btn btn-outline" onclick="showToast('正在重新生成...')">🔄 重新生成</button>
+    <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="showToast('已复制并标记为已回复', true)">📋 复制并标记已回复</button>
+  </div>
+</div>
+
+<!-- ========== Toast ========== -->
+<div class="toast" id="toast">
+  <span id="toast-text">操作成功</span>
+</div>
+
+<!-- ========== 底部状态栏 ========== -->
+<div class="statusbar">
+  <div style="display: flex; align-items: center; gap: 6px;">
+    <div class="statusbar-dot"></div>
+    <span>已连接</span>
+  </div>
+  <span>最后同步：2分钟前</span>
+  <span>评论总数：1,286</span>
+  <span>本月额度：156/300</span>
+</div>
+
+<script>
+// ========== 评论数据 ==========
+const commentsData = [
+  {
+    id: 1,
+    author: "甜橙小姐",
+    avatar: "橙",
+    avatarColor: "linear-gradient(135deg, #F59E0B, #EF4444)",
+    platform: "小红书",
+    platformClass: "platform-xhs",
+    content: "这个色号太好看了！求链接！黄皮能用吗？",
+    sentiment: "positive",
+    sentimentLabel: "正面",
+    sentimentEmoji: "😊",
+    priority: "high",
+    priorityLabel: "🔥 高价值",
+    context: "夏日口红试色合集",
+    time: "5分钟前",
+    likes: 23,
+    status: "pending"
+  },
+  {
+    id: 2,
+    author: "护肤小白",
+    avatar: "白",
+    avatarColor: "linear-gradient(135deg, #10B981, #06B6D4)",
+    platform: "抖音",
+    platformClass: "platform-dy",
+    content: "用了你推荐的面霜居然过敏了...脸红了一大片，怎么办啊",
+    sentiment: "negative",
+    sentimentLabel: "负面",
+    sentimentEmoji: "😠",
+    priority: "high",
+    priorityLabel: "🔥 高价值",
+    context: "敏感肌护肤好物分享",
+    time: "12分钟前",
+    likes: 8,
+    status: "pending"
+  },
+  {
+    id: 3,
+    author: "化妆师阿杰",
+    avatar: "杰",
+    avatarColor: "linear-gradient(135deg, #4F46E5, #7C3AED)",
+    platform: "B站",
+    platformClass: "platform-bili",
+    content: "作为专业化妆师来说，这个妆教画得很详细了，但眼影晕染部分可以再细致一些，期待改进！",
+    sentiment: "neutral",
+    sentimentLabel: "中性",
+    sentimentEmoji: "😐",
+    priority: "medium",
+    priorityLabel: "⚡ 待关注",
+    context: "日常通勤妆教程",
+    time: "28分钟前",
+    likes: 45,
+    status: "pending"
+  },
+  {
+    id: 4,
+    author: "爱美的小鱼",
+    avatar: "鱼",
+    avatarColor: "linear-gradient(135deg, #EC4899, #F43F5E)",
+    platform: "小红书",
+    platformClass: "platform-xhs",
+    content: "绝绝子！！这个妆容也太好看了吧，已经照着画了，同事都夸好看！！爱了爱了 ❤️❤️",
+    sentiment: "positive",
+    sentimentLabel: "正面",
+    sentimentEmoji: "😊",
+    priority: "medium",
+    priorityLabel: "⚡ 待关注",
+    context: "约会妆容教程",
+    time: "45分钟前",
+    likes: 67,
+    status: "pending"
+  },
+  {
+    id: 5,
+    author: "理性消费者",
+    avatar: "理",
+    avatarColor: "linear-gradient(135deg, #6B7280, #374151)",
+    platform: "B站",
+    platformClass: "platform-bili",
+    content: "这个真的值得买吗？看到好几个博主都在推，有点怀疑是不是广告...",
+    sentiment: "negative",
+    sentimentLabel: "负面",
+    sentimentEmoji: "😟",
+    priority: "high",
+    priorityLabel: "🔥 高价值",
+    context: "平价护肤品测评",
+    time: "1小时前",
+    likes: 34,
+    status: "pending"
+  },
+  {
+    id: 6,
+    author: "小可爱的日常",
+    avatar: "可",
+    avatarColor: "linear-gradient(135deg, #F472B6, #FB923C)",
+    platform: "抖音",
+    platformClass: "platform-dy",
+    content: "姐姐好美！什么时候出眼妆教程呀？好想看！",
+    sentiment: "positive",
+    sentimentLabel: "正面",
+    sentimentEmoji: "😊",
+    priority: "medium",
+    priorityLabel: "⚡ 待关注",
+    context: "今日份妆容分享",
+    time: "1小时前",
+    likes: 12,
+    status: "replied"
+  },
+  {
+    id: 7,
+    author: "干皮救星",
+    avatar: "干",
+    avatarColor: "linear-gradient(135deg, #0EA5E9, #2563EB)",
+    platform: "小红书",
+    platformClass: "platform-xhs",
+    content: "干皮用这款粉底液会卡粉吗？之前用过其他品牌都会起皮",
+    sentiment: "neutral",
+    sentimentLabel: "中性",
+    sentimentEmoji: "😐",
+    priority: "medium",
+    priorityLabel: "⚡ 待关注",
+    context: "秋冬粉底液横评",
+    time: "2小时前",
+    likes: 19,
+    status: "pending"
+  },
+  {
+    id: 8,
+    author: "忠实粉丝CC",
+    avatar: "C",
+    avatarColor: "linear-gradient(135deg, #8B5CF6, #EC4899)",
+    platform: "B站",
+    platformClass: "platform-bili",
+    content: "从你1000粉就开始关注了，现在都12万了！一路看着你成长，真的好棒！继续加油！",
+    sentiment: "positive",
+    sentimentLabel: "正面",
+    sentimentEmoji: "😊",
+    priority: "low",
+    priorityLabel: "📌 普通",
+    context: "一周年感恩视频",
+    time: "3小时前",
+    likes: 156,
+    status: "replied",
+    replyContent: "谢谢你一路陪伴！能被你从1000粉陪到现在真的太幸福了，我会继续认真分享，也欢迎你常来聊天～"
+  },
+  {
+    id: 9,
+    author: "成分党研究员",
+    avatar: "研",
+    avatarColor: "linear-gradient(135deg, #059669, #0EA5E9)",
+    platform: "小红书",
+    platformClass: "platform-xhs",
+    content: "请问这个精华里烟酰胺浓度是多少？敏感肌建立耐受需要多久？",
+    sentiment: "neutral",
+    sentimentLabel: "中性",
+    sentimentEmoji: "😐",
+    priority: "high",
+    priorityLabel: "🔥 高价值",
+    context: "早C晚A入门指南",
+    time: "4小时前",
+    likes: 41,
+    status: "replied",
+    replyContent: "这款烟酰胺浓度是5%，敏感肌建议先每周2-3次、少量叠加保湿产品使用，连续两周无刺痛泛红后再逐步增加频次。"
+  },
+  {
+    id: 10,
+    author: "路人甲",
+    avatar: "甲",
+    avatarColor: "linear-gradient(135deg, #9CA3AF, #6B7280)",
+    platform: "抖音",
+    platformClass: "platform-dy",
+    content: "广告太多了，不想看。",
+    sentiment: "negative",
+    sentimentLabel: "负面",
+    sentimentEmoji: "😠",
+    priority: "medium",
+    priorityLabel: "⚡ 待关注",
+    context: "6月爱用品分享",
+    time: "5小时前",
+    likes: 6,
+    status: "ignored",
+    replyContent: ""
+  }
+];
+
+const myTemplates = [
+  {
+    name: "求链接-亲切回复",
+    style: "亲切型",
+    scene: "粉丝询问购买链接",
+    usage: 86,
+    content: "宝子链接我已经放在评论区置顶啦～如果你是{肤质/场景}，可以优先看{推荐规格}，有问题随时问我呀。"
+  },
+  {
+    name: "负面体验-安抚说明",
+    style: "专业型",
+    scene: "产品使用后不适",
+    usage: 42,
+    content: "先抱抱你，出现不适建议先暂停使用并观察皮肤状态。每个人肤质不同，我把使用注意事项和排查步骤整理给你。"
+  },
+  {
+    name: "催更-幽默互动",
+    style: "幽默型",
+    scene: "粉丝催更新内容",
+    usage: 58,
+    content: "收到！你的催更已经加入我的置顶待办，比闹钟还管用。我这就去剪，争取让你下次刷新就看到～"
+  },
+  {
+    name: "专业问题-分点回答",
+    style: "专业型",
+    scene: "成分/参数/教程咨询",
+    usage: 31,
+    content: "这个问题可以从三点看：1）{要点一}；2）{要点二}；3）{要点三}。如果你是{用户情况}，建议优先选择{建议}。"
+  }
+];
+
+const marketTemplates = [
+  {
+    name: "爆款笔记求链接回复包",
+    style: "美妆护肤",
+    author: "美妆运营研究所",
+    installs: "2.3k",
+    rating: "4.9",
+    content: "覆盖求链接、求色号、黄皮适配、干皮油皮适配等高频评论，适合美妆种草账号。"
+  },
+  {
+    name: "负面评论温和化解包",
+    style: "危机处理",
+    author: "评论区安全官",
+    installs: "1.8k",
+    rating: "4.8",
+    content: "针对过敏、不好用、广告质疑、价格争议等场景，先安抚情绪再给出解决路径。"
+  },
+  {
+    name: "数码测评专业答疑包",
+    style: "数码测评",
+    author: "硬件评测助手",
+    installs: "946",
+    rating: "4.7",
+    content: "适用于参数咨询、购买建议、竞品对比、售后提醒，让回复更专业可信。"
+  },
+  {
+    name: "粉丝陪伴感维护包",
+    style: "粉丝维护",
+    author: "增长互动实验室",
+    installs: "3.1k",
+    rating: "4.9",
+    content: "用于老粉互动、感谢支持、纪念日评论、情绪价值回应，提升粉丝粘性。"
+  }
+];
+
+// ========== 渲染评论列表 ==========
+function renderCommentList(containerId, limit, statusFilter) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let items = commentsData;
+  if (statusFilter === 'pending') items = commentsData.filter(c => c.status === 'pending');
+  if (statusFilter === 'processed') items = commentsData.filter(c => c.status === 'replied' || c.status === 'ignored');
+  items = limit ? items.slice(0, limit) : items;
+  container.innerHTML = items.map(c => {
+    const isProcessed = c.status === 'replied' || c.status === 'ignored';
+    const processedContext = isProcessed && c.replyContent
+      ? `<div class="comment-context" style="background:#F0FDF4;color:#166534;"><span>已回复：${c.replyContent}</span></div>`
+      : `<div class="comment-context"><div class="context-thumb"></div><span>评「${c.context}」</span></div>`;
+    const processedActions = `<button class="comment-action-btn primary" onclick="event.stopPropagation(); showToast('已复制历史回复', true)">📋 复制回复</button><button class="comment-action-btn" onclick="event.stopPropagation(); openReplyPanel(${c.id})">重新生成</button>`;
+    const pendingActions = `<button class="comment-action-btn primary" onclick="event.stopPropagation(); openReplyPanel(${c.id})">🎨 生成话术</button><button class="comment-action-btn" onclick="event.stopPropagation(); showToast('已标记为已回复', true)">✓ 标记已回复</button><button class="comment-action-btn" onclick="event.stopPropagation(); showToast('已忽略')">✕ 忽略</button>`;
+    return `
+    <div class="comment-card priority-${c.priority}" onclick="showToast('已打开评论记录')">
+      <div class="comment-avatar" style="background: ${c.avatarColor};">${c.avatar}</div>
+      <div class="comment-body">
+        <div class="comment-header">
+          <span class="comment-author">${c.author}</span>
+          <span class="comment-platform ${c.platformClass}">${c.platform}</span>
+          <span class="comment-time">${c.time}</span>
+        </div>
+        <div class="comment-content">${c.content}</div>
+        ${processedContext}
+        <div class="comment-footer">
+          <span class="sentiment-tag sentiment-${c.sentiment}">${c.sentimentEmoji} ${c.sentimentLabel}</span>
+          ${c.priority === 'high' ? '<span class="priority-badge priority-high-badge">🔥 高价值</span>' : ''}
+          ${c.priority === 'medium' ? '<span class="priority-badge priority-medium-badge">⚡ 待关注</span>' : ''}
+          <div class="comment-meta">
+            <span>❤️ ${c.likes}</span>
+            ${c.status === 'replied' ? '<span style="color: var(--success);">✓ 已回复</span>' : ''}
+            ${c.status === 'ignored' ? '<span style="color: var(--gray-500);">✕ 已忽略</span>' : ''}
+          </div>
+        </div>
+        <div class="comment-actions">
+          ${isProcessed ? processedActions : pendingActions}
+        </div>
+      </div>
+    </div>
+  `}).join('');
+}
+
+// ========== 页面切换 ==========
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + pageId);
+  if (page) page.classList.add('active');
+  // 导航高亮
+  const navItems = document.querySelectorAll('.nav-item');
+  const navMap = { dashboard: 0, comments: 1, pending: 2, processed: 3, analytics: 4, report: 5, templates: 6, market: 7, settings: 8 };
+  if (navMap[pageId] !== undefined && navItems[navMap[pageId]]) {
+    navItems[navMap[pageId]].classList.add('active');
+  }
+}
+
+// ========== 话术面板 ==========
+function openReplyPanel(commentId) {
+  const comment = commentsData.find(c => c.id === commentId);
+  if (comment) {
+    document.getElementById('reply-original-text').textContent = comment.content;
+  }
+  document.getElementById('reply-overlay').classList.add('show');
+  document.getElementById('reply-panel').classList.add('show');
+}
+function closeReplyPanel() {
+  document.getElementById('reply-overlay').classList.remove('show');
+  document.getElementById('reply-panel').classList.remove('show');
+}
+
+// ========== 复制话术 ==========
+function copyReply(btn) {
+  const card = btn.closest('.reply-card');
+  const text = card.querySelector('.reply-card-text').textContent;
+  // 模拟复制
+  navigator.clipboard?.writeText(text);
+  btn.classList.add('copied');
+  btn.innerHTML = '✓ 已复制';
+  showToast('已复制到剪贴板', true);
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = '📋 复制';
+  }, 2000);
+}
+
+// ========== 渲染模板列表 ==========
+function renderTemplates() {
+  const myGrid = document.getElementById('my-template-grid');
+  if (myGrid) {
+    myGrid.innerHTML = myTemplates.map(t => `
+      <div class="template-card">
+        <div class="template-card-header">
+          <div>
+            <div class="template-title">${t.name}</div>
+            <div class="template-meta"><span class="template-tag">${t.style}</span><span>${t.scene}</span><span>使用 ${t.usage} 次</span></div>
+          </div>
+          <button class="reply-btn" onclick="showToast('已进入编辑模式')">编辑</button>
+        </div>
+        <div class="template-content">${t.content}</div>
+        <div class="template-actions">
+          <button class="reply-btn copy-btn" onclick="copyTemplate(this)">📋 复制</button>
+          <button class="reply-btn" onclick="showToast('已应用到当前评论', true)">套用</button>
+          <button class="reply-btn" onclick="showToast('已删除模板')">删除</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  const marketGrid = document.getElementById('market-template-grid');
+  if (marketGrid) {
+    marketGrid.innerHTML = marketTemplates.map(t => `
+      <div class="template-card market-card">
+        <div class="template-card-header">
+          <div>
+            <div class="template-title">${t.name}</div>
+            <div class="template-meta"><span class="template-tag">${t.style}</span><span>⭐ ${t.rating}</span><span>${t.installs} 安装</span></div>
+          </div>
+        </div>
+        <div class="market-author"><div class="author-avatar">${t.author[0]}</div><span>${t.author}</span></div>
+        <div class="template-content">${t.content}</div>
+        <div class="template-actions">
+          <button class="reply-btn copy-btn" onclick="showToast('已安装到我的模板', true)">安装模板</button>
+          <button class="reply-btn" onclick="showToast('已打开预览')">预览</button>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function copyTemplate(btn) {
+  const text = btn.closest('.template-card').querySelector('.template-content').textContent;
+  navigator.clipboard?.writeText(text);
+  btn.classList.add('copied');
+  btn.innerHTML = '✓ 已复制';
+  showToast('模板内容已复制', true);
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = '📋 复制';
+  }, 2000);
+}
+
+// ========== Toast ==========
+function showToast(text, success) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = (success ? '✓ ' : '') + text;
+  toast.className = 'toast' + (success ? ' success' : '');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ========== 初始化 ==========
+document.addEventListener('DOMContentLoaded', () => {
+  renderCommentList('dashboard-comments', 3);
+  renderCommentList('comment-list');
+  renderCommentList('pending-comment-list', null, 'pending');
+  renderCommentList('processed-comment-list', null, 'processed');
+  renderTemplates();
+});
+</script>
+
+</body>
+</html>

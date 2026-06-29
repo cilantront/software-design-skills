@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>竞品对比分析 Widget</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;place-items:center;background:#101827;font-family:"Plus Jakarta Sans","Microsoft YaHei",system-ui,sans-serif;color:#e5e7eb}.panel{width:1040px;max-width:calc(100vw - 32px);border:1px solid rgba(148,163,184,.28);border-radius:28px;background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(30,41,59,.92));box-shadow:0 30px 90px rgba(0,0,0,.35);padding:28px}.head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}.eyebrow{font-size:12px;color:#93c5fd;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.head h1{margin:6px 0 8px;font-size:28px;color:white}.head p{margin:0;color:#94a3b8}.add{border:0;border-radius:14px;background:#2563eb;color:white;font-weight:800;padding:12px 16px;cursor:pointer}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{border:1px solid rgba(148,163,184,.24);border-radius:20px;background:rgba(15,23,42,.72);padding:18px}.card h2{margin:0 0 14px;font-size:17px;color:#f8fafc}.competitor{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,.05);margin-bottom:10px}.appicon{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#60a5fa,#a78bfa);display:grid;place-items:center;color:white}.appicon svg{width:22px;height:22px}.meta strong{display:block;color:white}.meta span{font-size:12px;color:#94a3b8}.score{margin-left:auto;color:#22c55e;font-weight:900}.bars{display:grid;gap:14px}.row{display:grid;grid-template-columns:90px 1fr 42px;gap:10px;align-items:center;font-size:13px;color:#cbd5e1}.track{height:10px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#38bdf8,#8b5cf6)}.suggestion{border-left:4px solid #38bdf8;background:rgba(56,189,248,.08);border-radius:14px;padding:14px;margin-bottom:12px}.suggestion b{color:#e0f2fe}.suggestion p{margin:6px 0 0;color:#cbd5e1;font-size:13px;line-height:1.6}.ab{display:grid;grid-template-columns:1fr 1fr;gap:12px}.variant{padding:14px;border:1px solid rgba(148,163,184,.24);border-radius:16px;background:rgba(255,255,255,.04)}.variant .label{font-size:12px;color:#93c5fd;font-weight:800}.variant strong{display:block;margin-top:6px;color:white}.footer{display:flex;justify-content:flex-end;gap:12px;margin-top:18px}.ghost{border:1px solid rgba(148,163,184,.35);background:transparent;color:#cbd5e1;border-radius:12px;padding:10px 14px;cursor:pointer}.primary{border:0;background:#7c3aed;color:white;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}@media(max-width:760px){.grid{grid-template-columns:1fr}.head{flex-direction:column}.ab{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <section class="panel" aria-label="竞品对比分析功能原型">
+    <header class="head">
+      <div><div class="eyebrow">Competitive ASO Insight</div><h1>竞品对比与差异化建议</h1><p>最多添加 5 个竞品，分析标题策略、关键词覆盖、描述结构，并生成可执行的 A/B 测试方案。</p></div>
+      <button class="add">添加竞品</button>
+    </header>
+    <div class="grid">
+      <div class="card">
+        <h2>竞品列表</h2>
+        <div class="competitor"><div class="appicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></div><div class="meta"><strong>Forest</strong><span>效率 · App Store · 英语市场</span></div><div class="score">92</div></div>
+        <div class="competitor"><div class="appicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg></div><div class="meta"><strong>Focus To-Do</strong><span>任务管理 · Google Play</span></div><div class="score">86</div></div>
+        <div class="competitor"><div class="appicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16"/><path d="M7 12h10"/><path d="M10 18h4"/></svg></div><div class="meta"><strong>Pomofocus</strong><span>Web工具 · SEO强</span></div><div class="score">78</div></div>
+      </div>
+      <div class="card">
+        <h2>关键词覆盖对比</h2>
+        <div class="bars">
+          <div class="row"><span>focus</span><div class="track"><div class="fill" style="width:88%"></div></div><b>高</b></div>
+          <div class="row"><span>timer</span><div class="track"><div class="fill" style="width:82%"></div></div><b>高</b></div>
+          <div class="row"><span>white noise</span><div class="track"><div class="fill" style="width:38%"></div></div><b>低</b></div>
+          <div class="row"><span>task plan</span><div class="track"><div class="fill" style="width:52%"></div></div><b>中</b></div>
+          <div class="row"><span>habit</span><div class="track"><div class="fill" style="width:64%"></div></div><b>中</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>差异化建议</h2>
+        <div class="suggestion"><b>避开红海词堆叠</b><p>竞品高度覆盖 focus/timer，建议标题保留核心搜索词，副标题突出「任务规划 + 白噪音」差异点。</p></div>
+        <div class="suggestion"><b>强化使用场景</b><p>长描述开头使用“deep work sessions / study focus”场景语言，提高搜索与转化一致性。</p></div>
+        <div class="suggestion"><b>本地化表达</b><p>日语市场建议避免直译 productivity，改用“集中・作業管理”表达。</p></div>
+      </div>
+      <div class="card">
+        <h2>A/B 测试方案</h2>
+        <div class="ab">
+          <div class="variant"><span class="label">Variant A</span><strong>FocusFlow: Pomodoro Timer</strong><p>搜索词优先，适合冷启动。</p></div>
+          <div class="variant"><span class="label">Variant B</span><strong>FocusFlow: Deep Work Planner</strong><p>差异化优先，适合转化测试。</p></div>
+        </div>
+        <div class="footer"><button class="ghost">导出报告</button><button class="primary">应用建议</button></div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

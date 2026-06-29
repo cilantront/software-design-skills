@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>CSV文件导入 - Widget原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f5f7fa; padding: 24px; color: #333; }
+.widget-container { background: #fff; border-radius: 12px; padding: 32px; max-width: 720px; margin: 0 auto; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+h2 { font-size: 18px; margin-bottom: 8px; color: #1a1a1a; }
+.subtitle { font-size: 13px; color: #888; margin-bottom: 24px; }
+.upload-zone { border: 2px dashed #c5cee0; border-radius: 10px; padding: 48px 24px; text-align: center; background: #fafbfc; transition: all .2s; cursor: pointer; }
+.upload-zone:hover { border-color: #4f7cff; background: #f0f5ff; }
+.upload-zone.drag-over { border-color: #4f7cff; background: #e8efff; }
+.upload-icon { font-size: 48px; margin-bottom: 12px; }
+.upload-text { font-size: 15px; color: #555; margin-bottom: 8px; }
+.upload-hint { font-size: 12px; color: #999; }
+.template-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: #4f7cff; font-size: 13px; text-decoration: none; cursor: pointer; }
+.template-link:hover { text-decoration: underline; }
+.preview-section { margin-top: 24px; display: none; }
+.preview-section.show { display: block; }
+.preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.preview-title { font-size: 14px; font-weight: 600; }
+.preview-stats { font-size: 12px; color: #888; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #f5f7fa; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #e8ecf0; }
+td { padding: 10px 12px; border-bottom: 1px solid #f0f2f5; }
+tr.error-row { background: #fff5f5; }
+tr.error-row td:last-child { color: #e53e3e; font-size: 12px; }
+.status-ok { color: #38a169; }
+.status-err { color: #e53e3e; }
+.actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+.btn { padding: 8px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; transition: all .2s; }
+.btn-primary { background: #4f7cff; color: #fff; }
+.btn-primary:hover { background: #3b6be8; }
+.btn-secondary { background: #f0f2f5; color: #555; }
+.btn-secondary:hover { background: #e4e7eb; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.result-banner { margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 13px; display: none; }
+.result-banner.success { background: #f0fff4; color: #276749; border: 1px solid #c6f6d5; display: block; }
+</style>
+</head>
+<body>
+<div class="widget-container">
+  <h2>CSV文件导入</h2>
+  <p class="subtitle">上传差评数据CSV文件，系统将自动解析并校验数据格式</p>
+
+  <div class="upload-zone" id="uploadZone">
+    <div class="upload-icon">📁</div>
+    <div class="upload-text">点击或拖拽CSV文件到此区域上传</div>
+    <div class="upload-hint">支持 .csv 格式，文件大小不超过 100MB，编码需为 UTF-8</div>
+    <a class="template-link" onclick="alert('下载模板文件：差评导入模板.csv')">📥 下载标准导入模板</a>
+  </div>
+
+  <div class="preview-section show" id="previewSection">
+    <div class="preview-header">
+      <span class="preview-title">数据预览（前10条）</span>
+      <span class="preview-stats">共 286 条记录 · 发现 <span style="color:#e53e3e">2 条</span>异常</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px">#</th>
+          <th>商品名称</th>
+          <th>评价内容</th>
+          <th style="width:60px">评分</th>
+          <th style="width:100px">评价时间</th>
+          <th style="width:120px">状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>无线蓝牙耳机Pro</td>
+          <td>音质很差，有杂音，退货了</td>
+          <td>⭐ 1</td>
+          <td>2026-06-15</td>
+          <td><span class="status-ok">✓ 校验通过</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>保温杯500ml</td>
+          <td>漏水严重，盖子拧不紧</td>
+          <td>⭐ 2</td>
+          <td>2026-06-14</td>
+          <td><span class="status-ok">✓ 校验通过</span></td>
+        </tr>
+        <tr class="error-row">
+          <td>3</td>
+          <td>手机壳定制款</td>
+          <td>（空）</td>
+          <td>⭐ 1</td>
+          <td>2026-06-14</td>
+          <td>⚠ 评价内容为空</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>运动鞋 男款</td>
+          <td>鞋底很硬，穿了脚疼</td>
+          <td>⭐ 2</td>
+          <td>2026-06-13</td>
+          <td><span class="status-ok">✓ 校验通过</span></td>
+        </tr>
+        <tr class="error-row">
+          <td>5</td>
+          <td>（空）</td>
+          <td>物流太慢了，一周才到</td>
+          <td>⭐ 2</td>
+          <td>2026-06-12</td>
+          <td>⚠ 缺少商品名称</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>电动牙刷T3</td>
+          <td>充电口接触不良，时断时充</td>
+          <td>⭐ 1</td>
+          <td>2026-06-11</td>
+          <td><span class="status-ok">✓ 校验通过</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="result-banner success">
+    ✅ 导入完成！成功导入 284 条差评，跳过 2 条异常数据
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="document.getElementById('previewSection').classList.remove('show')">取消</button>
+    <button class="btn btn-primary" onclick="document.querySelector('.result-banner').classList.add('success')">确认导入（284条）</button>
+  </div>
+</div>
+
+<script>
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('click', () => { zone.classList.toggle('drag-over'); });
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); document.getElementById('previewSection').classList.add('show'); });
+</script>
+</body>
+</html>

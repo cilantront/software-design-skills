@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>批量导入 Widget</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #F9FAFB; padding: 20px; }
+.widget-frame { background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; max-width: 520px; margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.widget-title { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 10px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: #374151; margin-bottom: 4px; font-weight: 500; }
+.field input, .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; font-family: inherit; }
+.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.btn { padding: 7px 13px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; }
+.btn-primary { background: #3B82F6; color: white; }
+.btn-ghost { background: transparent; color: #3B82F6; }
+.tag { display: inline-block; padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 500; background: #F3F4F6; color: #374151; cursor: pointer; }
+.tag.active { background: #3B82F6; color: white; }
+.upload-zone { border: 2px dashed #D1D5DB; border-radius: 8px; padding: 28px 20px; text-align: center; cursor: pointer; margin-bottom: 14px; }
+</style></head><body>
+
+<div class="widget-frame">
+  <div class="widget-title">批量导入多个文件</div>
+  <div class="upload-zone"><div style="font-weight:600; margin:8px 0 4px">拖拽多个文件或文件夹</div><div style="font-size:12px; color:#6B7280">≤20 个文件，总计 ≤50MB</div></div>
+  <div style="border:1px solid #E5E7EB; border-radius:6px; margin-bottom:10px">
+    <div style="padding:8px 12px; border-bottom:1px solid #F3F4F6; font-size:12px; display:flex; justify-content:space-between"><span>微信_小王_6月.csv</span><span style="color:#10B981">✓ 匹配小王</span></div>
+    <div style="padding:8px 12px; border-bottom:1px solid #F3F4F6; font-size:12px; display:flex; justify-content:space-between"><span>邮件_老张.zip</span><span style="color:#10B981">✓ 匹配老张</span></div>
+    <div style="padding:8px 12px; font-size:12px; display:flex; justify-content:space-between"><span>未知.txt</span><span style="color:#F59E0B">⚠ 待分配</span></div>
+  </div>
+  <div class="actions"><button class="btn btn-ghost">取消</button><button class="btn btn-primary">开始导入 (3)</button></div>
+</div>
+
+</body></html>

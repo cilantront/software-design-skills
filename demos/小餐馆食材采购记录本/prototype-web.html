@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小餐馆食材采购记录本 - Web后台端原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 220px; background: #001529; color: #fff; min-height: 100vh; position: fixed; left: 0; top: 0; }
+.sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-header h2 { font-size: 15px; color: #fff; margin-bottom: 4px; }
+.sidebar-header .shop-name { font-size: 12px; color: rgba(255,255,255,0.6); }
+.sidebar-menu { padding: 10px 0; }
+.menu-group { margin-bottom: 4px; }
+.menu-group-title { padding: 8px 20px; font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+.menu-link { display: flex; align-items: center; padding: 10px 20px; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px; transition: all 0.2s; text-decoration: none; }
+.menu-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.menu-link.active { color: #fff; background: #1890ff; }
+.menu-link .menu-icon { margin-right: 10px; font-size: 16px; }
+.menu-link .badge { margin-left: auto; background: #ff4d4f; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+
+/* Main Content */
+.main-content { margin-left: 220px; flex: 1; }
+.top-bar { background: #fff; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 10; }
+.breadcrumb { font-size: 13px; color: #999; }
+.breadcrumb span { color: #333; font-weight: 500; }
+.user-info { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
+
+.page-content { padding: 24px; }
+
+/* Dashboard Cards */
+.stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.stat-card .card-label { font-size: 13px; color: #999; margin-bottom: 8px; }
+.stat-card .card-value { font-size: 28px; font-weight: bold; color: #333; }
+.stat-card .card-change { font-size: 12px; margin-top: 6px; }
+.stat-card .card-change.up { color: #ff4d4f; }
+.stat-card .card-change.down { color: #52c41a; }
+.stat-card.highlight { border-left: 3px solid #ff4d4f; }
+
+/* Charts */
+.chart-section { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.chart-card h3 { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 16px; }
+.chart-area { width: 100%; height: 200px; background: linear-gradient(180deg, #E8F5E9 0%, #fff 100%); border-radius: 8px; position: relative; overflow: hidden; }
+.chart-line { position: absolute; bottom: 20px; left: 10px; right: 10px; height: 150px; }
+.chart-line svg { width: 100%; height: 100%; }
+.pie-chart { width: 160px; height: 160px; border-radius: 50%; margin: 20px auto; background: conic-gradient(#F44336 0% 32%, #FF9800 32% 54%, #FFC107 54% 71%, #2196F3 71% 89%, #9C27B0 89% 100%); position: relative; }
+.pie-chart::after { content: ''; width: 80px; height: 80px; background: #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.data-table th { background: #fafafa; padding: 12px 16px; font-size: 13px; font-weight: 600; color: #666; text-align: left; border-bottom: 1px solid #f0f0f0; }
+.data-table td { padding: 12px 16px; font-size: 13px; color: #333; border-bottom: 1px solid #f5f5f5; }
+.data-table tr:hover { background: #fafafa; }
+.status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.status-badge.normal { background: #f6ffed; color: #52c41a; }
+.status-badge.warning { background: #fff7e6; color: #fa8c16; }
+.status-badge.danger { background: #fff1f0; color: #ff4d4f; }
+.action-btn { padding: 4px 8px; background: none; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; color: #666; cursor: pointer; margin-right: 4px; }
+.action-btn:hover { border-color: #1890ff; color: #1890ff; }
+.action-btn.danger:hover { border-color: #ff4d4f; color: #ff4d4f; }
+
+/* Filter Bar */
+.filter-bar { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.filter-item { display: flex; align-items: center; gap: 6px; }
+.filter-item label { font-size: 13px; color: #666; }
+.filter-item select, .filter-item input { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+.filter-btn { padding: 6px 16px; background: #1890ff; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
+.filter-btn:hover { background: #40a9ff; }
+.filter-btn.secondary { background: #fff; color: #666; border: 1px solid #d9d9d9; }
+
+/* Alert Config */
+.alert-config-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.alert-config-table th { background: #fafafa; padding: 12px 16px; font-size: 13px; font-weight: 600; color: #666; text-align: left; }
+.alert-config-table td { padding: 12px 16px; font-size: 13px; color: #333; border-bottom: 1px solid #f5f5f5; }
+.threshold-input { width: 60px; padding: 4px 8px; border: 1px solid #d9d9d9; border-radius: 4px; text-align: center; font-size: 13px; }
+.switch { width: 36px; height: 20px; background: #52c41a; border-radius: 10px; position: relative; cursor: pointer; display: inline-block; }
+.switch::after { content: ''; width: 16px; height: 16px; background: #fff; border-radius: 50%; position: absolute; top: 2px; right: 2px; }
+.switch.off { background: #d9d9d9; }
+.switch.off::after { right: auto; left: 2px; }
+
+/* Tabs */
+.content-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
+.content-tab { padding: 10px 20px; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; }
+.content-tab.active { color: #1890ff; border-bottom-color: #1890ff; font-weight: 500; }
+
+/* Page Sections */
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+/* Settings Form */
+.settings-form { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); max-width: 600px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
+.form-group input, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 14px; }
+.form-group input:focus, .form-group select:focus { border-color: #1890ff; outline: none; }
+.form-submit { padding: 8px 24px; background: #1890ff; color: #fff; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }
+
+/* Members */
+.member-list { display: grid; gap: 12px; }
+.member-card { background: #fff; border-radius: 8px; padding: 16px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.member-avatar { width: 40px; height: 40px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px; }
+.member-info { flex: 1; }
+.member-name { font-size: 14px; font-weight: 600; color: #333; }
+.member-role { font-size: 12px; color: #999; margin-top: 2px; }
+.member-actions { display: flex; gap: 8px; }
+
+/* Pagination */
+.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 16px; padding: 12px 0; }
+.pagination button { padding: 4px 10px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.pagination button.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+.pagination .page-info { font-size: 12px; color: #999; }
+
+/* Alert list */
+.alert-list-item { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 3px solid #ff4d4f; }
+.alert-list-item .alert-icon { font-size: 24px; margin-right: 12px; }
+.alert-list-item .alert-info { flex: 1; }
+.alert-list-item .alert-title { font-size: 14px; font-weight: 600; color: #333; }
+.alert-list-item .alert-desc { font-size: 12px; color: #999; margin-top: 4px; }
+.alert-list-item .alert-time { font-size: 12px; color: #999; }
+.alert-list-item .alert-action { padding: 4px 12px; background: #1890ff; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; }
+
+/* Prototype Nav */
+.prototype-nav { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.85); color: #fff; padding: 12px 16px; border-radius: 10px; font-size: 12px; z-index: 999; }
+.prototype-nav h3 { font-size: 13px; margin-bottom: 8px; color: #1890ff; }
+.prototype-nav a { display: block; color: #aaa; text-decoration: none; padding: 3px 0; cursor: pointer; }
+.prototype-nav a:hover { color: #fff; }
+.prototype-nav a.active { color: #1890ff; }
+
+/* Multi-store */
+.store-card { background: #fff; border-radius: 8px; padding: 16px; display: inline-block; width: calc(50% - 8px); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 12px; }
+.store-card:nth-child(odd) { margin-right: 12px; }
+.store-card .store-name { font-size: 15px; font-weight: 600; color: #333; }
+.store-card .store-stats { display: flex; gap: 16px; margin-top: 10px; }
+.store-card .store-stat { font-size: 12px; color: #666; }
+.store-card .store-stat strong { color: #333; font-size: 16px; display: block; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h2>🍜 采购记录本</h2>
+    <div class="shop-name">老张家快餐店</div>
+  </div>
+  <div class="sidebar-menu">
+    <div class="menu-group">
+      <div class="menu-group-title">概览</div>
+      <a class="menu-link active" onclick="showSection('dashboard')" id="menu-dashboard">
+        <span class="menu-icon">📊</span> 数据看板
+      </a>
+    </div>
+    <div class="menu-group">
+      <div class="menu-group-title">业务管理</div>
+      <a class="menu-link" onclick="showSection('purchases')" id="menu-purchases">
+        <span class="menu-icon">📋</span> 采购记录
+      </a>
+      <a class="menu-link" onclick="showSection('reports')" id="menu-reports">
+        <span class="menu-icon">📈</span> 报表分析
+      </a>
+      <a class="menu-link" onclick="showSection('alerts')" id="menu-alerts">
+        <span class="menu-icon">⚠️</span> 预警记录
+        <span class="badge">3</span>
+      </a>
+    </div>
+    <div class="menu-group">
+      <div class="menu-group-title">配置</div>
+      <a class="menu-link" onclick="showSection('alert-config')" id="menu-alert-config">
+        <span class="menu-icon">🔧</span> 预警配置
+      </a>
+      <a class="menu-link" onclick="showSection('suppliers')" id="menu-suppliers">
+        <span class="menu-icon">🏭</span> 供应商管理
+      </a>
+      <a class="menu-link" onclick="showSection('ingredients')" id="menu-ingredients">
+        <span class="menu-icon">🥬</span> 食材库
+      </a>
+      <a class="menu-link" onclick="showSection('members')" id="menu-members">
+        <span class="menu-icon">👥</span> 协作成员
+      </a>
+    </div>
+    <div class="menu-group">
+      <div class="menu-group-title">系统</div>
+      <a class="menu-link" onclick="showSection('settings')" id="menu-settings">
+        <span class="menu-icon">⚙️</span> 店铺设置
+      </a>
+      <a class="menu-link" onclick="showSection('stores')" id="menu-stores">
+        <span class="menu-icon">🏪</span> 多店管理
+        <span class="badge" style="background:#fa8c16">PRO</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+  <div class="top-bar">
+    <div class="breadcrumb">首页 / <span id="current-page-title">数据看板</span></div>
+    <div class="user-info">
+      <span>🔔 3</span>
+      <span>张老板</span>
+      <div class="user-avatar">👨‍🍳</div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="page-section active" id="section-dashboard">
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="card-label">今日采购成本</div>
+          <div class="card-value">¥386</div>
+          <div class="card-change up">↑ 12.2% 较昨日</div>
+        </div>
+        <div class="stat-card">
+          <div class="card-label">今日采购笔数</div>
+          <div class="card-value">8</div>
+          <div class="card-change down">↓ 2笔 较昨日</div>
+        </div>
+        <div class="stat-card highlight">
+          <div class="card-label">待处理预警</div>
+          <div class="card-value" style="color:#ff4d4f">3</div>
+          <div class="card-change" style="color:#ff4d4f">⚠️ 需及时关注</div>
+        </div>
+        <div class="stat-card">
+          <div class="card-label">本月累计成本</div>
+          <div class="card-value">¥8,642</div>
+          <div class="card-change up">↑ 5.3% 较上月</div>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <div class="chart-card">
+          <h3>📈 本周成本趋势</h3>
+          <div class="chart-area">
+            <div class="chart-line">
+              <svg viewBox="0 0 400 150" preserveAspectRatio="none">
+                <polyline points="0,120 60,100 120,90 180,110 240,80 300,95 360,70 400,85" fill="none" stroke="#4CAF50" stroke-width="2"/>
+                <polyline points="0,120 60,100 120,90 180,110 240,80 300,95 360,70 400,85" fill="url(#grad1)" stroke="none"/>
+                <defs>
+                  <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4CAF50" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#4CAF50" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="180" cy="110" r="4" fill="#ff4d4f"/>
+                <text x="170" y="130" font-size="10" fill="#ff4d4f">异常</text>
+              </svg>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:11px;color:#999">
+            <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px">
+            <div style="text-align:center"><div style="font-size:12px;color:#999">日均</div><div style="font-size:16px;font-weight:bold">¥342</div></div>
+            <div style="text-align:center"><div style="font-size:12px;color:#999">最高</div><div style="font-size:16px;font-weight:bold;color:#ff4d4f">¥428</div></div>
+            <div style="text-align:center"><div style="font-size:12px;color:#999">最低</div><div style="font-size:16px;font-weight:bold;color:#52c41a">¥265</div></div>
+            <div style="text-align:center"><div style="font-size:12px;color:#999">环比</div><div style="font-size:16px;font-weight:bold;color:#ff4d4f">+8.2%</div></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>🥧 本月品类占比</h3>
+          <div class="pie-chart"></div>
+          <div style="margin-top:12px">
+            <div style="display:flex;align-items:center;margin-bottom:6px"><span style="width:10px;height:10px;background:#F44336;border-radius:50%;margin-right:6px"></span><span style="font-size:12px;flex:1">蔬菜</span><span style="font-size:12px;font-weight:600">32%</span></div>
+            <div style="display:flex;align-items:center;margin-bottom:6px"><span style="width:10px;height:10px;background:#FF9800;border-radius:50%;margin-right:6px"></span><span style="font-size:12px;flex:1">肉类</span><span style="font-size:12px;font-weight:600">22%</span></div>
+            <div style="display:flex;align-items:center;margin-bottom:6px"><span style="width:10px;height:10px;background:#FFC107;border-radius:50%;margin-right:6px"></span><span style="font-size:12px;flex:1">禽蛋</span><span style="font-size:12px;font-weight:600">17%</span></div>
+            <div style="display:flex;align-items:center;margin-bottom:6px"><span style="width:10px;height:10px;background:#2196F3;border-radius:50%;margin-right:6px"></span><span style="font-size:12px;flex:1">水产</span><span style="font-size:12px;font-weight:600">18%</span></div>
+            <div style="display:flex;align-items:center"><span style="width:10px;height:10px;background:#9C27B0;border-radius:50%;margin-right:6px"></span><span style="font-size:12px;flex:1">粮油调料</span><span style="font-size:12px;font-weight:600">11%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>⚠️ 最近预警</h3>
+        <table class="data-table">
+          <thead><tr><th>时间</th><th>食材</th><th>本次价格</th><th>均价</th><th>涨幅</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td>06-29 09:15</td><td>🥬 青菜</td><td>¥4.0/斤</td><td>¥3.1/斤</td><td style="color:#ff4d4f;font-weight:bold">+29%</td><td><span class="status-badge danger">待处理</span></td><td><button class="action-btn">查看</button></td></tr>
+            <tr><td>06-28 14:30</td><td>🥚 鸡蛋</td><td>¥6.5/斤</td><td>¥5.2/斤</td><td style="color:#ff4d4f;font-weight:bold">+25%</td><td><span class="status-badge warning">已标记</span></td><td><button class="action-btn">查看</button></td></tr>
+            <tr><td>06-27 08:45</td><td>🐟 鲈鱼</td><td>¥35/斤</td><td>¥28/斤</td><td style="color:#ff4d4f;font-weight:bold">+25%</td><td><span class="status-badge normal">已忽略</span></td><td><button class="action-btn">查看</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== PURCHASES ===== -->
+    <div class="page-section" id="section-purchases">
+      <div class="filter-bar">
+        <div class="filter-item">
+          <label>日期：</label>
+          <input type="date" value="2026-06-01"> ~ <input type="date" value="2026-06-29">
+        </div>
+        <div class="filter-item">
+          <label>品类：</label>
+          <select><option>全部</option><option>蔬菜</option><option>肉类</option><option>禽蛋</option><option>水产</option><option>粮油</option></select>
+        </div>
+        <div class="filter-item">
+          <label>供应商：</label>
+          <select><option>全部</option><option>王叔菜摊</option><option>李记肉铺</option><option>张禽蛋批发</option></select>
+        </div>
+        <div class="filter-item">
+          <label>状态：</label>
+          <select><option>全部</option><option>正常</option><option>价格异常</option></select>
+        </div>
+        <button class="filter-btn">搜索</button>
+        <button class="filter-btn secondary" style="margin-left:auto">📥 导出</button>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th><input type="checkbox"></th><th>日期</th><th>食材</th><th>品类</th><th>数量</th><th>单价</th><th>金额</th><th>供应商</th><th>录入人</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox"></td><td>06-29</td><td>🥬 青菜</td><td>蔬菜</td><td>5斤</td><td>¥4.0</td><td>¥20</td><td>王叔菜摊</td><td>张老板</td><td><span class="status-badge danger">异常</span></td><td><button class="action-btn">查看</button><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td><input type="checkbox"></td><td>06-29</td><td>🥩 猪肉</td><td>肉类</td><td>3斤</td><td>¥28.0</td><td>¥84</td><td>李记肉铺</td><td>张老板</td><td><span class="status-badge normal">正常</span></td><td><button class="action-btn">查看</button><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td><input type="checkbox"></td><td>06-29</td><td>🥚 鸡蛋</td><td>禽蛋</td><td>10斤</td><td>¥6.5</td><td>¥65</td><td>张禽蛋批发</td><td>王厨师</td><td><span class="status-badge normal">正常</span></td><td><button class="action-btn">查看</button><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td><input type="checkbox"></td><td>06-29</td><td>🍅 西红柿</td><td>蔬菜</td><td>8斤</td><td>¥3.5</td><td>¥28</td><td>王叔菜摊</td><td>张老板</td><td><span class="status-badge normal">正常</span></td><td><button class="action-btn">查看</button><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td><input type="checkbox"></td><td>06-29</td><td>🐟 草鱼</td><td>水产</td><td>2条</td><td>¥18.0</td><td>¥72</td><td>老周水产</td><td>张老板</td><td><span class="status-badge normal">正常</span></td><td><button class="action-btn">查看</button><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td><input type="checkbox"></td><td>06-29</td><td>🧴 大豆油</td><td>粮油</td><td>1桶</td><td>¥62.0</td><td>¥62</td><td>旺达粮油</td><td>张老板</td><td><span class="status-badge normal">正常</span></td><td><button class="action-btn">查看</button><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td><input type="checkbox"></td><td>06-28</td><td>🥬 生菜</td><td>蔬菜</td><td>6斤</td><td>¥5.0</td><td>¥30</td><td>王叔菜摊</td><td>王厨师</td><td><span class="status-badge normal">正常</span></td><td><button class="action-btn">查看</button><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td><input type="checkbox"></td><td>06-28</td><td>🥩 五花肉</td><td>肉类</td><td>4斤</td><td>¥26.0</td><td>¥104</td><td>李记肉铺</td><td>张老板</td><td><span class="status-badge normal">正常</span></td><td><button class="action-btn">查看</button><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span class="page-info">共 156 条记录</span>
+        <button>‹ 上一页</button>
+        <button class="active">1</button>
+        <button>2</button>
+        <button>3</button>
+        <button>...</button>
+        <button>20</button>
+        <button>下一页 ›</button>
+      </div>
+    </div>
+
+    <!-- ===== REPORTS ===== -->
+    <div class="page-section" id="section-reports">
+      <div class="content-tabs">
+        <div class="content-tab active">日报</div>
+        <div class="content-tab">周报</div>
+        <div class="content-tab">月报</div>
+      </div>
+
+      <div class="stat-cards" style="grid-template-columns: repeat(3, 1fr)">
+        <div class="stat-card">
+          <div class="card-label">今日总成本</div>
+          <div class="card-value">¥386</div>
+          <div class="card-change up">↑ 12.2% 较昨日</div>
+        </div>
+        <div class="stat-card">
+          <div class="card-label">最高品类</div>
+          <div class="card-value" style="font-size:20px">🥬 蔬菜</div>
+          <div class="card-change" style="color:#333">¥126（32.6%）</div>
+        </div>
+        <div class="stat-card">
+          <div class="card-label">异常项目</div>
+          <div class="card-value" style="color:#ff4d4f">1</div>
+          <div class="card-change" style="color:#ff4d4f">青菜涨幅 30%</div>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <div class="chart-card">
+          <h3>📊 今日品类成本明细</h3>
+          <table class="data-table" style="box-shadow:none">
+            <thead><tr><th>品类</th><th>金额</th><th>占比</th><th>较昨日</th><th>笔数</th></tr></thead>
+            <tbody>
+              <tr><td>🥬 蔬菜</td><td>¥126</td><td>32.6%</td><td style="color:#ff4d4f">+36%</td><td>4笔</td></tr>
+              <tr><td>🥩 肉类</td><td>¥84</td><td>21.8%</td><td style="color:#52c41a">-5%</td><td>1笔</td></tr>
+              <tr><td>🥚 禽蛋</td><td>¥65</td><td>16.8%</td><td style="color:#ff4d4f">+12%</td><td>1笔</td></tr>
+              <tr><td>🐟 水产</td><td>¥72</td><td>18.7%</td><td style="color:#52c41a">-8%</td><td>1笔</td></tr>
+              <tr><td>🧴 粮油调料</td><td>¥39</td><td>10.1%</td><td style="color:#999">—</td><td>1笔</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="chart-card">
+          <h3>📈 近7日成本趋势</h3>
+          <div class="chart-area" style="height:220px">
+            <div class="chart-line">
+              <svg viewBox="0 0 300 180" preserveAspectRatio="none">
+                <polyline points="0,140 50,120 100,130 150,100 200,110 250,80 300,95" fill="none" stroke="#4CAF50" stroke-width="2.5"/>
+                <circle cx="50" cy="120" r="3" fill="#4CAF50"/>
+                <circle cx="100" cy="130" r="3" fill="#4CAF50"/>
+                <circle cx="150" cy="100" r="3" fill="#4CAF50"/>
+                <circle cx="200" cy="110" r="3" fill="#4CAF50"/>
+                <circle cx="250" cy="80" r="4" fill="#ff4d4f"/>
+                <circle cx="300" cy="95" r="3" fill="#4CAF50"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:right;margin-top:12px">
+        <button class="filter-btn" style="background:#52c41a">📥 导出 PDF</button>
+        <button class="filter-btn" style="margin-left:8px">📊 导出 Excel</button>
+      </div>
+    </div>
+
+    <!-- ===== ALERT RECORDS ===== -->
+    <div class="page-section" id="section-alerts">
+      <div class="content-tabs">
+        <div class="content-tab active">待处理 (3)</div>
+        <div class="content-tab">已处理</div>
+        <div class="content-tab">全部</div>
+      </div>
+
+      <div class="alert-list-item">
+        <div class="alert-icon">🥬</div>
+        <div class="alert-info">
+          <div class="alert-title">青菜价格异常上涨 <span class="status-badge danger">待处理</span></div>
+          <div class="alert-desc">本次 ¥4.0/斤，近30天均价 ¥3.1/斤，涨幅 29%（阈值 30%）</div>
+        </div>
+        <div class="alert-time">06-29 09:15</div>
+        <button class="alert-action">处理</button>
+      </div>
+
+      <div class="alert-list-item">
+        <div class="alert-icon">🥚</div>
+        <div class="alert-info">
+          <div class="alert-title">鸡蛋价格异常上涨 <span class="status-badge warning">已标记</span></div>
+          <div class="alert-desc">本次 ¥6.5/斤，近30天均价 ¥5.2/斤，涨幅 25%（单品阈值 8%）</div>
+        </div>
+        <div class="alert-time">06-28 14:30</div>
+        <button class="alert-action">查看</button>
+      </div>
+
+      <div class="alert-list-item">
+        <div class="alert-icon">🐟</div>
+        <div class="alert-info">
+          <div class="alert-title">鲈鱼价格异常上涨 <span class="status-badge normal">已忽略</span></div>
+          <div class="alert-desc">本次 ¥35/斤，近30天均价 ¥28/斤，涨幅 25%（阈值 20%）· 备注：休渔期正常涨价</div>
+        </div>
+        <div class="alert-time">06-27 08:45</div>
+        <button class="alert-action">查看</button>
+      </div>
+    </div>
+
+    <!-- ===== ALERT CONFIG ===== -->
+    <div class="page-section" id="section-alert-config">
+      <h3 style="margin-bottom:16px;font-size:16px">品类默认阈值配置</h3>
+      <table class="alert-config-table">
+        <thead><tr><th>品类</th><th>图标</th><th>默认阈值</th><th>说明</th><th>启用状态</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>蔬菜</td><td>🥬</td><td><input class="threshold-input" value="30">%</td><td>受天气/季节影响大，叶菜类日波动可达20-50%</td><td><span class="switch"></span></td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>肉类</td><td>🥩</td><td><input class="threshold-input" value="15">%</td><td>猪牛羊肉单价高，15%涨幅意味着显著成本增加</td><td><span class="switch"></span></td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>禽蛋</td><td>🥚</td><td><input class="threshold-input" value="15">%</td><td>季节性明显，夏季产蛋量下降价格易上涨</td><td><span class="switch"></span></td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>水产</td><td>🐟</td><td><input class="threshold-input" value="20">%</td><td>受休渔期、天气影响，波动中等偏大</td><td><span class="switch"></span></td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>粮油</td><td>🌾</td><td><input class="threshold-input" value="10">%</td><td>粮油价格非常稳定，10%涨幅已是重大异常</td><td><span class="switch"></span></td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>调料干货</td><td>🧂</td><td><input class="threshold-input" value="10">%</td><td>保质期长、价格极其稳定</td><td><span class="switch"></span></td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>饮料包材</td><td>🥤</td><td><input class="threshold-input" value="10">%</td><td>工业品属性，价格最稳定</td><td><span class="switch"></span></td><td><button class="action-btn">编辑</button></td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:24px 0 16px;font-size:16px">单品阈值覆盖</h3>
+      <table class="data-table">
+        <thead><tr><th>食材</th><th>所属品类</th><th>品类默认</th><th>覆盖阈值</th><th>覆盖原因</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>🥚 鸡蛋</td><td>禽蛋</td><td>15%</td><td style="color:#ff4d4f;font-weight:bold">8%</td><td>鸡蛋对价格更敏感，波动范围更小</td><td><span class="status-badge normal">生效中</span></td><td><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td>🥩 五花肉</td><td>肉类</td><td>15%</td><td style="color:#ff4d4f;font-weight:bold">10%</td><td>五花肉价格相对稳定</td><td><span class="status-badge normal">生效中</span></td><td><button class="action-btn">编辑</button><button class="action-btn danger">删除</button></td></tr>
+        </tbody>
+      </table>
+      <button class="filter-btn" style="margin-top:16px">+ 添加单品阈值覆盖</button>
+
+      <div style="margin-top:24px;background:#E8F5E9;border-radius:8px;padding:16px">
+        <div style="font-size:14px;font-weight:600;color:#2E7D32;margin-bottom:6px">💡 V1.1 预告：智能阈值推荐</div>
+        <div style="font-size:13px;color:#555">基于您店铺的历史采购数据，系统将自动推荐各食材的最优阈值。例如："鸡蛋建议 8%，您近 30 天波动多在 5%-12%"。</div>
+      </div>
+    </div>
+
+    <!-- ===== SUPPLIERS ===== -->
+    <div class="page-section" id="section-suppliers">
+      <div class="filter-bar">
+        <div class="filter-item">
+          <label>主营品类：</label>
+          <select><option>全部</option><option>蔬菜</option><option>肉类</option><option>禽蛋</option><option>水产</option><option>粮油</option></select>
+        </div>
+        <button class="filter-btn">搜索</button>
+        <button class="filter-btn secondary" style="margin-left:auto">+ 新增供应商</button>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>供应商名称</th><th>联系人</th><th>电话</th><th>主营品类</th><th>合作笔数</th><th>本月金额</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>王叔菜摊</td><td>王大明</td><td>138****1234</td><td>🥬 蔬菜</td><td>45笔</td><td>¥1,860</td><td><button class="action-btn">编辑</button><button class="action-btn">对账</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td>李记肉铺</td><td>李师傅</td><td>139****5678</td><td>🥩 肉类</td><td>28笔</td><td>¥2,352</td><td><button class="action-btn">编辑</button><button class="action-btn">对账</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td>张禽蛋批发</td><td>张姐</td><td>136****9012</td><td>🥚 禽蛋</td><td>15笔</td><td>¥975</td><td><button class="action-btn">编辑</button><button class="action-btn">对账</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td>老周水产</td><td>周师傅</td><td>137****3456</td><td>🐟 水产</td><td>12笔</td><td>¥864</td><td><button class="action-btn">编辑</button><button class="action-btn">对账</button><button class="action-btn danger">删除</button></td></tr>
+          <tr><td>旺达粮油</td><td>赵经理</td><td>135****7890</td><td>🌾 粮油</td><td>8笔</td><td>¥496</td><td><button class="action-btn">编辑</button><button class="action-btn">对账</button><button class="action-btn danger">删除</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== INGREDIENTS ===== -->
+    <div class="page-section" id="section-ingredients">
+      <div class="content-tabs">
+        <div class="content-tab active">系统预置</div>
+        <div class="content-tab">自定义食材</div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-item">
+          <label>品类：</label>
+          <select><option>全部品类</option><option>蔬菜</option><option>肉类</option><option>禽蛋</option><option>水产</option><option>粮油</option><option>调料干货</option><option>饮料包材</option></select>
+        </div>
+        <button class="filter-btn secondary" style="margin-left:auto">+ 添加自定义食材</button>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>食材名称</th><th>品类</th><th>默认单位</th><th>预警阈值</th><th>启用状态</th><th>近30天采购次数</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>🥬 青菜</td><td>蔬菜</td><td>斤</td><td>30%（品类默认）</td><td><span class="switch"></span></td><td>18次</td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>🍅 西红柿</td><td>蔬菜</td><td>斤</td><td>30%（品类默认）</td><td><span class="switch"></span></td><td>12次</td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>🥔 土豆</td><td>蔬菜</td><td>斤</td><td>30%（品类默认）</td><td><span class="switch"></span></td><td>15次</td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>🥩 猪肉</td><td>肉类</td><td>斤</td><td>15%（品类默认）</td><td><span class="switch"></span></td><td>20次</td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>🥩 五花肉</td><td>肉类</td><td>斤</td><td style="color:#ff4d4f">10%（单品覆盖）</td><td><span class="switch"></span></td><td>8次</td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>🥚 鸡蛋</td><td>禽蛋</td><td>斤</td><td style="color:#ff4d4f">8%（单品覆盖）</td><td><span class="switch"></span></td><td>15次</td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>🐟 草鱼</td><td>水产</td><td>条</td><td>20%（品类默认）</td><td><span class="switch"></span></td><td>6次</td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>🌾 大米</td><td>粮油</td><td>斤</td><td>10%（品类默认）</td><td><span class="switch"></span></td><td>4次</td><td><button class="action-btn">编辑</button></td></tr>
+          <tr><td>🧴 大豆油</td><td>粮油</td><td>桶</td><td>10%（品类默认）</td><td><span class="switch"></span></td><td>3次</td><td><button class="action-btn">编辑</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== MEMBERS ===== -->
+    <div class="page-section" id="section-members">
+      <div class="filter-bar">
+        <div style="flex:1;font-size:14px;color:#333;font-weight:600">协作成员（3人）</div>
+        <button class="filter-btn">+ 邀请新成员</button>
+      </div>
+
+      <div class="member-list">
+        <div class="member-card">
+          <div class="member-avatar">👨‍🍳</div>
+          <div class="member-info">
+            <div class="member-name">张老板</div>
+            <div class="member-role">店主 · 138****0001</div>
+          </div>
+          <div class="member-actions">
+            <span style="font-size:12px;color:#52c41a;background:#f6ffed;padding:2px 8px;border-radius:10px">店长</span>
+          </div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">👨‍🍳</div>
+          <div class="member-info">
+            <div class="member-name">王厨师</div>
+            <div class="member-role">采购员 · 139****0002 · 加入于 2026-05-15</div>
+          </div>
+          <div class="member-actions">
+            <button class="action-btn">调整角色</button>
+            <button class="action-btn danger">移除</button>
+          </div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">👩</div>
+          <div class="member-info">
+            <div class="member-name">李阿姨</div>
+            <div class="member-role">采购员 · 137****0003 · 加入于 2026-06-01</div>
+          </div>
+          <div class="member-actions">
+            <button class="action-btn">调整角色</button>
+            <button class="action-btn danger">移除</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;background:#fff;border-radius:8px;padding:16px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px">📱 邀请方式</div>
+        <div style="display:flex;gap:16px">
+          <div style="flex:1;border:1px solid #f0f0f0;border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:24px;margin-bottom:8px">🔗</div>
+            <div style="font-size:13px;font-weight:600">邀请码</div>
+            <div style="font-size:18px;font-weight:bold;color:#1890ff;margin-top:4px;letter-spacing:2px">AB3K9X</div>
+            <button class="action-btn" style="margin-top:8px">复制</button>
+          </div>
+          <div style="flex:1;border:1px solid #f0f0f0;border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:24px;margin-bottom:8px">📱</div>
+            <div style="font-size:13px;font-weight:600">小程序码</div>
+            <div style="width:80px;height:80px;background:#f5f5f5;border-radius:4px;margin:8px auto;display:flex;align-items:center;justify-content:center;font-size:10px;color:#999">小程序码占位</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <div class="page-section" id="section-settings">
+      <h3 style="margin-bottom:16px;font-size:16px">店铺基本信息</h3>
+      <div class="settings-form">
+        <div class="form-group">
+          <label>店铺名称</label>
+          <input value="老张家快餐店">
+        </div>
+        <div class="form-group">
+          <label>店铺类型</label>
+          <select>
+            <option selected>快餐</option>
+            <option>面馆</option>
+            <option>奶茶</option>
+            <option>早餐</option>
+            <option>正餐</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>店铺地址</label>
+          <input value="某某市某某区幸福路128号">
+        </div>
+        <div class="form-group">
+          <label>联系电话</label>
+          <input value="13800000001">
+        </div>
+        <div class="form-group">
+          <label>营业时间</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="time" value="06:30" style="flex:1"> ~ <input type="time" value="21:00" style="flex:1">
+          </div>
+        </div>
+        <button class="form-submit">保存设置</button>
+      </div>
+
+      <h3 style="margin:24px 0 16px;font-size:16px">会员信息</h3>
+      <div class="settings-form">
+        <div class="form-group">
+          <label>当前版本</label>
+          <div style="padding:12px;background:#FFF3E0;border-radius:4px;font-size:14px;color:#E65100">
+            👑 免费版 · 已使用 23 天
+          </div>
+        </div>
+        <div class="form-group">
+          <label>到期提醒</label>
+          <div style="padding:12px;background:#fff2f0;border-radius:4px;font-size:14px;color:#ff4d4f">
+            ⏰ 12 条记录将在 7 天后归档
+          </div>
+        </div>
+        <button class="form-submit" style="background:#FF9800">升级专业版</button>
+      </div>
+    </div>
+
+    <!-- ===== MULTI-STORE (PRO) ===== -->
+    <div class="page-section" id="section-stores">
+      <div style="background:linear-gradient(135deg,#FFD54F,#FFB300);border-radius:8px;padding:24px;margin-bottom:20px">
+        <div style="font-size:18px;font-weight:bold;color:#333">👑 多店管理</div>
+        <div style="font-size:14px;color:#555;margin-top:6px">专业版功能 · 管理多家连锁门店，跨店数据汇总</div>
+        <div style="margin-top:12px;font-size:13px;color:#E65100">💡 当前为免费版，升级专业版（每天不到 1 块钱）即可解锁多店管理</div>
+      </div>
+
+      <div style="opacity:0.7">
+        <div class="store-card">
+          <div class="store-name">🏪 老张家快餐店（总店）</div>
+          <div style="font-size:12px;color:#999;margin-top:4px">某某市某某区幸福路128号 · 快餐</div>
+          <div class="store-stats">
+            <div class="store-stat"><strong>¥386</strong>今日成本</div>
+            <div class="store-stat"><strong>8笔</strong>今日采购</div>
+            <div class="store-stat"><strong>1</strong>待处理预警</div>
+          </div>
+        </div>
+        <div class="store-card">
+          <div class="store-name">🏪 老张家面馆（二店）</div>
+          <div style="font-size:12px;color:#999;margin-top:4px">某某市某某区建设路56号 · 面馆</div>
+          <div class="store-stats">
+            <div class="store-stat"><strong>¥258</strong>今日成本</div>
+            <div class="store-stat"><strong>5笔</strong>今日采购</div>
+            <div class="store-stat"><strong>0</strong>待处理预警</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;text-align:center">
+        <button class="filter-btn" style="background:#FF9800;font-size:14px;padding:10px 24px">🔓 升级专业版，解锁多店管理</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Prototype Navigation -->
+<div class="prototype-nav">
+  <h3>🖥️ Web后台端原型</h3>
+  <a onclick="showSection('dashboard')" class="active" id="pnav-dashboard">数据看板</a>
+  <a onclick="showSection('purchases')" id="pnav-purchases">采购记录管理</a>
+  <a onclick="showSection('reports')" id="pnav-reports">报表分析</a>
+  <a onclick="showSection('alerts')" id="pnav-alerts">预警记录</a>
+  <a onclick="showSection('alert-config')" id="pnav-alert-config">预警配置</a>
+  <a onclick="showSection('suppliers')" id="pnav-suppliers">供应商管理</a>
+  <a onclick="showSection('ingredients')" id="pnav-ingredients">食材库管理</a>
+  <a onclick="showSection('members')" id="pnav-members">协作成员</a>
+  <a onclick="showSection('settings')" id="pnav-settings">店铺设置</a>
+  <a onclick="showSection('stores')" id="pnav-stores">多店管理(PRO)</a>
+</div>
+
+<script>
+const pageTitles = {
+  'dashboard': '数据看板',
+  'purchases': '采购记录管理',
+  'reports': '报表分析',
+  'alerts': '预警记录',
+  'alert-config': '预警配置',
+  'suppliers': '供应商管理',
+  'ingredients': '食材库管理',
+  'members': '协作成员',
+  'settings': '店铺设置',
+  'stores': '多店管理'
+};
+
+function showSection(sectionId) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + sectionId).classList.add('active');
+  document.querySelectorAll('.menu-link').forEach(m => m.classList.remove('active'));
+  const menuEl = document.getElementById('menu-' + sectionId);
+  if (menuEl) menuEl.classList.add('active');
+  document.querySelectorAll('.prototype-nav a').forEach(a => a.classList.remove('active'));
+  const pnavEl = document.getElementById('pnav-' + sectionId);
+  if (pnavEl) pnavEl.classList.add('active');
+  document.getElementById('current-page-title').textContent = pageTitles[sectionId] || sectionId;
+}
+</script>
+
+</body>
+</html>

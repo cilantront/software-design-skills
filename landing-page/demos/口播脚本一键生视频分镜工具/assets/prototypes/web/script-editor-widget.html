@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>脚本编辑区组件原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; padding: 40px; }
+.widget-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.editor-widget { max-width: 720px; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+.editor-title-bar { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; }
+.title-input { flex: 1; font-size: 20px; font-weight: 700; border: none; background: transparent; }
+.title-input:focus { outline: none; }
+.editor-stats { display: flex; gap: 16px; font-size: 12px; color: #999; }
+.stat { display: flex; align-items: center; gap: 4px; }
+.stat.highlight { color: #667eea; font-weight: 600; }
+.editor-toolbar { padding: 10px 20px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 6px; align-items: center; }
+.tool-btn { width: 30px; height: 30px; border-radius: 6px; border: none; background: none; cursor: pointer; font-size: 13px; color: #555; }
+.tool-btn:hover { background: #f0f2ff; color: #667eea; }
+.sep { width: 1px; height: 20px; background: #e0e0e0; margin: 0 4px; }
+.editor-body { padding: 20px; }
+.editor-body textarea { width: 100%; min-height: 220px; border: none; font-size: 14px; line-height: 1.8; resize: none; font-family: inherit; }
+.editor-body textarea:focus { outline: none; }
+.editor-footer { padding: 12px 20px; background: #fafbfc; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+.save-hint { font-size: 12px; color: #4caf50; }
+.btn-group { display: flex; gap: 8px; }
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; border: none; }
+.btn-outline { background: #fff; border: 1px solid #e0e0e0; color: #333; }
+.btn-fill { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-weight: 600; }
+.warning-bar { background: #fff3e0; padding: 10px 20px; font-size: 12px; color: #e65100; border-top: 1px solid #ffe0b2; }
+</style>
+</head>
+<body>
+<div class="widget-title">📝 脚本编辑区 Widget</div>
+<div class="editor-widget">
+  <div class="editor-title-bar">
+    <input class="title-input" value="5个让你效率翻倍的晨间习惯" />
+    <div class="editor-stats">
+      <div class="stat">📝 1,230字</div>
+      <div class="stat highlight">⏱️ 约5分钟</div>
+    </div>
+  </div>
+  <div class="editor-toolbar">
+    <button class="tool-btn" title="加粗"><b>B</b></button>
+    <button class="tool-btn" title="斜体"><i>I</i></button>
+    <button class="tool-btn" title="高亮">🖍</button>
+    <div class="sep"></div>
+    <button class="tool-btn" title="导入文件">📂</button>
+    <button class="tool-btn" title="模板">📋</button>
+    <button class="tool-btn" title="清空">🗑</button>
+  </div>
+  <div class="editor-body">
+    <textarea>大家好，今天给大家分享5个我亲测有效的晨间习惯，坚持一个月你会发现整个人的状态完全不一样。
+
+第一个习惯，早起后先喝一杯温水...</textarea>
+  </div>
+  <div class="editor-footer">
+    <div class="save-hint">🟢 自动保存于 12:30</div>
+    <div class="btn-group">
+      <button class="btn btn-outline">保存草稿</button>
+      <button class="btn btn-fill">✨ 一键生成分镜</button>
+    </div>
+  </div>
+  <div class="warning-bar">💡 建议脚本长度 500-2000 字，分镜效果最佳（当前字数适中）</div>
+</div>
+</body>
+</html>

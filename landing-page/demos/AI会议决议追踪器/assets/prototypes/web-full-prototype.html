@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI会议决议追踪器 - 全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f3f4f6; color: #1f2937; }
+
+/* Layout */
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; background: #1e1b4b; color: white; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
+.sidebar-header { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; }
+.sidebar-logo .icon { width: 32px; height: 32px; background: linear-gradient(135deg, #818cf8, #6366f1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.sidebar-logo span { font-size: 14px; font-weight: 600; }
+.sidebar-nav { padding: 12px 8px; }
+.nav-group { margin-bottom: 8px; }
+.nav-group-title { font-size: 11px; color: rgba(255,255,255,0.4); padding: 8px 12px 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.7); transition: all 0.2s; margin-bottom: 2px; }
+.nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+.nav-item.active { background: rgba(99,102,241,0.3); color: white; }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-item .badge { margin-left: auto; background: #ef4444; color: white; font-size: 11px; padding: 1px 6px; border-radius: 10px; }
+
+.main { flex: 1; margin-left: 240px; }
+.topbar { height: 56px; background: white; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 24px; position: sticky; top: 0; z-index: 50; }
+.topbar-search { flex: 1; max-width: 400px; position: relative; }
+.topbar-search input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: #f9fafb; }
+.topbar-search input:focus { outline: none; border-color: #6366f1; background: white; }
+.topbar-search .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+.topbar-right { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+.topbar-right .icon-btn { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; color: #6b7280; }
+.topbar-right .icon-btn:hover { background: #f3f4f6; }
+.notification-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 2px solid white; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #818cf8, #6366f1); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+.content { padding: 24px; }
+.page { display: none; }
+.page.active { display: block; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.page-title { font-size: 20px; font-weight: 600; }
+.page-subtitle { font-size: 14px; color: #6b7280; margin-top: 4px; }
+
+/* Buttons */
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #6366f1; color: white; }
+.btn-primary:hover { background: #4f46e5; }
+.btn-secondary { background: white; color: #374151; border: 1px solid #e5e7eb; }
+.btn-secondary:hover { background: #f9fafb; }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+
+/* Cards */
+.card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 20px; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 20px; }
+.stat-card .stat-label { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+.stat-card .stat-value { font-size: 28px; font-weight: 700; }
+.stat-card .stat-change { font-size: 12px; margin-top: 4px; }
+.stat-card .stat-change.up { color: #10b981; }
+.stat-card .stat-change.down { color: #ef4444; }
+.stat-card.danger .stat-value { color: #ef4444; }
+.stat-card.warning .stat-value { color: #f59e0b; }
+
+/* Table */
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; }
+td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #f3f4f6; }
+tr:hover td { background: #f9fafb; }
+
+/* Status badges */
+.status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+.status-badge.processing { background: #dbeafe; color: #1d4ed8; }
+.status-badge.review { background: #fef3c7; color: #b45309; }
+.status-badge.done { background: #d1fae5; color: #047857; }
+.status-badge.failed { background: #fee2e2; color: #b91c1c; }
+.status-badge.overdue { background: #fee2e2; color: #b91c1c; }
+.status-badge.pending { background: #f3f4f6; color: #4b5563; }
+.status-badge.in-progress { background: #dbeafe; color: #1d4ed8; }
+
+/* Kanban */
+.kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; min-height: 500px; }
+.kanban-column { background: #f9fafb; border-radius: 12px; padding: 12px; }
+.kanban-column-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 4px; margin-bottom: 12px; }
+.kanban-column-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.kanban-column-count { background: #e5e7eb; color: #6b7280; font-size: 12px; padding: 1px 8px; border-radius: 10px; }
+.kanban-card { background: white; border-radius: 8px; border: 1px solid #e5e7eb; padding: 12px; margin-bottom: 8px; cursor: grab; transition: all 0.2s; }
+.kanban-card:hover { border-color: #6366f1; box-shadow: 0 2px 8px rgba(99,102,241,0.1); }
+.kanban-card.overdue { border-left: 3px solid #ef4444; }
+.kanban-card .card-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+.kanban-card .card-meta { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #6b7280; }
+.kanban-card .card-assignee { display: flex; align-items: center; gap: 6px; }
+.kanban-card .avatar-sm { width: 20px; height: 20px; border-radius: 50%; background: #818cf8; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.kanban-card .card-due { display: flex; align-items: center; gap: 4px; }
+.kanban-card .card-due.urgent { color: #ef4444; font-weight: 500; }
+.kanban-card .card-source { font-size: 11px; color: #9ca3af; margin-top: 6px; }
+
+/* Upload area */
+.upload-zone { border: 2px dashed #d1d5db; border-radius: 12px; padding: 48px; text-align: center; transition: all 0.3s; cursor: pointer; }
+.upload-zone:hover { border-color: #6366f1; background: #f5f3ff; }
+.upload-zone .upload-icon { font-size: 48px; color: #6366f1; margin-bottom: 16px; }
+.upload-zone .upload-text { font-size: 16px; font-weight: 500; color: #374151; margin-bottom: 8px; }
+.upload-zone .upload-hint { font-size: 13px; color: #6b7280; }
+
+/* Extraction review */
+.extraction-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; min-height: 600px; }
+.extraction-left { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+.extraction-left .panel-header { padding: 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; background: #f9fafb; }
+.extraction-left .transcript-content { padding: 16px; font-size: 14px; line-height: 1.8; max-height: 500px; overflow-y: auto; }
+.extraction-left .highlight { background: #fef08a; padding: 2px 4px; border-radius: 3px; }
+.extraction-right { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; display: flex; flex-direction: column; }
+.extraction-right .panel-header { padding: 16px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; background: #f9fafb; }
+.extraction-list { flex: 1; overflow-y: auto; padding: 12px; }
+.extraction-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+.extraction-item.low-confidence { border-color: #fecaca; background: #fef2f2; }
+.extraction-item .item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.extraction-item .item-type { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+.extraction-item .item-type.decision { background: #dbeafe; color: #1d4ed8; }
+.extraction-item .item-type.todo { background: #d1fae5; color: #047857; }
+.extraction-item .item-title { font-size: 14px; font-weight: 500; flex: 1; }
+.extraction-item .item-confidence { font-size: 12px; }
+.extraction-item .item-confidence.high { color: #10b981; }
+.extraction-item .item-confidence.low { color: #ef4444; }
+.extraction-item .item-desc { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+.extraction-item .item-meta { display: flex; gap: 16px; font-size: 12px; color: #9ca3af; }
+
+/* Filters */
+.filter-bar { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+.filter-bar select, .filter-bar input { padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px; background: white; }
+.filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: #6366f1; }
+
+/* Auth cards */
+.platform-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.platform-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 20px; text-align: center; }
+.platform-card .platform-icon { font-size: 32px; margin-bottom: 12px; }
+.platform-card .platform-name { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.platform-card .platform-status { font-size: 13px; margin-bottom: 12px; }
+.platform-card .platform-status.connected { color: #10b981; }
+.platform-card .platform-status.disconnected { color: #9ca3af; }
+
+/* Settings */
+.settings-section { background: white; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 16px; }
+.settings-section .section-header { padding: 16px 20px; border-bottom: 1px solid #e5e7eb; font-weight: 600; }
+.settings-section .section-body { padding: 20px; }
+.setting-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+.setting-item:last-child { border-bottom: none; }
+.setting-label { font-size: 14px; }
+.setting-desc { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.toggle { width: 40px; height: 22px; background: #d1d5db; border-radius: 11px; position: relative; cursor: pointer; transition: 0.3s; }
+.toggle.on { background: #6366f1; }
+.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+.toggle.on::after { left: 20px; }
+
+/* Subscription */
+.plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 700px; margin: 0 auto; }
+.plan-card { background: white; border-radius: 12px; border: 2px solid #e5e7eb; padding: 24px; text-align: center; position: relative; }
+.plan-card.featured { border-color: #6366f1; }
+.plan-card.featured::before { content: '推荐'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6366f1; color: white; padding: 2px 12px; border-radius: 10px; font-size: 12px; }
+.plan-card .plan-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.plan-card .plan-price { font-size: 36px; font-weight: 700; color: #6366f1; margin-bottom: 4px; }
+.plan-card .plan-price span { font-size: 14px; color: #6b7280; font-weight: 400; }
+.plan-card .plan-features { list-style: none; margin: 20px 0; text-align: left; }
+.plan-card .plan-features li { padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.plan-card .plan-features li::before { content: '✓'; color: #10b981; font-weight: bold; }
+
+/* Dashboard extras */
+.dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.recent-list { }
+.recent-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+.recent-item:last-child { border-bottom: none; }
+.recent-item .file-icon { width: 36px; height: 36px; background: #ede9fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 16px; }
+.recent-item .file-info { flex: 1; }
+.recent-item .file-name { font-size: 14px; font-weight: 500; }
+.recent-item .file-time { font-size: 12px; color: #9ca3af; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 48px; color: #9ca3af; }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state .empty-text { font-size: 16px; margin-bottom: 8px; }
+
+/* Login page */
+.login-page { display: flex; min-height: 100vh; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); }
+.login-left { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 48px; color: white; }
+.login-left h1 { font-size: 36px; margin-bottom: 16px; }
+.login-left p { font-size: 16px; opacity: 0.8; line-height: 1.6; }
+.login-right { width: 420px; background: white; display: flex; flex-direction: column; justify-content: center; padding: 48px; }
+.login-form h2 { font-size: 24px; margin-bottom: 8px; }
+.login-form .subtitle { color: #6b7280; margin-bottom: 32px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.form-group input { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; }
+.form-group input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+.login-btn { width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; }
+.login-btn:hover { background: #4f46e5; }
+.login-divider { text-align: center; margin: 24px 0; color: #9ca3af; font-size: 13px; position: relative; }
+.login-divider::before, .login-divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #e5e7eb; }
+.login-divider::before { left: 0; }
+.login-divider::after { right: 0; }
+.social-login { display: flex; gap: 12px; }
+.social-btn { flex: 1; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.social-btn:hover { background: #f9fafb; }
+</style>
+</head>
+<body>
+<!-- Login Page -->
+<div id="loginPage" class="login-page" style="display:none;">
+  <div class="login-left">
+    <h1>🎯 AI会议决议追踪器</h1>
+    <p>告别"会上讨论热烈、会后无人跟进"的困境。<br>AI 自动从会议转录中提取决议和待办，可视化看板追踪执行状态，到期自动提醒。</p>
+    <br><br>
+    <div style="display:flex; gap:24px;">
+      <div><div style="font-size:32px; font-weight:700;">95%</div><div style="opacity:0.7; font-size:14px;">决议不再遗漏</div></div>
+      <div><div style="font-size:32px; font-weight:700;">80%</div><div style="opacity:0.7; font-size:14px;">节省整理时间</div></div>
+      <div><div style="font-size:32px; font-weight:700;">3x</div><div style="opacity:0.7; font-size:14px;">执行效率提升</div></div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form">
+      <h2>欢迎回来 👋</h2>
+      <p class="subtitle">登录你的账户继续使用</p>
+      <div class="form-group">
+        <label>邮箱地址</label>
+        <input type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" placeholder="输入密码">
+      </div>
+      <button class="login-btn" onclick="showApp()">登 录</button>
+      <div class="login-divider">或</div>
+      <div class="social-login">
+        <button class="social-btn">💬 微信登录</button>
+        <button class="social-btn">🐦 飞书登录</button>
+      </div>
+      <p style="text-align:center; margin-top:24px; font-size:13px; color:#6b7280;">还没有账户？<a href="#" style="color:#6366f1;">立即注册</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="mainApp" class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="icon">🎯</div>
+        <span>决议追踪器</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group">
+        <div class="nav-group-title">概览</div>
+        <div class="nav-item active" onclick="switchPage('dashboard', this)">
+          <span class="icon">📊</span> 工作台
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">核心功能</div>
+        <div class="nav-item" onclick="switchPage('files', this)">
+          <span class="icon">📁</span> 转录文件
+        </div>
+        <div class="nav-item" onclick="switchPage('extraction', this)">
+          <span class="icon">🤖</span> AI提取审核
+        </div>
+        <div class="nav-item" onclick="switchPage('kanban', this)">
+          <span class="icon">📋</span> 待办看板
+          <span class="badge">3</span>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">工具</div>
+        <div class="nav-item" onclick="switchPage('sync', this)">
+          <span class="icon">🔗</span> 跨工具同步
+        </div>
+        <div class="nav-item" onclick="switchPage('reminders', this)">
+          <span class="icon">🔔</span> 提醒设置
+        </div>
+        <div class="nav-item" onclick="switchPage('archive', this)">
+          <span class="icon">📦</span> 历史归档
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">账户</div>
+        <div class="nav-item" onclick="switchPage('subscription', this)">
+          <span class="icon">💎</span> 订阅管理
+        </div>
+        <div class="nav-item" onclick="switchPage('team', this)">
+          <span class="icon">👥</span> 团队管理
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="搜索文件、待办、决议...">
+      </div>
+      <div class="topbar-right">
+        <div class="icon-btn" onclick="switchPage('reminders', document.querySelector('.nav-item:nth-child(1)'))">
+          🔔
+          <span class="notification-dot"></span>
+        </div>
+        <div class="user-avatar" title="张明">张</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Dashboard Page -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-header">
+          <div>
+            <div class="page-title">工作台</div>
+            <div class="page-subtitle">欢迎回来，张明！以下是你的待办概览。</div>
+          </div>
+          <button class="btn btn-primary" onclick="switchPage('files', document.querySelectorAll('.nav-item')[1])">📤 上传转录文件</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">总待办数</div>
+            <div class="stat-value">47</div>
+            <div class="stat-change up">↑ 12% 较上周</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">进行中</div>
+            <div class="stat-value">18</div>
+            <div class="stat-change up">↑ 3 条新增</div>
+          </div>
+          <div class="stat-card danger">
+            <div class="stat-label">已逾期</div>
+            <div class="stat-value">5</div>
+            <div class="stat-change down">↑ 2 条新增</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-label">本周到期</div>
+            <div class="stat-value">8</div>
+            <div class="stat-change">需关注</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="font-size:16px; font-weight:600;">最近处理</h3>
+              <a href="#" style="font-size:13px; color:#6366f1;" onclick="switchPage('files', document.querySelectorAll('.nav-item')[1]); return false;">查看全部 →</a>
+            </div>
+            <div class="recent-list">
+              <div class="recent-item">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                  <div class="file-name">产品周会_20260628.txt</div>
+                  <div class="file-time">今天 10:30 · 30分钟会议</div>
+                </div>
+                <span class="status-badge review">待审核</span>
+              </div>
+              <div class="recent-item">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                  <div class="file-name">技术评审_前端架构_20260627.json</div>
+                  <div class="file-time">昨天 14:00 · 45分钟会议</div>
+                </div>
+                <span class="status-badge done">已完成</span>
+              </div>
+              <div class="recent-item">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                  <div class="file-name">客户需求沟通_20260626.srt</div>
+                  <div class="file-time">6月26日 · 60分钟会议</div>
+                </div>
+                <span class="status-badge done">已完成</span>
+              </div>
+              <div class="recent-item">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                  <div class="file-name">Q3规划讨论_20260625.vtt</div>
+                  <div class="file-time">6月25日 · 90分钟会议</div>
+                </div>
+                <span class="status-badge done">已完成</span>
+              </div>
+              <div class="recent-item">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                  <div class="file-name">每日站会_20260624.txt</div>
+                  <div class="file-time">6月24日 · 15分钟会议</div>
+                </div>
+                <span class="status-badge processing">解析中</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <h3 style="font-size:16px; font-weight:600; margin-bottom:16px;">⚡ 快捷操作</h3>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="switchPage('files', document.querySelectorAll('.nav-item')[1])">📤 上传新转录文件</button>
+                <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="switchPage('kanban', document.querySelectorAll('.nav-item')[3])">📋 查看待办看板</button>
+                <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="switchPage('sync', document.querySelectorAll('.nav-item')[4])">🔗 管理同步</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3 style="font-size:16px; font-weight:600; margin-bottom:12px;">📈 本周完成率</h3>
+              <div style="display:flex; align-items:flex-end; gap:8px; height:80px;">
+                <div style="flex:1; background:#e0e7ff; border-radius:4px 4px 0 0; height:40%;"></div>
+                <div style="flex:1; background:#e0e7ff; border-radius:4px 4px 0 0; height:60%;"></div>
+                <div style="flex:1; background:#e0e7ff; border-radius:4px 4px 0 0; height:80%;"></div>
+                <div style="flex:1; background:#c7d2fe; border-radius:4px 4px 0 0; height:50%;"></div>
+                <div style="flex:1; background:#c7d2fe; border-radius:4px 4px 0 0; height:70%;"></div>
+                <div style="flex:1; background:#818cf8; border-radius:4px 4px 0 0; height:90%;"></div>
+                <div style="flex:1; background:#6366f1; border-radius:4px 4px 0 0; height:65%;"></div>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:8px;">
+                <div style="flex:1; text-align:center; font-size:11px; color:#9ca3af;">周一</div>
+                <div style="flex:1; text-align:center; font-size:11px; color:#9ca3af;">周二</div>
+                <div style="flex:1; text-align:center; font-size:11px; color:#9ca3af;">周三</div>
+                <div style="flex:1; text-align:center; font-size:11px; color:#9ca3af;">周四</div>
+                <div style="flex:1; text-align:center; font-size:11px; color:#9ca3af;">周五</div>
+                <div style="flex:1; text-align:center; font-size:11px; color:#6366f1; font-weight:500;">周六</div>
+                <div style="flex:1; text-align:center; font-size:11px; color:#6366f1; font-weight:500;">今天</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Files Page -->
+      <div id="page-files" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">转录文件管理</div>
+            <div class="page-subtitle">管理所有已上传的会议转录文件</div>
+          </div>
+          <button class="btn btn-primary">📤 上传文件</button>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="upload-zone">
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">拖拽文件到此处，或点击选择文件</div>
+            <div class="upload-hint">支持 .txt / .srt / .vtt / .json / .docx 格式，单文件不超过 50MB</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="filter-bar">
+            <input type="text" placeholder="🔍 搜索文件名..." style="flex:1; min-width:200px;">
+            <select>
+              <option>全部状态</option>
+              <option>解析中</option>
+              <option>待审核</option>
+              <option>已完成</option>
+              <option>解析失败</option>
+            </select>
+            <select>
+              <option>全部时间</option>
+              <option>今天</option>
+              <option>最近7天</option>
+              <option>最近30天</option>
+            </select>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>文件名</th>
+                  <th>会议时间</th>
+                  <th>上传时间</th>
+                  <th>状态</th>
+                  <th>待办数</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a href="#" style="color:#6366f1; font-weight:500;" onclick="switchPage('extraction', document.querySelectorAll('.nav-item')[2]); return false;">产品周会_20260628.txt</a></td>
+                  <td>2026-06-28 10:00</td>
+                  <td>2026-06-28 10:30</td>
+                  <td><span class="status-badge review">待审核</span></td>
+                  <td>8 条待审核</td>
+                  <td><a href="#" style="color:#6366f1;">审核</a> · <a href="#" style="color:#ef4444;">删除</a></td>
+                </tr>
+                <tr>
+                  <td><a href="#" style="color:#6366f1; font-weight:500;">技术评审_前端架构_20260627.json</a></td>
+                  <td>2026-06-27 14:00</td>
+                  <td>2026-06-27 15:00</td>
+                  <td><span class="status-badge done">已完成</span></td>
+                  <td>12 条已确认</td>
+                  <td><a href="#" style="color:#6366f1;">查看</a> · <a href="#" style="color:#ef4444;">删除</a></td>
+                </tr>
+                <tr>
+                  <td><a href="#" style="color:#6366f1; font-weight:500;">客户需求沟通_20260626.srt</a></td>
+                  <td>2026-06-26 09:30</td>
+                  <td>2026-06-26 11:00</td>
+                  <td><span class="status-badge done">已完成</span></td>
+                  <td>6 条已确认</td>
+                  <td><a href="#" style="color:#6366f1;">查看</a> · <a href="#" style="color:#ef4444;">删除</a></td>
+                </tr>
+                <tr>
+                  <td><a href="#" style="color:#6366f1; font-weight:500;">Q3规划讨论_20260625.vtt</a></td>
+                  <td>2026-06-25 14:00</td>
+                  <td>2026-06-25 16:00</td>
+                  <td><span class="status-badge done">已完成</span></td>
+                  <td>15 条已确认</td>
+                  <td><a href="#" style="color:#6366f1;">查看</a> · <a href="#" style="color:#ef4444;">删除</a></td>
+                </tr>
+                <tr>
+                  <td>每日站会_20260624.txt</td>
+                  <td>2026-06-24 09:00</td>
+                  <td>2026-06-24 09:20</td>
+                  <td><span class="status-badge processing">解析中</span></td>
+                  <td>—</td>
+                  <td><span style="color:#9ca3af;">处理中...</span></td>
+                </tr>
+                <tr>
+                  <td>设计评审_UI改版_20260623.txt</td>
+                  <td>2026-06-23 15:00</td>
+                  <td>2026-06-23 16:00</td>
+                  <td><span class="status-badge failed">解析失败</span></td>
+                  <td>—</td>
+                  <td><a href="#" style="color:#6366f1;">重试</a> · <a href="#" style="color:#ef4444;">删除</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; font-size:13px; color:#6b7280;">
+            <span>共 23 条记录</span>
+            <div style="display:flex; gap:4px;">
+              <button class="btn btn-secondary btn-sm" disabled>上一页</button>
+              <button class="btn btn-sm" style="background:#6366f1; color:white;">1</button>
+              <button class="btn btn-secondary btn-sm">2</button>
+              <button class="btn btn-secondary btn-sm">下一页</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Extraction Review Page -->
+      <div id="page-extraction" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">AI提取结果审核</div>
+            <div class="page-subtitle">来源：产品周会_20260628.txt · 共提取 8 条结果</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary">🔄 重新提取</button>
+            <button class="btn btn-primary">✅ 确认全部 (6)</button>
+          </div>
+        </div>
+
+        <div class="extraction-layout">
+          <div class="extraction-left">
+            <div class="panel-header">📄 转录原文 — 产品周会_20260628.txt</div>
+            <div class="transcript-content">
+              <p><strong>张明 (10:02):</strong> 好的，我们开始今天的产品周会。先回顾一下上周的任务完成情况。</p>
+              <p><strong>李华 (10:03):</strong> 上周我们完成了用户反馈系统的改版，<span class="highlight">决定在V1.2版本中加入暗色模式支持</span>。</p>
+              <p><strong>张明 (10:05):</strong> 很好。<span class="highlight">暗色模式由王磊负责，下周五前完成设计稿</span>。</p>
+              <p><strong>王磊 (10:06):</strong> 好的，我这边安排。另外<span class="highlight">需要同步更新设计规范文档</span>。</p>
+              <p><strong>张明 (10:08):</strong> 接下来说说AI提取功能。刘芳，算法那边进展如何？</p>
+              <p><strong>刘芳 (10:09):</strong> 目前准确率已经到了85%，<span class="highlight">我们决定采用GLM-4作为默认模型，GPT-4作为备选</span>。</p>
+              <p><strong>张明 (10:12):</strong> 可以。<span class="highlight">刘芳负责在本月底前完成模型切换的技术方案</span>。</p>
+              <p><strong>陈杰 (10:15):</strong> 同步功能方面，<span class="highlight">飞书API对接已完成，钉钉预计下周完成</span>。</p>
+              <p><strong>张明 (10:18):</strong> 好的。<span class="highlight">陈杰负责在7月5日前完成钉钉和Notion的同步对接</span>。</p>
+              <p><strong>李华 (10:22):</strong> 还有一个事，<span class="highlight">我们决定免费版额度从5次调整到10次</span>，更好地吸引用户。</p>
+              <p><strong>张明 (10:25):</strong> 同意。<span class="highlight">李华负责更新定价页面和相关的用户引导流程，下周三前上线</span>。</p>
+              <p><strong>刘芳 (10:28):</strong> 另外提醒一下，<span class="highlight">需要在月底前完成数据安全合规审查</span>。</p>
+              <p><strong>张明 (10:30):</strong> 好的，今天的会就到这里。大家注意跟进各自的任务。</p>
+            </div>
+          </div>
+          <div class="extraction-right">
+            <div class="panel-header">
+              <span>🤖 AI提取结果 (8条)</span>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-secondary btn-sm">+ 添加</button>
+              </div>
+            </div>
+            <div class="extraction-list">
+              <div class="extraction-item">
+                <div class="item-header">
+                  <span class="item-type decision">决议</span>
+                  <span class="item-title">V1.2版本加入暗色模式支持</span>
+                  <span class="item-confidence high">92%</span>
+                </div>
+                <div class="item-desc">团队决定在V1.2版本中加入暗色模式功能支持</div>
+                <div class="item-meta">
+                  <span>📅 2026-06-28</span>
+                  <span>☑️ 已确认</span>
+                </div>
+              </div>
+              <div class="extraction-item">
+                <div class="item-header">
+                  <span class="item-type todo">待办</span>
+                  <span class="item-title">完成暗色模式设计稿</span>
+                  <span class="item-confidence high">95%</span>
+                </div>
+                <div class="item-desc">完成暗色模式的UI设计稿，包括所有核心页面</div>
+                <div class="item-meta">
+                  <span>👤 王磊</span>
+                  <span>📅 2026-07-03 (下周五)</span>
+                  <span>☑️ 已确认</span>
+                </div>
+              </div>
+              <div class="extraction-item">
+                <div class="item-header">
+                  <span class="item-type todo">待办</span>
+                  <span class="item-title">同步更新设计规范文档</span>
+                  <span class="item-confidence high">88%</span>
+                </div>
+                <div class="item-desc">配合暗色模式更新设计规范文档</div>
+                <div class="item-meta">
+                  <span>👤 王磊</span>
+                  <span>📅 2026-07-03</span>
+                  <span>☑️ 已确认</span>
+                </div>
+              </div>
+              <div class="extraction-item">
+                <div class="item-header">
+                  <span class="item-type decision">决议</span>
+                  <span class="item-title">采用GLM-4作为默认模型</span>
+                  <span class="item-confidence high">96%</span>
+                </div>
+                <div class="item-desc">AI提取引擎采用GLM-4作为默认模型，GPT-4作为备选</div>
+                <div class="item-meta">
+                  <span>📅 2026-06-28</span>
+                  <span>☑️ 已确认</span>
+                </div>
+              </div>
+              <div class="extraction-item">
+                <div class="item-header">
+                  <span class="item-type todo">待办</span>
+                  <span class="item-title">完成模型切换技术方案</span>
+                  <span class="item-confidence high">91%</span>
+                </div>
+                <div class="item-desc">完成GLM-4/GPT-4多模型切换的技术方案设计</div>
+                <div class="item-meta">
+                  <span>👤 刘芳</span>
+                  <span>📅 2026-06-30 (本月底)</span>
+                  <span>☑️ 已确认</span>
+                </div>
+              </div>
+              <div class="extraction-item">
+                <div class="item-header">
+                  <span class="item-type todo">待办</span>
+                  <span class="item-title">完成钉钉和Notion同步对接</span>
+                  <span class="item-confidence high">93%</span>
+                </div>
+                <div class="item-desc">完成钉钉和Notion平台的API对接和双向同步功能</div>
+                <div class="item-meta">
+                  <span>👤 陈杰</span>
+                  <span>📅 2026-07-05</span>
+                  <span>☑️ 已确认</span>
+                </div>
+              </div>
+              <div class="extraction-item">
+                <div class="item-header">
+                  <span class="item-type todo">待办</span>
+                  <span class="item-title">更新定价页面和用户引导</span>
+                  <span class="item-confidence high">89%</span>
+                </div>
+                <div class="item-desc">更新免费版额度到10次，修改定价页面和引导流程</div>
+                <div class="item-meta">
+                  <span>👤 李华</span>
+                  <span>📅 2026-07-01 (下周三)</span>
+                  <span>☑️ 已确认</span>
+                </div>
+              </div>
+              <div class="extraction-item low-confidence">
+                <div class="item-header">
+                  <span class="item-type todo">待办</span>
+                  <span class="item-title">完成数据安全合规审查</span>
+                  <span class="item-confidence low">52% ⚠️</span>
+                </div>
+                <div class="item-desc" style="color:#ef4444;">⚠️ 低置信度，需人工确认</div>
+                <div class="item-meta">
+                  <span>👤 待确认</span>
+                  <span>📅 2026-06-30</span>
+                  <span style="color:#ef4444;">未确认</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanban Page -->
+      <div id="page-kanban" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">待办跟进看板</div>
+            <div class="page-subtitle">追踪所有会议决议的执行状态</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary" id="viewToggle" onclick="toggleView()">📊 列表视图</button>
+            <button class="btn btn-primary">🔗 同步到协作工具</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom:16px;">
+          <div class="stat-card" style="padding:12px;">
+            <div class="stat-label" style="font-size:12px;">总待办</div>
+            <div class="stat-value" style="font-size:20px;">47</div>
+          </div>
+          <div class="stat-card" style="padding:12px;">
+            <div class="stat-label" style="font-size:12px;">待开始</div>
+            <div class="stat-value" style="font-size:20px; color:#6b7280;">12</div>
+          </div>
+          <div class="stat-card" style="padding:12px;">
+            <div class="stat-label" style="font-size:12px;">进行中</div>
+            <div class="stat-value" style="font-size:20px; color:#1d4ed8;">18</div>
+          </div>
+          <div class="stat-card" style="padding:12px;">
+            <div class="stat-label" style="font-size:12px;">已完成</div>
+            <div class="stat-value" style="font-size:20px; color:#047857;">12</div>
+          </div>
+          <div class="stat-card danger" style="padding:12px;">
+            <div class="stat-label" style="font-size:12px;">已逾期</div>
+            <div class="stat-value" style="font-size:20px;">5</div>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <select>
+            <option>全部负责人</option>
+            <option>张明</option>
+            <option>王磊</option>
+            <option>刘芳</option>
+            <option>陈杰</option>
+            <option>李华</option>
+          </select>
+          <select>
+            <option>全部来源会议</option>
+            <option>产品周会_20260628</option>
+            <option>技术评审_20260627</option>
+            <option>客户需求沟通_20260626</option>
+          </select>
+          <select>
+            <option>全部截止日期</option>
+            <option>今天到期</option>
+            <option>本周到期</option>
+            <option>本月到期</option>
+            <option>已逾期</option>
+          </select>
+          <input type="text" placeholder="🔍 搜索待办...">
+        </div>
+
+        <div id="kanbanView" class="kanban-board">
+          <!-- 待开始 -->
+          <div class="kanban-column">
+            <div class="kanban-column-header">
+              <div class="kanban-column-title">
+                ⏳ 待开始 <span class="kanban-column-count">3</span>
+              </div>
+            </div>
+            <div class="kanban-card">
+              <div class="card-title">完成暗色模式设计稿</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">王</div> 王磊</div>
+                <div class="card-due">📅 7月3日</div>
+              </div>
+              <div class="card-source">📄 产品周会_0628</div>
+            </div>
+            <div class="kanban-card">
+              <div class="card-title">更新设计规范文档</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">王</div> 王磊</div>
+                <div class="card-due">📅 7月3日</div>
+              </div>
+              <div class="card-source">📄 产品周会_0628</div>
+            </div>
+            <div class="kanban-card">
+              <div class="card-title">更新定价页面</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">李</div> 李华</div>
+                <div class="card-due">📅 7月1日</div>
+              </div>
+              <div class="card-source">📄 产品周会_0628</div>
+            </div>
+          </div>
+
+          <!-- 进行中 -->
+          <div class="kanban-column">
+            <div class="kanban-column-header">
+              <div class="kanban-column-title">
+                🔄 进行中 <span class="kanban-column-count">4</span>
+              </div>
+            </div>
+            <div class="kanban-card">
+              <div class="card-title">完成模型切换技术方案</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">刘</div> 刘芳</div>
+                <div class="card-due">📅 6月30日</div>
+              </div>
+              <div class="card-source">📄 产品周会_0628</div>
+            </div>
+            <div class="kanban-card">
+              <div class="card-title">钉钉API同步对接</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">陈</div> 陈杰</div>
+                <div class="card-due urgent">📅 明天</div>
+              </div>
+              <div class="card-source">📄 技术评审_0627</div>
+            </div>
+            <div class="kanban-card">
+              <div class="card-title">Notion API对接</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">陈</div> 陈杰</div>
+                <div class="card-due">📅 7月5日</div>
+              </div>
+              <div class="card-source">📄 产品周会_0628</div>
+            </div>
+            <div class="kanban-card">
+              <div class="card-title">用户反馈分析报告</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">李</div> 李华</div>
+                <div class="card-due">📅 7月2日</div>
+              </div>
+              <div class="card-source">📄 客户需求沟通_0626</div>
+            </div>
+          </div>
+
+          <!-- 已完成 -->
+          <div class="kanban-column">
+            <div class="kanban-column-header">
+              <div class="kanban-column-title">
+                ✅ 已完成 <span class="kanban-column-count">3</span>
+              </div>
+            </div>
+            <div class="kanban-card" style="opacity:0.7;">
+              <div class="card-title">用户反馈系统改版</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">李</div> 李华</div>
+                <div class="card-due">✅ 6月27日</div>
+              </div>
+              <div class="card-source">📄 技术评审_0627</div>
+            </div>
+            <div class="kanban-card" style="opacity:0.7;">
+              <div class="card-title">飞书API同步对接</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">陈</div> 陈杰</div>
+                <div class="card-due">✅ 6月28日</div>
+              </div>
+              <div class="card-source">📄 技术评审_0627</div>
+            </div>
+            <div class="kanban-card" style="opacity:0.7;">
+              <div class="card-title">AI提取Prompt优化</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">刘</div> 刘芳</div>
+                <div class="card-due">✅ 6月26日</div>
+              </div>
+              <div class="card-source">📄 技术评审_0627</div>
+            </div>
+          </div>
+
+          <!-- 已逾期 -->
+          <div class="kanban-column">
+            <div class="kanban-column-header">
+              <div class="kanban-column-title">
+                🚨 已逾期 <span class="kanban-column-count" style="background:#fecaca; color:#b91c1c;">2</span>
+              </div>
+            </div>
+            <div class="kanban-card overdue">
+              <div class="card-title">数据库性能优化</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">陈</div> 陈杰</div>
+                <div class="card-due urgent">📅 逾期3天</div>
+              </div>
+              <div class="card-source">📄 技术评审_0627</div>
+            </div>
+            <div class="kanban-card overdue">
+              <div class="card-title">安全合规审查报告</div>
+              <div class="card-meta">
+                <div class="card-assignee"><div class="avatar-sm">刘</div> 刘芳</div>
+                <div class="card-due urgent">📅 逾期1天</div>
+              </div>
+              <div class="card-source">📄 产品周会_0628</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- List View (hidden by default) -->
+        <div id="listView" class="card" style="display:none;">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>标题</th>
+                  <th>负责人</th>
+                  <th>状态</th>
+                  <th>截止日期</th>
+                  <th>来源会议</th>
+                  <th>置信度</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500;">完成暗色模式设计稿</td>
+                  <td>王磊</td>
+                  <td><span class="status-badge pending">待开始</span></td>
+                  <td>2026-07-03</td>
+                  <td>产品周会_0628</td>
+                  <td><span style="color:#10b981;">95%</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;">完成模型切换技术方案</td>
+                  <td>刘芳</td>
+                  <td><span class="status-badge in-progress">进行中</span></td>
+                  <td>2026-06-30</td>
+                  <td>产品周会_0628</td>
+                  <td><span style="color:#10b981;">91%</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;">钉钉API同步对接</td>
+                  <td>陈杰</td>
+                  <td><span class="status-badge in-progress">进行中</span></td>
+                  <td style="color:#ef4444; font-weight:500;">2026-06-30 (明天)</td>
+                  <td>技术评审_0627</td>
+                  <td><span style="color:#10b981;">93%</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500; color:#ef4444;">数据库性能优化</td>
+                  <td>陈杰</td>
+                  <td><span class="status-badge overdue">已逾期</span></td>
+                  <td style="color:#ef4444;">2026-06-25 (逾期3天)</td>
+                  <td>技术评审_0627</td>
+                  <td><span style="color:#10b981;">87%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sync Page -->
+      <div id="page-sync" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">跨工具同步</div>
+            <div class="page-subtitle">将待办事项同步到协作平台，保持双向状态一致</div>
+          </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:600; margin-bottom:16px;">🔗 平台授权</h3>
+        <div class="platform-grid">
+          <div class="platform-card">
+            <div class="platform-icon">🐦</div>
+            <div class="platform-name">飞书</div>
+            <div class="platform-status connected">✅ 已授权</div>
+            <button class="btn btn-secondary btn-sm">管理授权</button>
+          </div>
+          <div class="platform-card">
+            <div class="platform-icon">📌</div>
+            <div class="platform-name">钉钉</div>
+            <div class="platform-status disconnected">⚪ 未授权</div>
+            <button class="btn btn-primary btn-sm">立即授权</button>
+          </div>
+          <div class="platform-card">
+            <div class="platform-icon">📝</div>
+            <div class="platform-name">Notion</div>
+            <div class="platform-status connected">✅ 已授权</div>
+            <button class="btn btn-secondary btn-sm">管理授权</button>
+          </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:600; margin-bottom:16px;">📤 同步配置</h3>
+        <div class="card" style="margin-bottom:20px;">
+          <div style="display:flex; gap:16px; align-items:center; margin-bottom:16px;">
+            <div style="flex:1;">
+              <div style="font-size:14px; font-weight:500;">目标平台</div>
+              <select style="margin-top:6px; padding:8px 12px; border:1px solid #e5e7eb; border-radius:6px; width:100%;">
+                <option>飞书 — 产品团队项目看板</option>
+                <option>Notion — 决议追踪数据库</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px; font-weight:500;">同步范围</div>
+              <select style="margin-top:6px; padding:8px 12px; border:1px solid #e5e7eb; border-radius:6px; width:100%;">
+                <option>全部待办 (47条)</option>
+                <option>仅选中的待办</option>
+                <option>仅本周到期</option>
+              </select>
+            </div>
+            <div style="padding-top:20px;">
+              <button class="btn btn-primary">🚀 开始同步</button>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:600; margin-bottom:16px;">📋 同步历史</h3>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>同步时间</th>
+                <th>目标平台</th>
+                <th>同步条目</th>
+                <th>结果</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2026-06-28 16:30</td>
+                <td>🐦 飞书</td>
+                <td>12 条待办</td>
+                <td><span class="status-badge done">全部成功</span></td>
+                <td><a href="#" style="color:#6366f1;">查看详情</a></td>
+              </tr>
+              <tr>
+                <td>2026-06-27 18:00</td>
+                <td>📝 Notion</td>
+                <td>8 条待办</td>
+                <td><span class="status-badge review">部分成功 (7/8)</span></td>
+                <td><a href="#" style="color:#6366f1;">重试失败项</a></td>
+              </tr>
+              <tr>
+                <td>2026-06-26 10:15</td>
+                <td>🐦 飞书</td>
+                <td>5 条待办</td>
+                <td><span class="status-badge done">全部成功</span></td>
+                <td><a href="#" style="color:#6366f1;">查看详情</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reminders Page -->
+      <div id="page-reminders" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">提醒设置</div>
+            <div class="page-subtitle">配置待办提醒规则，确保不遗漏重要事项</div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-header">⏰ 全局提醒规则</div>
+          <div class="section-body">
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">截止日期前提醒</div>
+                <div class="setting-desc">在待办截止日期前几天发送提醒</div>
+              </div>
+              <select style="padding:6px 12px; border:1px solid #e5e7eb; border-radius:6px;">
+                <option>1天（默认）</option>
+                <option>2天</option>
+                <option>3天</option>
+                <option>当天</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">逾期后每日提醒</div>
+                <div class="setting-desc">任务逾期后每天发送提醒直到完成</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">站内消息通知</div>
+                <div class="setting-desc">在系统内展示通知，未读有红点提示</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">邮件通知</div>
+                <div class="setting-desc">通过邮件发送提醒到注册邮箱</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Webhook通知</div>
+                <div class="setting-desc">通过飞书/钉钉Webhook发送群聊提醒</div>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-header">🔗 Webhook配置</div>
+          <div class="section-body">
+            <div class="setting-item">
+              <div style="flex:1;">
+                <div class="setting-label">飞书群机器人 Webhook URL</div>
+                <input type="text" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/xxxxx" style="margin-top:8px; padding:8px 12px; border:1px solid #e5e7eb; border-radius:6px; width:100%; max-width:500px;">
+              </div>
+              <button class="btn btn-secondary btn-sm" style="margin-left:12px;">测试</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-header">📋 最近通知记录</div>
+          <div class="section-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>任务</th>
+                  <th>渠道</th>
+                  <th>接收人</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>今天 09:00</td>
+                  <td>钉钉API同步对接</td>
+                  <td>站内 + 邮件</td>
+                  <td>陈杰</td>
+                  <td><span class="status-badge done">已送达</span></td>
+                </tr>
+                <tr>
+                  <td>今天 09:00</td>
+                  <td>数据库性能优化</td>
+                  <td>站内 + 邮件</td>
+                  <td>陈杰</td>
+                  <td><span class="status-badge overdue">逾期提醒</span></td>
+                </tr>
+                <tr>
+                  <td>昨天 09:00</td>
+                  <td>AI提取Prompt优化</td>
+                  <td>站内</td>
+                  <td>刘芳</td>
+                  <td><span class="status-badge done">已送达</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Archive Page -->
+      <div id="page-archive" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">历史归档</div>
+            <div class="page-subtitle">查看已完成和已逾期的历史决议记录</div>
+          </div>
+          <button class="btn btn-secondary">📥 导出报告</button>
+        </div>
+
+        <div style="background:#ede9fe; border:1px solid #c4b5fd; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#5b21b6;">
+          💎 历史归档为专业版功能。当前版本：免费版 · <a href="#" style="font-weight:500;" onclick="switchPage('subscription', document.querySelectorAll('.nav-item')[7]); return false;">升级专业版</a>
+        </div>
+
+        <div class="card">
+          <div class="filter-bar">
+            <input type="text" placeholder="🔍 搜索归档决议..." style="flex:1;">
+            <select>
+              <option>全部来源</option>
+              <option>产品周会</option>
+              <option>技术评审</option>
+            </select>
+            <select>
+              <option>全部时间</option>
+              <option>最近30天</option>
+              <option>最近3个月</option>
+            </select>
+            <select>
+              <option>全部负责人</option>
+              <option>王磊</option>
+              <option>刘芳</option>
+            </select>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>标题</th>
+                  <th>类型</th>
+                  <th>负责人</th>
+                  <th>最终状态</th>
+                  <th>归档时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500;">完成用户反馈系统改版</td>
+                  <td><span class="item-type todo" style="font-size:11px; padding:2px 8px; border-radius:4px; background:#d1fae5; color:#047857;">待办</span></td>
+                  <td>李华</td>
+                  <td><span class="status-badge done">已完成</span></td>
+                  <td>2026-06-28</td>
+                  <td><a href="#" style="color:#6366f1;">恢复</a> · <a href="#" style="color:#6b7280;">详情</a></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;">确定V1.1版本发布日期</td>
+                  <td><span class="item-type decision" style="font-size:11px; padding:2px 8px; border-radius:4px; background:#dbeafe; color:#1d4ed8;">决议</span></td>
+                  <td>—</td>
+                  <td><span class="status-badge done">已归档</span></td>
+                  <td>2026-06-27</td>
+                  <td><a href="#" style="color:#6b7280;">详情</a></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;">服务器迁移方案确认</td>
+                  <td><span class="item-type decision" style="font-size:11px; padding:2px 8px; border-radius:4px; background:#dbeafe; color:#1d4ed8;">决议</span></td>
+                  <td>—</td>
+                  <td><span class="status-badge done">已归档</span></td>
+                  <td>2026-06-25</td>
+                  <td><a href="#" style="color:#6b7280;">详情</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscription Page -->
+      <div id="page-subscription" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">订阅管理</div>
+            <div class="page-subtitle">管理你的订阅版本和付费方案</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px; text-align:center; padding:24px;">
+          <div style="font-size:14px; color:#6b7280; margin-bottom:8px;">当前版本</div>
+          <div style="font-size:24px; font-weight:700; color:#6366f1;">免费版</div>
+          <div style="margin-top:8px; font-size:14px;">本月剩余处理额度：<strong>6 / 10 次</strong></div>
+          <div style="margin-top:4px; font-size:13px; color:#9ca3af;">额度每月1日重置 · 当前周期：2026-06-01 至 2026-06-30</div>
+        </div>
+
+        <div class="plan-grid">
+          <div class="plan-card">
+            <div class="plan-name">免费版</div>
+            <div class="plan-price">¥0 <span>/月</span></div>
+            <ul class="plan-features">
+              <li>每月 10 次会议处理</li>
+              <li>AI 基础决议提取</li>
+              <li>待办跟进看板</li>
+              <li>站内消息提醒</li>
+            </ul>
+            <button class="btn btn-secondary" style="width:100%;" disabled>当前版本</button>
+          </div>
+          <div class="plan-card featured">
+            <div class="plan-name">专业版</div>
+            <div class="plan-price">¥29 <span>/月</span></div>
+            <ul class="plan-features">
+              <li>不限会议处理次数</li>
+              <li>AI 高级决议提取</li>
+              <li>跨工具同步 (飞书/钉钉/Notion)</li>
+              <li>多渠道提醒 (邮件/Webhook)</li>
+              <li>历史决议归档</li>
+              <li>团队协作 (最多10人)</li>
+              <li>数据导出报告</li>
+            </ul>
+            <button class="btn btn-primary" style="width:100%;">升级专业版</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Page -->
+      <div id="page-team" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">团队管理</div>
+            <div class="page-subtitle">管理团队成员和权限（专业版功能）</div>
+          </div>
+          <button class="btn btn-primary">📧 邀请成员</button>
+        </div>
+
+        <div style="background:#ede9fe; border:1px solid #c4b5fd; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#5b21b6;">
+          💎 团队管理为专业版功能 · <a href="#" style="font-weight:500;" onclick="switchPage('subscription', document.querySelectorAll('.nav-item')[7]); return false;">升级专业版</a>
+        </div>
+
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>成员</th>
+                <th>邮箱</th>
+                <th>角色</th>
+                <th>加入时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="user-avatar" style="width:28px; height:28px; font-size:12px;">张</div>
+                    <span style="font-weight:500;">张明 (我)</span>
+                  </div>
+                </td>
+                <td>zhangming@example.com</td>
+                <td><span class="status-badge" style="background:#dbeafe; color:#1d4ed8;">管理员</span></td>
+                <td>2026-06-01</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="user-avatar" style="width:28px; height:28px; font-size:12px; background:#818cf8;">王</div>
+                    <span>王磊</span>
+                  </div>
+                </td>
+                <td>wanglei@example.com</td>
+                <td><span class="status-badge" style="background:#f3f4f6; color:#4b5563;">成员</span></td>
+                <td>2026-06-15</td>
+                <td><a href="#" style="color:#6366f1;">编辑</a> · <a href="#" style="color:#ef4444;">移除</a></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="user-avatar" style="width:28px; height:28px; font-size:12px; background:#818cf8;">刘</div>
+                    <span>刘芳</span>
+                  </div>
+                </td>
+                <td>liufang@example.com</td>
+                <td><span class="status-badge" style="background:#f3f4f6; color:#4b5563;">成员</span></td>
+                <td>2026-06-15</td>
+                <td><a href="#" style="color:#6366f1;">编辑</a> · <a href="#" style="color:#ef4444;">移除</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function switchPage(pageId, navItem) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Show target page
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+  // Update nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navItem) navItem.classList.add('active');
+}
+
+function showApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+}
+
+function toggleView() {
+  const kanban = document.getElementById('kanbanView');
+  const list = document.getElementById('listView');
+  const btn = document.getElementById('viewToggle');
+  if (kanban.style.display === 'none') {
+    kanban.style.display = 'grid';
+    list.style.display = 'none';
+    btn.textContent = '📊 列表视图';
+  } else {
+    kanban.style.display = 'none';
+    list.style.display = 'block';
+    btn.textContent = '📋 看板视图';
+  }
+}
+
+// Show login page for demo
+document.getElementById('mainApp').style.display = 'flex';
+</script>
+</body>
+</html>

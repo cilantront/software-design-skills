@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>宠物信息登记 Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: #f7f7f7; padding: 16px; max-width: 375px; margin: 0 auto; }
+.widget { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.widget-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.widget-subtitle { font-size: 12px; color: #888; margin-bottom: 16px; }
+.section { margin-bottom: 16px; }
+.section-header { font-size: 14px; font-weight: 600; margin-bottom: 10px; padding-left: 8px; border-left: 3px solid #07c160; color: #333; }
+.card { background: #fafafa; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+.form-item { margin-bottom: 10px; }
+.form-label { font-size: 13px; color: #666; margin-bottom: 4px; display: block; }
+.form-input, .form-select { width: 100%; padding: 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 14px; background: #fff; }
+.form-textarea { width: 100%; padding: 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 14px; min-height: 50px; resize: none; background: #fff; }
+.form-row { display: flex; gap: 8px; }
+.form-row > * { flex: 1; }
+.special-req { border: 1.5px solid #07c160; background: #f0fdf4; }
+.photo-upload { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.photo-slot { aspect-ratio: 1; background: #f7f7f7; border: 1px dashed #d9d9d9; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #999; gap: 2px; cursor: pointer; }
+.photo-slot.filled { background: #fef3c7; border: none; }
+.photo-slot .emoji { font-size: 28px; }
+.btn-primary { display: block; width: 100%; padding: 14px; background: #07c160; color: #fff; border: none; border-radius: 24px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; }
+.history-hint { background: #e0f2fe; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #0284c7; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="widget-title">🐾 宠物信息登记</div>
+  <div class="widget-subtitle">寄养人端 · 核心功能 Widget</div>
+  <div class="history-hint">💡 可复用历史宠物档案，减少重复录入</div>
+
+  <div class="section">
+    <div class="section-header">基本信息</div>
+    <div class="card">
+      <div class="form-item"><label class="form-label">宠物名字 *</label><input class="form-input" placeholder="如：豆豆"></div>
+      <div class="form-row">
+        <div class="form-item"><label class="form-label">品种 *</label><input class="form-input" placeholder="如：柯基"></div>
+        <div class="form-item"><label class="form-label">年龄 *</label><input class="form-input" placeholder="如：3岁"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-item"><label class="form-label">性别 *</label><select class="form-select"><option>公</option><option>母</option></select></div>
+        <div class="form-item"><label class="form-label">体重(kg)</label><input class="form-input" placeholder="如：12"></div>
+      </div>
+      <div class="form-item"><label class="form-label">毛色</label><input class="form-input" placeholder="如：黄白相间"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">健康状况</div>
+    <div class="card">
+      <div class="form-item"><label class="form-label">疫苗接种 *</label><input class="form-input" placeholder="如：已完成三针"></div>
+      <div class="form-item"><label class="form-label">绝育状态 *</label><select class="form-select"><option>已绝育</option><option>未绝育</option></select></div>
+      <div class="form-item"><label class="form-label">过敏史 *</label><input class="form-input" placeholder="无则填'无'"></div>
+      <div class="form-item"><label class="form-label">既往病史 *</label><input class="form-input" placeholder="无则填'无'"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">🔔 主人特殊要求（核心差异化）</div>
+    <div class="card special-req">
+      <div class="form-item"><label class="form-label">💊 喂药说明</label><textarea class="form-textarea" placeholder="如：每天早晚各一次肠胃药"></textarea></div>
+      <div class="form-item"><label class="form-label">🚫 饮食禁忌</label><textarea class="form-textarea" placeholder="如：不能吃鸡肉"></textarea></div>
+      <div class="form-item"><label class="form-label">💤 生活习惯</label><textarea class="form-textarea" placeholder="如：晚上需开小夜灯"></textarea></div>
+      <div class="form-item"><label class="form-label">⚠ 忌讳事项</label><textarea class="form-textarea" placeholder="如：不喜欢被抱"></textarea></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">宠物照片</div>
+    <div class="photo-upload">
+      <div class="photo-slot filled"><span class="emoji">🐕</span><span>正面</span></div>
+      <div class="photo-slot filled"><span class="emoji">🐕</span><span>侧面</span></div>
+      <div class="photo-slot"><span style="font-size:24px;">+</span><span>添加</span></div>
+    </div>
+  </div>
+
+  <button class="btn-primary">保存档案</button>
+</div>
+</body>
+</html>

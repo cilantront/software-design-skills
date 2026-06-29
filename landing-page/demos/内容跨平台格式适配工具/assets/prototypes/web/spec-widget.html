@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>规格速查组件原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F3FF;padding:32px;color:#312E81;}
+.widget{max-width:720px;margin:0 auto;background:white;border-radius:16px;border:1px solid #E5E7EB;padding:32px;box-shadow:0 4px 12px rgba(99,102,241,0.08);}
+.title{font-size:14px;font-weight:600;margin-bottom:16px;}
+.tabs{display:flex;gap:4px;background:#F3F4F6;padding:4px;border-radius:10px;margin-bottom:20px;}
+.tab{flex:1;padding:8px;text-align:center;border-radius:8px;font-size:12px;font-weight:600;color:#6B7280;cursor:pointer;}
+.tab.active{background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;}
+.spec-table{width:100%;border-collapse:collapse;}
+.spec-table th{text-align:left;padding:10px 12px;background:#F9FAFB;font-size:12px;font-weight:600;color:#6B7280;border-bottom:1px solid #E5E7EB;}
+.spec-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid #E5E7EB;}
+.spec-table td:first-child{font-weight:600;color:#312E81;}
+.update-info{font-size:11px;color:#9CA3AF;margin-top:12px;text-align:right;}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="title">平台规格速查</div>
+  <div class="tabs">
+    <div class="tab active">📕 小红书</div>
+    <div class="tab">🎵 抖音</div>
+    <div class="tab">💬 公众号</div>
+    <div class="tab">📺 B站</div>
+    <div class="tab">🎬 视频号</div>
+  </div>
+  <table class="spec-table">
+    <thead>
+      <tr><th>规格项</th><th>参数</th><th>备注</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>图片推荐尺寸</td><td>1080 × 1440 px</td><td>3:4 竖图</td></tr>
+      <tr><td>支持图片比例</td><td>3:4 / 1:1 / 4:3</td><td>推荐3:4</td></tr>
+      <tr><td>图片格式</td><td>JPG / PNG / WebP</td><td></td></tr>
+      <tr><td>单张图片大小</td><td>≤ 20 MB</td><td></td></tr>
+      <tr><td>图片数量上限</td><td>18 张/篇</td><td></td></tr>
+      <tr><td>标题字数</td><td>≤ 20 字</td><td></td></tr>
+      <tr><td>正文字数</td><td>≤ 1000 字</td><td></td></tr>
+      <tr><td>标签数量</td><td>5-10 个</td><td>话题标签</td></tr>
+      <tr><td>视频推荐比例</td><td>9:16 / 3:4 / 1:1</td><td></td></tr>
+      <tr><td>视频时长上限</td><td>15 分钟</td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="update-info">最近更新：2026年6月15日</div>
+</div>
+</body>
+</html>

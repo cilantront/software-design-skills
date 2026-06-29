@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>注册登录 Widget</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #F9FAFB; padding: 20px; }
+.widget-frame { background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; max-width: 520px; margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.widget-title { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 10px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: #374151; margin-bottom: 4px; font-weight: 500; }
+.field input, .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; font-family: inherit; }
+.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.btn { padding: 7px 13px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; }
+.btn-primary { background: #3B82F6; color: white; }
+.btn-ghost { background: transparent; color: #3B82F6; }
+.tag { display: inline-block; padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 500; background: #F3F4F6; color: #374151; cursor: pointer; }
+.tag.active { background: #3B82F6; color: white; }
+.upload-zone { border: 2px dashed #D1D5DB; border-radius: 8px; padding: 28px 20px; text-align: center; cursor: pointer; margin-bottom: 14px; }
+</style></head><body>
+
+<div class="widget-frame" style="max-width:380px; margin:0 auto">
+  <div style="text-align:center; margin-bottom:16px"><div style="display:inline-flex; width:40px; height:40px; background:#3B82F6; border-radius:10px; align-items:center; justify-content:center; color:white; margin-bottom:10px">💬</div><div style="font-size:18px; font-weight:700">欢迎使用</div><div style="font-size:12px; color:#6B7280">沟通归档助手</div></div>
+  <div style="display:flex; border-bottom:1px solid #E5E7EB; margin-bottom:16px"><div style="flex:1; padding:8px; text-align:center; color:#3B82F6; border-bottom:2px solid #3B82F6; font-weight:500">登录</div><div style="flex:1; padding:8px; text-align:center; color:#6B7280">注册</div></div>
+  <div class="field"><label>邮箱</label><input value="demo@example.com"/></div>
+  <div class="field"><label>密码</label><input type="password" value="demo123456"/></div>
+  <button class="btn btn-primary" style="width:100%; margin-top:10px">登录</button>
+  <div style="display:flex; gap:8px; margin-top:12px"><button class="btn btn-ghost" style="flex:1; border:1px solid #E5E7EB">微信</button><button class="btn btn-ghost" style="flex:1; border:1px solid #E5E7EB">GitHub</button></div>
+</div>
+
+</body></html>

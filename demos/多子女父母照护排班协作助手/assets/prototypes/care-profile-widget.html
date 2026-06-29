@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>被照护人档案 Widget 原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f0f2f5; display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; padding: 20px; }
+.widget-box { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); max-width: 375px; }
+.widget-title { font-size: 14px; color: #999; margin-bottom: 16px; text-align: center; }
+.phone-screen { width: 320px; height: 520px; border-radius: 24px; border: 3px solid #333; overflow: hidden; margin: 0 auto; background: #f5f5f5; }
+.nav-bar { height: 44px; background: #FF8C42; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; font-weight: 600; }
+.content { height: calc(100% - 44px); overflow-y: auto; }
+.profile-header { background: #fff; padding: 16px; display: flex; align-items: center; }
+.avatar { width: 56px; height: 56px; border-radius: 50%; background: #FF8C42; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; }
+.profile-info { margin-left: 14px; }
+.profile-name { font-size: 17px; font-weight: 600; color: #333; }
+.profile-meta { font-size: 12px; color: #999; margin-top: 3px; }
+.tabs { display: flex; background: #fff; border-bottom: 1px solid #f0f0f0; }
+.tab { flex: 1; text-align: center; padding: 11px; font-size: 13px; color: #666; }
+.tab.active { color: #FF8C42; border-bottom: 2px solid #FF8C42; font-weight: 600; }
+.info-row { display: flex; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #f8f8f8; font-size: 13px; }
+.info-label { color: #999; }
+.info-value { color: #333; max-width: 60%; text-align: right; }
+.tag { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 11px; margin-right: 6px; margin-bottom: 4px; }
+.tag-orange { background: #FFF3E0; color: #FF8C42; }
+.tag-blue { background: #E3F2FD; color: #1976D2; }
+.section { padding: 14px 16px; background: #fff; margin-top: 8px; }
+.section-label { font-size: 13px; color: #999; margin-bottom: 8px; }
+.section-content { font-size: 13px; color: #333; line-height: 1.8; }
+.desc-card { background: #f9f9f9; border-radius: 12px; padding: 16px; margin-top: 16px; max-width: 375px; }
+.desc-card h3 { font-size: 14px; color: #333; margin-bottom: 8px; }
+.desc-card ul { font-size: 12px; color: #666; line-height: 1.8; margin-left: 16px; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="widget-box">
+    <div class="widget-title">被照护人档案 — 基本信息Tab</div>
+    <div class="phone-screen">
+      <div class="nav-bar">被照护人档案</div>
+      <div class="content">
+        <div class="profile-header">
+          <div class="avatar">爸</div>
+          <div class="profile-info">
+            <div class="profile-name">张爸爸</div>
+            <div class="profile-meta">男 · 78岁 · 1948-03-15</div>
+            <div class="profile-meta">📍 北京市朝阳区XX小区</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active">基本信息</div>
+          <div class="tab">健康档案</div>
+          <div class="tab">照护需求</div>
+        </div>
+        <div class="info-row"><span class="info-label">姓名</span><span class="info-value">张爸爸</span></div>
+        <div class="info-row"><span class="info-label">性别</span><span class="info-value">男</span></div>
+        <div class="info-row"><span class="info-label">出生日期</span><span class="info-value">1948-03-15</span></div>
+        <div class="info-row"><span class="info-label">住址</span><span class="info-value">北京市朝阳区XX小区3号楼501</span></div>
+        <div class="info-row"><span class="info-label">紧急联系人</span><span class="info-value">张大姐 138****1234</span></div>
+        <div class="info-row"><span class="info-label">紧急联系人2</span><span class="info-value">张二弟 139****5678</span></div>
+        <div style="padding:12px 16px;background:#fff;margin-top:8px;">
+          <div class="section-label">照片</div>
+          <div style="display:flex;gap:8px;">
+            <div style="width:64px;height:64px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:24px;color:#ccc;">+</div>
+            <div style="width:64px;height:64px;border-radius:8px;background:#FFB74D;display:flex;align-items:center;justify-content:center;font-size:24px;">👴</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="desc-card">
+    <h3>基本信息说明</h3>
+    <ul>
+      <li>姓名为必填项，其他信息选填</li>
+      <li>照片支持相册选择和拍照，单张≤10MB</li>
+      <li>紧急联系人至少填写1位</li>
+      <li>仅管理员可编辑档案信息</li>
+      <li>档案修改后自动通知群组成员</li>
+    </ul>
+  </div>
+</div>
+
+<div>
+  <div class="widget-box">
+    <div class="widget-title">被照护人档案 — 健康档案Tab</div>
+    <div class="phone-screen">
+      <div class="nav-bar">被照护人档案</div>
+      <div class="content">
+        <div class="profile-header" style="padding:12px 16px;">
+          <div class="avatar" style="width:44px;height:44px;font-size:18px;">爸</div>
+          <div class="profile-info">
+            <div class="profile-name" style="font-size:15px;">张爸爸</div>
+            <div class="profile-meta">78岁 · 高血压、糖尿病、关节炎</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab">基本信息</div>
+          <div class="tab active">健康档案</div>
+          <div class="tab">照护需求</div>
+        </div>
+        <div class="section">
+          <div class="section-label">主要疾病</div>
+          <div>
+            <span class="tag tag-orange">高血压</span>
+            <span class="tag tag-orange">糖尿病</span>
+            <span class="tag tag-orange">关节炎</span>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-label">过敏史</div>
+          <div class="section-content">青霉素过敏</div>
+        </div>
+        <div class="section">
+          <div class="section-label">既往病史</div>
+          <div class="section-content">2018年膝关节置换手术<br>2020年心脏支架手术</div>
+        </div>
+        <div class="section">
+          <div class="section-label">当前用药清单</div>
+          <div style="background:#FFF3E0;border-radius:8px;padding:12px;margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:600;color:#333;">💊 降压药（氨氯地平）</div>
+            <div style="font-size:12px;color:#666;margin-top:4px;">用法：每日1次 · 早饭后<br>用量：5mg/次</div>
+          </div>
+          <div style="background:#E3F2FD;border-radius:8px;padding:12px;margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:600;color:#333;">💊 降糖药（二甲双胍）</div>
+            <div style="font-size:12px;color:#666;margin-top:4px;">用法：每日2次 · 早晚饭前<br>用量：500mg/次</div>
+          </div>
+          <div style="background:#E8F5E9;border-radius:8px;padding:12px;">
+            <div style="font-size:14px;font-weight:600;color:#333;">💊 钙片</div>
+            <div style="font-size:12px;color:#666;margin-top:4px;">用法：每日1次 · 晚饭后<br>用量：600mg/次</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="desc-card">
+    <h3>健康档案说明</h3>
+    <ul>
+      <li>用药清单支持添加多种药品，含名称、用法、用量</li>
+      <li>疾病标签可选择或自定义输入</li>
+      <li>过敏史和既往病史为重要信息，建议详细填写</li>
+      <li>健康信息加密存储，仅群组成员可见</li>
+    </ul>
+  </div>
+</div>
+
+<div>
+  <div class="widget-box">
+    <div class="widget-title">被照护人档案 — 照护需求Tab</div>
+    <div class="phone-screen">
+      <div class="nav-bar">被照护人档案</div>
+      <div class="content">
+        <div class="profile-header" style="padding:12px 16px;">
+          <div class="avatar" style="width:44px;height:44px;font-size:18px;">爸</div>
+          <div class="profile-info">
+            <div class="profile-name" style="font-size:15px;">张爸爸</div>
+            <div class="profile-meta">78岁 · 需要日常照护</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab">基本信息</div>
+          <div class="tab">健康档案</div>
+          <div class="tab active">照护需求</div>
+        </div>
+        <div class="section">
+          <div class="section-label">📋 日常照护需求</div>
+          <div style="background:#FFF3E0;border-radius:8px;padding:10px 12px;margin-bottom:6px;">
+            <div style="font-size:13px;font-weight:600;color:#333;">🍳 做饭</div>
+            <div style="font-size:12px;color:#666;">频率：每日 · 午餐和晚餐</div>
+          </div>
+          <div style="background:#E3F2FD;border-radius:8px;padding:10px 12px;margin-bottom:6px;">
+            <div style="font-size:13px;font-weight:600;color:#333;">💊 送药</div>
+            <div style="font-size:12px;color:#666;">频率：每日 · 提醒按时服药</div>
+          </div>
+          <div style="background:#E8F5E9;border-radius:8px;padding:10px 12px;margin-bottom:6px;">
+            <div style="font-size:13px;font-weight:600;color:#333;">🏥 陪同就医</div>
+            <div style="font-size:12px;color:#666;">频率：每周三 · 定期复查</div>
+          </div>
+          <div style="background:#F3E5F5;border-radius:8px;padding:10px 12px;">
+            <div style="font-size:13px;font-weight:600;color:#333;">💬 陪聊</div>
+            <div style="font-size:12px;color:#666;">频率：每日 · 至少30分钟</div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-label">🏥 医疗照护需求</div>
+          <div class="section-content">
+            • 每周三上午：朝阳医院心内科复查<br>
+            • 每月15日：社区医院测血糖、血压<br>
+            • 下次检查：2026-07-03 心脏彩超
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-label">⚠️ 特殊照护说明</div>
+          <div class="section-content">
+            • 饮食：低盐低糖，不吃辛辣食物<br>
+            • 作息：晚上9点前就寝，早上6点左右起床<br>
+            • 情绪：喜欢听京剧，心情不好时会念叨已故老伴<br>
+            • 行动：需要使用助行器，注意防摔倒
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="desc-card">
+    <h3>照护需求说明</h3>
+    <ul>
+      <li>日常照护需求包含类型和频率两个维度</li>
+      <li>医疗照护需求记录定期就医安排和复诊时间</li>
+      <li>特殊照护说明包含饮食禁忌、作息习惯等关键信息</li>
+      <li>所有照护者可在日志中参照这些说明执行照护</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

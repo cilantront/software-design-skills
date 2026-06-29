@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P6 - 订阅与付费页 - 自由职业者合同关键日期提醒器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f7fa; color: #2c3e50; }
+.topbar { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+.topbar .logo { font-size: 18px; font-weight: 700; color: #4f46e5; display: flex; align-items: center; gap: 8px; }
+.topbar .logo span { font-size: 22px; }
+.topbar .right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.topbar .bell { position: relative; cursor: pointer; font-size: 20px; }
+.topbar .bell .badge { position: absolute; top: -4px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.topbar .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.layout { display: flex; margin-top: 56px; min-height: calc(100vh - 56px); }
+.sidebar { width: 220px; background: #fff; border-right: 1px solid #e2e8f0; padding: 16px 0; position: fixed; top: 56px; bottom: 0; }
+.sidebar a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #64748b; font-size: 14px; text-decoration: none; }
+.sidebar a:hover { background: #f1f5f9; color: #4f46e5; }
+.sidebar a.active { background: #eef2ff; color: #4f46e5; font-weight: 600; border-right: 3px solid #4f46e5; }
+.sidebar a .icon { font-size: 18px; width: 24px; text-align: center; }
+.sidebar a .lock { font-size: 12px; margin-left: auto; color: #94a3b8; }
+.main { margin-left: 220px; flex: 1; padding: 24px 40px; }
+
+/* Hero */
+.hero { text-align: center; padding: 32px 0 40px; }
+.hero h1 { font-size: 28px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+.hero p { font-size: 16px; color: #64748b; }
+
+/* Plan Cards */
+.plans { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 720px; margin: 0 auto 40px; }
+.plan-card { background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 2px solid #e2e8f0; position: relative; }
+.plan-card.featured { border-color: #4f46e5; }
+.plan-card.featured::before { content: '🌟 推荐'; position: absolute; top: -12px; right: 20px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.plan-card .plan-name { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+.plan-card .plan-price { font-size: 36px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+.plan-card .plan-price span { font-size: 14px; font-weight: 400; color: #94a3b8; }
+.plan-card .plan-desc { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+.plan-card .features { list-style: none; margin-bottom: 24px; }
+.plan-card .features li { font-size: 14px; color: #475569; padding: 6px 0; display: flex; align-items: center; gap: 8px; }
+.plan-card .features li .check { color: #10b981; font-size: 16px; }
+.plan-card .features li .cross { color: #cbd5e1; font-size: 16px; }
+.plan-card .features li.disabled { color: #cbd5e1; }
+.plan-btn { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; text-align: center; }
+.plan-btn.free { background: #f1f5f9; color: #94a3b8; cursor: default; }
+.plan-btn.pro { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; }
+.plan-btn.pro:hover { opacity: 0.9; }
+
+/* Current Plan Badge */
+.current-badge { display: inline-block; background: #d1fae5; color: #065f46; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 8px; margin-left: 8px; }
+
+/* Comparison Table */
+.comparison { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); max-width: 720px; margin-left: auto; margin-right: auto; }
+.comparison h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; text-align: center; }
+.comp-table { width: 100%; border-collapse: collapse; }
+.comp-table th { text-align: left; padding: 10px 12px; font-size: 13px; font-weight: 600; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+.comp-table th:last-child { text-align: center; }
+.comp-table td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
+.comp-table td:last-child { text-align: center; }
+.comp-table .check-icon { color: #10b981; font-size: 16px; }
+.comp-table .cross-icon { color: #cbd5e1; font-size: 16px; }
+.comp-table .category { background: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; }
+
+/* FAQ */
+.faq { max-width: 720px; margin: 0 auto 32px; }
+.faq h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.faq-item { background: #fff; border-radius: 10px; padding: 16px 20px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.faq-item .q { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+.faq-item .a { font-size: 14px; color: #64748b; line-height: 1.6; }
+
+/* Payment Modal */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 16px; padding: 32px; width: 420px; max-width: 90vw; }
+.modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 16px; text-align: center; }
+.modal .plan-summary { background: #f8fafc; border-radius: 10px; padding: 16px; margin-bottom: 20px; text-align: center; }
+.modal .plan-summary .name { font-size: 16px; font-weight: 600; }
+.modal .plan-summary .price { font-size: 24px; font-weight: 700; color: #4f46e5; margin-top: 4px; }
+.modal .pay-methods { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.pay-method { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; cursor: pointer; }
+.pay-method:hover { border-color: #4f46e5; background: #fafafe; }
+.pay-method.selected { border-color: #4f46e5; background: #eef2ff; }
+.pay-method .icon { font-size: 24px; }
+.pay-method .name { font-size: 14px; font-weight: 500; }
+.modal .pay-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.modal .close { position: absolute; top: 12px; right: 16px; font-size: 20px; cursor: pointer; color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><span>📅</span> 合同日期提醒器</div>
+  <div class="right">
+    <div class="bell">🔔<div class="badge">3</div></div>
+    <div class="avatar">林</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <a href="#"><span class="icon">🏠</span> 主页</a>
+    <a href="#"><span class="icon">📄</span> 合同管理</a>
+    <a href="#"><span class="icon">📆</span> 日历看板</a>
+    <a href="#"><span class="icon">🔔</span> 消息中心</a>
+    <div class="divider"></div>
+    <a href="#"><span class="icon">👥</span> 团队管理 <span class="lock">🔒</span></a>
+    <a href="#"><span class="icon">📊</span> 统计报告 <span class="lock">🔒</span></a>
+    <div class="divider"></div>
+    <a href="#"><span class="icon">⚙️</span> 提醒设置</a>
+    <a href="#" class="active"><span class="icon">💎</span> 订阅管理</a>
+  </div>
+
+  <div class="main">
+    <!-- Hero -->
+    <div class="hero">
+      <h1>💎 选择适合你的方案</h1>
+      <p>简单透明的定价，随时升级或降级</p>
+    </div>
+
+    <!-- Plan Cards -->
+    <div class="plans">
+      <!-- Free Plan -->
+      <div class="plan-card">
+        <div class="plan-name">免费版 <span class="current-badge">当前方案</span></div>
+        <div class="plan-price">¥0 <span>/ 月</span></div>
+        <div class="plan-desc">适合刚开始管理少量合同的用户</div>
+        <ul class="features">
+          <li><span class="check">✅</span> 最多管理 5 份合同</li>
+          <li><span class="check">✅</span> AI 自动提取关键日期</li>
+          <li><span class="check">✅</span> 1 次提前提醒（7天）</li>
+          <li><span class="check">✅</span> 站内信通知</li>
+          <li><span class="check">✅</span> 月历/时间线看板</li>
+          <li class="disabled"><span class="cross">✕</span> 多级提醒（3/7/30天）</li>
+          <li class="disabled"><span class="cross">✕</span> 邮件/微信推送</li>
+          <li class="disabled"><span class="cross">✕</span> 团队协作</li>
+          <li class="disabled"><span class="cross">✕</span> 统计报告</li>
+          <li class="disabled"><span class="cross">✕</span> 批量操作</li>
+        </ul>
+        <button class="plan-btn free">当前方案</button>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="plan-card featured">
+        <div class="plan-name">专业版</div>
+        <div class="plan-price">¥19 <span>/ 月</span></div>
+        <div class="plan-desc">适合管理多份合同的专业自由职业者</div>
+        <ul class="features">
+          <li><span class="check">✅</span> <strong>不限</strong>合同数量</li>
+          <li><span class="check">✅</span> AI 自动提取关键日期</li>
+          <li><span class="check">✅</span> <strong>多级提醒（30/7/3天 + 到期当天）</strong></li>
+          <li><span class="check">✅</span> <strong>邮件 + 微信推送</strong></li>
+          <li><span class="check">✅</span> 月历/时间线看板</li>
+          <li><span class="check">✅</span> <strong>团队协作（最多10人）</strong></li>
+          <li><span class="check">✅</span> <strong>到期统计报告 + 导出</strong></li>
+          <li><span class="check">✅</span> <strong>批量上传/删除</strong></li>
+          <li><span class="check">✅</span> <strong>免打扰时段设置</strong></li>
+          <li><span class="check">✅</span> <strong>逾期每日提醒</strong></li>
+        </ul>
+        <button class="plan-btn pro" onclick="document.querySelector('.modal-overlay').classList.add('show')">立即升级</button>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="comparison">
+      <h3>📋 功能详细对比</h3>
+      <table class="comp-table">
+        <thead>
+          <tr><th>功能</th><th>免费版</th><th>专业版</th></tr>
+        </thead>
+        <tbody>
+          <tr class="category"><td colspan="3">📄 合同管理</td></tr>
+          <tr><td>合同数量上限</td><td>5 份</td><td><strong>不限</strong></td></tr>
+          <tr><td>AI 关键日期提取</td><td><span class="check-icon">✅</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr><td>批量上传</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr><td>批量删除</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr class="category"><td colspan="3">🔔 提醒通知</td></tr>
+          <tr><td>提前提醒次数</td><td>1 次</td><td><strong>4 次</strong>（30/7/3天+当天）</td></tr>
+          <tr><td>站内信通知</td><td><span class="check-icon">✅</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr><td>邮件提醒</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr><td>微信推送</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr><td>免打扰时段</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr><td>逾期每日提醒</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr class="category"><td colspan="3">👥 团队协作</td></tr>
+          <tr><td>创建团队</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr><td>团队成员数</td><td>-</td><td>最多 10 人</td></tr>
+          <tr><td>团队日历</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr class="category"><td colspan="3">📊 报告</td></tr>
+          <tr><td>到期统计报告</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+          <tr><td>导出 PDF/Excel</td><td><span class="cross-icon">✕</span></td><td><span class="check-icon">✅</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq">
+      <h3>❓ 常见问题</h3>
+      <div class="faq-item">
+        <div class="q">Q: 可以随时取消订阅吗？</div>
+        <div class="a">A: 可以。取消订阅后，你的专业版权益将在当前计费周期结束时失效，届时自动降为免费版。已上传的合同数据不会丢失。</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">Q: 降级为免费版后，超出 5 份的合同怎么办？</div>
+        <div class="a">A: 降级后，系统会保留上传时间最近的 5 份合同正常显示，其余合同数据会隐藏但保留 90 天。在此期间内重新升级即可恢复。</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">Q: 支持哪些支付方式？</div>
+        <div class="a">A: 目前支持微信支付、支付宝。海外用户可使用信用卡（通过 Stripe 通道）。</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">Q: 有年付优惠吗？</div>
+        <div class="a">A: MVP 阶段暂不提供年付方案。后续版本会根据用户反馈考虑推出年付折扣。</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">Q: AI 提取准确率如何？</div>
+        <div class="a">A: AI 对标准格式合同的日期提取准确率在 85% 以上。所有 AI 提取结果都需要你人工确认后才保存，确保数据准确。你也可以随时手动修改。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay">
+  <div class="modal" style="position:relative;">
+    <span class="close" onclick="document.querySelector('.modal-overlay').classList.remove('show')">✕</span>
+    <h3>💳 升级专业版</h3>
+    <div class="plan-summary">
+      <div class="name">专业版 - 月度订阅</div>
+      <div class="price">¥19 / 月</div>
+    </div>
+    <div style="font-size:14px;color:#64748b;margin-bottom:12px;">选择支付方式</div>
+    <div class="pay-methods">
+      <div class="pay-method selected">
+        <div class="icon">💬</div>
+        <div class="name">微信支付</div>
+      </div>
+      <div class="pay-method">
+        <div class="icon">🔵</div>
+        <div class="name">支付宝</div>
+      </div>
+      <div class="pay-method">
+        <div class="icon">💳</div>
+        <div class="name">信用卡（海外）</div>
+      </div>
+    </div>
+    <button class="pay-btn">确认支付 ¥19</button>
+    <div style="text-align:center;font-size:12px;color:#94a3b8;margin-top:12px;">支付即表示你同意《服务协议》和《隐私政策》</div>
+  </div>
+</div>
+
+</body>
+</html>

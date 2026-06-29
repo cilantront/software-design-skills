@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>人工修正 Widget</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #F9FAFB; padding: 20px; }
+.widget-frame { background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; max-width: 520px; margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.widget-title { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 10px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: #374151; margin-bottom: 4px; font-weight: 500; }
+.field input, .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; font-family: inherit; }
+.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.btn { padding: 7px 13px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; }
+.btn-primary { background: #3B82F6; color: white; }
+.btn-ghost { background: transparent; color: #3B82F6; }
+.tag { display: inline-block; padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 500; background: #F3F4F6; color: #374151; cursor: pointer; }
+.tag.active { background: #3B82F6; color: white; }
+.upload-zone { border: 2px dashed #D1D5DB; border-radius: 8px; padding: 28px 20px; text-align: center; cursor: pointer; margin-bottom: 14px; }
+</style></head><body>
+
+<div class="widget-frame">
+  <div class="widget-title">AI 提取结果确认</div>
+  <div style="border-left:3px solid #3B82F6; padding:10px; background:#F9FAFB; border-radius:4px; margin-bottom:10px">
+    <div style="display:flex; gap:6px; align-items:center; margin-bottom:4px"><span class="tag" style="background:#DBEAFE; color:#1D4ED8">决策</span><span style="font-size:11px; color:#6B7280">6/28 · 小王</span></div>
+    <div style="font-size:13px; margin-bottom:4px"><strong>确定使用方案 B，放弃方案 A</strong></div>
+    <div style="font-size:12px; color:#6B7280; font-style:italic">原文："方案 B 更简洁，就定这个了"</div>
+    <div style="display:flex; gap:6px; margin-top:8px"><button class="btn btn-primary" style="padding:4px 10px; font-size:11px">✓ 确认</button><button class="btn btn-ghost" style="padding:4px 10px; font-size:11px">✏️ 修改</button><button class="btn btn-ghost" style="padding:4px 10px; font-size:11px; color:#EF4444">✕ 误判</button></div>
+  </div>
+  <div style="border-left:3px solid #F59E0B; padding:10px; background:#F9FAFB; border-radius:4px">
+    <div style="display:flex; gap:6px; align-items:center; margin-bottom:4px"><span class="tag" style="background:#FFEDD5; color:#C2410C">变更</span><span style="font-size:11px; color:#6B7280">6/27 · 小王</span></div>
+    <div style="font-size:13px"><strong>Logo 颜色改为蓝色系</strong></div>
+  </div>
+</div>
+
+</body></html>

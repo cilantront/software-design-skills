@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>确认选片 - 客户H5</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f8f8f8; color: #333; min-height: 100vh; }
+.page-header { background: #fff; padding: 16px; text-align: center; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; }
+.page-header h1 { font-size: 18px; font-weight: 600; }
+.page-header .back { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 20px; text-decoration: none; color: #333; }
+.content { padding: 16px; padding-bottom: 100px; }
+.section { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.section h2 { font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.selected-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.selected-thumb { aspect-ratio: 1; border-radius: 6px; overflow: hidden; position: relative; }
+.selected-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.selected-thumb .num { position: absolute; bottom: 2px; left: 2px; background: rgba(0,0,0,0.5); color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 3px; }
+.selected-thumb .has-note { position: absolute; top: 2px; right: 2px; font-size: 12px; }
+.count-summary { display: flex; justify-content: space-around; padding: 12px 0; }
+.count-item { text-align: center; }
+.count-item .val { font-size: 24px; font-weight: 700; }
+.count-item .lbl { font-size: 12px; color: #999; margin-top: 2px; }
+.count-item.highlight .val { color: #e94560; }
+.annotation-summary { }
+.anno-photo { margin-bottom: 12px; }
+.anno-photo .photo-label { font-size: 13px; color: #666; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.anno-photo .photo-label img { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; }
+.anno-tag { display: inline-block; padding: 3px 10px; background: #fff0f0; color: #e94560; border-radius: 12px; font-size: 12px; margin: 2px; }
+.billing-detail { }
+.billing-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 14px; border-bottom: 1px solid #f5f5f5; }
+.billing-row:last-child { border: none; }
+.billing-row.total { font-size: 16px; font-weight: 700; color: #e94560; border-top: 2px solid #f0f0f0; padding-top: 12px; margin-top: 4px; }
+.billing-row .note { font-size: 12px; color: #999; }
+.notice { background: #fff8e6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px; font-size: 13px; color: #ad6d00; margin-bottom: 16px; display: flex; gap: 8px; }
+.bottom-actions { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 12px 16px; display: flex; gap: 12px; border-top: 1px solid #eee; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
+.btn { flex: 1; padding: 12px; border-radius: 24px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; text-align: center; }
+.btn-back { background: #f0f0f0; color: #666; }
+.btn-confirm { background: #e94560; color: #fff; }
+.btn-confirm:active { background: #d63851; }
+/* Success modal */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.success-modal { background: #fff; border-radius: 16px; padding: 32px; text-align: center; width: 300px; }
+.success-modal .icon { font-size: 56px; margin-bottom: 16px; }
+.success-modal h2 { font-size: 20px; margin-bottom: 8px; }
+.success-modal p { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+.success-modal .btn { display: block; }
+</style>
+</head>
+<body>
+<div class="page-header">
+  <a href="#" class="back" onclick="history.back();return false">←</a>
+  <h1>确认选片</h1>
+</div>
+
+<div class="content">
+  <div class="notice">
+    <span>⚠️</span>
+    <span>确认后选片结果将锁定，无法再修改。请仔细核对选中照片和修图批注。</span>
+  </div>
+
+  <div class="section">
+    <h2>📷 选中照片（25张）</h2>
+    <div class="count-summary">
+      <div class="count-item"><div class="val">25</div><div class="lbl">已选中</div></div>
+      <div class="count-item"><div class="val" style="color:#1890ff">20</div><div class="lbl">套餐含</div></div>
+      <div class="count-item highlight"><div class="val">5</div><div class="lbl">超片</div></div>
+      <div class="count-item"><div class="val" style="color:#fa8c16">8</div><div class="lbl">有批注</div></div>
+    </div>
+    <div class="selected-grid" id="selectedGrid"></div>
+  </div>
+
+  <div class="section">
+    <h2>💬 修图批注汇总</h2>
+    <div class="annotation-summary">
+      <div class="anno-photo">
+        <div class="photo-label"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect fill='%23f8e8d4' width='24' height='24'/%3E%3C/svg%3E">照片 #001</div>
+        <span class="anno-tag">去黑眼圈</span>
+        <span class="anno-tag">稍微磨皮</span>
+      </div>
+      <div class="anno-photo">
+        <div class="photo-label"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect fill='%23f0e0d0' width='24' height='24'/%3E%3C/svg%3E">照片 #003</div>
+        <span class="anno-tag">背景调色偏暖</span>
+        <span class="anno-tag">整体调亮</span>
+      </div>
+      <div class="anno-photo">
+        <div class="photo-label"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect fill='%23e8d8c8' width='24' height='24'/%3E%3C/svg%3E">照片 #005</div>
+        <span class="anno-tag">瘦脸</span>
+      </div>
+      <div class="anno-photo">
+        <div class="photo-label"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect fill='%23f8e0d0' width='24' height='24'/%3E%3C/svg%3E">照片 #008</div>
+        <span class="anno-tag">去背景杂物</span>
+        <span class="anno-tag">调亮</span>
+      </div>
+      <div class="anno-photo">
+        <div class="photo-label"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect fill='%23f0e8d8' width='24' height='24'/%3E%3C/svg%3E">照片 #011</div>
+        <span class="anno-tag">磨皮美白</span>
+        <span class="anno-tag">眼神修复</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>💰 费用确认</h2>
+    <div class="billing-detail">
+      <div class="billing-row"><span>套餐：精修20张</span><span>¥1,999</span></div>
+      <div class="billing-row"><span>已选照片</span><span>25张</span></div>
+      <div class="billing-row">
+        <span>超出套餐 <span class="note">（5张 × ¥50/张）</span></span>
+        <span style="color:#e94560;font-weight:600">+¥250</span>
+      </div>
+      <div class="billing-row total"><span>结算总额</span><span>¥2,249</span></div>
+    </div>
+    <p style="font-size:12px;color:#999;margin-top:8px;text-align:center">超片费用将与摄影师线下结算</p>
+  </div>
+</div>
+
+<div class="bottom-actions">
+  <button class="btn btn-back" onclick="history.back()">继续修改</button>
+  <button class="btn btn-confirm" onclick="confirmSelection()">确认选片</button>
+</div>
+
+<div class="modal-overlay" id="successModal">
+  <div class="success-modal">
+    <div class="icon">✅</div>
+    <h2>选片已提交！</h2>
+    <p>摄影师已收到您的选片结果<br>修图完成后会通知您领取成片</p>
+    <button class="btn btn-confirm" onclick="location.reload()">返回首页</button>
+  </div>
+</div>
+
+<script>
+// Generate selected photo thumbnails
+const grid = document.getElementById('selectedGrid');
+const colors = ['f8e8d4','f0e0d0','e8d8c8','f8e0d0','f0e8d8','e8e0d0','f8d8c8','f0d8c0','e8d0c0','f8e0c0','f0d8b8','e8c8b0','f8d0a8','f0c8a0','e8c0a0','f8d8b0','f0d0a8','e8c8a0','f8c098','f0b890','e8b088','f8c8b0','f0c0a8','e8b8a0','f8d0c0'];
+for (let i = 0; i < 25; i++) {
+  const thumb = document.createElement('div');
+  thumb.className = 'selected-thumb';
+  const c = colors[i % colors.length];
+  const hasNote = [0, 2, 4, 7, 10].includes(i);
+  thumb.innerHTML = `
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23${c}' width='80' height='80'/%3E%3Ctext x='40' y='44' text-anchor='middle' fill='%23a08060' font-size='10'%3E${String(i+1).padStart(3,'0')}%3C/text%3E%3C/svg%3E" alt="">
+    <span class="num">${i+1}</span>
+    ${hasNote ? '<span class="has-note">💬</span>' : ''}
+  `;
+  grid.appendChild(thumb);
+}
+
+function confirmSelection() {
+  if (confirm('确认提交选片结果？提交后将无法修改。')) {
+    document.getElementById('successModal').classList.add('show');
+  }
+}
+</script>
+</body>
+</html>

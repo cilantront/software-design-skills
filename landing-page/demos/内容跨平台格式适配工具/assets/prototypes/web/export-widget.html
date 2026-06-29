@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>素材包导出组件原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F3FF;padding:32px;color:#312E81;}
+.widget{max-width:600px;margin:0 auto;background:white;border-radius:16px;border:1px solid #E5E7EB;padding:32px;box-shadow:0 4px 12px rgba(99,102,241,0.08);}
+.title{font-size:14px;font-weight:600;margin-bottom:16px;}
+.platforms{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
+.pf{border:2px solid #E5E7EB;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;}
+.pf.checked{border-color:#6366F1;background:#EEF2FF;}
+.pf .icon{font-size:20px;margin-bottom:4px;}
+.pf .name{font-size:11px;font-weight:600;}
+.pf .check{width:16px;height:16px;border-radius:50%;border:2px solid #D5D8DC;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;}
+.pf.checked .check{background:#6366F1;border-color:#6366F1;}
+.format-row{margin-bottom:16px;}
+.format-label{font-size:12px;color:#6B7280;margin-bottom:8px;}
+.format-opts{display:flex;gap:8px;}
+.format-opt{padding:7px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;cursor:pointer;}
+.format-opt.active{border-color:#6366F1;background:#EEF2FF;color:#6366F1;font-weight:600;}
+.summary{background:#F9FAFB;border-radius:10px;padding:16px;margin-bottom:20px;font-size:13px;line-height:2;}
+.btn-export{background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;}
+.btn-export:hover{opacity:.9;}
+.hint{text-align:center;font-size:11px;color:#6B7280;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="title">素材包导出</div>
+  <div class="format-label">选择导出平台</div>
+  <div class="platforms">
+    <div class="pf checked" onclick="this.classList.toggle('checked')"><div class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="icon">📕</div><div class="name">小红书</div></div>
+    <div class="pf checked" onclick="this.classList.toggle('checked')"><div class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="icon">🎵</div><div class="name">抖音</div></div>
+    <div class="pf checked" onclick="this.classList.toggle('checked')"><div class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="icon">💬</div><div class="name">公众号</div></div>
+    <div class="pf checked" onclick="this.classList.toggle('checked')"><div class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="icon">📺</div><div class="name">B站</div></div>
+    <div class="pf checked" onclick="this.classList.toggle('checked')"><div class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="icon">🎬</div><div class="name">视频号</div></div>
+  </div>
+  <div class="format-row">
+    <div class="format-label">图片格式</div>
+    <div class="format-opts">
+      <div class="format-opt active">JPG（推荐）</div>
+      <div class="format-opt">PNG</div>
+      <div class="format-opt">WebP</div>
+    </div>
+  </div>
+  <div class="format-row">
+    <div class="format-label">文案格式</div>
+    <div class="format-opts">
+      <div class="format-opt active">TXT</div>
+      <div class="format-opt">Markdown</div>
+    </div>
+  </div>
+  <div class="summary">
+    📦 包含 <strong>5</strong> 个平台素材<br>
+    🖼️ 图片 <strong>10</strong> 张 · 📝 文案 <strong>5</strong> 份 · 📋 发布指南 <strong>5</strong> 份<br>
+    💾 预计大小：<strong>约 8.5 MB</strong>
+  </div>
+  <button class="btn-export">一键导出素材包</button>
+  <div class="hint">打包后自动下载ZIP · 素材包24小时后自动清理</div>
+</div>
+</body>
+</html>

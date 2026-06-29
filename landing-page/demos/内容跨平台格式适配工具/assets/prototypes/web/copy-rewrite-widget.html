@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI文案改写组件原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F3FF;padding:32px;color:#312E81;}
+.widget{max-width:720px;margin:0 auto;background:white;border-radius:16px;border:1px solid #E5E7EB;padding:32px;box-shadow:0 4px 12px rgba(99,102,241,0.08);}
+.title{font-size:14px;font-weight:600;margin-bottom:16px;}
+.source-text{background:#F9FAFB;border-radius:10px;padding:14px;font-size:13px;line-height:1.8;margin-bottom:20px;border:1px solid #E5E7EB;}
+.source-label{font-size:12px;font-weight:600;color:#6B7280;margin-bottom:8px;}
+.tabs{display:flex;gap:4px;background:#F3F4F6;padding:4px;border-radius:10px;margin-bottom:16px;}
+.tab{flex:1;padding:8px;text-align:center;border-radius:8px;font-size:12px;font-weight:600;color:#6B7280;cursor:pointer;}
+.tab.active{background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;}
+.result-box{border:1px solid #E5E7EB;border-radius:10px;padding:16px;}
+.result-text{font-size:13px;line-height:2;min-height:120px;outline:none;}
+.meta-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid #E5E7EB;}
+.meta-info{font-size:11px;color:#6B7280;}
+.meta-actions{display:flex;gap:6px;}
+.meta-btn{background:#F3F4F6;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;color:#312E81;cursor:pointer;}
+.meta-btn:hover{background:#EEF2FF;color:#6366F1;}
+.level-bar{display:flex;gap:6px;margin-bottom:16px;}
+.level{flex:1;padding:8px;text-align:center;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;cursor:pointer;}
+.level.active{border-color:#6366F1;background:#EEF2FF;color:#6366F1;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="title">AI文案改写</div>
+  <div class="source-label">原始文案</div>
+  <div class="source-text">这款秋季新品外套采用优质面料，版型宽松显瘦，焦糖色设计时尚百搭，适合多种场合穿着。现在购买还有限时优惠。</div>
+  <div class="source-label" style="margin-top:16px;">改写力度</div>
+  <div class="level-bar">
+    <div class="level" onclick="document.querySelectorAll('.level').forEach(l=>l.classList.remove('active'));this.classList.add('active');">轻度润色</div>
+    <div class="level active" onclick="document.querySelectorAll('.level').forEach(l=>l.classList.remove('active'));this.classList.add('active');">中度改写</div>
+    <div class="level" onclick="document.querySelectorAll('.level').forEach(l=>l.classList.remove('active'));this.classList.add('active');">深度重写</div>
+  </div>
+  <div class="tabs">
+    <div class="tab active">📕 小红书</div>
+    <div class="tab">🎵 抖音</div>
+    <div class="tab">💬 公众号</div>
+    <div class="tab">📺 B站</div>
+    <div class="tab">🎬 视频号</div>
+  </div>
+  <div class="result-box">
+    <div class="source-label">小红书 · 种草风 · 已改写</div>
+    <div class="result-text" contenteditable="true">🍂 秋季新品来啦！这件外套真的太绝了～<br><br>✨ 面料超级柔软亲肤，穿上一整天都不会觉得闷<br>✨ 版型是那种微微oversize的感觉，显瘦又时髦<br>✨ 配色是今年最火的焦糖棕，搭配什么内搭都好看<br><br>学生党也能冲！你们秋天最喜欢穿什么外套呀？</div>
+    <div class="meta-row">
+      <div class="meta-info">320字 · 改写耗时 4.2秒</div>
+      <div class="meta-actions">
+        <button class="meta-btn">🔄 重新改写</button>
+        <button class="meta-btn">📋 复制</button>
+        <button class="meta-btn">✓ 确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

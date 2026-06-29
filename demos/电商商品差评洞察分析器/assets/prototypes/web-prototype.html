@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>电商商品差评洞察分析器 - WEB端全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f5f7fa; color: #333; }
+
+/* 顶部导航 */
+.topbar { height: 56px; background: #fff; border-bottom: 1px solid #e8ecf0; display: flex; align-items: center; padding: 0 24px; position: fixed; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,.03); }
+.logo { font-size: 15px; font-weight: 700; color: #4f7cff; margin-right: 32px; display: flex; align-items: center; gap: 8px; }
+.logo-icon { font-size: 20px; }
+.nav-tabs { display: flex; gap: 4px; flex: 1; }
+.nav-tab { padding: 8px 16px; font-size: 13px; color: #666; cursor: pointer; border-radius: 6px; transition: all .2s; display: flex; align-items: center; gap: 6px; }
+.nav-tab:hover { background: #f5f7fa; color: #333; }
+.nav-tab.active { background: #e8efff; color: #4f7cff; font-weight: 600; }
+.user-info { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #666; }
+.user-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #4f7cff, #7ba3ff); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+.usage-mini { font-size: 11px; color: #888; padding: 4px 8px; background: #fffbea; border-radius: 4px; }
+
+/* 主内容区 */
+.main { margin-top: 56px; padding: 24px; min-height: calc(100vh - 56px); }
+.page { display: none; }
+.page.active { display: block; }
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.page-subtitle { font-size: 13px; color: #888; }
+
+/* 通用卡片 */
+.card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.04); margin-bottom: 18px; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+/* 按钮 */
+.btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; transition: all .2s; }
+.btn-primary { background: #4f7cff; color: #fff; }
+.btn-primary:hover { background: #3b6be8; }
+.btn-secondary { background: #f0f2f5; color: #555; }
+.btn-secondary:hover { background: #e4e7eb; }
+.btn-ghost { background: transparent; color: #4f7cff; }
+.btn-ghost:hover { background: #e8efff; }
+
+/* 标签 */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin: 1px 2px; }
+.tag-quality { background: #fee2e2; color: #991b1b; }
+.tag-logistics { background: #fef3c7; color: #92400e; }
+.tag-desc { background: #dbeafe; color: #1e40af; }
+.tag-service { background: #ede9fe; color: #5b21b6; }
+.tag-package { background: #d1fae5; color: #065f46; }
+.tag-price { background: #ffedd5; color: #9a3412; }
+.tag-experience { background: #cffafe; color: #155e75; }
+.tag-other { background: #f3f4f6; color: #374151; }
+
+/* 表格 */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #fafbfc; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #e8ecf0; font-size: 12px; color: #666; }
+td { padding: 12px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+tr:hover { background: #fafcff; }
+
+/* ============ PAGE 1: 数据导入页 ============ */
+.import-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+.upload-zone { border: 2px dashed #c5cee0; border-radius: 10px; padding: 48px 24px; text-align: center; background: #fafbfc; cursor: pointer; transition: all .2s; }
+.upload-zone:hover { border-color: #4f7cff; background: #f0f5ff; }
+.upload-icon { font-size: 48px; margin-bottom: 12px; }
+.upload-text { font-size: 14px; color: #555; margin-bottom: 6px; }
+.upload-hint { font-size: 12px; color: #999; margin-bottom: 12px; }
+.platform-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.platform-card { border: 1px solid #e8ecf0; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all .2s; }
+.platform-card:hover { border-color: #4f7cff; background: #f8faff; }
+.platform-icon { width: 36px; height: 36px; border-radius: 8px; background: #f0f2f5; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.platform-name { font-size: 13px; font-weight: 600; }
+.platform-status { font-size: 11px; color: #38a169; }
+.import-records { margin-top: 0; }
+.record-status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.record-status.success { background: #f0fff4; color: #276749; }
+.record-status.failed { background: #fff5f5; color: #991b1b; }
+
+/* ============ PAGE 2: AI分类与确认页 ============ */
+.analysis-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.filter-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.filter-chip { padding: 5px 12px; border-radius: 16px; font-size: 12px; background: #f0f2f5; border: 1px solid transparent; cursor: pointer; }
+.filter-chip.active { background: #e8efff; border-color: #4f7cff; color: #4f7cff; }
+.confidence { font-size: 12px; font-weight: 600; }
+.conf-high { color: #38a169; }
+.conf-mid { color: #e5a000; }
+.conf-low { color: #e53e3e; }
+.sentiment { font-size: 12px; }
+.sent-strong { color: #e53e3e; }
+.sent-mid { color: #e5a000; }
+
+/* ============ PAGE 3: 洞察报告看板 ============ */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.kpi-card { background: linear-gradient(135deg, #f8faff, #fff); border: 1px solid #e8ecf0; border-radius: 10px; padding: 16px; }
+.kpi-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+.kpi-value { font-size: 28px; font-weight: 700; color: #1a1a1a; }
+.kpi-sub { font-size: 11px; color: #888; margin-top: 4px; }
+
+.chart-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-bottom: 24px; }
+.chart-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.chart-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.chart-title small { font-size: 11px; color: #aaa; font-weight: 400; }
+.bar-chart { display: flex; align-items: flex-end; gap: 14px; height: 200px; padding: 10px 0; }
+.bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bar { width: 100%; max-width: 46px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, #4f7cff, #7ba3ff); position: relative; transition: all .3s; cursor: pointer; }
+.bar:hover { opacity: .85; }
+.bar-val { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 600; color: #4f7cff; white-space: nowrap; }
+.bar-label { font-size: 11px; color: #666; text-align: center; }
+
+.matrix { position: relative; height: 230px; background: linear-gradient(135deg, #f0fff4 0%, #fffbea 50%, #fff5f5 100%); border-radius: 8px; border: 1px solid #e8ecf0; }
+.matrix-axis { position: absolute; font-size: 10px; color: #aaa; }
+.matrix-axis.x { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.matrix-axis.y { top: 50%; left: 8px; transform: translateY(-50%) rotate(-90deg); transform-origin: left center; }
+.bubble { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: transform .2s; }
+.bubble:hover { transform: scale(1.1); z-index: 2; }
+.bubble-p0 { background: rgba(229, 62, 62, .85); }
+.bubble-p1 { background: rgba(229, 160, 0, .85); }
+.bubble-p2 { background: rgba(56, 161, 105, .85); }
+.matrix-legend { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; font-size: 10px; }
+.matrix-legend span { display: flex; align-items: center; gap: 3px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* 优先改进 */
+.priority-list { display: flex; flex-direction: column; gap: 12px; }
+.priority-card { border: 1px solid #e8ecf0; border-radius: 10px; padding: 16px; display: flex; gap: 16px; align-items: flex-start; background: #fff; }
+.priority-card.p0 { border-left: 4px solid #e53e3e; }
+.priority-card.p1 { border-left: 4px solid #e5a000; }
+.priority-card.p2 { border-left: 4px solid #38a169; }
+.priority-badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; }
+.priority-card.p0 .priority-badge { background: #e53e3e; }
+.priority-card.p1 .priority-badge { background: #e5a000; }
+.priority-card.p2 .priority-badge { background: #38a169; }
+.priority-body { flex: 1; }
+.priority-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.priority-meta { font-size: 12px; color: #888; margin-bottom: 8px; }
+.priority-meta strong { color: #444; }
+.suggestion { background: #f8faff; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #444; line-height: 1.6; }
+.suggestion-label { font-size: 11px; color: #4f7cff; font-weight: 600; margin-bottom: 4px; }
+
+/* ============ PAGE 4: 竞品对比页 ============ */
+.comp-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.comp-tab { padding: 8px 14px; border-radius: 8px; border: 1px solid #e8ecf0; background: #fff; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.comp-tab.active { border-color: #4f7cff; background: #e8efff; color: #4f7cff; font-weight: 600; }
+.comp-tab .dot { width: 8px; height: 8px; border-radius: 50%; }
+.add-comp { padding: 8px 14px; border-radius: 8px; border: 1px dashed #c5cee0; background: transparent; cursor: pointer; font-size: 13px; color: #888; }
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+.compare-card { background: #fff; border: 1px solid #e8ecf0; border-radius: 10px; padding: 20px; }
+.radar-wrap { display: flex; justify-content: center; padding: 10px 0; }
+.radar-legend { display: flex; gap: 16px; justify-content: center; margin-top: 10px; font-size: 12px; }
+.legend-line { display: flex; align-items: center; gap: 5px; }
+.legend-line .swatch { width: 14px; height: 3px; border-radius: 2px; }
+.adv-list { display: flex; flex-direction: column; gap: 8px; }
+.adv-item { padding: 10px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.adv-item.advantage { background: #f0fff4; border-left: 3px solid #38a169; }
+.adv-item.disadvantage { background: #fff5f5; border-left: 3px solid #e53e3e; }
+.adv-label { font-weight: 600; font-size: 13px; }
+.adv-delta { font-size: 12px; }
+.advantage .adv-delta { color: #38a169; }
+.disadvantage .adv-delta { color: #e53e3e; }
+.gap-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.gap-item { padding: 12px; background: linear-gradient(135deg, #f8faff, #fff); border: 1px solid #e8ecf0; border-radius: 8px; }
+.gap-item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #4f7cff; }
+.gap-item-desc { font-size: 12px; color: #666; line-height: 1.5; }
+
+/* ============ PAGE 5: 设置与账号页 ============ */
+.settings-grid { display: grid; grid-template-columns: 240px 1fr; gap: 18px; }
+.settings-menu { background: #fff; border-radius: 12px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.04); height: fit-content; }
+.settings-menu-item { padding: 10px 14px; font-size: 13px; border-radius: 6px; cursor: pointer; color: #555; display: flex; align-items: center; gap: 8px; }
+.settings-menu-item:hover { background: #f5f7fa; }
+.settings-menu-item.active { background: #e8efff; color: #4f7cff; font-weight: 600; }
+.settings-content { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.settings-section { margin-bottom: 28px; }
+.settings-section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #f0f2f5; }
+.info-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 13px; border-bottom: 1px solid #fafbfc; }
+.info-row:last-child { border-bottom: none; }
+.info-label { color: #888; }
+.info-value { color: #333; font-weight: 500; }
+.current-plan { background: linear-gradient(135deg, #f8faff, #fff); border: 1px solid #e0e8ff; border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.plan-name { font-size: 20px; font-weight: 700; color: #4f7cff; }
+.usage-bar-bg { height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin-bottom: 8px; }
+.usage-bar-fill { height: 100%; background: linear-gradient(90deg, #e5a000, #fbbf24); border-radius: 5px; width: 84%; }
+.api-item { border: 1px solid #e8ecf0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.api-key { font-family: 'Courier New', monospace; font-size: 12px; color: #666; background: #f5f7fa; padding: 4px 8px; border-radius: 4px; }
+.team-member { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #e8ecf0; border-radius: 8px; margin-bottom: 8px; }
+.member-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4f7cff, #7ba3ff); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.member-info { flex: 1; }
+.member-name { font-size: 13px; font-weight: 600; }
+.member-email { font-size: 11px; color: #888; }
+.role-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; background: #f0f2f5; color: #555; }
+
+.section-divider { height: 1px; background: #f0f2f5; margin: 20px 0; }
+.time-switch { display: flex; gap: 4px; background: #f0f2f5; padding: 3px; border-radius: 6px; }
+.time-switch span { padding: 4px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; color: #666; }
+.time-switch span.active { background: #fff; color: #4f7cff; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-icon">🔍</span>
+    <span>差评洞察分析器</span>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage(0)">📥 数据导入</div>
+    <div class="nav-tab" onclick="showPage(1)">🤖 AI分类</div>
+    <div class="nav-tab" onclick="showPage(2)">📊 洞察报告</div>
+    <div class="nav-tab" onclick="showPage(3)">🔍 竞品对比</div>
+    <div class="nav-tab" onclick="showPage(4)">⚙️ 设置</div>
+  </div>
+  <div class="user-info">
+    <span class="usage-mini">本月 420/500</span>
+    <div class="user-avatar">李</div>
+  </div>
+</div>
+
+<!-- 主内容区 -->
+<div class="main">
+
+<!-- ============ PAGE 0: 数据导入页 ============ -->
+<div class="page active" id="page-0">
+  <div class="page-header">
+    <div class="page-title">数据导入</div>
+    <div class="page-subtitle">通过CSV文件或电商平台API导入商品差评数据</div>
+  </div>
+
+  <div class="import-grid">
+    <div class="card">
+      <div class="card-title">📁 CSV文件导入</div>
+      <div class="upload-zone" onclick="alert('打开文件选择对话框')">
+        <div class="upload-icon">📤</div>
+        <div class="upload-text">点击或拖拽CSV文件到此区域</div>
+        <div class="upload-hint">支持 .csv 格式，最大 100MB，UTF-8编码</div>
+        <button class="btn btn-primary" style="margin-top: 12px">选择文件</button>
+      </div>
+      <div style="margin-top: 12px; text-align: center;">
+        <a class="btn-ghost" style="font-size: 12px; cursor: pointer;">📥 下载标准导入模板</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔌 电商平台API导入</div>
+      <div class="platform-cards">
+        <div class="platform-card">
+          <div class="platform-icon" style="background:#ff5000;color:#fff">淘</div>
+          <div>
+            <div class="platform-name">淘宝/天猫</div>
+            <div class="platform-status">✓ 已授权</div>
+          </div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-icon" style="background:#e4393c;color:#fff">京</div>
+          <div>
+            <div class="platform-name">京东</div>
+            <div class="platform-status">✓ 已授权</div>
+          </div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-icon" style="background:#e45d2d;color:#fff">拼</div>
+          <div>
+            <div class="platform-name">拼多多</div>
+            <div style="font-size:11px;color:#888">未授权</div>
+          </div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-icon" style="background:#111;color:#fff">抖</div>
+          <div>
+            <div class="platform-name">抖音电商</div>
+            <div style="font-size:11px;color:#888">未授权</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-secondary" style="width:100%;margin-top:12px">+ 配置新的平台授权</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="justify-content: space-between;">
+      <span>📋 导入记录</span>
+      <div class="time-switch">
+        <span>近7天</span>
+        <span class="active">近30天</span>
+        <span>全部</span>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>导入时间</th>
+          <th>数据来源</th>
+          <th>数据条数</th>
+          <th>成功/失败</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2026-06-28 10:23</td>
+          <td>CSV文件 · 6月差评数据.csv</td>
+          <td>286</td>
+          <td>284 / 2</td>
+          <td><span class="record-status success">✓ 成功</span></td>
+          <td><a class="btn-ghost" style="font-size:12px">查看详情</a></td>
+        </tr>
+        <tr>
+          <td>2026-06-25 15:41</td>
+          <td>淘宝API · 蓝牙耳机Pro</td>
+          <td>420</td>
+          <td>420 / 0</td>
+          <td><span class="record-status success">✓ 成功</span></td>
+          <td><a class="btn-ghost" style="font-size:12px">查看详情</a></td>
+        </tr>
+        <tr>
+          <td>2026-06-20 09:15</td>
+          <td>京东API · 保温杯系列</td>
+          <td>294</td>
+          <td>294 / 0</td>
+          <td><span class="record-status success">✓ 成功</span></td>
+          <td><a class="btn-ghost" style="font-size:12px">查看详情</a></td>
+        </tr>
+        <tr>
+          <td>2026-06-15 11:08</td>
+          <td>CSV文件 · 5月汇总.csv</td>
+          <td>1,208</td>
+          <td>1,203 / 5</td>
+          <td><span class="record-status success">✓ 成功</span></td>
+          <td><a class="btn-ghost" style="font-size:12px">查看详情</a></td>
+        </tr>
+        <tr>
+          <td>2026-06-10 16:32</td>
+          <td>拼多多API · 运动鞋</td>
+          <td>0</td>
+          <td>0 / 0</td>
+          <td><span class="record-status failed">✕ 授权过期</span></td>
+          <td><a class="btn-ghost" style="font-size:12px">重新授权</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ PAGE 1: AI分类与确认页 ============ -->
+<div class="page" id="page-1">
+  <div class="page-header">
+    <div class="page-title">AI 分类与确认</div>
+    <div class="page-subtitle">查看AI分类结果，支持人工修正 · 共 1,000 条差评已分类</div>
+  </div>
+
+  <div class="analysis-header">
+    <div class="filter-bar">
+      <span class="filter-chip active">全部 1,000</span>
+      <span class="filter-chip">产品质量 342</span>
+      <span class="filter-chip">物流配送 198</span>
+      <span class="filter-chip">描述不符 156</span>
+      <span class="filter-chip">客服态度 89</span>
+      <span class="filter-chip">价格问题 72</span>
+      <span class="filter-chip">包装破损 68</span>
+      <span class="filter-chip">使用体验 55</span>
+      <span class="filter-chip" style="background:#fff5f5;color:#e53e3e">建议复核 23</span>
+    </div>
+    <button class="btn btn-primary">🚀 重新分析新数据</button>
+  </div>
+
+  <div class="card" style="padding: 0;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px"><input type="checkbox"></th>
+          <th>商品名称</th>
+          <th style="width:280px">差评原文</th>
+          <th>AI分类</th>
+          <th>情感</th>
+          <th>置信度</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>无线蓝牙耳机Pro</td>
+          <td>音质很差，有明显杂音，通话对方听不清</td>
+          <td><span class="tag tag-quality">产品质量</span></td>
+          <td><span class="sentiment sent-strong">● 强负面</span></td>
+          <td><span class="confidence conf-high">95%</span></td>
+          <td><span style="font-size:11px;color:#276749">✓ AI分类</span></td>
+          <td><button class="btn-ghost" style="font-size:12px">修正</button></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>保温杯500ml</td>
+          <td>物流太慢，等了一周，外包装压扁了</td>
+          <td><span class="tag tag-logistics">物流配送</span><span class="tag tag-package">包装破损</span></td>
+          <td><span class="sentiment sent-strong">● 强负面</span></td>
+          <td><span class="confidence conf-mid">78%</span></td>
+          <td><span style="font-size:11px;color:#276749">✓ AI分类</span></td>
+          <td><button class="btn-ghost" style="font-size:12px">修正</button></td>
+        </tr>
+        <tr style="background:#fffbf0">
+          <td><input type="checkbox"></td>
+          <td>手机壳定制款</td>
+          <td>跟图片差太多了，颜色完全不对</td>
+          <td><span class="tag tag-desc">描述不符</span></td>
+          <td><span class="sentiment sent-mid">● 中负面</span></td>
+          <td><span class="confidence conf-low">62%</span></td>
+          <td><span style="font-size:11px;color:#e5a000">⚠ 建议复核</span></td>
+          <td><button class="btn-ghost" style="font-size:12px">修正</button></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>电动牙刷T3</td>
+          <td>客服态度很差，问什么都不耐烦</td>
+          <td><span class="tag tag-service">客服态度</span></td>
+          <td><span class="sentiment sent-strong">● 强负面</span></td>
+          <td><span class="confidence conf-high">91%</span></td>
+          <td><span style="font-size:11px;color:#276749">✓ AI分类</span></td>
+          <td><button class="btn-ghost" style="font-size:12px">修正</button></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>运动鞋 男款</td>
+          <td>鞋底很硬，穿了脚疼，根本不适合跑步</td>
+          <td><span class="tag tag-experience">使用体验</span></td>
+          <td><span class="sentiment sent-mid">● 中负面</span></td>
+          <td><span class="confidence conf-high">88%</span></td>
+          <td><span style="font-size:11px;color:#276749">✓ 人工确认</span></td>
+          <td><button class="btn-ghost" style="font-size:12px">修正</button></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>无线蓝牙耳机Pro</td>
+          <td>用了两天就充不进电了，质量堪忧</td>
+          <td><span class="tag tag-quality">产品质量</span></td>
+          <td><span class="sentiment sent-strong">● 强负面</span></td>
+          <td><span class="confidence conf-high">97%</span></td>
+          <td><span style="font-size:11px;color:#276749">✓ AI分类</span></td>
+          <td><button class="btn-ghost" style="font-size:12px">修正</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f2f5;">
+      <span style="font-size:12px;color:#888">共 1,000 条 · 已确认 856 条 · 待确认 121 条 · 建议复核 23 条</span>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary">全部确认</button>
+        <button class="btn btn-primary" onclick="showPage(2)">查看洞察报告 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2: 洞察报告看板 ============ -->
+<div class="page" id="page-2">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div class="page-title">📊 差评洞察报告</div>
+      <div class="page-subtitle">基于1,000条已确认差评数据的洞察分析</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="time-switch">
+        <span>近7天</span>
+        <span class="active">近30天</span>
+        <span>近90天</span>
+      </div>
+      <button class="btn btn-secondary">📥 导出</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">差评总数</div>
+      <div class="kpi-value">1,000</div>
+      <div class="kpi-sub">较上周期 <span style="color:#e53e3e">↑ 12.5%</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">分类类别数</div>
+      <div class="kpi-value">8</div>
+      <div class="kpi-sub">覆盖全部标签体系</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Top 1 问题</div>
+      <div class="kpi-value" style="font-size:20px;color:#e53e3e">产品质量</div>
+      <div class="kpi-sub">占比 34.2% · 342条</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">平均情感强度</div>
+      <div class="kpi-value" style="color:#e53e3e;font-size:22px">强负面</div>
+      <div class="kpi-sub">强负面占比 58%</div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="chart-title">问题频次排行 <small>按分类标签统计</small></div>
+      <div class="bar-chart">
+        <div class="bar-item"><div class="bar" style="height:100%"><span class="bar-val">342</span></div><div class="bar-label">产品<br>质量</div></div>
+        <div class="bar-item"><div class="bar" style="height:58%"><span class="bar-val">198</span></div><div class="bar-label">物流<br>配送</div></div>
+        <div class="bar-item"><div class="bar" style="height:46%"><span class="bar-val">156</span></div><div class="bar-label">描述<br>不符</div></div>
+        <div class="bar-item"><div class="bar" style="height:26%"><span class="bar-val">89</span></div><div class="bar-label">客服<br>态度</div></div>
+        <div class="bar-item"><div class="bar" style="height:21%"><span class="bar-val">72</span></div><div class="bar-label">价格<br>问题</div></div>
+        <div class="bar-item"><div class="bar" style="height:20%"><span class="bar-val">68</span></div><div class="bar-label">包装<br>破损</div></div>
+        <div class="bar-item"><div class="bar" style="height:16%"><span class="bar-val">55</span></div><div class="bar-label">使用<br>体验</div></div>
+        <div class="bar-item"><div class="bar" style="height:6%"><span class="bar-val">20</span></div><div class="bar-label">其他</div></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">影响程度矩阵 <small>X=频次 Y=影响</small></div>
+      <div class="matrix">
+        <div class="matrix-axis x">频次 →</div>
+        <div class="matrix-axis y">影响程度 →</div>
+        <div class="matrix-legend">
+          <span><span class="legend-dot" style="background:#e53e3e"></span>P0</span>
+          <span><span class="legend-dot" style="background:#e5a000"></span>P1</span>
+          <span><span class="legend-dot" style="background:#38a169"></span>P2</span>
+        </div>
+        <div class="bubble bubble-p0" style="width:68px;height:68px;top:18px;right:20px">产品质量</div>
+        <div class="bubble bubble-p0" style="width:52px;height:52px;top:65px;right:105px">物流配送</div>
+        <div class="bubble bubble-p1" style="width:44px;height:44px;top:85px;left:40%">描述不符</div>
+        <div class="bubble bubble-p1" style="width:34px;height:34px;top:35px;left:28%">客服态度</div>
+        <div class="bubble bubble-p2" style="width:28px;height:28px;bottom:45px;left:20%">价格</div>
+        <div class="bubble bubble-p2" style="width:26px;height:26px;bottom:55px;left:38%">包装</div>
+        <div class="bubble bubble-p2" style="width:22px;height:22px;bottom:65px;left:55%">体验</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 优先改进建议</div>
+    <div class="priority-list">
+      <div class="priority-card p0">
+        <span class="priority-badge">P0</span>
+        <div class="priority-body">
+          <div class="priority-title">产品质量问题</div>
+          <div class="priority-meta">占比 <strong>34.2%</strong> · 342条 · 强负面 72%</div>
+          <div class="suggestion">
+            <div class="suggestion-label">💡 AI建议</div>
+            1) 加强出厂质检，增加音频测试工序<br>
+            2) 更换充电口供应商或强化接口耐用性测试<br>
+            3) 建立产品退货原因追踪机制
+          </div>
+        </div>
+      </div>
+      <div class="priority-card p0">
+        <span class="priority-badge">P0</span>
+        <div class="priority-body">
+          <div class="priority-title">物流配送体验</div>
+          <div class="priority-meta">占比 <strong>19.8%</strong> · 198条 · 强负面 48%</div>
+          <div class="suggestion">
+            <div class="suggestion-label">💡 AI建议</div>
+            1) 优化合作物流商或增设区域分仓<br>
+            2) 加强外包装防护（增加缓冲材料）<br>
+            3) 商品页明确标注预计到货时间
+          </div>
+        </div>
+      </div>
+      <div class="priority-card p1">
+        <span class="priority-badge">P1</span>
+        <div class="priority-body">
+          <div class="priority-title">商品描述不符 + 客服态度</div>
+          <div class="priority-meta">合计占比 <strong>24.5%</strong> · 建议重新拍摄商品图片 + 客服培训</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:16px">
+      <button class="btn btn-primary" onclick="showPage(3)">进入竞品对比 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 3: 竞品对比页 ============ -->
+<div class="page" id="page-3">
+  <div class="page-header">
+    <div class="page-title">🔍 竞品差评对比分析</div>
+    <div class="page-subtitle">将自家店铺与竞品的差评分类结果对比，发现差异化改进机会</div>
+  </div>
+
+  <div class="comp-tabs">
+    <div class="comp-tab active"><span class="dot" style="background:#4f7cff"></span>竞品A：XX品牌旗舰店</div>
+    <div class="comp-tab"><span class="dot" style="background:#e5a000"></span>竞品B：YY品牌官方店</div>
+    <div class="comp-tab"><span class="dot" style="background:#38a169"></span>竞品C：ZZ自营店</div>
+    <button class="add-comp">+ 添加竞品</button>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="chart-title">📊 分类标签对比</div>
+      <div class="radar-wrap">
+        <svg width="300" height="230" viewBox="0 0 300 230">
+          <g stroke="#e8ecf0" fill="none">
+            <polygon points="150,30 245,85 245,165 150,220 55,165 55,85"/>
+            <polygon points="150,60 210,95 210,155 150,190 90,155 90,95"/>
+            <polygon points="150,90 175,105 175,145 150,160 125,145 125,105"/>
+          </g>
+          <g stroke="#d0d5dd" stroke-dasharray="2,2">
+            <line x1="150" y1="30" x2="150" y2="220"/>
+            <line x1="55" y1="85" x2="245" y2="165"/>
+            <line x1="55" y1="165" x2="245" y2="85"/>
+          </g>
+          <polygon points="150,55 197,102 185,162 150,178 118,158 115,102"
+                   fill="rgba(79,124,255,0.2)" stroke="#4f7cff" stroke-width="2"/>
+          <polygon points="150,70 210,108 187,166 150,190 112,154 108,100"
+                   fill="rgba(229,160,0,0.15)" stroke="#e5a000" stroke-width="2"/>
+          <g font-size="10" fill="#666" text-anchor="middle">
+            <text x="150" y="22">产品质量</text>
+            <text x="255" y="85">物流配送</text>
+            <text x="255" y="170">描述不符</text>
+            <text x="150" y="238">客服态度</text>
+            <text x="45" y="170">价格问题</text>
+            <text x="45" y="85">包装破损</text>
+          </g>
+        </svg>
+      </div>
+      <div class="radar-legend">
+        <div class="legend-line"><span class="swatch" style="background:#4f7cff"></span>我的店铺</div>
+        <div class="legend-line"><span class="swatch" style="background:#e5a000"></span>竞品A</div>
+      </div>
+    </div>
+
+    <div class="compare-card">
+      <div class="chart-title">⚖️ 优势与劣势识别</div>
+      <div class="adv-list">
+        <div class="adv-item advantage">
+          <div>
+            <div class="adv-label">✅ 优势：产品质量</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">我的占比34% vs 竞品28%</div>
+          </div>
+          <div class="adv-delta">相对更好</div>
+        </div>
+        <div class="adv-item advantage">
+          <div>
+            <div class="adv-label">✅ 优势：价格问题</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">我的占比7% vs 竞品9%</div>
+          </div>
+          <div class="adv-delta">低 2%</div>
+        </div>
+        <div class="adv-item disadvantage">
+          <div>
+            <div class="adv-label">⚠ 劣势：物流配送</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">我的20% vs 竞品25%</div>
+          </div>
+          <div class="adv-delta">需改进</div>
+        </div>
+        <div class="adv-item disadvantage">
+          <div>
+            <div class="adv-label">⚠ 劣势：客服态度</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">我的9% vs 竞品12%</div>
+          </div>
+          <div class="adv-delta">低 3%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💎 市场空白发现</div>
+    <div class="gap-list">
+      <div class="gap-item">
+        <div class="gap-item-title">🔹 竞品痛点未覆盖</div>
+        <div class="gap-item-desc">竞品A"售后服务"差评占比15%，您几乎为零——这是差异化优势，建议在营销中突出</div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-item-title">🔹 共性痛点机会</div>
+        <div class="gap-item-desc">两家"描述不符"问题都突出（16% vs 18%），率先解决可获得竞争优势</div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-item-title">🔹 蓝海改进方向</div>
+        <div class="gap-item-desc">竞品使用体验差评11%（您5%），可加强产品体验设计形成壁垒</div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-item-title">🔹 警惕风险信号</div>
+        <div class="gap-item-desc">竞品A"产品质量"差评近30天环比下降8%，竞品在改进，需加快自身节奏</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 4: 设置与账号页 ============ -->
+<div class="page" id="page-4">
+  <div class="page-header">
+    <div class="page-title">⚙️ 设置与账号</div>
+    <div class="page-subtitle">管理套餐、API密钥、团队协作等系统设置</div>
+  </div>
+
+  <div class="settings-grid">
+    <div class="settings-menu">
+      <div class="settings-menu-item active">💳 套餐与用量</div>
+      <div class="settings-menu-item">🔑 API密钥管理</div>
+      <div class="settings-menu-item">👥 团队协作</div>
+      <div class="settings-menu-item">🏷️ 自定义标签</div>
+      <div class="settings-menu-item">🔔 通知设置</div>
+    </div>
+
+    <div class="settings-content">
+      <div class="settings-section">
+        <div class="settings-section-title">当前套餐</div>
+        <div class="current-plan">
+          <div>
+            <div style="font-size:12px;color:#888;margin-bottom:4px">当前方案</div>
+            <div class="plan-name">免费版</div>
+            <div style="font-size:12px;color:#888;margin-top:4px">激活时间：2026-05-01 · 下次结算：2026-07-01</div>
+          </div>
+          <button class="btn btn-primary">升级专业版</button>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <span style="font-size:13px;font-weight:600">本月用量</span>
+            <span style="font-size:12px;color:#888">2026-06-01 ~ 2026-06-30</span>
+          </div>
+          <div class="usage-bar-bg"><div class="usage-bar-fill"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-top:6px">
+            <span>已使用 <strong style="color:#e5a000">420 条</strong></span>
+            <span>剩余 80 条 / 总额度 500 条</span>
+          </div>
+          <div style="margin-top:10px;padding:10px 12px;background:#fffbea;border:1px solid #fef3c7;border-radius:6px;font-size:12px;color:#92400e">
+            ⚠️ 您本月免费额度已使用 <strong>84%</strong>，即将耗尽。建议升级专业版，享受无限分析额度。
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="border:1px solid #e8ecf0;border-radius:8px;padding:14px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">免费版 · ¥0/月</div>
+            <div style="font-size:12px;color:#666;line-height:1.7">
+              ✓ 每月分析 500 条差评<br>
+              ✓ 基础洞察报告<br>
+              ✓ CSV文件导入<br>
+              <span style="color:#bbb">— 竞品对比分析<br>
+              — 趋势分析<br>
+              — 团队协作</span>
+            </div>
+            <button class="btn btn-secondary" style="width:100%;margin-top:10px" disabled>当前方案</button>
+          </div>
+          <div style="border:2px solid #4f7cff;border-radius:8px;padding:14px;background:linear-gradient(135deg,#f8faff,#fff);position:relative">
+            <span style="position:absolute;top:-9px;right:12px;background:#4f7cff;color:#fff;font-size:11px;padding:2px 10px;border-radius:10px">推荐</span>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">专业版 · ¥79/月</div>
+            <div style="font-size:12px;color:#666;line-height:1.7">
+              ✓ <strong>不限差评分析数量</strong><br>
+              ✓ 完整报告 + 趋势分析<br>
+              ✓ CSV + 平台API双导入<br>
+              ✓ 竞品对比分析<br>
+              ✓ 优先改进追踪<br>
+              ✓ 团队协作（最多5人）
+            </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:10px">立即升级</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">🔑 API密钥管理</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:#555">LLM 分类引擎</div>
+        <div class="api-item">
+          <div>
+            <div style="font-size:13px;font-weight:600">OpenAI GPT-4</div>
+            <div class="api-key" style="margin-top:4px">sk-••••••••••••••••••••3f8a</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px">测试</button>
+            <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px">修改</button>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin:14px 0 8px;color:#555">电商平台API</div>
+        <div class="api-item">
+          <div>
+            <div style="font-size:13px;font-weight:600">淘宝/天猫开放平台</div>
+            <div style="font-size:11px;color:#38a169;margin-top:2px">✓ 已授权 · 有效期至 2027-01-15</div>
+          </div>
+          <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px">解绑</button>
+        </div>
+        <div class="api-item">
+          <div>
+            <div style="font-size:13px;font-weight:600">京东宙斯平台</div>
+            <div style="font-size:11px;color:#38a169;margin-top:2px">✓ 已授权 · 有效期至 2026-12-20</div>
+          </div>
+          <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px">解绑</button>
+        </div>
+        <button class="btn btn-ghost" style="font-size:12px;margin-top:8px">+ 添加新的API密钥</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">👥 团队协作</div>
+        <div style="padding:10px 12px;background:#f8faff;border:1px solid #e0e8ff;border-radius:6px;font-size:12px;color:#4f7cff;margin-bottom:12px">
+          💡 团队协作是专业版功能，升级后可邀请最多5名团队成员
+        </div>
+        <div class="team-member">
+          <div class="member-avatar">李</div>
+          <div class="member-info">
+            <div class="member-name">李小明（我）</div>
+            <div class="member-email">lixiaoming@example.com</div>
+          </div>
+          <span class="role-tag">管理员</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showPage(idx) {
+  document.querySelectorAll('.page').forEach((p, i) => {
+    p.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+  window.scrollTo(0, 0);
+}
+
+// Filter chips interaction
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    this.parentElement.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Time switch interaction
+document.querySelectorAll('.time-switch').forEach(sw => {
+  sw.querySelectorAll('span').forEach(s => {
+    s.addEventListener('click', function() {
+      sw.querySelectorAll('span').forEach(x => x.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+});
+
+// Comp tabs interaction
+document.querySelectorAll('.comp-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.comp-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Settings menu interaction
+document.querySelectorAll('.settings-menu-item').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.settings-menu-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

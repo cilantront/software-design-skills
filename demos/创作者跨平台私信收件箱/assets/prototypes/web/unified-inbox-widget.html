@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>统一收件箱 - Widget原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #F3F4F6; padding: 24px; }
+.widget { background: white; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; max-width: 900px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.toolbar { padding: 12px 16px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 12px; }
+.search-box { flex: 1; padding: 6px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; background: #F9FAFB; }
+.filter-chip { padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; background: #F3F4F6; color: #6B7280; }
+.filter-chip.active { background: #EEF2FF; color: #4F46E5; }
+.msg-list { }
+.msg-item { display: flex; padding: 12px 16px; gap: 12px; border-bottom: 1px solid #F3F4F6; cursor: pointer; }
+.msg-item:hover { background: #F9FAFB; }
+.msg-item.unread { background: #EEF2FF; }
+.msg-item.high-value { border-left: 3px solid #F59E0B; }
+.msg-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 600; }
+.msg-content { flex: 1; min-width: 0; }
+.msg-top { display: flex; align-items: center; gap: 6px; }
+.msg-name { font-size: 14px; font-weight: 500; }
+.msg-platform { font-size: 11px; padding: 1px 4px; border-radius: 3px; background: #F3F4F6; color: #6B7280; }
+.msg-time { margin-left: auto; font-size: 11px; color: #9CA3AF; }
+.msg-preview { font-size: 13px; color: #6B7280; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-tags { display: flex; gap: 4px; margin-top: 4px; }
+.tag { font-size: 11px; padding: 1px 6px; border-radius: 3px; }
+.tag-biz { background: #DBEAFE; color: #1D4ED8; }
+.tag-fan { background: #D1FAE5; color: #065F46; }
+.tag-hv { background: #FEF3C7; color: #92400E; font-weight: 500; }
+.tag-harass { background: #FEE2E2; color: #991B1B; }
+.empty-state { padding: 40px; text-align: center; color: #9CA3AF; display: none; }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="toolbar">
+    <input class="search-box" placeholder="🔍 搜索私信内容、发送者昵称..." />
+    <span class="filter-chip active">全部</span>
+    <span class="filter-chip">商务合作</span>
+    <span class="filter-chip">粉丝咨询</span>
+    <span class="filter-chip">互推邀约</span>
+    <span class="filter-chip">未读</span>
+  </div>
+  <div class="msg-list">
+    <div class="msg-item high-value unread">
+      <div class="msg-avatar" style="background:#3B82F6">星</div>
+      <div class="msg-content">
+        <div class="msg-top"><span class="msg-name">星巴克品牌合作</span><span class="msg-platform">📕 小红书</span><span class="msg-time">10:23</span></div>
+        <div class="msg-preview">您好，我们是星巴克市场部，希望邀请您合作推广春季新品系列...</div>
+        <div class="msg-tags"><span class="tag tag-biz">商务合作</span><span class="tag tag-hv">⭐ 高价值</span></div>
+      </div>
+    </div>
+    <div class="msg-item unread">
+      <div class="msg-avatar" style="background:#10B981">美</div>
+      <div class="msg-content">
+        <div class="msg-top"><span class="msg-name">美妆小达人Lisa</span><span class="msg-platform">🎵 抖音</span><span class="msg-time">09:45</span></div>
+        <div class="msg-preview">亲亲，你用的那个口红色号是什么呀？好想去买！</div>
+        <div class="msg-tags"><span class="tag tag-fan">粉丝咨询</span></div>
+      </div>
+    </div>
+    <div class="msg-item">
+      <div class="msg-avatar" style="background:#F59E0B">科</div>
+      <div class="msg-content">
+        <div class="msg-top"><span class="msg-name">科技测评小王</span><span class="msg-platform">📺 B站</span><span class="msg-time">昨天</span></div>
+        <div class="msg-preview">你好！想邀请你一起做一期联合测评视频，互相导流~</div>
+        <div class="msg-tags"><span class="tag" style="background:#EDE9FE; color:#5B21B6;">互推邀约</span></div>
+      </div>
+    </div>
+    <div class="msg-item">
+      <div class="msg-avatar" style="background:#6B7280">用</div>
+      <div class="msg-content">
+        <div class="msg-top"><span class="msg-name">用户_8273645</span><span class="msg-platform">📕 小红书</span><span class="msg-time">昨天</span></div>
+        <div class="msg-preview">加我微信xxxxx，赚钱机会不要错过...</div>
+        <div class="msg-tags"><span class="tag tag-harass">恶意骚扰</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

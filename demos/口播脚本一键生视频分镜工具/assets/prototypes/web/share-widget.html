@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>分享组件原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; padding: 40px; }
+.widget-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.share-widget { max-width: 480px; background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.share-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.share-title { font-size: 16px; font-weight: 600; }
+.link-box { display: flex; gap: 8px; padding: 10px; background: #f5f7fa; border-radius: 8px; margin-bottom: 16px; }
+.link-box input { flex: 1; border: none; background: none; font-size: 13px; color: #333; }
+.link-box input:focus { outline: none; }
+.copy-btn { padding: 6px 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.section-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #333; }
+.qr-area { display: flex; gap: 16px; align-items: center; padding: 16px; background: #f5f7fa; border-radius: 10px; margin-bottom: 16px; }
+.qr-code { width: 100px; height: 100px; background: #fff; border: 1px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #999; flex-shrink: 0; }
+.qr-info { flex: 1; }
+.qr-info h4 { font-size: 13px; margin-bottom: 4px; }
+.qr-info p { font-size: 11px; color: #999; margin-bottom: 8px; }
+.dl-btn { padding: 5px 12px; border: 1px solid #667eea; color: #667eea; border-radius: 6px; font-size: 11px; background: #fff; cursor: pointer; }
+.perm-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.perm-btn { flex: 1; padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px; text-align: center; font-size: 12px; cursor: pointer; background: #fff; }
+.perm-btn.selected { border-color: #667eea; background: #f0f2ff; color: #667eea; }
+.hint { font-size: 11px; color: #999; text-align: center; }
+</style>
+</head>
+<body>
+<div class="widget-title">🔗 分享组件 Widget</div>
+<div class="share-widget">
+  <div class="share-header">
+    <span>🔗</span>
+    <div class="share-title">分享分镜板</div>
+  </div>
+
+  <div class="section-title">📋 分享链接</div>
+  <div class="link-box">
+    <input value="https://storyboard.ai/share/abc123xyz" readonly />
+    <button class="copy-btn">复制</button>
+  </div>
+
+  <div class="section-title">🔒 访问权限</div>
+  <div class="perm-row">
+    <div class="perm-btn selected">🌐 公开访问</div>
+    <div class="perm-btn">🔑 密码访问</div>
+    <div class="perm-btn">👥 指定人</div>
+  </div>
+
+  <div class="section-title">📱 二维码</div>
+  <div class="qr-area">
+    <div class="qr-code">
+      <div style="text-align:center;">
+        <div style="font-size:28px;">⬜</div>
+        <div>二维码</div>
+      </div>
+    </div>
+    <div class="qr-info">
+      <h4>扫码查看分镜板</h4>
+      <p>有效期 30 天 · 当前为公开访问</p>
+      <button class="dl-btn">📥 下载二维码图片</button>
+    </div>
+  </div>
+
+  <div class="hint">💡 分享后，他人可查看分镜板内容，但不可编辑</div>
+</div>
+</body>
+</html>

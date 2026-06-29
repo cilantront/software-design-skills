@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>物品清单 - 搬家物品清单与进度跟踪器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #F8F9FA; color: #2C3E50; max-width: 375px; margin: 0 auto; min-height: 100vh; padding-bottom: 70px; }
+/* Nav */
+.nav-bar { background: #fff; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F0F2F5; position: sticky; top: 0; z-index: 10; }
+.nav-bar .back { font-size: 20px; cursor: pointer; text-decoration: none; color: #2C3E50; }
+.nav-bar .task-info { flex: 1; }
+.nav-bar .task-info h2 { font-size: 15px; font-weight: 600; }
+.nav-bar .task-info .sub { font-size: 11px; color: #95A5A6; }
+.nav-bar .progress-badge { background: #ECFDF5; color: #10B981; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+/* Tabs */
+.tabs { display: flex; background: #fff; border-bottom: 1px solid #F0F2F5; padding: 0 16px; }
+.tab { padding: 12px 0; margin-right: 24px; font-size: 14px; color: #95A5A6; cursor: pointer; position: relative; text-decoration: none; }
+.tab.active { color: #4A90D9; font-weight: 600; }
+.tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #4A90D9; border-radius: 1px; }
+/* Filter Bar */
+.filter-bar { display: flex; gap: 8px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #F0F2F5; align-items: center; }
+.filter-chip { padding: 6px 12px; border-radius: 14px; font-size: 12px; background: #F0F2F5; color: #2C3E50; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.filter-chip.active { background: #EFF6FF; color: #4A90D9; }
+.search-box { flex: 1; min-width: 0; }
+.search-box input { width: 100%; border: 1px solid #E5E7EB; border-radius: 14px; padding: 6px 12px; font-size: 12px; outline: none; }
+/* Room Group */
+.room-group { background: #fff; margin: 8px 0; }
+.room-header { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; gap: 8px; }
+.room-header .toggle { font-size: 12px; color: #95A5A6; transition: transform 0.2s; }
+.room-header .room-icon { font-size: 18px; }
+.room-header .room-name { font-size: 14px; font-weight: 600; flex: 1; }
+.room-header .room-stats { font-size: 11px; color: #95A5A6; }
+.room-header .room-progress { font-size: 12px; font-weight: 600; color: #10B981; }
+/* Item Row */
+.item-row { display: flex; align-items: center; padding: 10px 16px 10px 44px; border-top: 1px solid #F5F7FA; }
+.item-row .item-name { flex: 1; font-size: 14px; }
+.item-row .item-qty { font-size: 11px; color: #95A5A6; margin-left: 4px; }
+.status-tag { padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.status-pack { background: #ECFDF5; color: #10B981; }
+.status-discard { background: #FEF2F2; color: #EF4444; }
+.status-donate { background: #EFF6FF; color: #3B82F6; }
+.status-special { background: #FFFBEB; color: #F59E0B; }
+.status-pending { background: #F3F4F6; color: #9CA3AF; }
+.item-row .more-btn { margin-left: 8px; font-size: 16px; color: #C0C4CC; cursor: pointer; }
+/* Add bar */
+.add-bar { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 375px; background: #fff; padding: 10px 16px; border-top: 1px solid #F0F2F5; display: flex; gap: 10px; }
+.add-btn { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.add-btn.primary { background: #4A90D9; color: #fff; }
+.add-btn.secondary { background: #F0F7FF; color: #4A90D9; }
+/* Bottom Nav */
+.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 375px; background: #fff; border-top: 1px solid #F0F2F5; display: flex; padding: 8px 0; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+.nav-item { flex: 1; text-align: center; cursor: pointer; text-decoration: none; color: inherit; }
+.nav-item .nav-icon { font-size: 20px; }
+.nav-item .nav-label { font-size: 10px; color: #95A5A6; }
+.nav-item.active .nav-label { color: #4A90D9; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="nav-bar">
+  <a href="01-home.html" class="back">←</a>
+  <div class="task-info">
+    <h2>搬家去朝阳区新家</h2>
+    <div class="sub">📅 2026-07-01 · 还有2天</div>
+  </div>
+  <div class="progress-badge">68%</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <a href="03-checklist.html" class="tab active">📋 物品清单</a>
+  <a href="05-timeline.html" class="tab">📅 时间线</a>
+  <a href="07-boxes.html" class="tab">📦 打包箱</a>
+  <a href="06-dashboard.html" class="tab">📊 进度</a>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <div class="filter-chip active">全部房间 ▾</div>
+  <div class="filter-chip">全部状态 ▾</div>
+  <div class="search-box"><input type="text" placeholder="🔍 搜索物品"></div>
+</div>
+
+<!-- Room: 卧室 (expanded) -->
+<div class="room-group">
+  <div class="room-header">
+    <span class="toggle">▼</span>
+    <span class="room-icon">🛏</span>
+    <span class="room-name">卧室</span>
+    <span class="room-stats">11/12件</span>
+    <span class="room-progress">92%</span>
+  </div>
+  <div class="item-row">
+    <span class="item-name">床</span>
+    <span class="status-tag status-special">⚡ 单独搬运</span>
+    <span class="more-btn">···</span>
+  </div>
+  <div class="item-row">
+    <span class="item-name">衣柜</span>
+    <span class="status-tag status-special">⚡ 单独搬运</span>
+    <span class="more-btn">···</span>
+  </div>
+  <div class="item-row">
+    <span class="item-name">冬季衣物</span>
+    <span class="item-qty">×5</span>
+    <span class="status-tag status-pack">▣ 打包带走</span>
+    <span class="more-btn">···</span>
+  </div>
+  <div class="item-row">
+    <span class="item-name">换季被褥</span>
+    <span class="item-qty">×3</span>
+    <span class="status-tag status-pack">▣ 打包带走</span>
+    <span class="more-btn">···</span>
+  </div>
+  <div class="item-row">
+    <span class="item-name">床头柜</span>
+    <span class="status-tag status-pack">▣ 打包带走</span>
+    <span class="more-btn">···</span>
+  </div>
+  <div class="item-row">
+    <span class="item-name">旧杂志</span>
+    <span class="item-qty">×8</span>
+    <span class="status-tag status-discard">✕ 丢弃</span>
+    <span class="more-btn">···</span>
+  </div>
+  <div class="item-row">
+    <span class="item-name">旧衣服（不穿的）</span>
+    <span class="item-qty">×6</span>
+    <span class="status-tag status-donate">♡ 捐赠</span>
+    <span class="more-btn">···</span>
+  </div>
+  <div class="item-row">
+    <span class="item-name">窗帘</span>
+    <span class="status-tag status-pack">▣ 打包带走</span>
+    <span class="more-btn">···</span>
+  </div>
+</div>
+
+<!-- Room: 厨房 (collapsed) -->
+<div class="room-group">
+  <div class="room-header">
+    <span class="toggle">▶</span>
+    <span class="room-icon">🍳</span>
+    <span class="room-name">厨房</span>
+    <span class="room-stats">5/8件</span>
+    <span class="room-progress" style="color:#4A90D9">60%</span>
+  </div>
+</div>
+
+<!-- Room: 客厅 (collapsed) -->
+<div class="room-group">
+  <div class="room-header">
+    <span class="toggle">▶</span>
+    <span class="room-icon">🛋</span>
+    <span class="room-name">客厅</span>
+    <span class="room-stats">3/6件</span>
+    <span class="room-progress" style="color:#4A90D9">50%</span>
+  </div>
+</div>
+
+<!-- Room: 书房 (collapsed) -->
+<div class="room-group">
+  <div class="room-header">
+    <span class="toggle">▶</span>
+    <span class="room-icon">📚</span>
+    <span class="room-name">书房</span>
+    <span class="room-stats">2/5件</span>
+    <span class="room-progress" style="color:#4A90D9">40%</span>
+  </div>
+</div>
+
+<!-- Room: 卫生间 (collapsed) -->
+<div class="room-group">
+  <div class="room-header">
+    <span class="toggle">▶</span>
+    <span class="room-icon">🚿</span>
+    <span class="room-name">卫生间</span>
+    <span class="room-stats">4/4件</span>
+    <span class="room-progress">100%</span>
+  </div>
+</div>
+
+<!-- Add Bar -->
+<div class="add-bar">
+  <button class="add-btn primary">＋ 添加物品</button>
+  <button class="add-btn secondary">＋ 添加房间</button>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <a href="01-home.html" class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">首页</div></a>
+  <a href="06-dashboard.html" class="nav-item"><div class="nav-icon">📊</div><div class="nav-label">进度</div></a>
+  <a href="09-profile.html" class="nav-item"><div class="nav-icon">👤</div><div class="nav-label">我的</div></a>
+</div>
+</body>
+</html>

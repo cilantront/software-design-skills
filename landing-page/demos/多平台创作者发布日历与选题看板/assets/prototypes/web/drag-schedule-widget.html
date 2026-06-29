@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拖拽排期</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #EEF2FF;
+            --bg: #F9FAFB;
+            --surface: #FFFFFF;
+            --border: #E5E7EB;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --xiaohongshu: #FF2442;
+            --bilibili: #FB7299;
+            --douyin: #000000;
+            --wechat-mp: #07C160;
+            --shipinhao: #FA9D3B;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg);
+            color: var(--text-primary);
+            padding: var(--spacing-md);
+        }
+
+        .drag-widget {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .widget-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .hint-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--primary-light);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+        }
+
+        .drag-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--spacing-md);
+            min-height: 500px;
+        }
+
+        /* Left Panel - Topic Cards */
+        .topics-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+        }
+
+        .topic-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+            cursor: grab;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .topic-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+            border-color: var(--primary);
+        }
+
+        .topic-card.dragging {
+            opacity: 0.7;
+            box-shadow: var(--shadow-lg);
+            transform: rotate(-2deg) scale(1.02);
+            z-index: 100;
+        }
+
+        .drag-handle {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .topic-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-primary);
+        }
+
+        .topic-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .platform-icon-small {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Right Panel - Calendar Grid */
+        .calendar-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .week-nav {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .nav-button {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: var(--surface);
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: var(--bg);
+            border-color: var(--primary);
+        }
+
+        .week-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .grid-header-cell {
+            background: var(--bg);
+            padding: var(--spacing-sm);
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .grid-row-label {
+            background: var(--bg);
+            padding: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .platform-label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .grid-cell {
+            background: var(--surface);
+            min-height: 80px;
+            padding: var(--spacing-xs);
+            position: relative;
+            transition: background 0.2s;
+        }
+
+        .grid-cell.drop-target {
+            background: var(--primary-light);
+            border: 2px dashed var(--primary);
+        }
+
+        .scheduled-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            font-size: 11px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .scheduled-time {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .recommendation-badge {
+            display: inline-block;
+            background: #D1FAE5;
+            color: #065F46;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="drag-widget">
+        <div class="widget-header">
+            <h2 class="widget-title">🗓️ 拖拽排期</h2>
+            <span class="hint-text">💡 提示：从左侧拖动选题卡片到右侧日历格子中</span>
+        </div>
+
+        <div class="drag-container">
+            <!-- Left Panel: Topic Cards -->
+            <div class="topics-panel">
+                <h3 class="panel-title">待排期选题</h3>
+
+                <div class="topic-card" draggable="true" id="topic1">
+                    <div class="drag-handle">⋮⋮ 拖动</div>
+                    <div class="topic-name">夏日防晒好物推荐</div>
+                    <div class="topic-meta">
+                        <span class="platform-icon-small" style="background: var(--xiaohongshu);">红</span>
+                        <span>小红书</span>
+                    </div>
+                </div>
+
+                <div class="topic-card" draggable="true" id="topic2">
+                    <div class="drag-handle">⋮⋮ 拖动</div>
+                    <div class="topic-name">办公室舞蹈挑战</div>
+                    <div class="topic-meta">
+                        <span class="platform-icon-small" style="background: var(--douyin);">抖</span>
+                        <span>抖音</span>
+                    </div>
+                </div>
+
+                <div class="topic-card" draggable="true" id="topic3">
+                    <div class="drag-handle">⋮⋮ 拖动</div>
+                    <div class="topic-name">Python教程第三讲</div>
+                    <div class="topic-meta">
+                        <span class="platform-icon-small" style="background: var(--bilibili);">B</span>
+                        <span>B站</span>
+                    </div>
+                </div>
+
+                <div class="topic-card" draggable="true" id="topic4">
+                    <div class="drag-handle">⋮⋮ 拖动</div>
+                    <div class="topic-name">职场沟通技巧分享</div>
+                    <div class="topic-meta">
+                        <span class="platform-icon-small" style="background: var(--wechat-mp);">公</span>
+                        <span>公众号</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Weekly Calendar -->
+            <div class="calendar-panel">
+                <div class="week-header">
+                    <div class="week-nav">
+                        <div class="nav-button">◀</div>
+                        <span class="week-title">2026年6月29日 - 7月5日</span>
+                        <div class="nav-button">▶</div>
+                    </div>
+                </div>
+
+                <div class="schedule-grid">
+                    <!-- Header row -->
+                    <div class="grid-header-cell"></div>
+                    <div class="grid-header-cell">周一<br><small>6/29</small></div>
+                    <div class="grid-header-cell">周二<br><small>6/30</small></div>
+                    <div class="grid-header-cell">周三<br><small>7/1</small></div>
+                    <div class="grid-header-cell">周四<br><small>7/2</small></div>
+                    <div class="grid-header-cell">周五<br><small>7/3</small></div>
+                    <div class="grid-header-cell">周六<br><small>7/4</small></div>
+                    <div class="grid-header-cell">周日<br><small>7/5</small></div>
+
+                    <!-- Xiaohongshu row -->
+                    <div class="grid-row-label">
+                        <div class="platform-label">
+                            <span class="platform-icon-small" style="background: var(--xiaohongshu);">红</span>
+                            <span>小红书</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="xiaohongshu" data-day="monday">
+                        <div class="scheduled-item">
+                            <div>日常vlog</div>
+                            <div class="scheduled-time">12:00</div>
+                            <span class="recommendation-badge">⭐ 推荐时间</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="xiaohongshu" data-day="tuesday"></div>
+                    <div class="grid-cell drop-target" data-platform="xiaohongshu" data-day="wednesday">
+                        <div class="scheduled-item">
+                            <div>好物分享</div>
+                            <div class="scheduled-time">18:00</div>
+                            <span class="recommendation-badge">⭐ 推荐时间</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="xiaohongshu" data-day="thursday"></div>
+                    <div class="grid-cell drop-target" data-platform="xiaohongshu" data-day="friday">
+                        <div class="scheduled-item">
+                            <div>周末探店</div>
+                            <div class="scheduled-time">10:00</div>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="xiaohongshu" data-day="saturday"></div>
+                    <div class="grid-cell drop-target" data-platform="xiaohongshu" data-day="sunday"></div>
+
+                    <!-- Bilibili row -->
+                    <div class="grid-row-label">
+                        <div class="platform-label">
+                            <span class="platform-icon-small" style="background: var(--bilibili);">B</span>
+                            <span>B站</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="bilibili" data-day="monday">
+                        <div class="scheduled-item">
+                            <div>Python教程</div>
+                            <div class="scheduled-time">17:00</div>
+                            <span class="recommendation-badge">⭐ 推荐时间</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="bilibili" data-day="tuesday"></div>
+                    <div class="grid-cell drop-target" data-platform="bilibili" data-day="wednesday"></div>
+                    <div class="grid-cell drop-target" data-platform="bilibili" data-day="thursday">
+                        <div class="scheduled-item">
+                            <div>游戏解说</div>
+                            <div class="scheduled-time">19:00</div>
+                            <span class="recommendation-badge">⭐ 推荐时间</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="bilibili" data-day="friday"></div>
+                    <div class="grid-cell drop-target" data-platform="bilibili" data-day="saturday">
+                        <div class="scheduled-item">
+                            <div>音乐翻唱</div>
+                            <div class="scheduled-time">14:00</div>
+                            <span class="recommendation-badge">⭐ 推荐时间</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="bilibili" data-day="sunday"></div>
+
+                    <!-- Douyin row -->
+                    <div class="grid-row-label">
+                        <div class="platform-label">
+                            <span class="platform-icon-small" style="background: var(--douyin);">抖</span>
+                            <span>抖音</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="douyin" data-day="monday"></div>
+                    <div class="grid-cell drop-target" data-platform="douyin" data-day="tuesday">
+                        <div class="scheduled-item">
+                            <div>舞蹈挑战</div>
+                            <div class="scheduled-time">18:00</div>
+                            <span class="recommendation-badge">⭐ 推荐时间</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="douyin" data-day="wednesday"></div>
+                    <div class="grid-cell drop-target" data-platform="douyin" data-day="thursday">
+                        <div class="scheduled-item">
+                            <div>情景剧</div>
+                            <div class="scheduled-time">20:00</div>
+                            <span class="recommendation-badge">⭐ 推荐时间</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="douyin" data-day="friday"></div>
+                    <div class="grid-cell drop-target" data-platform="douyin" data-day="saturday">
+                        <div class="scheduled-item">
+                            <div>挑战赛</div>
+                            <div class="scheduled-time">15:00</div>
+                        </div>
+                    </div>
+                    <div class="grid-cell drop-target" data-platform="douyin" data-day="sunday"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let draggedCard = null;
+        let ghostCard = null;
+
+        document.querySelectorAll('.topic-card').forEach(card => {
+            card.addEventListener('dragstart', function(e) {
+                draggedCard = this;
+                this.classList.add('dragging');
+
+                // Create a visual ghost card that follows the cursor
+                ghostCard = this.cloneNode(true);
+                ghostCard.style.position = 'fixed';
+                ghostCard.style.pointerEvents = 'none';
+                ghostCard.style.zIndex = '1000';
+                ghostCard.style.opacity = '0.8';
+                ghostCard.style.width = this.offsetWidth + 'px';
+                ghostCard.classList.add('dragging');
+                document.body.appendChild(ghostCard);
+
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', this.id);
+
+                // Hide the ghost immediately, we'll update it manually
+                setTimeout(() => {
+                    if (ghostCard) {
+                        ghostCard.style.display = 'none';
+                    }
+                }, 0);
+            });
+
+            card.addEventListener('dragend', function(e) {
+                this.classList.remove('dragging');
+                if (ghostCard) {
+                    ghostCard.remove();
+                    ghostCard = null;
+                }
+
+                document.querySelectorAll('.drop-target').forEach(cell => {
+                    cell.classList.remove('drop-target');
+                });
+            });
+        });
+
+        document.querySelectorAll('.drop-target').forEach(cell => {
+            cell.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                this.style.background = 'var(--primary-light)';
+                this.style.border = '2px dashed var(--primary)';
+            });
+
+            cell.addEventListener('dragleave', function() {
+                this.style.background = '';
+                this.style.border = '';
+            });
+
+            cell.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.background = '';
+                this.style.border = '';
+
+                const topicId = e.dataTransfer.getData('text/plain');
+                const topicCard = document.getElementById(topicId);
+
+                if (topicCard) {
+                    const platform = this.dataset.platform;
+                    const day = this.dataset.day;
+                    const topicName = topicCard.querySelector('.topic-name').textContent;
+
+                    // Add scheduled item to cell
+                    const newItem = document.createElement('div');
+                    newItem.className = 'scheduled-item';
+                    newItem.innerHTML = `
+                        <div>${topicName}</div>
+                        <div class="scheduled-time">已安排</div>
+                        <span class="recommendation-badge">新添加</span>
+                    `;
+                    this.appendChild(newItem);
+
+                    // Visual feedback
+                    newItem.style.animation = 'pulse 0.5s ease-in-out';
+
+                    alert(`已将「${topicName}」安排到${getDayName(day)}\n\n（原型演示功能）`);
+                }
+            });
+        });
+
+        function getDayName(day) {
+            const days = {
+                monday: '周一',
+                tuesday: '周二',
+                wednesday: '周三',
+                thursday: '周四',
+                friday: '周五',
+                saturday: '周六',
+                sunday: '周日'
+            };
+            return days[day] || day;
+        }
+
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>选片助手 - 创建画廊/上传照片</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f7fa; color: #333; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #1a1a2e; color: #fff; padding: 20px 0; }
+.sidebar .logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 18px; font-weight: 600; }
+.sidebar .logo span { color: #e94560; }
+.sidebar nav { margin-top: 20px; }
+.sidebar nav a { display: flex; align-items: center; padding: 12px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; }
+.sidebar nav a:hover, .sidebar nav a.active { background: rgba(233,69,96,0.15); color: #fff; border-right: 3px solid #e94560; }
+.sidebar nav a .icon { width: 20px; margin-right: 10px; text-align: center; }
+.main { flex: 1; padding: 24px; }
+.header { margin-bottom: 24px; }
+.header h1 { font-size: 22px; margin-bottom: 16px; }
+.steps { display: flex; align-items: center; gap: 0; margin-bottom: 32px; }
+.step { display: flex; align-items: center; gap: 8px; }
+.step .num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border: 2px solid #ddd; color: #999; }
+.step.active .num { background: #e94560; color: #fff; border-color: #e94560; }
+.step.done .num { background: #52c41a; color: #fff; border-color: #52c41a; }
+.step .label { font-size: 13px; color: #999; }
+.step.active .label { color: #333; font-weight: 500; }
+.step.done .label { color: #52c41a; }
+.step-line { width: 40px; height: 2px; background: #ddd; margin: 0 8px; }
+.step-line.done { background: #52c41a; }
+.content { background: #fff; border-radius: 10px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.section-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
+.form-group input, .form-group select { width: 100%; max-width: 400px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+.form-group .hint { font-size: 12px; color: #999; margin-top: 4px; }
+.form-row { display: flex; gap: 20px; }
+.form-row .form-group { flex: 1; }
+.upload-zone { border: 2px dashed #d9d9d9; border-radius: 10px; padding: 60px 20px; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; }
+.upload-zone:hover { border-color: #e94560; background: rgba(233,69,96,0.02); }
+.upload-zone .icon { font-size: 48px; margin-bottom: 16px; }
+.upload-zone .title { font-size: 16px; margin-bottom: 8px; }
+.upload-zone .desc { font-size: 13px; color: #999; }
+.upload-progress { margin-top: 20px; }
+.upload-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-bottom: 1px solid #f5f5f5; }
+.upload-item .filename { flex: 1; font-size: 13px; }
+.upload-item .progress { width: 200px; }
+.upload-item .progress-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+.upload-item .progress-bar .fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.upload-item .status { font-size: 12px; width: 60px; text-align: right; }
+.summary { background: #fafafa; border-radius: 8px; padding: 16px; margin-top: 20px; display: flex; gap: 24px; }
+.summary .item { text-align: center; }
+.summary .item .val { font-size: 24px; font-weight: 700; color: #e94560; }
+.summary .item .lbl { font-size: 12px; color: #999; margin-top: 4px; }
+.btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; }
+.btn-primary { background: #e94560; color: #fff; }
+.btn-primary:hover { background: #d63851; }
+.btn-outline { background: #fff; border: 1px solid #ddd; color: #666; }
+.radio-group { display: flex; gap: 16px; flex-wrap: wrap; }
+.radio-card { border: 2px solid #eee; border-radius: 8px; padding: 16px; width: 180px; cursor: pointer; transition: all 0.2s; }
+.radio-card:hover { border-color: #e94560; }
+.radio-card.selected { border-color: #e94560; background: rgba(233,69,96,0.03); }
+.radio-card .name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.radio-card .desc { font-size: 12px; color: #999; }
+.watermark-preview { width: 300px; height: 200px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; margin-top: 12px; overflow: hidden; }
+.watermark-preview .wm { position: absolute; color: rgba(255,255,255,0.6); font-size: 16px; transform: rotate(-15deg); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">选片<span>助手</span></div>
+    <nav>
+      <a href="#"><span class="icon">📊</span>工作台</a>
+      <a href="#" class="active"><span class="icon">🖼️</span>画廊管理</a>
+      <a href="#"><span class="icon">📋</span>选片报告</a>
+      <a href="#"><span class="icon"> 👥</span>客户管理</a>
+      <a href="#"><span class="icon">💎</span>套餐与账单</a>
+      <a href="#"><span class="icon">⚙️</span>设置</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="header">
+      <h1>创建画廊</h1>
+      <div class="steps">
+        <div class="step done"><div class="num">✓</div><span class="label">选择客户</span></div>
+        <div class="step-line done"></div>
+        <div class="step done"><div class="num">✓</div><span class="label">套餐规则</span></div>
+        <div class="step-line done"></div>
+        <div class="step active"><div class="num">3</div><span class="label">上传照片</span></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="num">4</div><span class="label">画廊设置</span></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="num">5</div><span class="label">预览发布</span></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-title">📤 批量上传原片</div>
+      <div class="upload-zone" id="uploadZone">
+        <div class="icon">📁</div>
+        <div class="title">拖拽照片到此处，或点击选择文件</div>
+        <div class="desc">支持 JPG / RAW / HEIC 格式，单次最多500张，每张≤100MB</div>
+      </div>
+      <div class="summary">
+        <div class="item"><div class="val" id="totalCount">128</div><div class="lbl">总照片数</div></div>
+        <div class="item"><div class="val" id="uploadedCount">128</div><div class="lbl">已上传</div></div>
+        <div class="item"><div class="val" id="processingCount">12</div><div class="lbl">处理中</div></div>
+        <div class="item"><div class="val" id="failedCount">0</div><div class="lbl">失败</div></div>
+        <div class="item"><div class="val" id="totalSize">3.2GB</div><div class="lbl">总大小</div></div>
+      </div>
+      <div class="upload-progress">
+        <div class="upload-item">
+          <span style="font-size:20px">📷</span>
+          <span class="filename">DSC_0001.ARW</span>
+          <div class="progress"><div class="progress-bar"><div class="fill" style="width:100%;background:#52c41a"></div></div></div>
+          <span class="status" style="color:#52c41a">✓ 完成</span>
+        </div>
+        <div class="upload-item">
+          <span style="font-size:20px">📷</span>
+          <span class="filename">DSC_0002.ARW</span>
+          <div class="progress"><div class="progress-bar"><div class="fill" style="width:100%;background:#52c41a"></div></div></div>
+          <span class="status" style="color:#52c41a">✓ 完成</span>
+        </div>
+        <div class="upload-item">
+          <span style="font-size:20px">📷</span>
+          <span class="filename">DSC_0127.ARW</span>
+          <div class="progress"><div class="progress-bar"><div class="fill" style="width:65%;background:#1890ff"></div></div></div>
+          <span class="status" style="color:#1890ff">65%</span>
+        </div>
+        <div class="upload-item">
+          <span style="font-size:20px">📷</span>
+          <span class="filename">DSC_0128.ARW</span>
+          <div class="progress"><div class="progress-bar"><div class="fill" style="width:30%;background:#1890ff"></div></div></div>
+          <span class="status" style="color:#1890ff">30%</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline">上一步</button>
+        <button class="btn btn-primary">下一步：画廊设置 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('click', () => { alert('原型演示：此处打开文件选择器'); });
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#e94560'; zone.style.background = 'rgba(233,69,96,0.05)'; });
+zone.addEventListener('dragleave', () => { zone.style.borderColor = '#d9d9d9'; zone.style.background = 'transparent'; });
+zone.addEventListener('drop', e => { e.preventDefault(); zone.style.borderColor = '#d9d9d9'; alert('原型演示：接收到拖拽文件'); });
+</script>
+</body>
+</html>

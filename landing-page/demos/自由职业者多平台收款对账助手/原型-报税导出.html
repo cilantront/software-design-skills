@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>报税导出 - 原型</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #1f2937; }
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; background: #1e293b; color: #94a3b8; padding: 20px 0; flex-shrink: 0; display: flex; flex-direction: column; }
+  .sidebar-logo { color: #fff; font-size: 16px; font-weight: 600; padding: 0 20px 20px; border-bottom: 1px solid #334155; }
+  .sidebar-logo span { color: #3b82f6; }
+  .sidebar-menu { list-style: none; margin-top: 12px; }
+  .sidebar-menu li { padding: 10px 20px; cursor: pointer; transition: all 0.2s; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-menu li:hover { background: #334155; color: #fff; }
+  .sidebar-menu li.active { background: #3b82f6; color: #fff; }
+  .version-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; background: #fef3c7; color: #92400e; margin-left: 6px; }
+  .pro-banner { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; padding: 12px 20px; margin: 0 20px 16px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .pro-badge { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .main { flex: 1; padding: 24px; overflow-y: auto; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .page-title { font-size: 22px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .header-actions { display: flex; gap: 12px; }
+  .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-success { background: #10b981; color: #fff; }
+  .btn-success:hover { background: #059669; }
+  .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+  .btn-outline:hover { background: #f9fafb; }
+  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; }
+  .tab { padding: 10px 20px; font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #6b7280; transition: all 0.2s; }
+  .tab:hover { color: #1f2937; }
+  .tab.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 500; }
+  .year-select { padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+  .quarter-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .quarter-tab { padding: 6px 16px; border: 1px solid #d1d5db; border-radius: 20px; font-size: 13px; cursor: pointer; background: #fff; transition: all 0.2s; }
+  .quarter-tab:hover { background: #f3f4f6; }
+  .quarter-tab.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .summary-item { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .summary-item .label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+  .summary-item .value { font-size: 22px; font-weight: 700; }
+  .summary-item .value.green { color: #10b981; }
+  .summary-item .value.blue { color: #3b82f6; }
+  .summary-item .value.orange { color: #f59e0b; }
+  .summary-item .value.purple { color: #8b5cf6; }
+  .summary-item .sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { background: #f9fafb; padding: 10px 12px; text-align: left; font-weight: 500; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; }
+  .data-table tr:hover { background: #f9fafb; }
+  .data-table tfoot td { background: #f9fafb; font-weight: 600; border-top: 2px solid #e5e7eb; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .currency-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .currency-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; text-align: center; }
+  .currency-flag { font-size: 24px; margin-bottom: 6px; }
+  .currency-code { font-size: 12px; color: #6b7280; }
+  .currency-amount { font-size: 18px; font-weight: 700; margin-top: 4px; }
+  .currency-converted { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+  .platform-breakdown { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .platform-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; display: flex; align-items: center; gap: 12px; }
+  .platform-icon { font-size: 28px; }
+  .platform-info { flex: 1; }
+  .platform-name { font-size: 13px; font-weight: 500; }
+  .platform-amount { font-size: 16px; font-weight: 700; color: #1f2937; }
+  .platform-sub { font-size: 11px; color: #6b7280; }
+  .invoice-status { display: flex; gap: 16px; margin-bottom: 16px; }
+  .invoice-stat { padding: 12px 20px; background: #f9fafb; border-radius: 8px; text-align: center; flex: 1; }
+  .invoice-stat .num { font-size: 20px; font-weight: 700; }
+  .invoice-stat .num.green { color: #10b981; }
+  .invoice-stat .num.orange { color: #f59e0b; }
+  .invoice-stat .label { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .free-overlay { position: relative; }
+  .free-overlay::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.85); z-index: 10; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+  .free-lock { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 11; text-align: center; }
+  .free-lock .icon { font-size: 48px; margin-bottom: 12px; }
+  .free-lock .title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .free-lock .desc { font-size: 13px; color: #6b7280; margin-bottom: 12px; }
+  .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; }
+  .filter-bar select, .filter-bar input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo"><span>⚡</span> 对账助手</div>
+    <ul class="sidebar-menu">
+      <li><span>📊</span> 对账看板</li>
+      <li><span>📥</span> CSV 导入</li>
+      <li><span>📋</span> 应收管理</li>
+      <li><span>🔍</span> 对账明细</li>
+      <li><span>📄</span> 月度报告</li>
+      <li class="active"><span>🧾</span> 报税导出 <span class="version-tag">PRO</span></li>
+      <li><span>⚙️</span> 账户设置</li>
+    </ul>
+    <div style="margin-top:auto;padding:12px 20px;border-top:1px solid #334155;">
+      <div class="pro-banner" style="margin:0;">
+        <span class="pro-badge">PRO</span>
+        <span>专业版 · 有效期至 2026-12-31</span>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">🧾 报税导出 <span class="pro-badge" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:2px 10px;border-radius:10px;font-size:12px;">PRO</span></div>
+      <div class="header-actions">
+        <select class="year-select">
+          <option>2026年度</option>
+          <option>2025年度</option>
+        </select>
+        <button class="btn btn-success">📥 导出报税文件</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this)">📊 收入汇总表</div>
+      <div class="tab" onclick="switchTab(this)">🧾 开票清单</div>
+      <div class="tab" onclick="switchTab(this)">💱 多币种折算</div>
+    </div>
+
+    <!-- Quarter Selector -->
+    <div class="quarter-tabs">
+      <div class="quarter-tab active" onclick="switchQuarter(this)">全年</div>
+      <div class="quarter-tab" onclick="switchQuarter(this)">Q1 (1-3月)</div>
+      <div class="quarter-tab" onclick="switchQuarter(this)">Q2 (4-6月)</div>
+      <div class="quarter-tab" onclick="switchQuarter(this)">Q3 (7-9月)</div>
+      <div class="quarter-tab" onclick="switchQuarter(this)">Q4 (10-12月)</div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="label">📊 年度总收入</div>
+        <div class="value green">¥286,500</div>
+        <div class="sub">含税收入</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">💳 手续费合计</div>
+        <div class="value orange">¥5,730</div>
+        <div class="sub">占总收入 2.0%</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">📈 净收入</div>
+        <div class="value blue">¥280,770</div>
+        <div class="sub">扣除手续费后</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">🧾 已开票金额</div>
+        <div class="value purple">¥198,000</div>
+        <div class="sub">未开票 ¥88,500</div>
+      </div>
+    </div>
+
+    <!-- Income Summary Table -->
+    <div class="card">
+      <div class="card-title">收入汇总明细（按月度）</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>月份</th>
+            <th>笔数</th>
+            <th>收入金额</th>
+            <th>手续费</th>
+            <th>净收入</th>
+            <th>主要渠道</th>
+            <th>已开票</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026年1月</td>
+            <td>18</td>
+            <td>¥22,500</td>
+            <td>¥450</td>
+            <td>¥22,050</td>
+            <td>微信 60%, 支付宝 40%</td>
+            <td><span class="badge badge-green">已开票</span></td>
+          </tr>
+          <tr>
+            <td>2026年2月</td>
+            <td>12</td>
+            <td>¥15,800</td>
+            <td>¥316</td>
+            <td>¥15,484</td>
+            <td>微信 70%, Stripe 30%</td>
+            <td><span class="badge badge-green">已开票</span></td>
+          </tr>
+          <tr>
+            <td>2026年3月</td>
+            <td>22</td>
+            <td>¥28,300</td>
+            <td>¥566</td>
+            <td>¥27,734</td>
+            <td>微信 50%, 支付宝 30%, Stripe 20%</td>
+            <td><span class="badge badge-green">已开票</span></td>
+          </tr>
+          <tr>
+            <td>2026年4月</td>
+            <td>16</td>
+            <td>¥19,600</td>
+            <td>¥392</td>
+            <td>¥19,208</td>
+            <td>支付宝 55%, 微信 45%</td>
+            <td><span class="badge badge-green">已开票</span></td>
+          </tr>
+          <tr>
+            <td>2026年5月</td>
+            <td>24</td>
+            <td>¥32,500</td>
+            <td>¥650</td>
+            <td>¥31,850</td>
+            <td>微信 65%, PayPal 35%</td>
+            <td><span class="badge badge-yellow">部分开票</span></td>
+          </tr>
+          <tr>
+            <td>2026年6月</td>
+            <td>20</td>
+            <td>¥26,800</td>
+            <td>¥536</td>
+            <td>¥26,264</td>
+            <td>微信 55%, 支付宝 25%, Stripe 20%</td>
+            <td><span class="badge badge-red">未开票</span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><b>合计</b></td>
+            <td><b>112</b></td>
+            <td><b>¥145,500</b></td>
+            <td><b>¥2,910</b></td>
+            <td><b>¥142,590</b></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Platform Breakdown -->
+    <div class="card">
+      <div class="card-title">按平台汇总</div>
+      <div class="platform-breakdown">
+        <div class="platform-item">
+          <div class="platform-icon">💚</div>
+          <div class="platform-info">
+            <div class="platform-name">微信支付</div>
+            <div class="platform-amount">¥89,200</div>
+            <div class="platform-sub">68 笔 · 手续费 ¥1,784 · 占比 61.3%</div>
+          </div>
+        </div>
+        <div class="platform-item">
+          <div class="platform-icon">💙</div>
+          <div class="platform-info">
+            <div class="platform-name">支付宝</div>
+            <div class="platform-amount">¥35,600</div>
+            <div class="platform-sub">28 笔 · 手续费 ¥712 · 占比 24.5%</div>
+          </div>
+        </div>
+        <div class="platform-item">
+          <div class="platform-icon">🟣</div>
+          <div class="platform-info">
+            <div class="platform-name">Stripe (USD)</div>
+            <div class="platform-amount">¥15,200 <span style="font-size:11px;color:#6b7280;">≈$2,111</span></div>
+            <div class="platform-sub">10 笔 · 手续费 ¥304 · 占比 10.4%</div>
+          </div>
+        </div>
+        <div class="platform-item">
+          <div class="platform-icon">🔵</div>
+          <div class="platform-info">
+            <div class="platform-name">PayPal (USD)</div>
+            <div class="platform-amount">¥5,500 <span style="font-size:11px;color:#6b7280;">≈$764</span></div>
+            <div class="platform-sub">6 笔 · 手续费 ¥165 · 占比 3.8%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoice Tab Content -->
+    <div class="card">
+      <div class="card-title">开票清单</div>
+      <div class="invoice-status">
+        <div class="invoice-stat">
+          <div class="num green">¥198,000</div>
+          <div class="label">已开票金额</div>
+        </div>
+        <div class="invoice-stat">
+          <div class="num orange">¥88,500</div>
+          <div class="label">待开票金额</div>
+        </div>
+        <div class="invoice-stat">
+          <div class="num" style="color:#1f2937;">42</div>
+          <div class="label">已开发票数</div>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <select>
+          <option>全部状态</option>
+          <option>已开票</option>
+          <option>待开票</option>
+        </select>
+        <select>
+          <option>全部客户</option>
+          <option>杭州某某科技</option>
+          <option>深圳某某传媒</option>
+          <option>北京某某教育</option>
+        </select>
+        <input type="text" placeholder="搜索客户..." style="width: 160px;">
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>客户名称</th>
+            <th>项目</th>
+            <th>金额</th>
+            <th>开票日期</th>
+            <th>发票号码</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>杭州某某科技</b></td>
+            <td>UI设计项目</td>
+            <td>¥12,000</td>
+            <td>2026-03-15</td>
+            <td>FP20260315001</td>
+            <td><span class="badge badge-green">已开票</span></td>
+          </tr>
+          <tr>
+            <td><b>深圳某某传媒</b></td>
+            <td>VI设计项目</td>
+            <td>¥8,000</td>
+            <td>2026-04-20</td>
+            <td>FP20260420003</td>
+            <td><span class="badge badge-green">已开票</span></td>
+          </tr>
+          <tr>
+            <td><b>北京某某教育</b></td>
+            <td>课程PPT设计</td>
+            <td>¥4,500</td>
+            <td>-</td>
+            <td>-</td>
+            <td><span class="badge badge-yellow">待开票</span></td>
+          </tr>
+          <tr>
+            <td><b>张先生</b></td>
+            <td>品牌设计</td>
+            <td>¥5,000</td>
+            <td>-</td>
+            <td>-</td>
+            <td><span class="badge badge-yellow">待开票</span></td>
+          </tr>
+          <tr>
+            <td><b>杭州某某网络</b></td>
+            <td>官网改版</td>
+            <td>¥6,300</td>
+            <td>2026-06-25</td>
+            <td>FP20260625008</td>
+            <td><span class="badge badge-green">已开票</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function switchQuarter(el) {
+  document.querySelectorAll('.quarter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

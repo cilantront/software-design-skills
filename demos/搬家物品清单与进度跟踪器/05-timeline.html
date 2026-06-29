@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>时间线任务 - 搬家物品清单与进度跟踪器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #F8F9FA; color: #2C3E50; max-width: 375px; margin: 0 auto; min-height: 100vh; padding-bottom: 70px; }
+.nav-bar { background: #fff; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F0F2F5; position: sticky; top: 0; z-index: 10; }
+.nav-bar .back { font-size: 20px; text-decoration: none; color: #2C3E50; }
+.nav-bar .task-info { flex: 1; }
+.nav-bar .task-info h2 { font-size: 15px; font-weight: 600; }
+.nav-bar .task-info .sub { font-size: 11px; color: #95A5A6; }
+.view-toggle { padding: 6px 12px; border-radius: 14px; font-size: 12px; background: #F0F2F5; cursor: pointer; color: #2C3E50; }
+.tabs { display: flex; background: #fff; border-bottom: 1px solid #F0F2F5; padding: 0 16px; }
+.tab { padding: 12px 0; margin-right: 24px; font-size: 14px; color: #95A5A6; text-decoration: none; position: relative; }
+.tab.active { color: #4A90D9; font-weight: 600; }
+.tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #4A90D9; border-radius: 1px; }
+/* Progress summary */
+.progress-summary { background: #fff; margin: 8px 0; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+.circle-progress { width: 56px; height: 56px; border-radius: 50%; background: conic-gradient(#10B981 0% 62%, #E5E7EB 62% 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.circle-progress-inner { width: 44px; height: 44px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #10B981; }
+.summary-info { flex: 1; }
+.summary-info .label { font-size: 12px; color: #95A5A6; }
+.summary-info .detail { font-size: 13px; margin-top: 4px; }
+.summary-info .detail span { font-weight: 600; }
+/* Timeline */
+.timeline { background: #fff; margin: 8px 0; padding: 16px; }
+.timeline-node { position: relative; padding-left: 28px; padding-bottom: 20px; }
+.timeline-node:last-child { padding-bottom: 0; }
+.timeline-node::before { content: ''; position: absolute; left: 7px; top: 14px; bottom: -6px; width: 2px; background: #E5E7EB; }
+.timeline-node:last-child::before { display: none; }
+.timeline-node .dot { position: absolute; left: 0; top: 4px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; }
+.dot-done { border-color: #10B981; background: #10B981; }
+.dot-current { border-color: #4A90D9; background: #4A90D9; box-shadow: 0 0 0 4px rgba(74,144,217,0.15); }
+.dot-pending { border-color: #D1D5DB; background: #fff; }
+.dot-overdue { border-color: #EF4444; background: #EF4444; }
+.node-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.node-date { font-size: 12px; color: #95A5A6; }
+.node-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.badge-done { background: #ECFDF5; color: #10B981; }
+.badge-today { background: #EFF6FF; color: #4A90D9; }
+.badge-upcoming { background: #F3F4F6; color: #95A5A6; }
+.badge-overdue { background: #FEF2F2; color: #EF4444; }
+.node-tasks { }
+.task-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+.task-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #D1D5DB; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.task-check.checked { border-color: #10B981; background: #10B981; color: #fff; }
+.task-row .task-text { flex: 1; font-size: 13px; }
+.task-row .task-text.done { text-decoration: line-through; color: #95A5A6; }
+.task-row .task-action { font-size: 11px; color: #4A90D9; cursor: pointer; }
+/* Add button */
+.add-bar { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 375px; background: #fff; padding: 10px 16px; border-top: 1px solid #F0F2F5; }
+.add-btn { width: 100%; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; background: #4A90D9; color: #fff; }
+.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 375px; background: #fff; border-top: 1px solid #F0F2F5; display: flex; padding: 8px 0; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+.nav-item { flex: 1; text-align: center; text-decoration: none; color: inherit; }
+.nav-item .nav-icon { font-size: 20px; }
+.nav-item .nav-label { font-size: 10px; color: #95A5A6; }
+</style>
+</head>
+<body>
+<div class="nav-bar">
+  <a href="01-home.html" class="back">←</a>
+  <div class="task-info"><h2>搬家去朝阳区新家</h2><div class="sub">📅 2026-07-01 · 还有2天</div></div>
+  <div class="view-toggle">📅 日历</div>
+</div>
+
+<div class="tabs">
+  <a href="03-checklist.html" class="tab">📋 物品清单</a>
+  <a href="05-timeline.html" class="tab active">📅 时间线</a>
+  <a href="07-boxes.html" class="tab">📦 打包箱</a>
+  <a href="06-dashboard.html" class="tab">📊 进度</a>
+</div>
+
+<div class="progress-summary">
+  <div class="circle-progress"><div class="circle-progress-inner">62%</div></div>
+  <div class="summary-info">
+    <div class="label">时间线任务完成进度</div>
+    <div class="detail"><span style="color:#10B981">5</span> 已完成 · <span style="color:#4A90D9">2</span> 待完成 · <span style="color:#EF4444">1</span> 已逾期</div>
+  </div>
+</div>
+
+<div class="timeline">
+  <!-- Node 1: Done -->
+  <div class="timeline-node">
+    <div class="dot dot-done">✓</div>
+    <div class="node-header">
+      <div class="node-date">提前30天 · 6月1日</div>
+      <div class="node-badge badge-done">已完成</div>
+    </div>
+    <div class="node-tasks">
+      <div class="task-row"><div class="task-check checked">✓</div><span class="task-text done">开始整理不常用物品</span></div>
+      <div class="task-row"><div class="task-check checked">✓</div><span class="task-text done">盘点各房间物品</span></div>
+    </div>
+  </div>
+  <!-- Node 2: Done -->
+  <div class="timeline-node">
+    <div class="dot dot-done">✓</div>
+    <div class="node-header">
+      <div class="node-date">提前21天 · 6月10日</div>
+      <div class="node-badge badge-done">已完成</div>
+    </div>
+    <div class="node-tasks">
+      <div class="task-row"><div class="task-check checked">✓</div><span class="task-text done">完成所有房间物品盘点</span></div>
+      <div class="task-row"><div class="task-check checked">✓</div><span class="task-text done">确认物品清单</span></div>
+    </div>
+  </div>
+  <!-- Node 3: Done -->
+  <div class="timeline-node">
+    <div class="dot dot-done">✓</div>
+    <div class="node-header">
+      <div class="node-date">提前14天 · 6月17日</div>
+      <div class="node-badge badge-done">已完成</div>
+    </div>
+    <div class="node-tasks">
+      <div class="task-row"><div class="task-check checked">✓</div><span class="task-text done">确认丢弃/捐赠清单</span></div>
+      <div class="task-row"><div class="task-check checked">✓</div><span class="task-text done">处理不需要的物品</span></div>
+    </div>
+  </div>
+  <!-- Node 4: Overdue -->
+  <div class="timeline-node">
+    <div class="dot dot-overdue">!</div>
+    <div class="node-header">
+      <div class="node-date">提前7天 · 6月24日</div>
+      <div class="node-badge badge-overdue">已逾期</div>
+    </div>
+    <div class="node-tasks">
+      <div class="task-row"><div class="task-check"></div><span class="task-text">联系搬家公司/租车</span><span class="task-action">标记完成</span></div>
+      <div class="task-row"><div class="task-check checked">✓</div><span class="task-text done">确认搬家日期</span></div>
+    </div>
+  </div>
+  <!-- Node 5: Current/Today -->
+  <div class="timeline-node">
+    <div class="dot dot-current">●</div>
+    <div class="node-header">
+      <div class="node-date">提前3天 · 6月28日</div>
+      <div class="node-badge badge-today">今天</div>
+    </div>
+    <div class="node-tasks">
+      <div class="task-row"><div class="task-check"></div><span class="task-text">准备打包材料（纸箱、胶带、气泡膜）</span><span class="task-action">标记完成</span></div>
+    </div>
+  </div>
+  <!-- Node 6: Upcoming -->
+  <div class="timeline-node">
+    <div class="dot dot-pending"></div>
+    <div class="node-header">
+      <div class="node-date">提前1天 · 6月30日</div>
+      <div class="node-badge badge-upcoming">待办</div>
+    </div>
+    <div class="node-tasks">
+      <div class="task-row"><div class="task-check"></div><span class="task-text">确认新旧地址与路线</span></div>
+      <div class="task-row"><div class="task-check"></div><span class="task-text">准备搬家当天物品</span></div>
+    </div>
+  </div>
+  <!-- Node 7: Moving Day -->
+  <div class="timeline-node">
+    <div class="dot dot-pending"></div>
+    <div class="node-header">
+      <div class="node-date">搬家当天 · 7月1日</div>
+      <div class="node-badge badge-upcoming">待办</div>
+    </div>
+    <div class="node-tasks">
+      <div class="task-row"><div class="task-check"></div><span class="task-text">按箱清单逐一核对</span></div>
+      <div class="task-row"><div class="task-check"></div><span class="task-text">确认所有物品装车</span></div>
+    </div>
+  </div>
+  <!-- Node 8: After Move -->
+  <div class="timeline-node">
+    <div class="dot dot-pending"></div>
+    <div class="node-header">
+      <div class="node-date">搬家后3天 · 7月4日</div>
+      <div class="node-badge badge-upcoming">待办</div>
+    </div>
+    <div class="node-tasks">
+      <div class="task-row"><div class="task-check"></div><span class="task-text">拆包整理</span></div>
+      <div class="task-row"><div class="task-check"></div><span class="task-text">核对物品是否完好到位</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="add-bar">
+  <button class="add-btn">＋ 添加自定义任务</button>
+</div>
+
+<div class="bottom-nav">
+  <a href="01-home.html" class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">首页</div></a>
+  <a href="06-dashboard.html" class="nav-item"><div class="nav-icon">📊</div><div class="nav-label">进度</div></a>
+  <a href="09-profile.html" class="nav-item"><div class="nav-icon">👤</div><div class="nav-label">我的</div></a>
+</div>
+</body>
+</html>
