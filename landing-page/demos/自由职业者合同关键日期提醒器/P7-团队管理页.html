@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P7 - 团队管理页 - 自由职业者合同关键日期提醒器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f7fa; color: #2c3e50; }
+.topbar { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+.topbar .logo { font-size: 18px; font-weight: 700; color: #4f46e5; display: flex; align-items: center; gap: 8px; }
+.topbar .logo span { font-size: 22px; }
+.topbar .right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.topbar .bell { position: relative; cursor: pointer; font-size: 20px; }
+.topbar .bell .badge { position: absolute; top: -4px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.topbar .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.layout { display: flex; margin-top: 56px; min-height: calc(100vh - 56px); }
+.sidebar { width: 220px; background: #fff; border-right: 1px solid #e2e8f0; padding: 16px 0; position: fixed; top: 56px; bottom: 0; }
+.sidebar a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #64748b; font-size: 14px; text-decoration: none; }
+.sidebar a:hover { background: #f1f5f9; color: #4f46e5; }
+.sidebar a.active { background: #eef2ff; color: #4f46e5; font-weight: 600; border-right: 3px solid #4f46e5; }
+.sidebar a .icon { font-size: 18px; width: 24px; text-align: center; }
+.main { margin-left: 220px; flex: 1; padding: 24px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-header h1 { font-size: 22px; font-weight: 600; color: #1e293b; }
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; }
+.btn-primary { background: #4f46e5; color: #fff; }
+.btn-primary:hover { background: #4338ca; }
+.btn-outline { background: #fff; color: #64748b; border: 1px solid #e2e8f0; }
+.btn-outline:hover { background: #f1f5f9; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-danger-sm { padding: 4px 10px; font-size: 12px; color: #ef4444; border: 1px solid #fecaca; background: #fff; cursor: pointer; border-radius: 6px; }
+.btn-danger-sm:hover { background: #fef2f2; }
+
+/* Team Info Card */
+.team-info { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; }
+.team-avatar { width: 64px; height: 64px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #fff; font-weight: 700; }
+.team-details { flex: 1; }
+.team-details h2 { font-size: 20px; font-weight: 600; color: #1e293b; }
+.team-details .meta { font-size: 13px; color: #64748b; margin-top: 4px; }
+.team-stats { display: flex; gap: 24px; }
+.team-stat { text-align: center; }
+.team-stat .num { font-size: 24px; font-weight: 700; color: #4f46e5; }
+.team-stat .label { font-size: 12px; color: #94a3b8; }
+
+/* Section */
+.section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section h3 .badge { background: #eef2ff; color: #4f46e5; font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+
+/* Members Table */
+.members-table { width: 100%; border-collapse: collapse; }
+.members-table th { text-align: left; padding: 10px 12px; font-size: 13px; font-weight: 600; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+.members-table td { padding: 12px; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
+.members-table tr:hover { background: #f8fafc; }
+.member-info { display: flex; align-items: center; gap: 10px; }
+.member-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; }
+.member-name { font-weight: 500; }
+.member-email { font-size: 12px; color: #94a3b8; }
+.role-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+.role-badge.admin { background: #fef3c7; color: #92400e; }
+.role-badge.member { background: #f1f5f9; color: #64748b; }
+.action-links { display: flex; gap: 8px; }
+.action-links a { font-size: 12px; color: #4f46e5; cursor: pointer; text-decoration: none; }
+.action-links a:hover { text-decoration: underline; }
+.action-links a.danger { color: #ef4444; }
+
+/* Team Calendar */
+.team-cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.filter-row { display: flex; gap: 8px; }
+.filter-row select { height: 32px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0 8px; font-size: 13px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+.cal-grid .day-header { background: #f8fafc; padding: 8px; text-align: center; font-size: 13px; font-weight: 600; color: #64748b; }
+.cal-grid .day { background: #fff; padding: 6px; min-height: 72px; font-size: 12px; }
+.cal-grid .day .date-num { font-weight: 500; margin-bottom: 4px; }
+.cal-grid .day.today .date-num { background: #4f46e5; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.cal-grid .day .mini-event { font-size: 10px; padding: 1px 4px; border-radius: 2px; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-event.zhang { background: #dbeafe; color: #1e40af; }
+.mini-event.li { background: #d1fae5; color: #065f46; }
+.mini-event.wang { background: #fef3c7; color: #92400e; }
+
+/* Invite Section */
+.invite-section { display: flex; gap: 24px; }
+.invite-box { flex: 1; padding: 16px; background: #f8fafc; border-radius: 10px; }
+.invite-box h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.invite-box .link-row { display: flex; gap: 8px; }
+.invite-box input { flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0 10px; font-size: 13px; background: #fff; }
+.invite-box .email-row { display: flex; gap: 8px; margin-top: 8px; }
+
+/* Legend */
+.legend { display: flex; gap: 16px; margin-top: 12px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; }
+.legend-item .dot { width: 10px; height: 10px; border-radius: 3px; }
+.dot.zhang { background: #dbeafe; border: 1px solid #93c5fd; }
+.dot.li { background: #d1fae5; border: 1px solid #6ee7b7; }
+.dot.wang { background: #fef3c7; border: 1px solid #fcd34d; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><span>📅</span> 合同日期提醒器</div>
+  <div class="right">
+    <div class="bell">🔔<div class="badge">3</div></div>
+    <div class="avatar">林</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <a href="#"><span class="icon">🏠</span> 主页</a>
+    <a href="#"><span class="icon">📄</span> 合同管理</a>
+    <a href="#"><span class="icon">📆</span> 日历看板</a>
+    <a href="#"><span class="icon">🔔</span> 消息中心</a>
+    <div class="divider"></div>
+    <a href="#" class="active"><span class="icon">👥</span> 团队管理</a>
+    <a href="#"><span class="icon">📊</span> 统计报告</a>
+    <div class="divider"></div>
+    <a href="#"><span class="icon">⚙️</span> 提醒设置</a>
+    <a href="#"><span class="icon">💎</span> 订阅管理</a>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <h1>👥 团队管理</h1>
+      <button class="btn btn-primary">+ 邀请成员</button>
+    </div>
+
+    <!-- Team Info -->
+    <div class="team-info">
+      <div class="team-avatar">张</div>
+      <div class="team-details">
+        <h2>张哥的设计工作室</h2>
+        <div class="meta">创建于 2026-05-10 · 专业版团队</div>
+      </div>
+      <div class="team-stats">
+        <div class="team-stat">
+          <div class="num">3</div>
+          <div class="label">团队成员</div>
+        </div>
+        <div class="team-stat">
+          <div class="num">20</div>
+          <div class="label">共享合同</div>
+        </div>
+        <div class="team-stat">
+          <div class="num">8</div>
+          <div class="label">本月到期</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members List -->
+    <div class="section">
+      <h3>成员列表 <span class="badge">3 / 10</span></h3>
+      <table class="members-table">
+        <thead>
+          <tr><th>成员</th><th>角色</th><th>共享合同数</th><th>加入时间</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="member-info">
+                <div class="member-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">张</div>
+                <div>
+                  <div class="member-name">张哥</div>
+                  <div class="member-email">zhang@example.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="role-badge admin">👑 管理员</span></td>
+            <td>12</td>
+            <td>2026-05-10</td>
+            <td><span style="font-size:12px;color:#94a3b8;">团队创建者</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="member-info">
+                <div class="member-avatar" style="background:linear-gradient(135deg,#3b82f6,#6366f1);">李</div>
+                <div>
+                  <div class="member-name">小李</div>
+                  <div class="member-email">li@example.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="role-badge member">成员</span></td>
+            <td>5</td>
+            <td>2026-05-15</td>
+            <td>
+              <div class="action-links">
+                <a>设为管理员</a>
+                <a class="danger">移除</a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="member-info">
+                <div class="member-avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4);">王</div>
+                <div>
+                  <div class="member-name">小王</div>
+                  <div class="member-email">wang@example.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="role-badge member">成员</span></td>
+            <td>3</td>
+            <td>2026-06-01</td>
+            <td>
+              <div class="action-links">
+                <a>设为管理员</a>
+                <a class="danger">移除</a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Team Calendar -->
+    <div class="section">
+      <div class="team-cal-header">
+        <h3 style="margin-bottom:0;">📅 团队日历</h3>
+        <div class="filter-row">
+          <select>
+            <option>2026年 7月</option>
+            <option>2026年 8月</option>
+          </select>
+          <select>
+            <option>全部成员</option>
+            <option>张哥</option>
+            <option>小李</option>
+            <option>小王</option>
+          </select>
+          <select>
+            <option>全部类型</option>
+            <option>付款节点</option>
+            <option>交付截止</option>
+            <option>续约窗口</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cal-grid">
+        <div class="day-header">一</div>
+        <div class="day-header">二</div>
+        <div class="day-header">三</div>
+        <div class="day-header">四</div>
+        <div class="day-header">五</div>
+        <div class="day-header">六</div>
+        <div class="day-header">日</div>
+
+        <div class="day"><div class="date-num">30</div></div>
+        <div class="day"><div class="date-num">1</div></div>
+        <div class="day"><div class="date-num">2</div></div>
+        <div class="day"><div class="date-num">3</div><div class="mini-event zhang">张·付款节点</div></div>
+        <div class="day"><div class="date-num">4</div></div>
+        <div class="day"><div class="date-num">5</div><div class="mini-event li">李·交付截止</div></div>
+        <div class="day"><div class="date-num">6</div></div>
+
+        <div class="day"><div class="date-num">7</div><div class="mini-event wang">王·续约窗口</div></div>
+        <div class="day"><div class="date-num">8</div></div>
+        <div class="day"><div class="date-num">9</div><div class="mini-event zhang">张·交付截止</div></div>
+        <div class="day"><div class="date-num">10</div></div>
+        <div class="day"><div class="date-num">11</div><div class="mini-event li">李·付款节点</div></div>
+        <div class="day"><div class="date-num">12</div></div>
+        <div class="day"><div class="date-num">13</div></div>
+
+        <div class="day"><div class="date-num">14</div></div>
+        <div class="day today"><div class="date-num">15</div><div class="mini-event zhang">张·付款节点</div><div class="mini-event wang">王·交付截止</div></div>
+        <div class="day"><div class="date-num">16</div></div>
+        <div class="day"><div class="date-num">17</div><div class="mini-event li">李·付款节点</div></div>
+        <div class="day"><div class="date-num">18</div></div>
+        <div class="day"><div class="date-num">19</div><div class="mini-event zhang">张·续约窗口</div></div>
+        <div class="day"><div class="date-num">20</div></div>
+
+        <div class="day"><div class="date-num">21</div></div>
+        <div class="day"><div class="date-num">22</div><div class="mini-event wang">王·付款节点</div></div>
+        <div class="day"><div class="date-num">23</div></div>
+        <div class="day"><div class="date-num">24</div><div class="mini-event li">李·交付截止</div></div>
+        <div class="day"><div class="date-num">25</div></div>
+        <div class="day"><div class="date-num">26</div></div>
+        <div class="day"><div class="date-num">27</div></div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="dot zhang"></div> 张哥</div>
+        <div class="legend-item"><div class="dot li"></div> 小李</div>
+        <div class="legend-item"><div class="dot wang"></div> 小王</div>
+      </div>
+    </div>
+
+    <!-- Invite Section -->
+    <div class="section">
+      <h3>📨 邀请新成员</h3>
+      <div class="invite-section">
+        <div class="invite-box">
+          <h4>🔗 邀请链接</h4>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:8px;">将链接发送给想邀请的人，点击即可加入团队</p>
+          <div class="link-row">
+            <input type="text" value="https://reminder.app/invite/abc123xyz" readonly>
+            <button class="btn btn-outline btn-sm">复制链接</button>
+          </div>
+        </div>
+        <div class="invite-box">
+          <h4>📧 邮箱邀请</h4>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:8px;">输入成员邮箱，发送邀请邮件</p>
+          <div class="email-row">
+            <input type="email" placeholder="输入成员邮箱地址">
+            <button class="btn btn-primary btn-sm">发送邀请</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

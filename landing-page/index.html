@@ -1,100 +1,1431 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>优特云 Skill — AI 驱动的需求分析与产品设计</title>
-  <meta name="description" content="优特云 Skill 平台：需求文档分析 Skill + 产品文档及UI原型分析 Skill，AI 驱动的需求分析与产品设计工具">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <title>需求文档 + PRD原型 Skill · 设计文档 SKILL 套件</title>
+  <meta name="description" content="需求文档生成 Skill 与 PRD文档及原型生成 Skill，从零散需求到完整产品定义，AI 全流程辅助。">
+  <meta property="og:title" content="需求文档 + PRD原型 Skill · 设计文档 SKILL 套件">
+  <meta property="og:description" content="从零散需求到完整PRD与原型文档，AI 全流程辅助产品文档生成。">
+  <meta property="og:type" content="website">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            rose: { DEFAULT: '#E11D48', light: '#FB7185', dark: '#9F1239' },
+            blue: { DEFAULT: '#3B82F6', light: '#60A5FA', dark: '#1D4ED8' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans SC', 'Inter', system-ui, sans-serif; }
+
+    .glass { background: rgba(255,255,255,0.72); backdrop-filter: blur(12px); }
+    .dark .glass { background: rgba(15,23,42,0.72); }
+
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) { .fade-in { transition: none; } }
+
+    .card-hover { transition: all 0.28s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 18px 36px rgba(0,0,0,0.07); }
+    .dark .card-hover:hover { box-shadow: 0 18px 36px rgba(0,0,0,0.25); }
+
+    .btn-rose { background: linear-gradient(135deg, #E11D48, #FB7185); color: #fff; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; transition: all 0.25s ease; box-shadow: 0 4px 14px rgba(225,29,72,0.3); }
+    .btn-rose:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(225,29,72,0.38); }
+    .btn-outline { background: transparent; color: #E11D48; border: 2px solid #E11D48; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; transition: all 0.25s ease; }
+    .dark .btn-outline { color: #FB7185; border-color: #FB7185; }
+    .btn-outline:hover { background: #E11D48; color: #fff; }
+    .dark .btn-outline:hover { background: #FB7185; color: #0F172A; }
+
+    .btn-coming { background: #E2E8F0; color: #64748B; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: default; }
+    .dark .btn-coming { background: #334155; color: #94A3B8; }
+
+    .tag-rose { background: rgba(225,29,72,0.09); color: #E11D48; border: 1.5px solid rgba(225,29,72,0.22); }
+    .dark .tag-rose { background: rgba(225,29,72,0.15); color: #FB7185; border-color: rgba(251,113,133,0.3); }
+    .tag-blue { background: rgba(59,130,246,0.09); color: #3B82F6; border: 1.5px solid rgba(59,130,246,0.22); }
+    .dark .tag-blue { background: rgba(59,130,246,0.15); color: #60A5FA; border-color: rgba(96,165,250,0.3); }
+
+    .section-divider { width: 64px; height: 4px; border-radius: 2px; margin: 0 auto; }
+
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+    /* Logo wall horizontal scroll */
+    @keyframes scroll-x {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-scroll-x {
+      animation: scroll-x 35s linear infinite;
+      width: max-content;
+    }
+    .animate-scroll-x:hover {
+      animation-play-state: paused;
+    }
+    /* Logo wall edge fade via mask */
+    .logo-mask {
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    }
+
+    /* ===== 案例展示 ===== */
+    .cases-filter-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-bottom: 3rem; }
+    .cases-filter-tag {
+      padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 600;
+      color: #64748B; background: rgba(241,245,249,0.8);
+      border: 1.5px solid rgba(226,232,240,0.8); border-radius: 50px;
+      cursor: pointer; transition: all 0.25s ease; user-select: none;
+    }
+    .dark .cases-filter-tag {
+      color: #94A3B8; background: rgba(30,41,59,0.6);
+      border-color: rgba(51,65,85,0.6);
+    }
+    .cases-filter-tag:hover { border-color: #E11D48; color: #E11D48; }
+    .dark .cases-filter-tag:hover { border-color: #FB7185; color: #FB7185; }
+    .cases-filter-tag.active {
+      background: linear-gradient(135deg, #E11D48, #FB7185); color: #fff;
+      border-color: transparent; box-shadow: 0 4px 14px rgba(225,29,72,0.3);
+    }
+
+    .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+
+    .case-card {
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(226,232,240,0.8); border-radius: 1rem;
+      overflow: hidden; cursor: pointer; transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+      opacity: 0; transform: translateY(28px);
+    }
+    .dark .case-card {
+      background: rgba(15,23,42,0.8); border-color: rgba(51,65,85,0.5);
+    }
+    .case-card.visible { opacity: 1; transform: translateY(0); }
+    .case-card:hover {
+      border-color: #E11D48; transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(225,29,72,0.15), 0 0 0 1px rgba(225,29,72,0.2);
+    }
+    .dark .case-card:hover {
+      border-color: #FB7185;
+      box-shadow: 0 12px 40px rgba(225,29,72,0.2), 0 0 0 1px rgba(251,113,133,0.3);
+    }
+
+    .case-card-thumb { position: relative; width: 100%; height: 200px; overflow: hidden; background: #F8FAFC; }
+    .dark .case-card-thumb { background: #1E293B; }
+    .case-card-thumb iframe { width: 333.33%; height: 333.33%; border: none; transform: scale(0.3); transform-origin: top left; pointer-events: none; }
+
+    .case-card-body { padding: 1.25rem 1.5rem 1.5rem; }
+    .case-card-name { font-size: 1.05rem; font-weight: 800; margin-bottom: 0.5rem; color: #0F172A; }
+    .dark .case-card-name { color: #F1F5F9; }
+    .case-card-desc { font-size: 0.82rem; color: #64748B; line-height: 1.65; margin-bottom: 0.85rem;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .dark .case-card-desc { color: #94A3B8; }
+    .case-card-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .case-card-tag {
+      padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 600;
+      color: #E11D48; background: rgba(225,29,72,0.08);
+      border: 1px solid rgba(225,29,72,0.15); border-radius: 4px;
+    }
+    .dark .case-card-tag { color: #FB7185; background: rgba(225,29,72,0.15); border-color: rgba(251,113,133,0.2); }
+
+    /* Modal */
+    .cases-modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    }
+    .cases-modal-overlay.active { opacity: 1; visibility: visible; }
+    .cases-modal-container {
+      position: relative; width: 94vw; max-width: 1380px; height: 88vh;
+      background: #FFF; border-radius: 1.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(225,29,72,0.1);
+      display: flex; flex-direction: column; overflow: hidden;
+      transform: scale(0.96); transition: transform 0.3s ease;
+    }
+    .dark .cases-modal-container { background: #0F172A; border-color: rgba(51,65,85,0.5); }
+    .cases-modal-overlay.active .cases-modal-container { transform: scale(1); }
+    .cases-modal-overlay.fullscreen .cases-modal-container { width: 100vw; max-width: 100vw; height: 100vh; border-radius: 0; }.cases-modal-overlay.fullscreen .cases-modal-sidebar { display: none; }
+
+    .cases-modal-close {
+      position: absolute; top: 1rem; right: 1.5rem; z-index: 10;
+      width: 38px; height: 38px; font-size: 1.4rem;
+      color: #64748B; background: rgba(241,245,249,0.9);
+      border: 1px solid rgba(226,232,240,0.8); border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.25s ease;
+    }
+    .dark .cases-modal-close { color: #94A3B8; background: rgba(30,41,59,0.8); border-color: rgba(51,65,85,0.6); }
+    .cases-modal-close:hover { color: #E11D48; background: rgba(225,29,72,0.08); border-color: rgba(225,29,72,0.3); }
+    .dark .cases-modal-close:hover { color: #FB7185; }
+
+    .cases-modal-fullscreen {
+      position: absolute; top: 1rem; right: 4.5rem; z-index: 10;
+      width: 38px; height: 38px; font-size: 1.1rem;
+      color: #64748B; background: rgba(241,245,249,0.9);
+      border: 1px solid rgba(226,232,240,0.8); border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.25s ease;
+    }
+    .dark .cases-modal-fullscreen { color: #94A3B8; background: rgba(30,41,59,0.8); border-color: rgba(51,65,85,0.6); }
+    .cases-modal-fullscreen:hover { color: #E11D48; }
+    .dark .cases-modal-fullscreen:hover { color: #FB7185; }
+
+    .cases-modal-body { display: flex; flex: 1; overflow: hidden; }
+    .cases-modal-sidebar {
+      width: 280px; min-width: 280px; padding: 2rem 1.5rem;
+      border-right: 1px solid rgba(226,232,240,0.8); overflow-y: auto;
+      background: rgba(248,250,252,0.6);
+    }
+    .dark .cases-modal-sidebar { background: rgba(15,23,42,0.4); border-right-color: rgba(51,65,85,0.5); }
+    .cases-modal-sidebar h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.65rem; color: #0F172A; }
+    .dark .cases-modal-sidebar h2 { color: #F1F5F9; }
+    .cases-modal-sidebar .desc { font-size: 0.85rem; color: #64748B; line-height: 1.7; margin-bottom: 1.25rem; }
+    .dark .cases-modal-sidebar .desc { color: #94A3B8; }
+    .cases-modal-sidebar .meta-section { margin-bottom: 1.25rem; }
+    .cases-modal-sidebar .meta-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94A3B8; margin-bottom: 0.4rem; }
+    .dark .cases-modal-sidebar .meta-label { color: #64748B; }
+    .cases-modal-sidebar .meta-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .cases-modal-sidebar .meta-tag {
+      padding: 0.2rem 0.6rem; font-size: 0.75rem; font-weight: 600;
+      color: #E11D48; background: rgba(225,29,72,0.08); border-radius: 4px;
+    }
+    .dark .cases-modal-sidebar .meta-tag { color: #FB7185; background: rgba(225,29,72,0.15); }
+    .cases-modal-sidebar .doc-list { list-style: none; padding: 0; }
+    .cases-modal-sidebar .doc-list li { font-size: 0.82rem; color: #475569; padding: 0.25rem 0; }
+    .dark .cases-modal-sidebar .doc-list li { color: #94A3B8; }
+
+    .cases-modal-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .cases-modal-tabs {
+      display: flex; gap: 0; border-bottom: 1px solid rgba(226,232,240,0.8);
+      padding: 0 1.5rem; background: rgba(248,250,252,0.4); flex-shrink: 0; overflow-x: auto;
+    }
+    .dark .cases-modal-tabs { background: rgba(15,23,42,0.4); border-bottom-color: rgba(51,65,85,0.5); }
+    .cases-modal-tab {
+      padding: 0.85rem 1.35rem; font-size: 0.88rem; font-weight: 600;
+      color: #64748B; cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.2s ease; user-select: none; white-space: nowrap;
+    }
+    .dark .cases-modal-tab { color: #94A3B8; }
+    .cases-modal-tab:hover { color: #E11D48; }
+    .dark .cases-modal-tab:hover { color: #FB7185; }
+    .cases-modal-tab.active { color: #E11D48; border-bottom-color: #E11D48; }
+    .dark .cases-modal-tab.active { color: #FB7185; border-bottom-color: #FB7185; }
+
+    .cases-modal-panel { flex: 1; overflow: hidden; position: relative; }
+    .cases-modal-panel .md-content {
+      padding: 2rem 2.5rem; height: 100%; overflow-y: auto;
+      color: #334155; font-size: 0.92rem; line-height: 1.75; max-width: 860px; margin: 0 auto;
+    }
+    .dark .cases-modal-panel .md-content { color: #CBD5E1; }
+    .cases-modal-panel .md-content h1 { font-size: 1.6rem; font-weight: 800; margin: 1.5rem 0 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid rgba(226,232,240,0.8); color: #0F172A; }
+    .dark .cases-modal-panel .md-content h1 { color: #F1F5F9; border-bottom-color: rgba(51,65,85,0.5); }
+    .cases-modal-panel .md-content h2 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.4rem; color: #1E293B; }
+    .dark .cases-modal-panel .md-content h2 { color: #E2E8F0; }
+    .cases-modal-panel .md-content h3 { font-size: 1.05rem; font-weight: 700; margin: 1rem 0 0.3rem; color: #334155; }
+    .dark .cases-modal-panel .md-content h3 { color: #CBD5E1; }
+    .cases-modal-panel .md-content p { margin-bottom: 0.5rem; }
+    .cases-modal-panel .md-content ul, .cases-modal-panel .md-content ol { margin: 0.25rem 0 0.75rem 1.5rem; }
+    .cases-modal-panel .md-content code { background: rgba(225,29,72,0.06); color: #E11D48; padding: 0.12em 0.35em; border-radius: 3px; font-size: 0.88em; }
+    .dark .cases-modal-panel .md-content code { background: rgba(225,29,72,0.12); color: #FB7185; }
+    .cases-modal-panel .md-content pre { background: #F1F5F9; padding: 1.15rem 1.35rem; border-radius: 0.75rem; overflow-x: auto; margin: 0.75rem 0; border: 1px solid rgba(226,232,240,0.8); line-height: 1.6; }
+    .dark .cases-modal-panel .md-content pre { background: #1E293B; border-color: rgba(51,65,85,0.5); }
+    .cases-modal-panel .md-content pre code { background: none; padding: 0; color: #334155; }
+    .dark .cases-modal-panel .md-content pre code { color: #CBD5E1; }
+    .cases-modal-panel .md-content table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.88rem; border-radius: 0.75rem; overflow: hidden; }
+    .cases-modal-panel .md-content th, .cases-modal-panel .md-content td { border: 1px solid rgba(226,232,240,0.8); padding: 0.45rem 0.75rem; text-align: left; }
+    .dark .cases-modal-panel .md-content th, .cases-modal-panel .md-content td { border-color: rgba(51,65,85,0.5); }
+    .cases-modal-panel .md-content th { background: rgba(248,250,252,0.8); font-weight: 700; color: #475569; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    .dark .cases-modal-panel .md-content th { background: rgba(30,41,59,0.6); color: #94A3B8; }
+    .cases-modal-panel .md-content blockquote { background: rgba(225,29,72,0.04); border-left: 3px solid #E11D48; padding: 0.75rem 1rem; margin: 0.75rem 0; border-radius: 0 6px 6px 0; color: #64748B; }
+    .dark .cases-modal-panel .md-content blockquote { color: #94A3B8; }
+    .cases-modal-panel .md-content a { color: #E11D48; text-decoration: none; border-bottom: 1px solid rgba(225,29,72,0.25); }
+    .dark .cases-modal-panel .md-content a { color: #FB7185; border-bottom-color: rgba(251,113,133,0.3); }
+    .cases-modal-panel iframe.prototype-frame { width: 100%; height: 100%; border: none; }
+    .cases-modal-panel .loading { display: flex; align-items: center; justify-content: center; height: 100%; color: #94A3B8; font-size: 0.95rem; }
+    .cases-modal-panel .loading::after {
+      content: ""; width: 22px; height: 22px; border: 2px solid rgba(226,232,240,0.8);
+      border-top-color: #E11D48; border-radius: 50%; animation: casesSpin 0.8s linear infinite; margin-left: 0.65rem;
+    }
+    .dark .cases-modal-panel .loading::after { border-color: rgba(51,65,85,0.5); border-top-color: #FB7185; }
+    @keyframes casesSpin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .cases-modal-sidebar { display: none; }
+      .cases-modal-body { flex-direction: column; }
+      .cases-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-<body>
+<body class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
 
-  <!-- Hero -->
-  <section class="hero" id="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-content">
-      <h1 class="hero-title">
-        <span class="gradient-text">优特云 Skill</span>
+  <!-- ===== NAV ===== -->
+  <nav class="fixed top-0 left-0 right-0 z-40 glass border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">📋</span>
+        <span class="font-extrabold text-[15px]">设计文档 SKILL 套件</span>
+      </div>
+      <div class="hidden md:flex items-center gap-7 text-[13px] font-semibold text-slate-500 dark:text-slate-400">
+        <a href="#skills" class="hover:text-rose-500 transition">两款 Skill</a>
+        <a href="#workflow" class="hover:text-rose-500 transition">工作流</a>
+        <a href="#showcase" class="hover:text-rose-500 transition">案例展示</a>
+        <a href="#cases" class="hover:text-rose-500 transition">适用场景</a>
+        <a href="#phase2" class="hover:text-rose-500 transition">方案文档 Skill</a>
+        <a href="#faq" class="hover:text-rose-500 transition">常见问题</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="theme-toggle-nav" class="relative w-14 h-7 rounded-full transition-all duration-300 cursor-pointer focus:outline-none shrink-0 border border-slate-300/70 dark:border-slate-600" style="background:#FFFFFF;" onclick="toggleTheme()" aria-label="切换主题">
+          <span class="absolute top-1/2 left-1.5 -translate-y-1/2 text-[13px] transition-all duration-300" id="icon-sun-nav" style="opacity:1">☀️</span>
+          <span class="absolute top-1/2 right-1.5 -translate-y-1/2 text-[13px] transition-all duration-300" id="icon-moon-nav" style="opacity:0.35">🌙</span>
+          <span id="toggle-thumb-nav" class="absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-300 transform translate-x-0 border border-slate-200/80"></span>
+        </button>
+        <a href="#cta" class="btn-rose !py-2 !px-5 !text-[13px]">免费试用</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="pt-[104px] pb-20 px-6 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-rose-50/80 via-white to-blue-50/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 -z-10"></div>
+    <div class="absolute top-24 left-6 w-72 h-72 bg-rose-200/40 dark:bg-rose-900/20 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute bottom-0 right-6 w-80 h-80 bg-blue-200/30 dark:bg-blue-900/15 rounded-full blur-3xl -z-10"></div>
+
+    <div class="max-w-3xl mx-auto">
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 bg-rose-50 dark:bg-rose-900/25 text-rose-500 dark:text-rose-400 px-4 py-1.5 rounded-full text-[13px] font-semibold mb-6 border border-rose-200/60 dark:border-rose-800/40">
+        🚀 现已推出 · 开源免费试用
+      </div>
+
+      <h1 class="text-[clamp(2rem,5.5vw,3.6rem)] font-black leading-[1.15] mb-5">
+        从零散需求到<br><span style="background:linear-gradient(135deg,#E11D48,#3B82F6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">完整产品定义</span>
       </h1>
-      <p class="hero-subtitle">AI 驱动的需求分析与产品设计，从想法到原型，一步到位</p>
-      <div class="hero-skills">
-        <div class="hero-skill-card">
-          <div class="hero-skill-icon">📋</div>
-          <h3>需求文档分析 Skill</h3>
-          <p>将模糊的用户想法转化为结构化的需求文档（URS），自动梳理用户画像、业务场景、功能优先级</p>
-        </div>
-        <div class="hero-skill-card">
-          <div class="hero-skill-icon">🎨</div>
-          <h3>产品文档及UI原型分析 Skill</h3>
-          <p>基于需求文档自动生成产品文档（PRD）和可交互的 UI 原型，覆盖管理后台、移动端、小程序等多端</p>
-        </div>
-      </div>
-      <a href="#gallery" class="cta-btn">查看案例展示</a>
-    </div>
-  </section>
 
-  <!-- Features -->
-  <section class="features" id="features">
-    <h2 class="section-title">核心能力</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🔍</div>
-        <h3>智能需求分析</h3>
-        <p>自动识别用户画像、业务场景、功能需求，生成结构化的 URS 文档</p>
+      <p class="text-[17px] text-slate-600 dark:text-slate-400 mb-2 font-medium">
+        两款 AI Skill，覆盖需求挖掘 → PRD → 原型全流程
+      </p>
+      <p class="text-[14px] text-slate-400 dark:text-slate-500 mb-10 max-w-xl mx-auto leading-relaxed">
+        需求文档生成 Skill 把杂乱需求整理成结构化文档；<br>
+        PRD文档及原型生成 Skill 基于需求文档自动输出标准 PRD 和原型说明。
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3.5 justify-center">
+        <a href="#skills" class="btn-rose text-[15px] px-9 py-3.5">了解两款 Skill</a>
+        <a href="#workflow" class="btn-outline text-[15px] px-9 py-3.5">查看工作流 ↓</a>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">📐</div>
-        <h3>产品方案设计</h3>
-        <p>基于五层架构思想，输出完整的产品文档（PRD），覆盖体验层到数据层</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🖼️</div>
-        <h3>UI 原型生成</h3>
-        <p>自动生成可交互的 HTML 原型，支持管理后台、移动 H5、小程序等多端</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏷️</div>
-        <h3>多行业覆盖</h3>
-        <p>覆盖保险、教育、医疗、物业、零售、知识付费等 10+ 行业场景</p>
+
+      <!-- Terminal preview -->
+      <div class="mt-14 max-w-[640px] mx-auto">
+        <div class="bg-[#0F1117] dark:bg-[#0B0D12] rounded-2xl p-4 text-left shadow-2xl border border-slate-700/60">
+          <div class="flex gap-1.5 mb-3.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#FF5F57]"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-[#28C840]"></span>
+          </div>
+          <code class="text-[13px] leading-[1.9] font-mono block">
+            <span class="text-slate-500">$ </span>clawhub install req-doc-skill prd-proto-skill<br>
+            <span class="text-emerald-400">✔ </span><span class="text-slate-300">两款 Skill 安装完成</span><br>
+            <br>
+            <span class="text-slate-500">▸ </span><span class="text-slate-400">输入需求文本或上传会议记录</span><br>
+            <span class="text-slate-500">▸ </span><span class="text-slate-400">AI 自动生成结构化需求文档</span><br>
+            <span class="text-slate-500">▸ </span><span class="text-slate-400">基于需求文档继续生成 PRD + 原型说明</span><br>
+            <br>
+            <span class="text-cyan-400">✨ 两阶段文档已生成，共耗时约 X 分钟</span>
+          </code>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Gallery -->
-  <section class="gallery" id="gallery">
-    <h2 class="section-title">案例展示</h2>
-    <div class="filter-bar" id="filterBar"></div>
-    <div class="gallery-grid" id="galleryGrid"></div>
+  <!-- ===== 支持的 Agent 工具 ===== -->
+  <section class="py-14 px-6 bg-slate-50/60 dark:bg-slate-900/40 border-y border-slate-200/70 dark:border-slate-800/60 overflow-hidden">
+    <div class="max-w-5xl mx-auto text-center">
+      <p class="text-[11px] font-bold tracking-[0.18em] uppercase text-slate-400 dark:text-slate-500 mb-9">支持的 Agent 工具</p>
+      <div class="relative logo-mask">
+        <!-- Scrolling logos -->
+        <div class="flex gap-x-12 items-center whitespace-nowrap animate-scroll-x" id="logo-track">
+          <!-- Codex (OpenAI icon) -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/openai.png" alt="Codex" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/openai.png" alt="Codex" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Codex</span>
+          </div>
+          <!-- Claude -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/claude.png" alt="Claude" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/claude.png" alt="Claude" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Claude</span>
+          </div>
+          <!-- Cursor -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/cursor.png" alt="Cursor" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/cursor.png" alt="Cursor" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Cursor</span>
+          </div>
+          <!-- OpenCode -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/opencode.png" alt="OpenCode" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/opencode.png" alt="OpenCode" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">OpenCode</span>
+          </div>
+          <!-- GitHub Copilot -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/github.png" alt="GitHub Copilot" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/github.png" alt="GitHub Copilot" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Copilot</span>
+          </div>
+          <!-- Windsurf -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/windsurf.png" alt="Windsurf" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/windsurf.png" alt="Windsurf" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Windsurf</span>
+          </div>
+          <!-- Gemini -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/gemini.png" alt="Gemini" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/gemini.png" alt="Gemini" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Gemini</span>
+          </div>
+          <!-- Cline -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/cline.png" alt="Cline" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/cline.png" alt="Cline" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Cline</span>
+          </div>
+          <!-- Antigravity -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/antigravity.png" alt="Antigravity" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/antigravity.png" alt="Antigravity" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Antigravity</span>
+          </div>
+          <!-- ClawBot (OpenClaw icon) -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/openclaw.png" alt="ClawBot" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/openclaw.png" alt="ClawBot" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">ClawBot</span>
+          </div>
+          <!-- Trae -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/trae.png" alt="Trae" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/trae.png" alt="Trae" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Trae</span>
+          </div>
+          <!-- Coze -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/coze.png" alt="Coze" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/coze.png" alt="Coze" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Coze</span>
+          </div>
+          <!-- DUPLICATE for seamless scroll -->
+          <!-- Codex (OpenAI icon) -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/openai.png" alt="Codex" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/openai.png" alt="Codex" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Codex</span>
+          </div>
+          <!-- Claude -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/claude.png" alt="Claude" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/claude.png" alt="Claude" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Claude</span>
+          </div>
+          <!-- Cursor -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/cursor.png" alt="Cursor" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/cursor.png" alt="Cursor" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Cursor</span>
+          </div>
+          <!-- OpenCode -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/opencode.png" alt="OpenCode" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/opencode.png" alt="OpenCode" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">OpenCode</span>
+          </div>
+          <!-- GitHub Copilot -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/github.png" alt="GitHub Copilot" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/github.png" alt="GitHub Copilot" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Copilot</span>
+          </div>
+          <!-- Windsurf -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/windsurf.png" alt="Windsurf" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/windsurf.png" alt="Windsurf" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Windsurf</span>
+          </div>
+          <!-- Gemini -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/gemini.png" alt="Gemini" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/gemini.png" alt="Gemini" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Gemini</span>
+          </div>
+          <!-- Cline -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/cline.png" alt="Cline" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/cline.png" alt="Cline" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Cline</span>
+          </div>
+          <!-- Antigravity -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/antigravity.png" alt="Antigravity" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/antigravity.png" alt="Antigravity" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Antigravity</span>
+          </div>
+          <!-- ClawBot (OpenClaw icon) -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/openclaw.png" alt="ClawBot" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/openclaw.png" alt="ClawBot" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">ClawBot</span>
+          </div>
+          <!-- Trae -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/trae.png" alt="Trae" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/trae.png" alt="Trae" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Trae</span>
+          </div>
+          <!-- Coze -->
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/light/coze.png" alt="Coze" class="h-10 w-auto dark:hidden" />
+            <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/coze.png" alt="Coze" class="h-10 w-auto hidden dark:block" />
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">Coze</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <p>&copy; 2026 优特云 Skill. All rights reserved.</p>
-  </footer>
+  <!-- ===== 案例展示 ===== -->
+  <section id="showcase" class="py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16 fade-in">
+        <span class="inline-block px-3 py-1 rounded-full text-[12px] font-bold tracking-wider uppercase text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/25 border border-rose-200/60 dark:border-rose-800/40 mb-4">案例展示</span>
+        <h2 class="text-[clamp(1.6rem,4vw,2.6rem)] font-black mb-3">看看 Skill 能做出什么</h2>
+        <p class="text-[15px] text-slate-500 dark:text-slate-400 max-w-lg mx-auto">来自真实场景的 16 个案例，覆盖保险、教育、医疗、物业、零售等行业</p>
+        <div class="section-divider bg-gradient-to-r from-rose-500 to-blue-500 mt-6"></div>
+      </div>
+      <div class="cases-filter-bar" id="casesFilterBar"></div>
+      <div class="cases-grid" id="casesGrid"></div>
+    </div>
+  </section>
 
-  <!-- Modal -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-container">
-      <button class="modal-close" id="modalClose">&times;</button>
-      <button class="modal-fullscreen" id="modalFullscreen" title="全屏">
-        <iconify-icon icon="mingcute:fullscreen-2-fill" width="20" height="20"></iconify-icon>
+  <!-- Cases Modal -->
+  <div class="cases-modal-overlay" id="casesModalOverlay">
+    <div class="cases-modal-container">
+      <button class="cases-modal-close" id="casesModalClose">×</button>
+      <button class="cases-modal-fullscreen" id="casesModalFullscreen" title="全屏">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
       </button>
-      <div class="modal-body">
-        <div class="modal-sidebar" id="modalSidebar"></div>
-        <div class="modal-content">
-          <div class="modal-tabs" id="modalTabs"></div>
-          <div class="modal-panel" id="modalPanel"></div>
+      <div class="cases-modal-body">
+        <div class="cases-modal-sidebar" id="casesModalSidebar"></div>
+        <div class="cases-modal-content">
+          <div class="cases-modal-tabs" id="casesModalTabs"></div>
+          <div class="cases-modal-panel" id="casesModalPanel"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@2/dist/iconify-icon.min.js"></script>
+  <!-- ===== 两款 SKILL 介绍 ===== -->
+  <section id="skills" class="py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Section header -->
+      <div class="text-center mb-16 fade-in">
+        <span class="inline-block px-3 py-1 rounded-full text-[12px] font-bold tracking-wider uppercase text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/25 border border-rose-200/60 dark:border-rose-800/40 mb-4">设计文档 SKILL 套件</span>
+        <h2 class="text-[clamp(1.6rem,4vw,2.6rem)] font-black mb-3">两款核心 Skill</h2>
+        <p class="text-[15px] text-slate-500 dark:text-slate-400 max-w-lg mx-auto">分别面向需求分析和产品定义两个阶段，可独立使用，也可组合形成完整工作流</p>
+        <div class="section-divider bg-gradient-to-r from-rose-500 to-blue-500 mt-6"></div>
+      </div>
+
+      <!-- Skill 1 -->
+      <div class="mb-20 fade-in">
+        <div class="flex flex-col md:flex-row gap-10 items-center">
+          <!-- Left: info -->
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-3xl">📋</span>
+              <div>
+                <h3 class="text-2xl font-extrabold">需求文档生成 Skill</h3>
+                <span class="text-[13px] font-semibold text-slate-400 dark:text-slate-500">第一阶段 · 需求分析</span>
+              </div>
+            </div>
+            <p class="text-[15px] text-slate-600 dark:text-slate-400 leading-[1.8] mb-6">
+              从零散的会议记录、邮件、聊天记录中智能提取需求信息，自动去重、分类、评估优先级，输出符合标准格式的需求文档。不涉及企业核心知识，<span class="text-rose-500 dark:text-rose-400 font-semibold">适合开源推广</span>。
+            </p>
+            <ul class="space-y-2.5 mb-8">
+              <li class="flex items-start gap-3"><span class="text-rose-500 mt-0.5 text-[15px]">✦</span><span class="text-[14px] text-slate-700 dark:text-slate-300">智能挖掘：从非结构化文本中提取有效需求</span></li>
+              <li class="flex items-start gap-3"><span class="text-rose-500 mt-0.5 text-[15px]">✦</span><span class="text-[14px] text-slate-700 dark:text-slate-300">优先级评估：多维度自动评分，辅助排期决策</span></li>
+              <li class="flex items-start gap-3"><span class="text-rose-500 mt-0.5 text-[15px]">✦</span><span class="text-[14px] text-slate-700 dark:text-slate-300">变更追踪：记录需求演进历史，影响范围可追溯</span></li>
+              <li class="flex items-start gap-3"><span class="text-rose-500 mt-0.5 text-[15px]">✦</span><span class="text-[14px] text-slate-700 dark:text-slate-300">多格式导出：Markdown / Word / PDF 无缝对接</span></li>
+            </ul>
+            <div class="flex gap-3">
+              <span class="tag-rose text-[12px] font-bold px-3 py-1 rounded-full">开源免费</span>
+              <span class="tag-rose text-[12px] font-bold px-3 py-1 rounded-full">CLI 安装</span>
+              <span class="tag-rose text-[12px] font-bold px-3 py-1 rounded-full">Agent 集成</span>
+            </div>
+          </div>
+          <!-- Right: visual card -->
+          <div class="flex-1 w-full max-w-md">
+            <div class="bg-gradient-to-br from-rose-50 to-rose-100/40 dark:from-slate-900 dark:to-slate-800 rounded-2xl p-7 border border-rose-200/50 dark:border-rose-800/30">
+              <div class="text-[12px] font-bold text-rose-400 dark:text-rose-500 mb-3 uppercase tracking-wider">输出示例 · 需求文档</div>
+              <div class="space-y-3">
+                <div class="bg-white/80 dark:bg-slate-800/80 rounded-xl p-3.5">
+                  <div class="h-2.5 bg-rose-200/70 dark:bg-rose-800/40 rounded-full w-2/3 mb-2"></div>
+                  <div class="h-2 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-full mb-1.5"></div>
+                  <div class="h-2 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-5/6"></div>
+                </div>
+                <div class="bg-white/80 dark:bg-slate-800/80 rounded-xl p-3.5">
+                  <div class="flex gap-2 mb-2">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">P0</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">P1</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500">P2</span>
+                  </div>
+                  <div class="h-2 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-full mb-1.5"></div>
+                  <div class="h-2 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-4/6"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skill 2 -->
+      <div class="fade-in">
+        <div class="flex flex-col md:flex-row-reverse gap-10 items-center">
+          <!-- Right (info on left visually): info -->
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-3xl">📝</span>
+              <div>
+                <h3 class="text-2xl font-extrabold">PRD文档及原型生成 Skill</h3>
+                <span class="text-[13px] font-semibold text-slate-400 dark:text-slate-500">第二阶段 · 产品定义</span>
+              </div>
+            </div>
+            <p class="text-[15px] text-slate-600 dark:text-slate-400 leading-[1.8] mb-6">
+              基于已生成的需求文档，自动输出包含产品概述、功能需求、交互设计、数据需求等完整章节的标准 PRD 文档，并同步生成产品原型说明文档，可直接用于设计团队对接。同样不涉及企业核心知识，<span class="text-blue-500 dark:text-blue-400 font-semibold">适合开源推广</span>。
+            </p>
+            <ul class="space-y-2.5 mb-8">
+              <li class="flex items-start gap-3"><span class="text-blue-500 mt-0.5 text-[15px]">✦</span><span class="text-[14px] text-slate-700 dark:text-slate-300">标准 PRD 生成：覆盖行业通用格式全部章节</span></li>
+              <li class="flex items-start gap-3"><span class="text-blue-500 mt-0.5 text-[15px]">✦</span><span class="text-[14px] text-slate-700 dark:text-slate-300">原型说明同步输出：页面结构、交互流程、组件规范</span></li>
+              <li class="flex items-start gap-3"><span class="text-blue-500 mt-0.5 text-[15px]">✦</span><span class="text-[14px] text-slate-700 dark:text-slate-300">需求双向追溯：PRD 每一条功能点关联原始需求</span></li>
+              <li class="flex items-start gap-3"><span class="text-blue-500 mt-0.5 text-[15px]">✦</span><span class="text-[14px] text-slate-700 dark:text-slate-300">模板自定义：内置多套标准模板，也支持导入团队模板</span></li>
+            </ul>
+            <div class="flex gap-3">
+              <span class="tag-blue text-[12px] font-bold px-3 py-1 rounded-full">开源免费</span>
+              <span class="tag-blue text-[12px] font-bold px-3 py-1 rounded-full">PRD+原型</span>
+              <span class="tag-blue text-[12px] font-bold px-3 py-1 rounded-full">需求追溯</span>
+            </div>
+          </div>
+          <!-- Left: visual card -->
+          <div class="flex-1 w-full max-w-md">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100/40 dark:from-slate-900 dark:to-slate-800 rounded-2xl p-7 border border-blue-200/50 dark:border-blue-800/30">
+              <div class="text-[12px] font-bold text-blue-400 dark:text-blue-500 mb-3 uppercase tracking-wider">输出示例 · PRD + 原型</div>
+              <div class="space-y-3">
+                <div class="bg-white/80 dark:bg-slate-800/80 rounded-xl p-3.5">
+                  <div class="h-2.5 bg-blue-200/70 dark:bg-blue-800/40 rounded-full w-1/2 mb-2"></div>
+                  <div class="h-2 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-full mb-1.5"></div>
+                  <div class="h-2 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-5/6"></div>
+                </div>
+                <div class="flex gap-3">
+                  <div class="flex-1 bg-white/80 dark:bg-slate-800/80 rounded-xl p-3.5">
+                    <div class="h-2 bg-purple-200/70 dark:bg-purple-800/40 rounded-full w-2/3 mb-2"></div>
+                    <div class="h-1.5 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-full mb-1"></div>
+                    <div class="h-1.5 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-3/4"></div>
+                  </div>
+                  <div class="flex-1 bg-white/80 dark:bg-slate-800/80 rounded-xl p-3.5">
+                    <div class="h-2 bg-indigo-200/70 dark:bg-indigo-800/40 rounded-full w-2/3 mb-2"></div>
+                    <div class="h-1.5 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-full mb-1"></div>
+                    <div class="h-1.5 bg-slate-200/70 dark:bg-slate-700/60 rounded-full w-4/5"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 组合工作流 ===== -->
+  <section id="workflow" class="py-24 px-6 bg-slate-50 dark:bg-slate-900/40">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 fade-in">
+        <h2 class="text-[clamp(1.6rem,4vw,2.6rem)] font-black mb-3">两款 Skill 组合工作流</h2>
+        <p class="text-[15px] text-slate-500 dark:text-slate-400 max-w-lg mx-auto">可单独使用，也可串联成完整的需求→产品定义流水线</p>
+      </div>
+
+      <div class="grid md:grid-cols-5 gap-4 items-start fade-in">
+        <!-- Step 1 -->
+        <div class="text-center px-3 py-6">
+          <div class="w-16 h-16 rounded-2xl bg-rose-500 flex items-center justify-center text-white text-xl font-black mx-auto mb-4 shadow-lg shadow-rose-200/50 dark:shadow-rose-900/20">1</div>
+          <h4 class="text-[14px] font-extrabold mb-2">输入原始需求</h4>
+          <p class="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">会议记录、邮件、聊天记录等零散文本</p>
+        </div>
+        <div class="hidden md:flex items-center justify-center pt-8 text-2xl text-slate-300 dark:text-slate-600">→</div>
+        <!-- Step 2 -->
+        <div class="text-center px-3 py-6">
+          <div class="w-16 h-16 rounded-2xl bg-rose-500 flex items-center justify-center text-white text-xl font-black mx-auto mb-4 shadow-lg shadow-rose-200/50 dark:shadow-rose-900/20">2</div>
+          <h4 class="text-[14px] font-extrabold mb-2">需求文档 Skill</h4>
+          <p class="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">提取、去重、评估优先级，输出结构化需求文档</p>
+        </div>
+        <div class="hidden md:flex items-center justify-center pt-8 text-2xl text-slate-300 dark:text-slate-600">→</div>
+        <!-- Step 3 -->
+        <div class="text-center px-3 py-6">
+          <div class="w-16 h-16 rounded-2xl bg-blue-500 flex items-center justify-center text-white text-xl font-black mx-auto mb-4 shadow-lg shadow-blue-200/50 dark:shadow-blue-900/20">3</div>
+          <h4 class="text-[14px] font-extrabold mb-2">PRD+原型 Skill</h4>
+          <p class="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">基于需求文档，生成标准 PRD 和原型说明文档</p>
+        </div>
+      </div>
+
+      <div class="mt-12 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 fade-in">
+        <h4 class="text-[14px] font-bold mb-3 text-slate-700 dark:text-slate-300">⏱ 关于生成时间</h4>
+        <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-[1.8]">
+          生成时间与实际需求的复杂度和原型页面数量正相关。需求条数越多、原型页面越复杂，生成时间相应增加。两款 Skill 均通过 CLI 隔离分发，<strong class="text-slate-800 dark:text-slate-200">生成过程实时可见</strong>，你可以随时查看 AI 的分析进度。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 适用场景 ===== -->
+  <section id="cases" class="py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16 fade-in">
+        <h2 class="text-[clamp(1.6rem,4vw,2.6rem)] font-black mb-3">适用场景</h2>
+        <p class="text-[15px] text-slate-500 dark:text-slate-400">无论你身处哪个产品环节，都能找到合适的用法</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 card-hover fade-in">
+          <span class="text-2xl mb-3 block">💼</span>
+          <h4 class="text-[15px] font-extrabold mb-2">产品经理</h4>
+          <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">从用户反馈提炼需求，输出可评审的 PRD，减少重复文档劳动。</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 card-hover fade-in">
+          <span class="text-2xl mb-3 block">🏢</span>
+          <h4 class="text-[15px] font-extrabold mb-2">企业 IT 部门</h4>
+          <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">整理业务部门的零散需求，输出可交付给开发团队的结构化文档。</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 card-hover fade-in">
+          <span class="text-2xl mb-3 block">🎨</span>
+          <h4 class="text-[15px] font-extrabold mb-2">产品设计师</h4>
+          <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">获取结构化的原型说明文档，减少与 PM 的反复沟通对齐成本。</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 card-hover fade-in">
+          <span class="text-2xl mb-3 block">🎓</span>
+          <h4 class="text-[15px] font-extrabold mb-2">产品新人 / 创业者</h4>
+          <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">学习行业标准文档格式，快速输出专业度足够的需求和 PRD 文档。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 方案文档 Skill 预告 ===== -->
+  <section id="phase2" class="py-24 px-6 bg-gradient-to-br from-emerald-50/90 via-green-50/60 to-teal-50/80 dark:from-slate-900 dark:via-slate-800 dark:to-slate-800 relative overflow-hidden">
+    <!-- Green decorative blobs -->
+    <div class="absolute top-0 left-1/4 w-80 h-80 bg-emerald-200/30 dark:bg-emerald-900/15 rounded-full blur-3xl -z-0"></div>
+    <div class="absolute bottom-0 right-1/4 w-72 h-72 bg-teal-200/30 dark:bg-teal-900/15 rounded-full blur-3xl -z-0"></div>
+
+    <div class="max-w-4xl mx-auto text-center relative z-10 fade-in">
+      <div class="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-4 py-1.5 rounded-full text-[12px] font-semibold mb-6 border border-emerald-200 dark:border-emerald-800/40">
+        🔒 方案文档 Skill · 敬请期待
+      </div>
+      <h2 class="text-[clamp(1.6rem,4vw,2.8rem)] font-black mb-4" style="background:linear-gradient(135deg,#059669,#0D9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">方案文档 Skill</h2>
+      <p class="text-[17px] text-slate-500 dark:text-slate-400 mb-3 font-medium">涉及企业专利技术 · 需要严格保护</p>
+      <p class="text-[14px] text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+        第三款 Skill 面向方案文档生成，包含企业核心专利技术和方法论。
+        SKILL.md 不包含原文，所有核心分析逻辑通过skill安装并调用CLI在云端完成，
+        确保知识产权不被泄露。适合对文档安全性有严格要求的客户。
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-5 mb-10 text-left">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-200 dark:border-emerald-800/40 shadow-sm">
+          <div class="text-lg mb-2 text-emerald-500">🔐</div>
+          <h4 class="text-[14px] font-bold mb-1.5 text-slate-800 dark:text-slate-200">CLI 原文隔离</h4>
+          <p class="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">SKILL.md 仅描述安装方式，原文完全在 CLI 侧保护</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-teal-200 dark:border-teal-800/40 shadow-sm">
+          <div class="text-lg mb-2 text-teal-500">☁️</div>
+          <h4 class="text-[14px] font-bold mb-1.5 text-slate-800 dark:text-slate-200">云端 SubAgent 分析</h4>
+          <p class="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">核心分析在云端完成，主 Agent 实时接收过程回传</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-green-200 dark:border-green-800/40 shadow-sm">
+          <div class="text-lg mb-2 text-green-500">🛡️</div>
+          <h4 class="text-[14px] font-bold mb-1.5 text-slate-800 dark:text-slate-200">授权严格控制</h4>
+          <p class="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">内置授权校验，仅授权客户可使用，支持渠道分发</p>
+        </div>
+      </div>
+
+      <button class="btn-coming text-[15px] px-10 py-3.5 cursor-default" disabled>敬请期待</button>
+      <p class="mt-4 text-[13px] text-slate-400 dark:text-slate-500">预计于 2026 年 Q3 发布，关注我们以获取最新进展</p>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section id="faq" class="py-24 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-14 fade-in">
+        <h2 class="text-[clamp(1.6rem,4vw,2.6rem)] font-black mb-3">常见问题</h2>
+      </div>
+      <div class="space-y-3.5 fade-in">
+        <details class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <summary class="p-5 font-bold text-[15px] flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer">
+            两款 Skill 是免费的吗？
+            <span class="text-rose-400 text-xl font-light">+</span>
+          </summary>
+          <div class="px-5 pb-5 text-[14px] text-slate-500 dark:text-slate-400 leading-[1.8]">
+            是的，两款 Skill 均采用开源推广策略，SKILL.md 完整公开，你可以自由安装和使用基础功能。商业授权版本提供额外的商业使用权限和技术支持，详情可联系我们。
+          </div>
+        </details>
+        <details class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <summary class="p-5 font-bold text-[15px] flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer">
+            必须先安装需求文档 Skill，才能用 PRD Skill 吗？
+            <span class="text-rose-400 text-xl font-light">+</span>
+          </summary>
+          <div class="px-5 pb-5 text-[14px] text-slate-500 dark:text-slate-400 leading-[1.8]">
+            不是必须的。如果你已经有结构化的需求文档（无论用什么工具生成的），可以直接传入 PRD 文档及原型生成 Skill。但两款 Skill 组合使用效果最佳：需求文档 Skill 负责"把需求整理好"，PRD Skill 负责"把 PRD 写专业"，形成完整闭环。
+          </div>
+        </details>
+        <details class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <summary class="p-5 font-bold text-[15px] flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer">
+            生成一份文档大概需要多久？
+            <span class="text-rose-400 text-xl font-light">+</span>
+          </summary>
+          <div class="px-5 pb-5 text-[14px] text-slate-500 dark:text-slate-400 leading-[1.8]">
+            生成时间与需求的复杂度和原型页面数量有关，无法用固定秒数衡量。需求条数越多、原型页面定义越详细，生成时间相应增加。两款 Skill 均通过 CLI 调用，生成过程中的思考步骤会实时返回，你可以随时查看进度，不必盲目等待。
+          </div>
+        </details>
+        <details class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <summary class="p-5 font-bold text-[15px] flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer">
+            支持哪些 Agent 平台？
+            <span class="text-rose-400 text-xl font-light">+</span>
+          </summary>
+          <div class="px-5 pb-5 text-[14px] text-slate-500 dark:text-slate-400 leading-[1.8]">
+            支持所有兼容 OpenClaw Skill 规范的 Agent 平台，包括 WorkBuddy、Claude Code Agent Team、OpenAI Symphony 等。同时也提供独立 CLI 工具，可在任意终端环境使用，不依赖特定 Agent 平台。
+          </div>
+        </details>
+        <details class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <summary class="p-5 font-bold text-[15px] flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer">
+            方案文档 Skill 什么时候发布？
+            <span class="text-rose-400 text-xl font-light">+</span>
+          </summary>
+          <div class="px-5 pb-5 text-[14px] text-slate-500 dark:text-slate-400 leading-[1.8]">
+            方案文档 Skill 涉及企业专利技术，需要通过 CLI 实现原文隔离保护，技术方案更复杂，预计于 2026 年 Q3 发布。你可以关注本页"方案文档 Skill"区块，或联系我们登记意向，发布时将优先通知。
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section id="cta" class="py-24 px-6 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-rose-500 via-rose-600 to-blue-600 opacity-95 -z-10"></div>
+    <div class="absolute inset-0 opacity-10 -z-10" style="background-image: url('data:image/svg+xml,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%220%200%2040%2040%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2220%22%20r%3D%221%22%20fill%3D%22white%22%20opacity%3D%220.4%22/%3E%3C/svg%3E');"></div>
+    <div class="max-w-2xl mx-auto text-center text-white relative z-10 fade-in">
+      <h2 class="text-[clamp(1.5rem,4vw,2.4rem)] font-black mb-4">准备好试用两款 Skill 了吗？</h2>
+      <p class="text-[16px] opacity-80 mb-8">开源免费 · 支持 CLI 一键安装 · 30 秒完成上手</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#" class="bg-white text-rose-500 font-extrabold text-[15px] px-10 py-3.5 rounded-2xl hover:bg-opacity-90 transition shadow-xl">免费安装试用</a>
+        <a href="#" class="bg-transparent border-2 border-white/60 text-white font-extrabold text-[15px] px-10 py-3.5 rounded-2xl hover:bg-white/10 transition">查看文档 →</a>
+      </div>
+      <p class="mt-7 text-[13px] opacity-45">已有 500+ 团队安装试用 · 开源 MIT 协议</p>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="pt-10 pb-8 px-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-wrap justify-between gap-x-10 gap-y-8 mb-10">
+        <!-- Col 1: Brand + Social -->
+        <div class="max-w-xs">
+          <div class="flex items-center gap-2 mb-2.5">
+            <span class="text-xl">📋</span>
+            <span class="font-extrabold text-[15px]">设计文档 SKILL 套件</span>
+          </div>
+          <p class="text-[13px] text-slate-400 dark:text-slate-500 leading-relaxed mb-4">需求文档 + PRD原型 两款 Skill，让产品文档生成高效又规范。</p>
+          <!-- Social icons: 微信 小红书 知乎 B站 抖音 -->
+          <div class="flex items-center gap-3">
+            <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:scale-110 transition" title="微信公众号">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.33.33 0 0 0 .167-.054l1.903-1.114a.86.86 0 0 1 .717-.098 10.2 10.2 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zM17.34 10.858c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.72.72 0 0 1 .598.082l1.584.926a.3.3 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.6.6 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03z"/></svg>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center bg-rose-50 dark:bg-rose-900/30 text-rose-500 dark:text-rose-400 hover:scale-110 transition" title="小红书"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path fill="#ff0000" d="M22.405 9.879c.002.016.01.02.07.019h.725a.797.797 0 0 0 .78-.972.794.794 0 0 0-.884-.618.795.795 0 0 0-.692.794c0 .101-.002.666.001.777m-11.509 4.808c-.203.001-1.353.004-1.685.003a2.528 2.528 0 0 1-.766-.126.025.025 0 0 0-.03.014L7.7 16.127a.025.025 0 0 0 .01.032c.111.06.336.124.495.124.66.01 1.32.002 1.981 0 .01 0 .02-.006.023-.015l.712-1.545a.025.025 0 0 0-.024-.035zM.477 9.91c-.071 0-.076.002-.076.01l-.01.08c-.027.397-.038.495-.234 3.06-.012.24-.034.389-.135.607-.026.057-.033.042.003.112.046.092.681 1.523.787 1.74.008.015.011.02.017.02.008 0 .033-.026.047-.044.147-.187.268-.391.371-.606.306-.635.44-1.325.486-1.706.014-.11.021-.22.03-.33l.204-2.616.022-.293c.003-.029 0-.033-.03-.034zm7.203 3.757a1.427 1.427 0 0 1-.135-.607c-.004-.084-.031-.39-.235-3.06a.443.443 0 0 0-.01-.082c-.004-.011-.052-.008-.076-.008h-1.48c-.03.001-.034.004-.03.034l.021.293c.076.982.153 1.964.233 2.946.05.4.186 1.085.487 1.706.103.215.223.419.37.606.015.018.037.051.048.049.02-.003.742-1.642.804-1.765.036-.07.03-.055.003-.112m3.861-.913h-.872a.126.126 0 0 1-.116-.178l1.178-2.625a.025.025 0 0 0-.023-.035l-1.318-.003a.148.148 0 0 1-.135-.21l.876-1.954a.025.025 0 0 0-.023-.035h-1.56q-.017 0-.024.015l-.926 2.068c-.085.169-.314.634-.399.938a.534.534 0 0 0-.02.191.46.46 0 0 0 .23.378.981.981 0 0 0 .46.119h.59c.041 0-.688 1.482-.834 1.972a.53.53 0 0 0-.023.172.465.465 0 0 0 .23.398c.15.092.342.12.475.12l1.66-.001c.01 0 .02-.006.023-.015l.575-1.28a.025.025 0 0 0-.024-.035zm-6.93-4.937H3.1a.032.032 0 0 0-.034.033c0 1.048-.01 2.795-.01 6.829 0 .288-.269.262-.28.262h-.74c-.04.001-.044.004-.04.047.001.037.465 1.064.555 1.263.01.02.03.033.051.033.157.003.767.009.938-.014.153-.02.3-.06.438-.132.3-.156.49-.419.595-.765.052-.172.075-.353.075-.533.002-2.33 0-4.66-.007-6.991a.032.032 0 0 0-.032-.032zm11.784 6.896c0-.014-.01-.021-.024-.022-.346.006-.692.004-1.037.004-.014-.002-.022-.01-.022-.024-.005-.434-.007-.869-.01-1.303 0-.072-.006-.071.07-.07l.733-.003c.041 0 .081.002.12.015.093.025.16.107.165.204.006.431.002 1.153.001 1.153zm2.67.244a1.953 1.953 0 0 0-.883-.222h-.18c-.04-.001-.04-.003-.042-.04V10.21q.001-.198-.025-.394a1.823 1.823 0 0 0-.153-.53 1.533 1.533 0 0 0-.677-.71 2.167 2.167 0 0 0-1-.258c-.153-.003-.567 0-.72 0-.07 0-.068.004-.068-.065V7.76c0-.031-.01-.041-.046-.039H17.93s-.016 0-.023.007c-.006.006-.008.012-.008.023v.546c-.008.036-.057.015-.082.022h-.95c-.022.002-.028.008-.03.032v1.481c0 .09-.004.082.082.082h.913c.082 0 .072.128.072.128V11.19s.003.117-.06.117h-1.482c-.068 0-.06.082-.06.082v1.445s-.01.068.064.068h1.457c.082 0 .076-.006.076.079v3.225c0 .088-.007.081.082.081h1.43c.09 0 .082.007.082-.08v-3.27c0-.029.006-.035.033-.035l2.323-.003c.098 0 .191.02.28.061a.46.46 0 0 1 .274.407c.008.395.003.79.003 1.185 0 .259-.107.367-.33.367h-1.218c-.023.002-.029.008-.028.033.184.437.374.871.57 1.303a.045.045 0 0 0 .04.026c.17.005.34.002.51.003.15-.002.517.004.666-.01a2.03 2.03 0 0 0 .408-.075c.59-.18.975-.698.976-1.313v-1.981q.001-.191-.034-.38c0 .078-.029-.641-.724-.998z"/></svg></a>
+            <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:scale-110 transition" title="知乎">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M5.721 0C2.251 0 0 2.25 0 5.719V18.28C0 21.751 2.252 24 5.721 24h12.56C21.751 24 24 21.75 24 18.281V5.72C24 2.249 21.75 0 18.281 0zm1.964 4.078q-.408 1.096-.68 2.11h4.587c.545-.006.445 1.168.445 1.171H9.384a58 58 0 0 1-.112 3.797h2.712c.388.023.393 1.251.393 1.266H9.183a9.2 9.2 0 0 1-.408 2.102l.757-.604c.452.456 1.512 1.712 1.906 2.177.473.681.063 2.081.063 2.081l-2.794-3.382c-.653 2.518-1.845 3.607-1.845 3.607-.523.468-1.58.82-2.64.516 2.218-1.73 3.44-3.917 3.667-6.497H4.491c0-.015.197-1.243.806-1.266h2.71c.024-.32.086-3.254.086-3.797H6.598c-.136.406-.158.447-.268.753-.594 1.095-1.603 1.122-1.907 1.155.906-1.821 1.416-3.6 1.591-4.064.425-1.124 1.671-1.125 1.671-1.125zM13.078 6h6.377v11.33h-2.573l-2.184 1.373-.401-1.373h-1.219zm1.313 1.219v8.86h.623l.263.937 1.455-.937h.938v-8.86z"/></svg>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center bg-pink-50 dark:bg-pink-900/30 text-pink-500 dark:text-pink-400 hover:scale-110 transition" title="哔哩哔哩">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M17.813 4.653h.854q2.266.08 3.773 1.574Q23.946 7.72 24 9.987v7.36q-.054 2.266-1.56 3.773c-1.506 1.507-2.262 1.524-3.773 1.56H5.333q-2.266-.054-3.773-1.56C.053 19.614.036 18.858 0 17.347v-7.36q.054-2.267 1.56-3.76t3.773-1.574h.774l-1.174-1.12a1.23 1.23 0 0 1-.373-.906q0-.534.373-.907l.027-.027q.4-.373.92-.373t.92.373L9.653 4.44q.107.106.187.213h4.267a.8.8 0 0 1 .16-.213l2.853-2.747q.4-.373.92-.373c.347 0 .662.151.929.4s.391.551.391.907q0 .532-.373.906zM5.333 7.24q-1.12.027-1.88.773-.76.748-.786 1.894v7.52q.026 1.146.786 1.893t1.88.773h13.334q1.12-.026 1.88-.773t.786-1.893v-7.52q-.026-1.147-.786-1.894t-1.88-.773zM8 11.107q.56 0 .933.373.375.374.4.96v1.173q-.025.586-.4.96-.373.375-.933.374-.56-.001-.684-.125-.933-.374-.4-.96V12.44q0-.56.386-.947.387-.386.947-.386zm8 0q.56 0 .933.373.375.374.4.96v1.173q-.025.586-.4.96-.373.375-.933.374-.56-.001-.684-.125-.933-.374-.4-.96V12.44q.025-.586.4-.96.373-.373.933-.373z"/></svg>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 transition" title="抖音">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+            </a>
+          </div>
+        </div>
+        <!-- Col 2: Skill 产品 -->
+        <div class="shrink-0">
+          <h4 class="font-bold text-[13px] mb-2.5">Skill 产品</h4>
+          <ul class="space-y-1 text-[13px] text-slate-500 dark:text-slate-400">
+            <li><a href="#" class="hover:text-rose-500 transition">需求文档生成 Skill</a></li>
+            <li><a href="#" class="hover:text-rose-500 transition">PRD文档及原型生成 Skill</a></li>
+            <li><a href="#phase2" class="hover:text-rose-500 transition">方案文档 Skill（敬请期待）</a></li>
+          </ul>
+        </div>
+        <!-- Col 3: 资源 -->
+        <div class="shrink-0">
+          <h4 class="font-bold text-[13px] mb-2.5">资源</h4>
+          <ul class="space-y-1 text-[13px] text-slate-500 dark:text-slate-400">
+            <li><a href="#" class="hover:text-rose-500 transition">使用文档</a></li>
+            <li><a href="#" class="hover:text-rose-500 transition">GitHub 仓库</a></li>
+            <li><a href="#" class="hover:text-rose-500 transition">ClawHub 安装指南</a></li>
+          </ul>
+        </div>
+        <!-- Col 4: 联系 -->
+        <div class="shrink-0 text-right">
+          <h4 class="font-bold text-[13px] mb-2.5">联系</h4>
+          <ul class="space-y-1 text-[13px] text-slate-500 dark:text-slate-400">
+            <li>珠海优特企业管理有限公司</li>
+            <li>产品方案部</li>
+            <li><a href="#" class="hover:text-rose-500 transition">联系邮箱 ↗</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-2">
+        <p class="text-[12px] text-slate-400">© 2026 设计文档 SKILL 套件 · 珠海优特企业管理有限公司</p>
+        <div class="flex gap-4 text-[12px]">
+          <a href="#" class="text-slate-400 hover:text-rose-500 transition">GitHub</a>
+          <a href="#" class="text-slate-400 hover:text-rose-500 transition">微信</a>
+          <a href="#" class="text-slate-400 hover:text-rose-500 transition">邮箱</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Cases: Markdown & Mermaid -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-  <script>mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'})</script>
-  <script src="js/demos-data.js"></script>
-  <script src="js/app.js"></script>
+  <script>mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'});</script>
+
+  <!-- Cases Data & Logic -->
+  <script>
+    // 案例数据 — 路径相对于 landing-page/index.html
+    const CASES_DEMOS = [
+      {
+        id: "pet-insurance",
+        name: "宠物保险对比助手",
+        description: "帮助宠物主人对比不同保险方案，支持 AI 智能推荐、理赔指引、多产品对比",
+        tags: ["需求分析", "产品设计", "金融保险"],
+        thumbnail: "./demos/宠物保险对比助手/assets/prototypes/product-admin-web-prototype.html",
+        urs: "./demos/宠物保险对比助手/URS-宠物保险对比助手.md",
+        prd: "./demos/宠物保险对比助手/PRD-宠物保险对比助手.md",
+        prototypes: [
+          { label: "产品管理后台", url: "./demos/宠物保险对比助手/assets/prototypes/product-admin-web-prototype.html" },
+          { label: "运营管理后台", url: "./demos/宠物保险对比助手/assets/prototypes/admin-web-prototype.html" },
+          { label: "C端小程序", url: "./demos/宠物保险对比助手/assets/prototypes/c-end-miniapp-prototype.html" },
+          { label: "C端H5", url: "./demos/宠物保险对比助手/assets/prototypes/c-end-h5-prototype.html" }
+        ]
+      },
+      {
+        id: "children-class-shuttle",
+        name: "儿童兴趣班接送交接表",
+        description: "面向家长、教师、管理员三端的兴趣班接送交接管理，确保儿童交接安全可追溯",
+        tags: ["需求分析", "产品设计", "教育"],
+        thumbnail: "./demos/儿童兴趣班接送交接表/assets/prototypes/admin-web-prototype.html",
+        urs: "./demos/儿童兴趣班接送交接表/URS-儿童兴趣班接送交接表.md",
+        prd: "./demos/儿童兴趣班接送交接表/PRD-儿童兴趣班接送交接表.md",
+        prototypes: [
+          { label: "管理后台", url: "./demos/儿童兴趣班接送交接表/assets/prototypes/admin-web-prototype.html" },
+          { label: "教师小程序", url: "./demos/儿童兴趣班接送交接表/assets/prototypes/teacher-mini-program-prototype.html" },
+          { label: "家长小程序", url: "./demos/儿童兴趣班接送交接表/assets/prototypes/parent-mini-program-prototype.html" }
+        ]
+      },
+      {
+        id: "delivery-risk-check",
+        name: "交付前资料风险确认台",
+        description: "面向独立顾问和自由职业者的交付前资料协同工具，自动识别资料缺失与过期风险",
+        tags: ["需求分析", "产品设计", "企业服务"],
+        thumbnail: "./demos/交付前资料风险确认台/UI原型_交付前资料风险确认台.html",
+        urs: "./demos/交付前资料风险确认台/需求文档_交付前资料风险确认台.md",
+        prd: "./demos/交付前资料风险确认台/PRD_交付前资料风险确认台.md",
+        prototypes: [
+          { label: "风险确认台", url: "./demos/交付前资料风险确认台/UI原型_交付前资料风险确认台.html" }
+        ]
+      },
+      {
+        id: "cs-feedback-to-card",
+        name: "客服反馈转产品需求卡AI",
+        description: "将客服反馈自动转化为结构化产品需求卡片，支持批量导入、报表分析和看板管理",
+        tags: ["需求分析", "产品设计", "客服"],
+        thumbnail: "./demos/客服反馈转产品需求卡AI/UI-客服反馈转产品需求卡AI.html",
+        urs: "./demos/客服反馈转产品需求卡AI/URS-客服反馈转产品需求卡AI.md",
+        prd: "./demos/客服反馈转产品需求卡AI/PRD-客服反馈转产品需求卡AI.md",
+        prototypes: [
+          { label: "需求卡片管理", url: "./demos/客服反馈转产品需求卡AI/UI-客服反馈转产品需求卡AI.html" },
+          { label: "数据导入", url: "./demos/客服反馈转产品需求卡AI/import.html" },
+          { label: "报表分析", url: "./demos/客服反馈转产品需求卡AI/report.html" },
+          { label: "卡片看板", url: "./demos/客服反馈转产品需求卡AI/cards.html" }
+        ]
+      },
+      {
+        id: "kb-gap-catcher",
+        name: "客服知识库缺口捕捉器",
+        description: "自动识别客服知识库中的内容缺口，支持 FAQ 编辑、任务分配和数据看板",
+        tags: ["需求分析", "产品设计", "客服", "知识管理"],
+        thumbnail: "./demos/客服知识库缺口捕捉器/assets/prototypes/kb-gap-catcher-prototype.html",
+        urs: "./demos/客服知识库缺口捕捉器/需求文档.md",
+        prd: "./demos/客服知识库缺口捕捉器/产品文档.md",
+        prototypes: [
+          { label: "知识库缺口管理", url: "./demos/客服知识库缺口捕捉器/assets/prototypes/kb-gap-catcher-prototype.html" }
+        ]
+      },
+      {
+        id: "course-to-exercise",
+        name: "课程讲义转练习卡",
+        description: "将课程讲义自动转化为结构化练习卡片，支持知识库管理、题目配置、预览导出",
+        tags: ["需求分析", "产品设计", "教育"],
+        thumbnail: "./demos/课程讲义转练习卡/prototype_01_dashboard.html",
+        urs: "./demos/课程讲义转练习卡/课程讲义转练习卡_URS需求文档.md",
+        prd: "./demos/课程讲义转练习卡/课程讲义转练习卡_PRD产品文档.md",
+        prototypes: [
+          { label: "工作台", url: "./demos/课程讲义转练习卡/prototype_01_dashboard.html" },
+          { label: "讲义上传", url: "./demos/课程讲义转练习卡/prototype_02_upload.html" },
+          { label: "知识库", url: "./demos/课程讲义转练习卡/prototype_03_knowledge.html" },
+          { label: "题目配置", url: "./demos/课程讲义转练习卡/prototype_04_config.html" },
+          { label: "预览", url: "./demos/课程讲义转练习卡/prototype_05_preview.html" },
+          { label: "练习管理", url: "./demos/课程讲义转练习卡/prototype_06_manage.html" },
+          { label: "导出", url: "./demos/课程讲义转练习卡/prototype_07_export.html" },
+          { label: "定价", url: "./demos/课程讲义转练习卡/prototype_08_pricing.html" }
+        ]
+      },
+      {
+        id: "bnb-cleaning",
+        name: "民宿清洁排班小助手",
+        description: "为民宿经营者提供清洁排班管理，支持管理员排班和清洁员接单两端协同",
+        tags: ["需求分析", "产品设计", "企业服务"],
+        thumbnail: "./demos/民宿清洁排班小助手/assets/prototypes/admin-prototype.html",
+        urs: "./demos/民宿清洁排班小助手/民宿清洁排班小助手_需求文档_URS.md",
+        prd: "./demos/民宿清洁排班小助手/民宿清洁排班小助手_PRD.md",
+        prototypes: [
+          { label: "管理后台", url: "./demos/民宿清洁排班小助手/assets/prototypes/admin-prototype.html" },
+          { label: "清洁员端", url: "./demos/民宿清洁排班小助手/assets/prototypes/cleaner-prototype.html" }
+        ]
+      },
+      {
+        id: "community-qa-asset",
+        name: "社群问答内容资产化助手",
+        description: "将社群群聊问答自动整理为可复用的内容资产（周报、FAQ、选题库），支持内容分级标记",
+        tags: ["需求分析", "产品设计", "知识付费"],
+        thumbnail: "./demos/社群问答内容资产化助手/社群问答内容资产化助手-UI原型.html",
+        urs: "./demos/社群问答内容资产化助手/社群问答内容资产化助手-URS.md",
+        prd: "./demos/社群问答内容资产化助手/社群问答内容资产化助手-PRD.md",
+        prototypes: [
+          { label: "内容资产管理", url: "./demos/社群问答内容资产化助手/社群问答内容资产化助手-UI原型.html" }
+        ]
+      },
+      {
+        id: "photo-selection",
+        name: "摄影选片修图反馈台",
+        description: "面向摄影工作室的选片与修图协同工具，支持客户选片、订单看板、修图反馈",
+        tags: ["需求分析", "产品设计", "摄影"],
+        thumbnail: "./demos/摄影选片修图反馈台/studio-backend.html",
+        urs: "./demos/摄影选片修图反馈台/URS-摄影选片修图反馈台.md",
+        prd: "./demos/摄影选片修图反馈台/PRD-摄影选片修图反馈台.md",
+        prototypes: [
+          { label: "工作室后台", url: "./demos/摄影选片修图反馈台/studio-backend.html" },
+          { label: "订单看板", url: "./demos/摄影选片修图反馈台/order-kanban.html" },
+          { label: "客户选片", url: "./demos/摄影选片修图反馈台/customer-selection.html" }
+        ]
+      },
+      {
+        id: "expo-material",
+        name: "小型展会摊位物料清单",
+        description: "为小型展会参展商提供物料清单管理，支持模板管理、扫码确认、复盘报告",
+        tags: ["需求分析", "产品设计", "展会"],
+        thumbnail: "./demos/小型展会摊位物料清单/assets/prototypes/admin-web-prototype.html",
+        urs: "./demos/小型展会摊位物料清单/URS-小型展会摊位物料清单.md",
+        prd: "./demos/小型展会摊位物料清单/PRD-小型展会摊位物料清单.md",
+        prototypes: [
+          { label: "管理后台", url: "./demos/小型展会摊位物料清单/assets/prototypes/admin-web-prototype.html" },
+          { label: "移动H5", url: "./demos/小型展会摊位物料清单/assets/prototypes/mobile-h5-prototype.html" },
+          { label: "移动小程序", url: "./demos/小型展会摊位物料清单/assets/prototypes/mobile-mini-program-prototype.html" }
+        ]
+      },
+      {
+        id: "dental-followup",
+        name: "牙科复诊与术后随访助手",
+        description: "面向牙科诊所的复诊预约与术后随访管理，支持诊所后台和患者 H5 两端",
+        tags: ["需求分析", "产品设计", "医疗"],
+        thumbnail: "./demos/牙科复诊与术后随访助手/clinic-dashboard.html",
+        urs: "./demos/牙科复诊与术后随访助手/URS-牙科复诊与术后随访助手.md",
+        prd: "./demos/牙科复诊与术后随访助手/PRD-牙科复诊与术后随访助手.md",
+        prototypes: [
+          { label: "诊所看板", url: "./demos/牙科复诊与术后随访助手/clinic-dashboard.html" },
+          { label: "患者H5", url: "./demos/牙科复诊与术后随访助手/patient-h5.html" }
+        ]
+      },
+      {
+        id: "drug-inventory",
+        name: "药品库存与服用提醒家庭版",
+        description: "面向家庭的药品库存管理与服用提醒工具，支持扫码录入、库存预警、服药确认",
+        tags: ["需求分析", "产品设计", "医疗", "家庭"],
+        thumbnail: "./demos/药品库存与服用提醒家庭版/assets/prototypes/miniprogram-prototype.html",
+        urs: "./demos/药品库存与服用提醒家庭版/药品库存与服用提醒家庭版_URS需求文档.md",
+        prd: "./demos/药品库存与服用提醒家庭版/药品库存与服用提醒家庭版_PRD产品文档.md",
+        prototypes: [
+          { label: "小程序主页", url: "./demos/药品库存与服用提醒家庭版/assets/prototypes/miniprogram-prototype.html" }
+        ]
+      },
+      {
+        id: "key-access-a",
+        name: "钥匙门禁借还留痕器-A",
+        description: "面向物业和企业的钥匙门禁借还管理，支持组织创建、物品管理、借还流程和记录导出",
+        tags: ["需求分析", "产品设计", "物业"],
+        thumbnail: "./demos/钥匙门禁借还留痕器-A/assets/prototypes/webapp-prototype.html",
+        urs: "./demos/钥匙门禁借还留痕器-A/URS-钥匙门禁借还留痕器.md",
+        prd: "./demos/钥匙门禁借还留痕器-A/PRD-钥匙门禁借还留痕器.md",
+        prototypes: [
+          { label: "Web管理端", url: "./demos/钥匙门禁借还留痕器-A/assets/prototypes/webapp-prototype.html" },
+          { label: "小程序端", url: "./demos/钥匙门禁借还留痕器-A/assets/prototypes/miniapp-prototype.html" }
+        ]
+      },
+      {
+        id: "key-access-b",
+        name: "钥匙门禁借还留痕器-B",
+        description: "钥匙门禁借还管理的另一种方案设计，支持管理后台和小程序两端",
+        tags: ["需求分析", "产品设计", "物业"],
+        thumbnail: "./demos/钥匙门禁借还留痕器-B/admin-web-prototype.html",
+        urs: "./demos/钥匙门禁借还留痕器-B/钥匙门禁借还留痕器_需求规格说明书_v1.0.md",
+        prd: "./demos/钥匙门禁借还留痕器-B/钥匙门禁借还留痕器_产品需求文档_PRD_v1.0.md",
+        prototypes: [
+          { label: "管理后台", url: "./demos/钥匙门禁借还留痕器-B/admin-web-prototype.html" },
+          { label: "小程序", url: "./demos/钥匙门禁借还留痕器-B/miniprogram-prototype.html" }
+        ]
+      },
+      {
+        id: "booking-supply",
+        name: "预约制门店耗材预测补货",
+        description: "面向预约制门店的耗材预测与补货管理，支持预约录入、库存管理、预测补货和提醒",
+        tags: ["需求分析", "产品设计", "零售"],
+        thumbnail: "./demos/预约制门店耗材预测补货/预约录入页.html",
+        urs: "./demos/预约制门店耗材预测补货/URS-预约制门店耗材预测补货.md",
+        prd: "./demos/预约制门店耗材预测补货/PRD-预约制门店耗材预测补货.md",
+        prototypes: [
+          { label: "预约录入", url: "./demos/预约制门店耗材预测补货/预约录入页.html" },
+          { label: "预测补货", url: "./demos/预约制门店耗材预测补货/预测补货页.html" },
+          { label: "库存管理", url: "./demos/预约制门店耗材预测补货/库存管理页.html" },
+          { label: "提醒页", url: "./demos/预约制门店耗材预测补货/提醒页.html" }
+        ]
+      },
+      {
+        id: "video-teaser",
+        name: "长内容预热视频包装器",
+        description: "将长内容（课程、文章）自动转化为预热短视频包装方案，支持创作者工作台和管理后台",
+        tags: ["需求分析", "产品设计", "内容创作"],
+        thumbnail: "./demos/长内容预热视频包装器/assets/prototypes/creator-workspace-prototype.html",
+        urs: "./demos/长内容预热视频包装器/长内容预热视频包装器V1.0-URS.md",
+        prd: "./demos/长内容预热视频包装器/长内容预热视频包装器V1.0-PRD.md",
+        prototypes: [
+          { label: "创作者工作台", url: "./demos/长内容预热视频包装器/assets/prototypes/creator-workspace-prototype.html" },
+          { label: "管理后台", url: "./demos/长内容预热视频包装器/assets/prototypes/admin-backend-prototype.html" }
+        ]
+      },
+      {
+        id: "rental-handover",
+        name: "租房交接留痕确认器",
+        description: "面向房东和租客的租房交接留痕工具，支持房屋状况记录、交接确认和留痕追溯",
+        tags: ["需求分析", "产品设计", "房产"],
+        thumbnail: "./demos/租房交接留痕确认器/UI原型_租房交接留痕确认器.html",
+        urs: "./demos/租房交接留痕确认器/需求说明书_租房交接留痕确认器.md",
+        prd: "./demos/租房交接留痕确认器/产品需求文档_PRD_租房交接留痕确认器.md",
+        prototypes: [
+          { label: "租房交接", url: "./demos/租房交接留痕确认器/UI原型_租房交接留痕确认器.html" }
+        ]
+      },
+
+  {
+    "id": "ai-knowledge-fragments",
+    "name": "AI个人知识碎片整理助手",
+    "description": "将零散的笔记、截图、链接等知识碎片自动整理为结构化知识卡片，支持标签分类和智能检索",
+    "tags": [
+      "需求分析",
+      "产品设计",
+      "知识管理"
+    ],
+    "thumbnail": "./demos/AI个人知识碎片整理助手/UI原型-AI个人知识碎片整理助手.html",
+    "urs": "./demos/AI个人知识碎片整理助手/AI个人知识碎片整理助手_URS.md",
+    "prd": "./demos/AI个人知识碎片整理助手/PRD-AI个人知识碎片整理助手.md",
+    "prototypes": [
+      {
+        "label": "知识碎片管理",
+        "url": "./demos/AI个人知识碎片整理助手/UI原型-AI个人知识碎片整理助手.html"
+      }
+    ]
+  },
+  {
+    "id": "project-cost-calc",
+    "name": "个人项目成本核算器",
+    "description": "面向自由职业者的项目成本核算工具，支持工时记录、费用分摊、利润分析和报价参考",
+    "tags": [
+      "需求分析",
+      "产品设计",
+      "自由职业"
+    ],
+    "thumbnail": "./demos/个人项目成本核算器/UI-个人项目成本核算器-Web端原型.html",
+    "urs": "./demos/个人项目成本核算器/URS-个人项目成本核算器.md",
+    "prd": "./demos/个人项目成本核算器/PRD-个人项目成本核算器.md",
+    "prototypes": [
+      {
+        "label": "Web端原型",
+        "url": "./demos/个人项目成本核算器/UI-个人项目成本核算器-Web端原型.html"
+      }
+    ]
+  },
+  {
+    "id": "moving-checklist",
+    "name": "搬家物品清单与进度跟踪器",
+    "description": "帮助用户系统化管理搬家物品清单，支持分房间记录、进度跟踪、标签分类和打包状态管理",
+    "tags": [
+      "需求分析",
+      "产品设计",
+      "生活工具"
+    ],
+    "thumbnail": "./demos/搬家物品清单与进度跟踪器/00-all-in-one.html",
+    "urs": "./demos/搬家物品清单与进度跟踪器/需求文档_URS.md",
+    "prd": "./demos/搬家物品清单与进度跟踪器/产品文档_PRD.md",
+    "prototypes": [
+      {
+        "label": "全功能SPA",
+        "url": "./demos/搬家物品清单与进度跟踪器/00-all-in-one.html"
+      }
+    ]
+  },
+  {
+    "id": "freelancer-contract-reminder",
+    "name": "自由职业者合同关键日期提醒器",
+    "description": "帮助自由职业者管理多份合同的关键日期，支持到期提醒、续约预警、统计分析和多视图管理",
+    "tags": [
+      "需求分析",
+      "产品设计",
+      "自由职业"
+    ],
+    "thumbnail": "./demos/自由职业者合同关键日期提醒器/SPA-自由职业者合同关键日期提醒器.html",
+    "urs": "./demos/自由职业者合同关键日期提醒器/URS-自由职业者合同关键日期提醒器.md",
+    "prd": "./demos/自由职业者合同关键日期提醒器/PRD-自由职业者合同关键日期提醒器.md",
+    "prototypes": [
+      {
+        "label": "全功能SPA",
+        "url": "./demos/自由职业者合同关键日期提醒器/SPA-自由职业者合同关键日期提醒器.html"
+      }
+    ]
+  }
+
+    ];
+  </script>
+  <script>
+    (function(){
+      var filterBar = document.getElementById('casesFilterBar');
+      var grid = document.getElementById('casesGrid');
+      var overlay = document.getElementById('casesModalOverlay');
+      var closeBtn = document.getElementById('casesModalClose');
+      var fsBtn = document.getElementById('casesModalFullscreen');
+      var sidebar = document.getElementById('casesModalSidebar');
+      var tabs = document.getElementById('casesModalTabs');
+      var panel = document.getElementById('casesModalPanel');
+      var currentDemo = null;
+
+      // Init filters
+      function initFilters() {
+        var tagSet = new Set();
+        CASES_DEMOS.forEach(function(d){ d.tags.forEach(function(t){ tagSet.add(t); }); });
+        var allBtn = document.createElement('button');
+        allBtn.className = 'cases-filter-tag active';
+        allBtn.textContent = '全部';
+        allBtn.dataset.tag = 'all';
+        allBtn.addEventListener('click', function(){ setFilter('all'); render('all'); });
+        filterBar.appendChild(allBtn);
+        tagSet.forEach(function(t){
+          var btn = document.createElement('button');
+          btn.className = 'cases-filter-tag';
+          btn.textContent = t;
+          btn.dataset.tag = t;
+          btn.addEventListener('click', function(){ setFilter(t); render(t); });
+          filterBar.appendChild(btn);
+        });
+      }
+
+      function setFilter(tag) {
+        filterBar.querySelectorAll('.cases-filter-tag').forEach(function(b){
+          b.classList.toggle('active', b.dataset.tag === tag);
+        });
+      }
+
+      function render(filterTag) {
+        grid.innerHTML = '';
+        var filtered = filterTag === 'all' ? CASES_DEMOS : CASES_DEMOS.filter(function(d){ return d.tags.indexOf(filterTag) !== -1; });
+        filtered.forEach(function(demo){
+          var card = document.createElement('div');
+          card.className = 'case-card';
+          card.innerHTML =
+            '<div class="case-card-thumb"><iframe src="' + demo.thumbnail + '" loading="lazy"></iframe></div>' +
+            '<div class="case-card-body">' +
+              '<div class="case-card-name">' + demo.name + '</div>' +
+              '<div class="case-card-desc">' + demo.description + '</div>' +
+              '<div class="case-card-tags">' + demo.tags.map(function(t){ return '<span class="case-card-tag">' + t + '</span>'; }).join('') + '</div>' +
+            '</div>';
+          card.addEventListener('click', function(){ openModal(demo); });
+          grid.appendChild(card);
+        });
+        initCardAnimation();
+      }
+
+      function initCardAnimation() {
+        var obs = new IntersectionObserver(function(entries){
+          entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }});
+        }, { threshold: 0.1 });
+        grid.querySelectorAll('.case-card').forEach(function(c){ obs.observe(c); });
+      }
+
+      function openModal(demo) {
+        currentDemo = demo;
+        sidebar.innerHTML =
+          '<h2>' + demo.name + '</h2>' +
+          '<p class="desc">' + demo.description + '</p>' +
+          '<div class="meta-section"><div class="meta-label">标签</div><div class="meta-tags">' + demo.tags.map(function(t){ return '<span class="meta-tag">' + t + '</span>'; }).join('') + '</div></div>' +
+          '<div class="meta-section"><div class="meta-label">文档</div><ul class="doc-list">' +
+            (demo.urs ? '<li>URS需求文档</li>' : '') +
+            (demo.prd ? '<li>PRD产品文档</li>' : '') +
+          '</ul></div>';
+
+        var tabList = [];
+        if(demo.urs) tabList.push({type:'urs', label:'URS'});
+        if(demo.prd) tabList.push({type:'prd', label:'PRD'});
+        demo.prototypes.forEach(function(pt,i){ tabList.push({type:'proto', label:pt.label, index:i}); });
+
+        tabs.innerHTML = tabList.map(function(t,i){
+          return '<div class="cases-modal-tab' + (i===0?' active':'') + '" data-type="' + t.type + '" data-index="' + (t.index||0) + '">' + t.label + '</div>';
+        }).join('');
+
+        tabs.querySelectorAll('.cases-modal-tab').forEach(function(tab){
+          tab.addEventListener('click', function(){
+            switchTab(demo, tab.dataset.type, parseInt(tab.dataset.index)||0);
+          });
+        });
+
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        switchTab(demo, tabList[0].type, tabList[0].index||0);
+      }
+
+      function switchTab(demo, type, index) {
+        tabs.querySelectorAll('.cases-modal-tab').forEach(function(t){ t.classList.remove('active'); });
+        var activeTab = tabs.querySelector('.cases-modal-tab[data-type="' + type + '"][data-index="' + index + '"]');
+        if(activeTab) activeTab.classList.add('active');
+
+        panel.innerHTML = '<div class="loading">加载中</div>';
+
+        if(type === 'urs' || type === 'prd') {
+          var url = type === 'urs' ? demo.urs : demo.prd;
+          fetch(url).then(function(r){ return r.text(); }).then(function(md){
+            var html = marked.parse(md);
+            panel.innerHTML = '<div class="md-content">' + html + '</div>';
+            setTimeout(function(){
+              if(typeof mermaid !== 'undefined') {
+                var els = panel.querySelectorAll('.language-mermaid');
+                els.forEach(function(el){
+                  try {
+                    var code = el.textContent;
+                    el.outerHTML = '<div class="mermaid">' + code + '</div>';
+                  } catch(e){}
+                });
+                mermaid.run({querySelector:'.mermaid'});
+              }
+            }, 100);
+          }).catch(function(){ panel.innerHTML = '<div class="loading" style="color:#ef4444">文档加载失败</div>'; });
+        panel.addEventListener("click",function(e){var a=e.target.closest("a");if(!a||!a.href||!currentDemo)return;var href=a.getAttribute("href");if(!href)return;var proto=currentDemo.prototypes.find(function(p){return href.indexOf(p.url.split("/").pop())!==-1||href===p.url});if(proto){e.preventDefault();e.stopPropagation();var idx=currentDemo.prototypes.indexOf(proto);switchTab(currentDemo,"proto",idx)}},{once:false});
+        } else if(type === 'proto') {
+          var proto = demo.prototypes[index];
+          panel.innerHTML = '<iframe class="prototype-frame" src="' + proto.url + '"></iframe>';
+        }
+      }
+
+      function closeModal() {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        panel.innerHTML = '';
+        currentDemo = null;
+      }
+
+      // Event listeners
+      closeBtn.addEventListener('click', closeModal);
+      fsBtn.addEventListener('click', function(){
+        overlay.classList.toggle('fullscreen');
+      });
+      overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && overlay.classList.contains('active')) closeModal(); });
+
+      // Init
+      initFilters();
+      render('all');
+    })();
+  </script>
+
+  <!-- Scripts -->
+  <script>
+    // Theme
+    function updateToggleState(isDark) {
+      const btn = document.getElementById('theme-toggle-nav');
+      const thumb = document.getElementById('toggle-thumb-nav');
+      const sun = document.getElementById('icon-sun-nav');
+      const moon = document.getElementById('icon-moon-nav');
+      if (!btn) return;
+      if (isDark) {
+        btn.style.background = '#1E293B';
+        thumb.style.transform = 'translateX(1.75rem)';
+        sun.style.opacity = '0.35';
+        moon.style.opacity = '1';
+      } else {
+        btn.style.background = '#FFFFFF';
+        thumb.style.transform = 'translateX(0)';
+        sun.style.opacity = '1';
+        moon.style.opacity = '0.35';
+      }
+    }
+
+    window.toggleTheme = function() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateToggleState(isDark);
+    };
+
+    // Init theme
+    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+    updateToggleState(document.documentElement.classList.contains('dark'));
+
+    // Fade-in
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // FAQ accordion
+    document.querySelectorAll('details').forEach(d => {
+      d.addEventListener('toggle', () => {
+        const s = d.querySelector('summary span');
+        if (s) s.textContent = d.open ? '−' : '+';
+      });
+    });
+
+    // Smooth anchor
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
 </body>
 </html>
