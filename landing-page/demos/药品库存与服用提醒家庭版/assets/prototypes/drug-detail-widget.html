@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>药品详情组件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #ecfeff;
+            color: #164E63;
+            padding: 16px;
+            max-width: 375px;
+            margin: 0 auto;
+        }
+
+        .widget-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Header */
+        .drug-header {
+            background: linear-gradient(135deg, #0891b2 0%, #22d3ee 100%);
+            padding: 20px;
+            color: white;
+        }
+
+        .drug-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-normal {
+            background: rgba(34, 197, 94, 0.3);
+        }
+
+        .status-warning {
+            background: rgba(251, 191, 36, 0.3);
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid #f0fdfa;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0891b2;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Stock Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .info-item {
+            background: #f0fdfa;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #164E63;
+        }
+
+        .info-value.warning {
+            color: #f59e0b;
+        }
+
+        .info-value.danger {
+            color: #ef4444;
+        }
+
+        /* Usage Instructions */
+        .usage-card {
+            background: #f0fdfa;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .usage-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e0f2fe;
+        }
+
+        .usage-row:last-child {
+            border-bottom: none;
+        }
+
+        .usage-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .usage-value {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        /* 7-Day Medication Record */
+        .medication-record {
+            margin-top: 12px;
+        }
+
+        .record-title {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .record-dots {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .day-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .day-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .day-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin: 0 auto 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .dot-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .dot-failure {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .dot-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .dot-empty {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            padding: 16px 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #22d3ee;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn:hover {
+            background: #f0fdfa;
+        }
+
+        .btn-primary {
+            background: #0891b2;
+            color: white;
+            border-color: #0891b2;
+        }
+
+        .btn-primary:hover {
+            background: #0e7490;
+        }
+
+        .btn-danger {
+            border-color: #fee2e2;
+            color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #fef2f2;
+        }
+
+        /* Member indicator */
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .member-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .member-name {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <!-- Header with Status -->
+        <div class="drug-header">
+            <div class="drug-name">阿莫西林胶囊</div>
+            <span class="status-badge status-normal">✓ 库存正常</span>
+
+            <div class="member-info">
+                <div class="member-avatar">👴</div>
+                <div class="member-name">爷爷</div>
+            </div>
+        </div>
+
+        <!-- Stock Information -->
+        <div class="section">
+            <div class="section-title">📦 库存信息</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">剩余数量</div>
+                    <div class="info-value">18粒</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">有效期至</div>
+                    <div class="info-value">2027-06-30</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">距过期</div>
+                    <div class="info-value" style="color: #22c55e;">368天</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">规格</div>
+                    <div class="info-value">0.25g×24</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Instructions -->
+        <div class="section">
+            <div class="section-title">💊 服用说明</div>
+            <div class="usage-card">
+                <div class="usage-row">
+                    <span class="usage-label">每次用量</span>
+                    <span class="usage-value">2粒</span>
+                </div>
+                <div class="usage-row">
+                    <span class="usage-label">每日次数</span>
+                    <span class="usage-value">3次</span>
+                </div>
+                <div class="usage-row">
+                    <span class="usage-label">服用时间</span>
+                    <span class="usage-value">早中晚饭后</span>
+                </div>
+                <div class="usage-row">
+                    <span class="usage-label">注意事项</span>
+                    <span class="usage-value">温水送服</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7-Day Medication Record -->
+        <div class="section">
+            <div class="section-title">📅 近7日服药记录</div>
+            <div class="medication-record">
+                <div class="record-dots">
+                    <div class="day-item">
+                        <div class="day-label">周一</div>
+                        <div class="day-dot dot-success">✓</div>
+                    </div>
+                    <div class="day-item">
+                        <div class="day-label">周二</div>
+                        <div class="day-dot dot-success">✓</div>
+                    </div>
+                    <div class="day-item">
+                        <div class="day-label">周三</div>
+                        <div class="day-dot dot-failure">✗</div>
+                    </div>
+                    <div class="day-item">
+                        <div class="day-label">周四</div>
+                        <div class="day-dot dot-success">✓</div>
+                    </div>
+                    <div class="day-item">
+                        <div class="day-label">周五</div>
+                        <div class="day-dot dot-success">✓</div>
+                    </div>
+                    <div class="day-item">
+                        <div class="day-label">周六</div>
+                        <div class="day-dot dot-pending">!</div>
+                    </div>
+                    <div class="day-item">
+                        <div class="day-label">今天</div>
+                        <div class="day-dot dot-empty">·</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn">
+                ✏️ 编辑
+            </button>
+            <button class="btn btn-primary">
+                🔔 设置提醒
+            </button>
+            <button class="btn btn-danger">
+                🗑 删除
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Button interactions
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.textContent.trim();
+                if (action.includes('编辑')) {
+                    alert('进入编辑模式');
+                } else if (action.includes('提醒')) {
+                    alert('打开提醒设置页面');
+                } else if (action.includes('删除')) {
+                    if (confirm('确定要删除这个药品吗？')) {
+                        alert('药品已删除');
+                    }
+                }
+            });
+        });
+
+        // Simulate day dot hover states
+        document.querySelectorAll('.day-dot').forEach(dot => {
+            dot.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+            });
+            dot.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

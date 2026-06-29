@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>药品库存与服用提醒家庭版 - 小程序全站点原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f4f8;
+    padding: 32px;
+    color: #164E63;
+  }
+  h1.page-title {
+    text-align: center;
+    font-size: 24px;
+    color: #164E63;
+    margin-bottom: 8px;
+  }
+  .page-subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 32px;
+  }
+  .prototype-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .phone-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .phone-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0e7490;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .phone-frame {
+    width: 280px;
+    height: 560px;
+    background: #fff;
+    border-radius: 32px;
+    border: 3px solid #1e293b;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+  }
+  /* WeChat mini program top bar */
+  .wx-topbar {
+    height: 44px;
+    background: #ededed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-bottom: 1px solid #d4d4d4;
+    flex-shrink: 0;
+  }
+  .wx-topbar .wx-dots {
+    position: absolute;
+    left: 12px;
+    font-size: 14px;
+    color: #666;
+    letter-spacing: 2px;
+  }
+  .wx-topbar .wx-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+  .wx-topbar .wx-circle {
+    position: absolute;
+    right: 12px;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid #666;
+    border-radius: 50%;
+  }
+  /* Screen content */
+  .screen-content {
+    flex: 1;
+    overflow-y: auto;
+    background: #f8fafb;
+    font-size: 13px;
+  }
+  /* Bottom nav */
+  .bottom-nav {
+    height: 52px;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 10px;
+    color: #94a3b8;
+    cursor: pointer;
+  }
+  .nav-item.active { color: #0891b2; }
+  .nav-icon {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Common elements */
+  .section-header {
+    background: linear-gradient(135deg, #0891b2, #22d3ee);
+    color: #fff;
+    padding: 16px;
+  }
+  .section-header h2 { font-size: 16px; font-weight: 600; }
+  .section-header p { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 8px 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .card-title { font-size: 14px; font-weight: 600; color: #164E63; margin-bottom: 6px; }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .tag-green { background: #d1fae5; color: #065f46; }
+  .tag-yellow { background: #fef3c7; color: #92400e; }
+  .tag-orange { background: #ffedd5; color: #9a3412; }
+  .tag-red { background: #fee2e2; color: #991b1b; }
+  .tag-gray { background: #f1f5f9; color: #64748b; }
+  .tag-blue { background: #cffafe; color: #155e75; }
+  .btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary { background: #0891b2; color: #fff; }
+  .btn-success { background: #059669; color: #fff; }
+  .btn-outline { background: #fff; color: #0891b2; border: 1px solid #0891b2; }
+  .btn-danger { background: #fee2e2; color: #dc2626; }
+  .progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #059669, #34d399);
+    border-radius: 4px;
+  }
+  .divider { height: 1px; background: #e5e7eb; margin: 8px 0; }
+  .row { display: flex; align-items: center; justify-content: space-between; }
+  .text-sm { font-size: 12px; color: #64748b; }
+  .text-lg { font-size: 16px; font-weight: 600; }
+  .text-md { font-size: 14px; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #cffafe; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #0891b2; font-weight: 600;
+  }
+  .list-item {
+    display: flex; align-items: center; padding: 10px 12px; gap: 10px;
+    border-bottom: 1px solid #f1f5f9; cursor: pointer;
+  }
+  .list-item:hover { background: #f8fafc; }
+  .form-group { margin: 10px 12px; }
+  .form-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+  .form-input {
+    width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 14px; color: #164E63; background: #fff;
+  }
+  .fab {
+    position: absolute; bottom: 64px; right: 16px;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: #0891b2; color: #fff; font-size: 24px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(8,145,178,0.4);
+    cursor: pointer; z-index: 10;
+  }
+  .tab-bar {
+    display: flex; background: #fff; border-bottom: 1px solid #e5e7eb;
+  }
+  .tab-item {
+    flex: 1; padding: 10px; text-align: center; font-size: 12px;
+    color: #64748b; cursor: pointer; border-bottom: 2px solid transparent;
+  }
+  .tab-item.active { color: #0891b2; border-bottom-color: #0891b2; font-weight: 600; }
+  .member-tabs {
+    display: flex; gap: 8px; padding: 10px 12px; background: #fff;
+    border-bottom: 1px solid #f1f5f9; overflow-x: auto;
+  }
+  .member-tab {
+    padding: 4px 12px; border-radius: 16px; font-size: 12px;
+    background: #f1f5f9; color: #64748b; white-space: nowrap; cursor: pointer;
+  }
+  .member-tab.active { background: #0891b2; color: #fff; }
+  /* Calendar grid */
+  .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 8px; }
+  .cal-header { font-size: 10px; color: #94a3b8; text-align: center; padding: 4px; }
+  .cal-day {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; border-radius: 8px; cursor: pointer; position: relative;
+  }
+  .cal-day.green { background: #d1fae5; color: #065f46; }
+  .cal-day.yellow { background: #fef3c7; color: #92400e; }
+  .cal-day.red { background: #fee2e2; color: #991b1b; }
+  .cal-day.gray { color: #cbd5e1; }
+  .cal-day.today { border: 2px solid #0891b2; }
+  .section-title { font-size: 13px; font-weight: 600; padding: 12px 12px 6px; color: #0e7490; }
+  .icon-btn {
+    width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; font-size: 16px;
+  }
+  /* Scan frame */
+  .scan-area {
+    width: 180px; height: 180px; margin: 30px auto;
+    border: 2px dashed #0891b2; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(8,145,178,0.05);
+    position: relative;
+  }
+  .scan-line {
+    position: absolute; top: 20%; left: 10%; right: 10%;
+    height: 2px; background: #0891b2; opacity: 0.6;
+  }
+  .corner { position: absolute; width: 20px; height: 20px; border-color: #0891b2; border-style: solid; }
+  .corner.tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 8px 0 0 0; }
+  .corner.tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; border-radius: 0 8px 0 0; }
+  .corner.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-radius: 0 0 0 8px; }
+  .corner.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
+  .big-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px; margin: 8px 12px; border-radius: 12px; background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: pointer; gap: 8px;
+  }
+  .big-btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .big-btn-icon { font-size: 32px; }
+  .big-btn-text { font-size: 14px; font-weight: 600; color: #164E63; }
+  .big-btn-desc { font-size: 11px; color: #94a3b8; }
+  .switch { width: 36px; height: 20px; border-radius: 10px; background: #0891b2; position: relative; cursor: pointer; }
+  .switch::after { content: ''; width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; right: 2px; }
+  .switch.off { background: #e2e8f0; }
+  .switch.off::after { right: auto; left: 2px; }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">药品库存与服用提醒家庭版</h1>
+<p class="page-subtitle">微信小程序全站点原型 · 共15个核心页面 · 适老化设计</p>
+
+<div class="prototype-grid">
+
+<!-- 页面1: 首页-今日服药概览 -->
+<div class="phone-wrapper">
+  <div class="phone-label">① 首页 - 今日服药概览</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">家庭药箱</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div class="member-tabs">
+        <span class="member-tab active">👤 爸爸</span>
+        <span class="member-tab">👤 妈妈</span>
+        <span class="member-tab">+ 添加</span>
+      </div>
+      <div class="section-header">
+        <h2>📋 今日服药计划</h2>
+        <p>2026年6月26日 周五</p>
+        <div style="margin-top:10px;">
+          <div class="row">
+            <span style="font-size:12px;">服药进度</span>
+            <span style="font-size:12px;">3/5 已完成</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-size:14px;font-weight:600;">阿司匹林肠溶片</div>
+            <div class="text-sm">08:00 · 1片 · 早餐后</div>
+          </div>
+          <span class="tag tag-green">✓ 已服</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-size:14px;font-weight:600;">二甲双胍缓释片</div>
+            <div class="text-sm">08:00 · 1片 · 早餐后</div>
+          </div>
+          <span class="tag tag-green">✓ 已服</span>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid #f59e0b;">
+        <div class="row">
+          <div>
+            <div style="font-size:14px;font-weight:600;">氨氯地平片</div>
+            <div class="text-sm">12:00 · 1片 · 午餐后</div>
+          </div>
+          <button class="btn btn-success" style="font-size:12px;padding:6px 12px;">已服药</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-size:14px;font-weight:600;">阿托伐他汀钙片</div>
+            <div class="text-sm">18:00 · 1片 · 晚餐后</div>
+          </div>
+          <span class="tag tag-gray">⏰ 未到</span>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid #ef4444;">
+        <div class="row">
+          <div>
+            <div style="font-size:14px;font-weight:600;">维生素D3</div>
+            <div class="text-sm">昨晚 21:00 · 未服</div>
+          </div>
+          <span class="tag tag-red">⚠ 漏服</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item active"><div class="nav-icon">🏠</div>首页</div>
+      <div class="nav-item"><div class="nav-icon">💊</div>药品</div>
+      <div class="nav-item"><div class="nav-icon">🛒</div>补药</div>
+      <div class="nav-item"><div class="nav-icon">👤</div>我的</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面2: 药品列表页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">② 药品列表页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">我的药品</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div class="member-tabs">
+        <span class="member-tab active">👤 爸爸</span>
+        <span class="member-tab">👤 妈妈</span>
+      </div>
+      <div style="padding:8px 12px;background:#fff;">
+        <input class="form-input" placeholder="🔍 搜索药品名称" style="font-size:13px;padding:8px 12px;">
+      </div>
+      <div class="card">
+        <div class="row">
+          <div style="flex:1;">
+            <div class="card-title">阿司匹林肠溶片</div>
+            <div class="text-sm">0.25g×24片 · 剩余18片</div>
+            <div class="text-sm" style="margin-top:4px;">有效期至 2027-03-15</div>
+          </div>
+          <span class="tag tag-green">正常</span>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid #f59e0b;">
+        <div class="row">
+          <div style="flex:1;">
+            <div class="card-title">二甲双胍缓释片</div>
+            <div class="text-sm">0.5g×30片 · 剩余5片</div>
+            <div class="text-sm" style="margin-top:4px;">有效期至 2026-09-20</div>
+          </div>
+          <span class="tag tag-yellow">临期</span>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid #ef4444;">
+        <div class="row">
+          <div style="flex:1;">
+            <div class="card-title">硝苯地平控释片</div>
+            <div class="text-sm">30mg×7片 · 剩余2片</div>
+            <div class="text-sm" style="margin-top:4px;">有效期至 2026-07-05</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+            <span class="tag tag-red">紧急</span>
+            <span class="tag tag-orange">不足</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div style="flex:1;">
+            <div class="card-title">氨氯地平片</div>
+            <div class="text-sm">5mg×28片 · 剩余22片</div>
+            <div class="text-sm" style="margin-top:4px;">有效期至 2027-06-01</div>
+          </div>
+          <span class="tag tag-green">正常</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div style="flex:1;">
+            <div class="card-title">阿托伐他汀钙片</div>
+            <div class="text-sm">20mg×14片 · 剩余10片</div>
+            <div class="text-sm" style="margin-top:4px;">有效期至 2027-01-10</div>
+          </div>
+          <span class="tag tag-green">正常</span>
+        </div>
+      </div>
+      <div class="fab">+</div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div>首页</div>
+      <div class="nav-item active"><div class="nav-icon">💊</div>药品</div>
+      <div class="nav-item"><div class="nav-icon">🛒</div>补药</div>
+      <div class="nav-item"><div class="nav-icon">👤</div>我的</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面3: 药品录入选择页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">③ 药品录入选择页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">录入药品</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div style="padding:20px 16px 10px;text-align:center;">
+        <div style="font-size:16px;font-weight:600;color:#164E63;">请选择录入方式</div>
+        <div class="text-sm" style="margin-top:6px;">为 <strong>爸爸</strong> 录入新药品</div>
+      </div>
+      <div class="big-btn" style="border: 2px solid #0891b2;">
+        <div class="big-btn-icon" style="color:#0891b2;">📷</div>
+        <div class="big-btn-text">扫码录入</div>
+        <div class="big-btn-desc">扫描药品条形码，自动识别药品信息</div>
+      </div>
+      <div class="big-btn">
+        <div class="big-btn-icon" style="color:#059669;">📸</div>
+        <div class="big-btn-text">拍照识别</div>
+        <div class="big-btn-desc">拍摄药品包装或说明书，AI识别信息</div>
+      </div>
+      <div class="big-btn">
+        <div class="big-btn-icon" style="color:#6366f1;">✏️</div>
+        <div class="big-btn-text">手动录入</div>
+        <div class="big-btn-desc">手动填写药品名称、规格、有效期等信息</div>
+      </div>
+      <div style="margin:16px;padding:12px;background:#ecfeff;border-radius:10px;border:1px solid #a5f3fc;">
+        <div style="font-size:12px;color:#155e75;">💡 <strong>小提示</strong></div>
+        <div style="font-size:11px;color:#155e75;margin-top:4px;">扫码录入最快捷，推荐优先使用。如识别失败，可切换其他方式。</div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div>首页</div>
+      <div class="nav-item active"><div class="nav-icon">💊</div>药品</div>
+      <div class="nav-item"><div class="nav-icon">🛒</div>补药</div>
+      <div class="nav-item"><div class="nav-icon">👤</div>我的</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面4: 扫码录入页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">④ 扫码录入页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">扫码录入</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div style="background:#1e293b;padding:20px;">
+        <div class="scan-area">
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div class="scan-line"></div>
+          <div style="color:#fff;font-size:12px;z-index:1;">将条形码放入框内</div>
+        </div>
+        <div style="text-align:center;color:#94a3b8;font-size:11px;margin-top:8px;">自动扫描，请保持稳定</div>
+      </div>
+      <div style="padding:12px;">
+        <div style="font-size:14px;font-weight:600;color:#059669;margin-bottom:8px;">✅ 已识别到药品信息</div>
+        <div class="card" style="margin:0;">
+          <div class="form-group" style="margin:0 0 8px;">
+            <div class="form-label">药品名称</div>
+            <input class="form-input" value="阿司匹林肠溶片" style="font-size:13px;">
+          </div>
+          <div class="form-group" style="margin:0 0 8px;">
+            <div class="form-label">规格</div>
+            <input class="form-input" value="0.25g×24片/盒" style="font-size:13px;">
+          </div>
+          <div class="form-group" style="margin:0 0 8px;">
+            <div class="form-label">生产厂家</div>
+            <input class="form-input" value="拜耳医药" style="font-size:13px;">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <div class="form-label">有效期</div>
+            <input class="form-input" value="2027-03-15" style="font-size:13px;">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-outline" style="flex:1;font-size:12px;">重新扫描</button>
+          <button class="btn btn-primary" style="flex:1;font-size:12px;">确认并继续</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面5: 拍照OCR录入页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑤ 拍照OCR录入页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">拍照识别</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div style="background:#1e293b;padding:16px;text-align:center;">
+        <div style="width:100%;height:140px;background:#334155;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <div style="color:#94a3b8;font-size:12px;">📸 药品包装照片预览区</div>
+        </div>
+        <div style="margin-top:8px;">
+          <button class="btn btn-outline" style="font-size:11px;color:#fff;border-color:#64748b;">🔄 重拍</button>
+        </div>
+      </div>
+      <div style="padding:8px 12px;background:#ecfeff;border-bottom:1px solid #a5f3fc;">
+        <div style="font-size:12px;color:#155e75;font-weight:600;">🔍 AI识别结果 — 请逐项确认</div>
+      </div>
+      <div class="card">
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">药品名称 <span style="color:#059669;">置信度 96%</span></div>
+          <input class="form-input" value="二甲双胍缓释片" style="font-size:13px;">
+        </div>
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">规格 <span style="color:#059669;">置信度 92%</span></div>
+          <input class="form-input" value="0.5g×30片" style="font-size:13px;">
+        </div>
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">有效期 <span style="color:#f59e0b;">置信度 78%</span></div>
+          <input class="form-input" value="2026-09-20" style="font-size:13px;border-color:#f59e0b;">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <div class="form-label">剩余数量（需手动填写）</div>
+          <input class="form-input" placeholder="请输入剩余数量" style="font-size:13px;">
+        </div>
+      </div>
+      <div style="padding:0 12px 12px;">
+        <button class="btn btn-primary" style="width:100%;font-size:13px;padding:10px;">确认识别结果并保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面6: 手动录入页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑥ 手动录入页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">手动录入</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div style="padding:8px 12px;background:#ecfeff;border-bottom:1px solid #a5f3fc;">
+        <div style="font-size:12px;color:#155e75;">为 <strong>爸爸</strong> 手动录入药品信息</div>
+      </div>
+      <div class="card">
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">药品名称 <span style="color:#ef4444;">*</span></div>
+          <input class="form-input" placeholder="如：阿莫西林胶囊" style="font-size:13px;">
+        </div>
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">规格</div>
+          <input class="form-input" placeholder="如：0.25g×24片/盒" style="font-size:13px;">
+        </div>
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">有效期 <span style="color:#ef4444;">*</span></div>
+          <input class="form-input" type="date" style="font-size:13px;">
+        </div>
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">剩余数量 <span style="color:#ef4444;">*</span></div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input class="form-input" value="1" style="font-size:13px;width:80px;">
+            <select class="form-input" style="font-size:13px;width:auto;">
+              <option>片</option><option>粒</option><option>ml</option><option>袋</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:8px;">用法用量</div>
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">每次剂量</div>
+          <input class="form-input" placeholder="如：1片、5ml" style="font-size:13px;">
+        </div>
+        <div class="form-group" style="margin:0 0 6px;">
+          <div class="form-label">每日次数</div>
+          <div style="display:flex;gap:6px;">
+            <span class="member-tab active">1次</span>
+            <span class="member-tab">2次</span>
+            <span class="member-tab">3次</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <div class="form-label">服用说明</div>
+          <input class="form-input" placeholder="如：饭后服用、避光保存" style="font-size:13px;">
+        </div>
+      </div>
+      <div style="padding:0 12px 12px;">
+        <button class="btn btn-primary" style="width:100%;font-size:13px;padding:10px;">保存药品信息</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面7: 药品详情页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑦ 药品详情页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">药品详情</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div class="section-header">
+        <div class="row">
+          <div>
+            <h2>阿司匹林肠溶片</h2>
+            <p>0.25g×24片 · 拜耳医药</p>
+          </div>
+          <span class="tag" style="background:rgba(255,255,255,0.3);color:#fff;">正常</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:8px;">📦 库存信息</div>
+        <div class="row" style="margin-bottom:6px;">
+          <span class="text-sm">剩余数量</span>
+          <span style="font-size:14px;font-weight:600;color:#059669;">18 片</span>
+        </div>
+        <div class="row" style="margin-bottom:6px;">
+          <span class="text-sm">有效期至</span>
+          <span style="font-size:14px;font-weight:500;">2027-03-15</span>
+        </div>
+        <div class="row">
+          <span class="text-sm">距过期</span>
+          <span style="font-size:14px;color:#059669;">还有 262 天</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:8px;">💊 服用说明</div>
+        <div class="text-sm" style="line-height:1.8;">
+          每次：<strong>1片</strong><br>
+          每日：<strong>1次</strong>，早餐后服用<br>
+          说明：<strong>肠溶片需整片吞服，不可掰碎</strong>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:8px;">📊 近7天服药记录</div>
+        <div style="display:flex;gap:4px;">
+          <div style="flex:1;text-align:center;">
+            <div style="font-size:10px;color:#94a3b8;">周一</div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#d1fae5;margin:4px auto;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div style="font-size:10px;color:#94a3b8;">周二</div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#d1fae5;margin:4px auto;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div style="font-size:10px;color:#94a3b8;">周三</div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#d1fae5;margin:4px auto;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div style="font-size:10px;color:#94a3b8;">周四</div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#fee2e2;margin:4px auto;display:flex;align-items:center;justify-content:center;font-size:12px;">✗</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div style="font-size:10px;color:#94a3b8;">周五</div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#d1fae5;margin:4px auto;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div style="font-size:10px;color:#94a3b8;">周六</div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#d1fae5;margin:4px auto;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div style="font-size:10px;color:#94a3b8;">今天</div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#cffafe;margin:4px auto;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #0891b2;">✓</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:8px 12px;display:flex;gap:8px;">
+        <button class="btn btn-outline" style="flex:1;font-size:12px;">编辑</button>
+        <button class="btn btn-primary" style="flex:1;font-size:12px;">设置提醒</button>
+        <button class="btn btn-danger" style="flex:1;font-size:12px;">删除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面8: 提醒设置页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑧ 提醒设置页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">设置服药提醒</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div style="padding:10px 12px;background:#ecfeff;border-bottom:1px solid #a5f3fc;">
+        <div class="row">
+          <span class="text-sm">为以下药品设置提醒</span>
+          <span style="font-size:13px;font-weight:600;color:#164E63;">阿司匹林肠溶片</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:10px;">⏰ 服药时间</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+          <span style="padding:6px 14px;background:#0891b2;color:#fff;border-radius:16px;font-size:13px;">08:00 ✕</span>
+          <span style="padding:6px 14px;background:#0891b2;color:#fff;border-radius:16px;font-size:13px;">20:00 ✕</span>
+          <span style="padding:6px 14px;background:#f1f5f9;color:#0891b2;border-radius:16px;font-size:13px;border:1px dashed #0891b2;">+ 添加时间</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:10px;">💊 每次剂量</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input class="form-input" value="1" style="font-size:14px;width:60px;text-align:center;">
+          <select class="form-input" style="font-size:13px;width:auto;">
+            <option>片</option><option>粒</option><option>ml</option>
+          </select>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:10px;">📅 服药周期</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <span class="member-tab active">长期服药</span>
+          <span class="member-tab">指定日期</span>
+        </div>
+        <div class="text-sm" style="color:#059669;">✓ 长期服药，无结束日期</div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:10px;">🔔 提醒方式</div>
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <span style="font-size:13px;">微信订阅消息推送</span>
+          <div class="switch"></div>
+        </div>
+        <div class="text-sm" style="color:#059669;">✓ 已授权订阅消息</div>
+      </div>
+      <div style="padding:8px 12px;">
+        <button class="btn btn-success" style="width:100%;font-size:14px;padding:12px;">保存提醒设置</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面9: 服药记录页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑨ 服药记录与日历</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">服药记录</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div class="member-tabs">
+        <span class="member-tab active">👤 爸爸</span>
+        <span class="member-tab">👤 妈妈</span>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item active">日历</div>
+        <div class="tab-item">统计</div>
+        <div class="tab-item">漏服记录</div>
+      </div>
+      <div style="padding:8px 12px;background:#fff;">
+        <div class="row">
+          <span style="font-size:14px;font-weight:600;">◀ 2026年6月 ▶</span>
+        </div>
+        <div class="calendar">
+          <div class="cal-header">日</div><div class="cal-header">一</div>
+          <div class="cal-header">二</div><div class="cal-header">三</div>
+          <div class="cal-header">四</div><div class="cal-header">五</div>
+          <div class="cal-header">六</div>
+          <div class="cal-day gray">1</div><div class="cal-day green">2</div>
+          <div class="cal-day green">3</div><div class="cal-day yellow">4</div>
+          <div class="cal-day green">5</div><div class="cal-day green">6</div>
+          <div class="cal-day red">7</div>
+          <div class="cal-day green">8</div><div class="cal-day green">9</div>
+          <div class="cal-day green">10</div><div class="cal-day green">11</div>
+          <div class="cal-day yellow">12</div><div class="cal-day green">13</div>
+          <div class="cal-day green">14</div>
+          <div class="cal-day green">15</div><div class="cal-day green">16</div>
+          <div class="cal-day red">17</div><div class="cal-day green">18</div>
+          <div class="cal-day green">19</div><div class="cal-day green">20</div>
+          <div class="cal-day green">21</div>
+          <div class="cal-day green">22</div><div class="cal-day yellow">23</div>
+          <div class="cal-day green">24</div><div class="cal-day green">25</div>
+          <div class="cal-day today green">26</div><div class="cal-day gray">27</div>
+          <div class="cal-day gray">28</div>
+        </div>
+      </div>
+      <div class="section-title">📅 6月26日详情</div>
+      <div class="card">
+        <div class="row" style="margin-bottom:4px;">
+          <span style="font-size:13px;font-weight:500;">阿司匹林肠溶片</span>
+          <span class="tag tag-green">✓ 已服</span>
+        </div>
+        <div class="text-sm">08:00 确认 · 1片</div>
+      </div>
+      <div class="card">
+        <div class="row" style="margin-bottom:4px;">
+          <span style="font-size:13px;font-weight:500;">氨氯地平片</span>
+          <span class="tag tag-yellow">待服</span>
+        </div>
+        <div class="text-sm">12:00 · 1片</div>
+      </div>
+      <div style="padding:10px 12px;background:#fff;">
+        <div class="row">
+          <span style="font-size:13px;font-weight:600;">本月统计</span>
+          <span style="font-size:13px;color:#059669;">完成率 92%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:92%"></div></div>
+        <div class="text-sm" style="margin-top:4px;">共服药 74 次 · 漏服 4 次 · 连续服药 8 天 🔥</div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div>首页</div>
+      <div class="nav-item"><div class="nav-icon">💊</div>药品</div>
+      <div class="nav-item"><div class="nav-icon">🛒</div>补药</div>
+      <div class="nav-item"><div class="nav-icon">👤</div>我的</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面10: 库存告警页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑩ 库存告警页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">库存告警</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div class="tab-bar">
+        <div class="tab-item active">全部 (3)</div>
+        <div class="tab-item">紧急 (1)</div>
+        <div class="tab-item">临期 (1)</div>
+        <div class="tab-item">不足 (1)</div>
+      </div>
+      <div class="card" style="border-left: 3px solid #ef4444;">
+        <div class="row" style="margin-bottom:6px;">
+          <span class="tag tag-red">🚨 紧急临期</span>
+          <span class="text-sm">爸爸</span>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:#164E63;margin-bottom:4px;">硝苯地平控释片</div>
+        <div class="text-sm" style="margin-bottom:8px;">
+          有效期：<strong style="color:#ef4444;">2026-07-05</strong>（还剩 <strong>9天</strong>）<br>
+          剩余数量：<strong>2片</strong>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-primary" style="font-size:11px;padding:5px 10px;">加入补药清单</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:5px 10px;">查看详情</button>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid #f59e0b;">
+        <div class="row" style="margin-bottom:6px;">
+          <span class="tag tag-yellow">⚠ 临期提醒</span>
+          <span class="text-sm">爸爸</span>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:#164E63;margin-bottom:4px;">二甲双胍缓释片</div>
+        <div class="text-sm" style="margin-bottom:8px;">
+          有效期：<strong style="color:#f59e0b;">2026-09-20</strong>（还剩 <strong>86天</strong>）<br>
+          剩余数量：5片
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-primary" style="font-size:11px;padding:5px 10px;">加入补药清单</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:5px 10px;">查看详情</button>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid #f97316;">
+        <div class="row" style="margin-bottom:6px;">
+          <span class="tag tag-orange">📦 库存不足</span>
+          <span class="text-sm">爸爸</span>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:#164E63;margin-bottom:4px;">硝苯地平控释片</div>
+        <div class="text-sm" style="margin-bottom:8px;">
+          剩余数量：<strong style="color:#f97316;">2片</strong>（低于最低库存线3片）
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-primary" style="font-size:11px;padding:5px 10px;">加入补药清单</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:5px 10px;">更新库存</button>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div>首页</div>
+      <div class="nav-item"><div class="nav-icon">💊</div>药品</div>
+      <div class="nav-item"><div class="nav-icon">🛒</div>补药</div>
+      <div class="nav-item"><div class="nav-icon">👤</div>我的</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面11: 补药清单页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑪ 补药清单页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">补药清单</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div style="padding:10px 12px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:14px;font-weight:600;">待补充药品 · 3项</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline" style="font-size:11px;padding:4px 10px;">📤 导出</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:4px 10px;">📤 分享</button>
+        </div>
+      </div>
+      <div class="card" style="border-left:3px solid #ef4444;">
+        <div class="row">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;">硝苯地平控释片</div>
+            <div class="text-sm" style="margin-top:4px;">
+              <span class="tag tag-red" style="margin-right:4px;">紧急</span>
+              建议补充：1盒（7片）
+            </div>
+            <div class="text-sm" style="margin-top:2px;">所属：爸爸</div>
+          </div>
+          <button class="btn btn-success" style="font-size:11px;padding:5px 10px;">已补药</button>
+        </div>
+      </div>
+      <div class="card" style="border-left:3px solid #f59e0b;">
+        <div class="row">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;">二甲双胍缓释片</div>
+            <div class="text-sm" style="margin-top:4px;">
+              <span class="tag tag-yellow" style="margin-right:4px;">临期</span>
+              建议补充：2盒（60片）
+            </div>
+            <div class="text-sm" style="margin-top:2px;">所属：爸爸</div>
+          </div>
+          <button class="btn btn-success" style="font-size:11px;padding:5px 10px;">已补药</button>
+        </div>
+      </div>
+      <div class="card" style="border-left:3px solid #f97316;">
+        <div class="row">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;">维生素D3胶囊</div>
+            <div class="text-sm" style="margin-top:4px;">
+              <span class="tag tag-orange" style="margin-right:4px;">不足</span>
+              建议补充：1瓶（60粒）
+            </div>
+            <div class="text-sm" style="margin-top:2px;">所属：妈妈</div>
+          </div>
+          <button class="btn btn-success" style="font-size:11px;padding:5px 10px;">已补药</button>
+        </div>
+      </div>
+      <div style="margin:12px;padding:12px;background:#ecfeff;border-radius:10px;text-align:center;">
+        <div style="font-size:12px;color:#155e75;">💡 购药完成后，点击"已补药"即可更新库存</div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div>首页</div>
+      <div class="nav-item"><div class="nav-icon">💊</div>药品</div>
+      <div class="nav-item active"><div class="nav-icon">🛒</div>补药</div>
+      <div class="nav-item"><div class="nav-icon">👤</div>我的</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面12: 家庭管理页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑫ 家庭管理页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">家庭管理</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div class="section-header">
+        <h2>🏠 张家大药房</h2>
+        <p>创建于 2026-05-01 · 家庭版有效期至 2026-12-31</p>
+      </div>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;">
+          <span style="font-size:13px;font-weight:600;">家庭成员 (4/10)</span>
+          <button class="btn btn-primary" style="font-size:11px;padding:4px 10px;">+ 邀请成员</button>
+        </div>
+        <div class="list-item" style="padding:8px 0;">
+          <div class="avatar" style="background:#d1fae5;color:#059669;">张</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">张爸爸（我）</div>
+            <div class="text-sm">管理员 · 用药成员</div>
+          </div>
+        </div>
+        <div class="list-item" style="padding:8px 0;">
+          <div class="avatar" style="background:#fce7f3;color:#db2777;">李</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">李妈妈</div>
+            <div class="text-sm">用药成员</div>
+          </div>
+          <span class="text-sm" style="color:#94a3b8;">⋮</span>
+        </div>
+        <div class="list-item" style="padding:8px 0;">
+          <div class="avatar">张</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">张大哥</div>
+            <div class="text-sm">照护者</div>
+          </div>
+          <span class="text-sm" style="color:#94a3b8;">⋮</span>
+        </div>
+        <div class="list-item" style="padding:8px 0;">
+          <div class="avatar" style="background:#fef3c7;color:#d97706;">张</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">张小姐</div>
+            <div class="text-sm">照护者</div>
+          </div>
+          <span class="text-sm" style="color:#94a3b8;">⋮</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:#164E63;margin-bottom:8px;">📩 邀请方式</div>
+        <div class="row" style="margin-bottom:8px;">
+          <span class="text-sm">邀请码</span>
+          <span style="font-size:14px;font-weight:600;color:#0891b2;letter-spacing:2px;">A3F8K2</span>
+        </div>
+        <div class="text-sm" style="color:#94a3b8;margin-bottom:8px;">有效期24小时 · <a href="#" style="color:#0891b2;">刷新</a></div>
+        <button class="btn btn-outline" style="width:100%;font-size:12px;">分享邀请链接给家人</button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div>首页</div>
+      <div class="nav-item"><div class="nav-icon">💊</div>药品</div>
+      <div class="nav-item"><div class="nav-icon">🛒</div>补药</div>
+      <div class="nav-item"><div class="nav-icon">👤</div>我的</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面13: 个人中心页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑬ 个人中心页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">我的</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div style="background:linear-gradient(135deg,#0891b2,#22d3ee);padding:20px 16px;color:#fff;">
+        <div class="row">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:24px;">👤</div>
+            <div>
+              <div style="font-size:16px;font-weight:600;">张爸爸</div>
+              <div style="font-size:12px;opacity:0.9;">138****8888</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:-8px;">
+        <div class="row">
+          <div>
+            <div style="font-size:13px;font-weight:600;">当前套餐</div>
+            <div style="font-size:16px;font-weight:700;color:#059669;margin-top:2px;">家庭版 ✓</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="text-sm">到期日</div>
+            <div style="font-size:13px;font-weight:500;">2026-12-31</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 12px;">
+        <div class="card" style="margin:4px 0;">
+          <div class="list-item" style="padding:4px 0;border:none;">
+            <span style="font-size:18px;">📊</span>
+            <span style="flex:1;font-size:14px;">服药记录</span>
+            <span style="color:#94a3b8;">›</span>
+          </div>
+          <div class="list-item" style="padding:4px 0;border:none;">
+            <span style="font-size:18px;">👨‍👩‍👧</span>
+            <span style="flex:1;font-size:14px;">家庭管理</span>
+            <span style="color:#94a3b8;">›</span>
+          </div>
+          <div class="list-item" style="padding:4px 0;border:none;">
+            <span style="font-size:18px;">💳</span>
+            <span style="flex:1;font-size:14px;">订阅管理</span>
+            <span style="color:#94a3b8;">›</span>
+          </div>
+          <div class="list-item" style="padding:4px 0;border:none;">
+            <span style="font-size:18px;">⚙️</span>
+            <span style="flex:1;font-size:14px;">提醒设置</span>
+            <span style="color:#94a3b8;">›</span>
+          </div>
+          <div class="list-item" style="padding:4px 0;border:none;">
+            <span style="font-size:18px;">📥</span>
+            <span style="flex:1;font-size:14px;">数据导出</span>
+            <span style="color:#94a3b8;">›</span>
+          </div>
+          <div class="list-item" style="padding:4px 0;border:none;">
+            <span style="font-size:18px;">☁️</span>
+            <span style="flex:1;font-size:14px;">云同步状态</span>
+            <span class="tag tag-green" style="font-size:10px;">已同步</span>
+          </div>
+          <div class="list-item" style="padding:4px 0;border:none;">
+            <span style="font-size:18px;">ℹ️</span>
+            <span style="flex:1;font-size:14px;">关于我们</span>
+            <span style="color:#94a3b8;">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div>首页</div>
+      <div class="nav-item"><div class="nav-icon">💊</div>药品</div>
+      <div class="nav-item"><div class="nav-icon">🛒</div>补药</div>
+      <div class="nav-item active"><div class="nav-icon">👤</div>我的</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面14: 订阅管理页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑭ 订阅管理页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">订阅管理</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div style="padding:16px;text-align:center;background:linear-gradient(135deg,#0891b2,#22d3ee);color:#fff;">
+        <div style="font-size:14px;opacity:0.9;">当前套餐</div>
+        <div style="font-size:22px;font-weight:700;margin:6px 0;">家庭版 ✓</div>
+        <div style="font-size:12px;opacity:0.9;">有效期至 2026-12-31 · 自动续费已开启</div>
+      </div>
+      <div class="section-title">套餐对比</div>
+      <div class="card" style="overflow-x:auto;">
+        <table style="width:100%;font-size:11px;border-collapse:collapse;">
+          <tr style="background:#f8fafc;">
+            <th style="padding:6px;text-align:left;font-weight:600;">功能</th>
+            <th style="padding:6px;text-align:center;font-weight:600;">免费版</th>
+            <th style="padding:6px;text-align:center;font-weight:600;color:#0891b2;">家庭版</th>
+          </tr>
+          <tr><td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;">用药成员</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;">1名</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#059669;font-weight:600;">最多10名</td></tr>
+          <tr><td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;">药品种类</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;">20种</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#059669;font-weight:600;">不限</td></tr>
+          <tr><td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;">家庭协同</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#ef4444;">✗</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#059669;">✓</td></tr>
+          <tr><td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;">云同步</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#ef4444;">✗</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#059669;">✓</td></tr>
+          <tr><td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;">数据导出</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#ef4444;">✗</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#059669;">✓</td></tr>
+          <tr><td style="padding:5px 6px;">漏服通知</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;">仅本人</td><td style="text-align:center;border-bottom:1px solid #f1f5f9;color:#059669;font-weight:600;">家人共享</td></tr>
+        </table>
+      </div>
+      <div style="padding:12px;text-align:center;">
+        <div style="font-size:24px;font-weight:700;color:#0891b2;">¥12<span style="font-size:13px;font-weight:400;color:#64748b;">/月</span></div>
+        <button class="btn btn-success" style="width:100%;margin-top:8px;padding:12px;font-size:14px;">续费家庭版</button>
+        <div class="text-sm" style="margin-top:6px;">支持微信支付 · 到期前7天提醒续费</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面15: 设置页 -->
+<div class="phone-wrapper">
+  <div class="phone-label">⑮ 设置页</div>
+  <div class="phone-frame">
+    <div class="wx-topbar">
+      <span class="wx-dots">···</span>
+      <span class="wx-title">提醒设置</span>
+      <span class="wx-circle"></span>
+    </div>
+    <div class="screen-content">
+      <div class="section-title">⏰ 提醒设置</div>
+      <div class="card">
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">提醒提前时间</div>
+            <div class="text-sm">准时推送提醒</div>
+          </div>
+          <span style="color:#94a3b8;">准时 ›</span>
+        </div>
+        <div class="divider"></div>
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">漏服判定窗口</div>
+            <div class="text-sm">超时30分钟未确认视为漏服</div>
+          </div>
+          <span style="color:#94a3b8;">30分钟 ›</span>
+        </div>
+        <div class="divider"></div>
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">免打扰时段</div>
+            <div class="text-sm">22:00 - 07:00 不推送提醒</div>
+          </div>
+          <div class="switch"></div>
+        </div>
+      </div>
+      <div class="section-title">🔔 告警设置</div>
+      <div class="card">
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">临期提醒阈值</div>
+            <div class="text-sm">有效期≤30天时提醒</div>
+          </div>
+          <span style="color:#94a3b8;">30天 ›</span>
+        </div>
+        <div class="divider"></div>
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">默认最低库存线</div>
+            <div class="text-sm">新药品的默认最低库存</div>
+          </div>
+          <span style="color:#94a3b8;">3 ›</span>
+        </div>
+      </div>
+      <div class="section-title">📱 通知设置</div>
+      <div class="card">
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">订阅消息授权</div>
+            <div class="text-sm" style="color:#059669;">✓ 已授权</div>
+          </div>
+          <button class="btn btn-outline" style="font-size:11px;padding:4px 10px;">管理</button>
+        </div>
+        <div class="divider"></div>
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">漏服通知推送</div>
+            <div class="text-sm">接收家人的漏服通知</div>
+          </div>
+          <div class="switch"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="list-item" style="padding:6px 0;border:none;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">库存告警推送</div>
+            <div class="text-sm">接收临期和库存不足提醒</div>
+          </div>
+          <div class="switch"></div>
+        </div>
+      </div>
+      <div style="padding:16px 12px;">
+        <button class="btn btn-primary" style="width:100%;padding:10px;font-size:14px;">保存设置</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center;margin-top:40px;padding:20px;color:#94a3b8;font-size:12px;">
+  <p>药品库存与服用提醒家庭版 · 小程序全站点原型</p>
+  <p>共15个核心页面 · 适老化设计 · WCAG 2.1 AA级色彩对比度</p>
+  <p style="margin-top:8px;">设计系统：主色 #0891B2 · 辅助色 #22D3EE · 强调色 #059669 · 背景 #ECFEFF</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ 编辑器 - Widget 原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    padding: 24px;
+    color: #1f2937;
+  }
+  .widget-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 24px;
+  }
+  .editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .editor-title-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .editor-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .status-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 500;
+  }
+  .auto-save {
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .auto-save.saved { color: #10b981; }
+  .editor-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-success { background: #10b981; color: #fff; }
+  .btn-success:hover { background: #059669; }
+  .btn-ghost { background: transparent; color: #6b7280; border: 1px solid #d1d5db; }
+  .btn-ghost:hover { background: #f9fafb; }
+
+  /* Reference card */
+  .reference-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .reference-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .reference-content { flex: 1; }
+  .reference-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .reference-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2937;
+    margin-bottom: 6px;
+  }
+  .reference-stats {
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+  .reference-stats span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .view-evidence {
+    color: #3b82f6;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 6px;
+    display: inline-block;
+  }
+  .view-evidence:hover { text-decoration: underline; }
+
+  /* Editor layout */
+  .editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .editor-pane {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .pane-header {
+    padding: 10px 16px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+  }
+  .mode-toggle {
+    display: flex;
+    gap: 4px;
+  }
+  .mode-toggle button {
+    padding: 3px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    background: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    color: #6b7280;
+  }
+  .mode-toggle button.active {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+  }
+
+  /* Form */
+  .form-group {
+    padding: 14px 16px;
+  }
+  .form-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .form-input:focus { border-color: #3b82f6; }
+  .form-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: "SF Mono", "Consolas", monospace;
+    line-height: 1.6;
+    outline: none;
+    min-height: 200px;
+    resize: vertical;
+    transition: border 0.2s;
+  }
+  .form-textarea:focus { border-color: #3b82f6; }
+
+  /* Preview pane */
+  .preview-content {
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #374151;
+    min-height: 200px;
+  }
+  .preview-content h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #1f2937;
+  }
+  .preview-content p {
+    margin-bottom: 10px;
+  }
+  .preview-content ul {
+    margin: 10px 0;
+    padding-left: 20px;
+  }
+  .preview-content li {
+    margin-bottom: 4px;
+  }
+  .preview-content strong { color: #1f2937; }
+
+  /* Tags */
+  .tags-section {
+    padding: 14px 16px;
+    border-top: 1px solid #e5e7eb;
+  }
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-remove {
+    cursor: pointer;
+    color: #93c5fd;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .tag-remove:hover { color: #ef4444; }
+  .tag-input {
+    padding: 4px 10px;
+    border: 1px dashed #d1d5db;
+    border-radius: 12px;
+    font-size: 12px;
+    outline: none;
+    width: 100px;
+  }
+
+  /* Regenerate */
+  .regenerate-bar {
+    padding: 10px 16px;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="widget-container">
+  <!-- Header -->
+  <div class="editor-header">
+    <div class="editor-title-area">
+      <span class="editor-title">📝 FAQ 编辑器</span>
+      <span class="status-badge">草稿</span>
+      <span class="auto-save saved">✓ 已自动保存 · 10:23:45</span>
+    </div>
+    <div class="editor-actions">
+      <button class="btn btn-ghost" onclick="alert('重新生成将覆盖当前编辑内容，确认？')">🔄 重新生成</button>
+      <button class="btn btn-ghost">💾 保存草稿</button>
+      <button class="btn btn-success" onclick="alert('提交到任务看板，状态：待处理')">📋 提交到看板</button>
+    </div>
+  </div>
+
+  <!-- Reference card -->
+  <div class="reference-card">
+    <div class="reference-icon">🎯</div>
+    <div class="reference-content">
+      <div class="reference-label">关联缺口</div>
+      <div class="reference-title">退款流程不明确，用户反复追问退款到账时间</div>
+      <div class="reference-stats">
+        <span>📈 出现 42 次</span>
+        <span>👥 影响 35 人</span>
+        <span>🔴 P0</span>
+        <span>💬 12 条证据对话</span>
+      </div>
+      <a class="view-evidence" onclick="alert('跳转到缺口详情页查看完整证据')">📖 查看完整对话证据 →</a>
+    </div>
+  </div>
+
+  <!-- Regenerate hint -->
+  <div class="regenerate-bar">
+    💡 LLM 已基于 12 条对话证据生成了 FAQ 草稿，建议根据实际情况进一步润色
+    <button class="btn btn-ghost" style="padding: 4px 10px; font-size: 11px;">🔄 重新生成</button>
+  </div>
+
+  <!-- Editor layout -->
+  <div class="editor-layout">
+    <!-- Left: Edit pane -->
+    <div class="editor-pane">
+      <div class="pane-header">
+        ✏️ 编辑
+        <div class="mode-toggle">
+          <button class="active">Markdown</button>
+          <button>可视化</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">问题标题</label>
+        <input class="form-input" type="text" value="退款多久能到账？退款到账时间说明"/>
+      </div>
+      <div class="form-group" style="padding-top: 0;">
+        <label class="form-label">答案正文（Markdown）</label>
+        <textarea class="form-textarea">## 退款到账时间
+
+感谢您的咨询！关于退款到账时间，我们为您整理了以下说明：
+
+### 📅 到账时间
+
+| 支付方式 | 到账时间 |
+|---------|---------|
+| 支付宝/微信 | 1-3 个工作日 |
+| 银行卡 | 3-7 个工作日 |
+| 信用卡 | 7-15 个工作日（视银行而定） |
+
+### 📋 退款流程
+
+1. **提交申请**：在订单详情页点击"申请退款"
+2. **审核**：客服将在 **24 小时内** 完成审核
+3. **退款处理**：审核通过后自动发起退款
+4. **到账**：按上述时间到账
+
+### ⚠️ 注意事项
+
+- 退款时间从**审核通过**开始计算，非申请时间
+- 节假日顺延
+- 如超过预计时间未到账，请联系客服并提供订单号
+
+---
+*最后更新：2026-06-26*</textarea>
+      </div>
+    </div>
+
+    <!-- Right: Preview pane -->
+    <div class="editor-pane">
+      <div class="pane-header">
+        👁️ 预览
+      </div>
+      <div class="preview-content">
+        <h2>退款多久能到账？退款到账时间说明</h2>
+        <p>感谢您的咨询！关于退款到账时间，我们为您整理了以下说明：</p>
+        <h3>📅 到账时间</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px;">
+          <tr style="background: #f9fafb;">
+            <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left;">支付方式</th>
+            <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left;">到账时间</th>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #e5e7eb;">支付宝/微信</td>
+            <td style="padding: 8px; border: 1px solid #e5e7eb;">1-3 个工作日</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #e5e7eb;">银行卡</td>
+            <td style="padding: 8px; border: 1px solid #e5e7eb;">3-7 个工作日</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #e5e7eb;">信用卡</td>
+            <td style="padding: 8px; border: 1px solid #e5e7eb;">7-15 个工作日（视银行而定）</td>
+          </tr>
+        </table>
+        <h3>📋 退款流程</h3>
+        <ol style="padding-left: 20px;">
+          <li><strong>提交申请</strong>：在订单详情页点击"申请退款"</li>
+          <li><strong>审核</strong>：客服将在 <strong>24 小时内</strong> 完成审核</li>
+          <li><strong>退款处理</strong>：审核通过后自动发起退款</li>
+          <li><strong>到账</strong>：按上述时间到账</li>
+        </ol>
+        <h3>⚠️ 注意事项</h3>
+        <ul style="padding-left: 20px;">
+          <li>退款时间从<strong>审核通过</strong>开始计算，非申请时间</li>
+          <li>节假日顺延</li>
+          <li>如超过预计时间未到账，请联系客服并提供订单号</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tags -->
+  <div class="tags-section" style="border-top: 1px solid #e5e7eb; padding-top: 14px;">
+    <label class="form-label">🏷️ 标签</label>
+    <div class="tags-list">
+      <span class="tag">退款 <span class="tag-remove" onclick="this.parentElement.remove()">×</span></span>
+      <span class="tag">售后 <span class="tag-remove" onclick="this.parentElement.remove()">×</span></span>
+      <span class="tag">到账时间 <span class="tag-remove" onclick="this.parentElement.remove()">×</span></span>
+      <span class="tag">支付 <span class="tag-remove" onclick="this.parentElement.remove()">×</span></span>
+      <input class="tag-input" placeholder="+ 添加标签" onkeypress="if(event.key==='Enter'){alert('添加标签: '+this.value); this.value='';}"/>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

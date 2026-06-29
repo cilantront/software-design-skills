@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用药确认组件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #ecfeff;
+            color: #164E63;
+            padding: 16px;
+            max-width: 375px;
+            margin: 0 auto;
+        }
+
+        .widget-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        /* Medicine Card Header */
+        .medicine-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .medicine-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .medicine-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #164E63;
+            margin-bottom: 4px;
+        }
+
+        .medicine-member {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Scheduled Time */
+        .scheduled-time {
+            text-align: center;
+            padding: 16px;
+            background: #f0fdfa;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .time-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .time-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0891b2;
+        }
+
+        /* Dosage Info */
+        .dosage-info {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .dosage-item {
+            text-align: center;
+        }
+
+        .dosage-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .dosage-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #164E63;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-taken {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-taken:hover {
+            background: #047857;
+        }
+
+        .btn-later {
+            background: white;
+            color: #0891b2;
+            border: 2px solid #0891b2;
+        }
+
+        .btn-later:hover {
+            background: #f0fdfa;
+        }
+
+        /* Missed State Variant */
+        .missed-state {
+            margin-top: 24px;
+            padding: 16px;
+            background: #fef2f2;
+            border: 2px solid #fee2e2;
+            border-radius: 8px;
+        }
+
+        .missed-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .missed-icon {
+            font-size: 24px;
+        }
+
+        .missed-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ef4444;
+        }
+
+        .missed-info {
+            font-size: 14px;
+            color: #991b1b;
+            margin-bottom: 12px;
+        }
+
+        .missed-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-missed-take {
+            flex: 1;
+            padding: 12px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-missed-skip {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Reminder note */
+        .reminder-note {
+            margin-top: 16px;
+            padding: 12px;
+            background: #fef3c7;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #92400e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Animation for taken button */
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-taken.success {
+            animation: successPulse 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <!-- Normal State -->
+        <div class="medicine-header">
+            <div class="medicine-icon">💊</div>
+            <div class="medicine-name">阿莫西林胶囊</div>
+            <div class="medicine-member">👴 爷爷</div>
+        </div>
+
+        <div class="scheduled-time">
+            <div class="time-label">计划服用时间</div>
+            <div class="time-value">08:00</div>
+        </div>
+
+        <div class="dosage-info">
+            <div class="dosage-item">
+                <div class="dosage-label">剂量</div>
+                <div class="dosage-value">2粒</div>
+            </div>
+            <div class="dosage-item">
+                <div class="dosage-label">每日次数</div>
+                <div class="dosage-value">3次</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-taken" onclick="handleTaken()">
+                ✓ 已服药
+            </button>
+            <button class="btn btn-later" onclick="handleLater()">
+                ⏰ 稍后提醒
+            </button>
+        </div>
+
+        <div class="reminder-note">
+            💡 温馨提示：饭后服用，温水送服
+        </div>
+
+        <!-- Missed State Variant (shown separately) -->
+        <div class="missed-state" style="margin-top: 32px;">
+            <div class="missed-header">
+                <span class="missed-icon">⚠️</span>
+                <span class="missed-title">漏服提醒</span>
+            </div>
+            <div class="missed-info">
+                该药品应在 08:00 服用，现已超过计划时间2小时
+            </div>
+            <div class="missed-actions">
+                <button class="btn-missed-take">立即补服</button>
+                <button class="btn-missed-skip">跳过本次</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleTaken() {
+            const btn = document.querySelector('.btn-taken');
+            btn.classList.add('success');
+            btn.textContent = '✓ 记录成功';
+
+            setTimeout(() => {
+                alert('服药记录已保存！');
+                btn.classList.remove('success');
+                btn.textContent = '✓ 已服药';
+            }, 300);
+        }
+
+        function handleLater() {
+            const laterTime = prompt('多久后提醒您？（分钟）', '30');
+            if (laterTime && !isNaN(laterTime)) {
+                alert(`将在 ${laterTime} 分钟后再次提醒您`);
+            }
+        }
+
+        // Missed state actions
+        document.querySelector('.btn-missed-take')?.addEventListener('click', function() {
+            alert('已记录补服，下次按时提醒');
+        });
+
+        document.querySelector('.btn-missed-skip')?.addEventListener('click', function() {
+            if (confirm('确定要跳过这次服药吗？这可能会影响治疗效果。')) {
+                alert('已跳过本次服药');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品详情与保费试算 - Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+.phone-frame { width: 375px; height: 750px; background: #fff; border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden; border: 8px solid #1a1a1a; }
+.status-bar { height: 44px; background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #fff; font-size: 12px; }
+.nav-bar { height: 50px; background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%); display: flex; align-items: center; padding: 0 16px; color: #fff; }
+.product-header { padding: 16px; }
+.product-name { font-size: 20px; font-weight: 700; color: #333; }
+.product-company { font-size: 13px; color: #999; margin-top: 4px; }
+.score-badge { display: inline-block; padding: 2px 8px; background: #FF6B35; color: #fff; border-radius: 10px; font-size: 11px; margin-top: 6px; }
+.metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 16px 16px; }
+.metric-item { text-align: center; padding: 12px 0; background: #FFF5EE; border-radius: 10px; }
+.metric-value { font-size: 16px; font-weight: 700; color: #FF6B35; }
+.metric-label { font-size: 11px; color: #999; margin-top: 2px; }
+.premium-section { margin: 0 16px; padding: 16px; background: linear-gradient(135deg, #FFF5EE 0%, #FFFFFF 100%); border-radius: 12px; border: 1px solid #FFD9B8; }
+.premium-title { font-size: 14px; color: #666; margin-bottom: 12px; }
+.premium-row { display: flex; align-items: center; margin-bottom: 12px; }
+.premium-pet { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; border-radius: 16px; font-size: 13px; }
+.premium-amount { display: flex; align-items: baseline; gap: 4px; }
+.amount-month { font-size: 28px; font-weight: 700; color: #FF6B35; }
+.amount-unit { font-size: 13px; color: #FF6B35; }
+.amount-year { font-size: 13px; color: #999; margin-left: 8px; }
+.premium-tip { font-size: 11px; color: #bbb; }
+.detail-section { padding: 16px; }
+.section-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 12px; }
+.coverage-list { }
+.coverage-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.coverage-name { font-size: 14px; color: #333; }
+.coverage-value { font-size: 14px; color: #FF6B35; font-weight: 500; }
+.bottom-bar { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 16px 30px; background: #fff; display: flex; gap: 10px; }
+.btn-secondary { flex: 1; height: 44px; border-radius: 22px; border: 1px solid #FF8C42; color: #FF8C42; background: #fff; font-size: 14px; cursor: pointer; }
+.btn-primary { flex: 1; height: 44px; border-radius: 22px; border: none; background: #FF8C42; color: #fff; font-size: 14px; cursor: pointer; }
+.disclaimer { position: absolute; bottom: 76px; left: 0; right: 0; text-align: center; font-size: 10px; color: #bbb; padding: 4px; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="status-bar"><span>9:41</span><span>📶 📡 🔋</span></div>
+  <div class="nav-bar"><span style="font-size:20px;cursor:pointer">‹</span><span style="margin-left:12px;font-size:17px;font-weight:600">产品详情</span></div>
+  <div class="product-header">
+    <div class="product-name">众安宠物综合医保</div>
+    <div class="product-company">众安在线财产保险股份有限公司</div>
+    <div class="score-badge">🏆 匹配度 92分</div>
+  </div>
+  <div class="metrics-grid">
+    <div class="metric-item"><div class="metric-value">6万</div><div class="metric-label">保额上限</div></div>
+    <div class="metric-item"><div class="metric-value">300</div><div class="metric-label">免赔额</div></div>
+    <div class="metric-item"><div class="metric-value">90%</div><div class="metric-label">赔付比例</div></div>
+    <div class="metric-item"><div class="metric-value">15天</div><div class="metric-label">等待期</div></div>
+  </div>
+  <div class="premium-section">
+    <div class="premium-title">💰 保费试算</div>
+    <div class="premium-row">
+      <div class="premium-pet">🐱 小橘 · 2岁 · 田园猫</div>
+    </div>
+    <div class="premium-amount">
+      <span class="amount-month">¥52</span><span class="amount-unit">/月</span>
+      <span class="amount-year">约¥624/年</span>
+    </div>
+    <div class="premium-tip">* 预估保费，实际以投保页面为准</div>
+  </div>
+  <div class="detail-section">
+    <div class="section-title">保障范围</div>
+    <div class="coverage-list">
+      <div class="coverage-item"><span class="coverage-name">门诊医疗</span><span class="coverage-value">最高2万</span></div>
+      <div class="coverage-item"><span class="coverage-name">住院医疗</span><span class="coverage-value">最高4万</span></div>
+      <div class="coverage-item"><span class="coverage-name">手术费用</span><span class="coverage-value">最高3万</span></div>
+      <div class="coverage-item"><span class="coverage-name">意外身故</span><span class="coverage-value">最高1万</span></div>
+    </div>
+  </div>
+  <div class="disclaimer">⚠️ 信息仅供参考，以保险机构官方条款为准</div>
+  <div class="bottom-bar">
+    <button class="btn-secondary">加入对比</button>
+    <button class="btn-primary">立即投保</button>
+  </div>
+</div>
+</body>
+</html>

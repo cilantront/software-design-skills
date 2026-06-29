@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品管理后台 - 全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; padding: 20px; }
+.site-header { text-align: center; margin-bottom: 30px; }
+.site-title { font-size: 24px; font-weight: 700; color: #333; }
+.site-desc { font-size: 14px; color: #999; margin-top: 8px; }
+.admin-demo { width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); overflow: hidden; }
+.admin-header { height: 56px; background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; padding: 0 24px; }
+.admin-logo { font-size: 16px; font-weight: 700; color: #4CAF50; margin-right: 24px; }
+.admin-nav { display: flex; gap: 24px; margin-right: auto; }
+.admin-nav-item { font-size: 14px; color: #666; cursor: pointer; padding: 16px 0; }
+.admin-nav-item.active { color: #4CAF50; border-bottom: 2px solid #4CAF50; }
+.admin-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; }
+.admin-body { display: flex; min-height: 600px; }
+.admin-sidebar { width: 200px; background: #fafafa; border-right: 1px solid #f0f0f0; padding: 16px 0; }
+.sidebar-item { display: flex; align-items: center; padding: 12px 24px; font-size: 14px; color: #666; cursor: pointer; }
+.sidebar-item:hover, .sidebar-item.active { background: #E8F5E9; color: #4CAF50; }
+.sidebar-icon { margin-right: 10px; font-size: 16px; }
+.admin-content { flex: 1; padding: 24px; }
+.page-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.filter-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+.filter-input { height: 32px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 240px; }
+.filter-select { height: 32px; padding: 0 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; background: #fff; }
+.btn { height: 32px; padding: 0 16px; border-radius: 4px; border: 1px solid #d9d9d9; background: #fff; font-size: 13px; cursor: pointer; }
+.btn-primary { background: #4CAF50; color: #fff; border-color: #4CAF50; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #fafafa; text-align: left; padding: 12px; color: #666; font-weight: 500; border-bottom: 1px solid #f0f0f0; }
+td { padding: 12px; border-bottom: 1px solid #f5f5f5; color: #333; }
+.status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.status-badge.pending { background: #FFF3E0; color: #FF8C42; }
+.status-badge.active { background: #E8F5E9; color: #4CAF50; }
+.status-badge.inactive { background: #f5f5f5; color: #999; }
+.action-link { color: #4CAF50; cursor: pointer; margin-right: 12px; font-size: 12px; }
+.form-section { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #f0f0f0; margin-bottom: 16px; }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+.form-row { display: flex; align-items: center; margin-bottom: 14px; }
+.form-label { width: 120px; font-size: 13px; color: #666; }
+.form-label .required { color: #ff4444; }
+.form-input { flex: 1; height: 36px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+.form-select { flex: 1; height: 36px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+.form-textarea { flex: 1; min-height: 80px; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; resize: vertical; }
+.step-bar { display: flex; align-items: center; margin-bottom: 24px; padding: 16px; background: #f9f9f9; border-radius: 8px; }
+.step-item { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.step-circle { width: 32px; height: 32px; border-radius: 50%; background: #e0e0e0; color: #999; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.step-circle.done { background: #4CAF50; color: #fff; }
+.step-circle.active { background: #2E7D32; color: #fff; box-shadow: 0 0 0 4px rgba(76,175,80,0.2); }
+.step-label { font-size: 12px; color: #666; margin-top: 6px; }
+.upload-area { flex: 1; height: 80px; border: 2px dashed #d9d9d9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="site-title">🖥️ 产品管理后台 - 全站点原型</div>
+  <div class="site-desc">WEB端 · 单体应用全屏布局 · 保险产品录入与维护</div>
+</div>
+
+<div class="admin-demo">
+  <div class="admin-header">
+    <div class="admin-logo">🛡️ 宠物保险产品管理</div>
+    <div class="admin-nav">
+      <div class="admin-nav-item active">产品列表</div>
+      <div class="admin-nav-item">新增产品</div>
+      <div class="admin-nav-item">审核管理</div>
+    </div>
+    <div class="admin-user">👤 产品运营 <span style="color:#ccc">|</span> <span style="cursor:pointer">退出</span></div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-sidebar">
+      <div class="sidebar-item active"><span class="sidebar-icon">🛡️</span>产品列表</div>
+      <div class="sidebar-item"><span class="sidebar-icon">➕</span>新增产品</div>
+      <div class="sidebar-item"><span class="sidebar-icon">✅</span>审核管理</div>
+      <div class="sidebar-item"><span class="sidebar-icon">📋</span>变更历史</div>
+      <div class="sidebar-item"><span class="sidebar-icon">📊</span>维度配置</div>
+    </div>
+    <div class="admin-content">
+      <div class="page-title">
+        <span>🛡️ 保险产品列表</span>
+        <button class="btn btn-primary">+ 新增产品</button>
+      </div>
+      <div class="filter-bar">
+        <input class="filter-input" placeholder="搜索产品名称/保险公司">
+        <select class="filter-select"><option>全部状态</option><option>待审核</option><option>已上架</option><option>已下架</option></select>
+        <select class="filter-select"><option>全部类型</option><option>门诊险</option><option>住院险</option><option>综合险</option><option>意外险</option></select>
+        <button class="btn btn-primary">查询</button>
+      </div>
+      <table>
+        <tr><th>产品ID</th><th>产品名称</th><th>保险公司</th><th>类型</th><th>保额上限</th><th>免赔额</th><th>赔付比例</th><th>状态</th><th>操作</th></tr>
+        <tr><td>P001</td><td>众安宠物综合医保</td><td>众安保险</td><td>综合险</td><td>6万</td><td>300元</td><td>90%</td><td><span class="status-badge active">已上架</span></td><td><span class="action-link">编辑</span><span class="action-link">下架</span><span class="action-link">历史</span></td></tr>
+        <tr><td>P002</td><td>平安萌宠保</td><td>平安财险</td><td>综合险</td><td>5万</td><td>200元</td><td>70%</td><td><span class="status-badge active">已上架</span></td><td><span class="action-link">编辑</span><span class="action-link">下架</span><span class="action-link">历史</span></td></tr>
+        <tr><td>P003</td><td>太平洋宠乐保</td><td>太平洋财险</td><td>门诊+住院</td><td>8万</td><td>500元</td><td>80%</td><td><span class="status-badge active">已上架</span></td><td><span class="action-link">编辑</span><span class="action-link">下架</span><span class="action-link">历史</span></td></tr>
+        <tr><td>P004</td><td>人保宠物医疗险</td><td>人保财险</td><td>住院险</td><td>10万</td><td>1000元</td><td>85%</td><td><span class="status-badge pending">待审核</span></td><td><span class="action-link">审核</span><span class="action-link">详情</span></td></tr>
+        <tr><td>P005</td><td>泰康在线宠物保</td><td>泰康在线</td><td>意外险</td><td>3万</td><td>500元</td><td>60%</td><td><span class="status-badge inactive">已下架</span></td><td><span class="action-link">编辑</span><span class="action-link">上架</span></td></tr>
+      </table>
+
+      <div style="margin-top:30px;padding-top:24px;border-top:2px solid #f0f0f0">
+        <div class="page-title">📝 新增产品 - 分步表单预览</div>
+        <div class="step-bar">
+          <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">基础信息</div></div>
+          <div class="step-item"><div class="step-circle active">2</div><div class="step-label">保障信息</div></div>
+          <div class="step-item"><div class="step-circle">3</div><div class="step-label">保费规则</div></div>
+          <div class="step-item"><div class="step-circle">4</div><div class="step-label">条款文件</div></div>
+        </div>
+        <div class="form-section">
+          <div class="section-title">Step 2: 保障信息录入</div>
+          <div class="form-row"><span class="form-label"><span class="required">*</span>保障范围</span><div class="form-textarea">门诊医疗、住院医疗、手术费用、意外身故</div></div>
+          <div class="form-row"><span class="form-label"><span class="required">*</span>保额上限(元)</span><input class="form-input" value="60000"></div>
+          <div class="form-row"><span class="form-label"><span class="required">*</span>免赔额(元)</span><input class="form-input" value="300"></div>
+          <div class="form-row"><span class="form-label"><span class="required">*</span>赔付比例(%)</span><input class="form-input" value="90"></div>
+          <div class="form-row"><span class="form-label"><span class="required">*</span>等待期(天)</span><input class="form-input" value="15"></div>
+          <div class="form-row"><span class="form-label">理赔次数限制</span><input class="form-input" placeholder="不限" value=""></div>
+          <div class="form-row"><span class="form-label">免责条款</span><div class="form-textarea">先天性疾病、既往病症、美容绝育等</div></div>
+        </div>
+        <div style="text-align:right;margin-top:16px"><button class="btn" style="margin-right:8px">上一步</button><button class="btn btn-primary">下一步</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

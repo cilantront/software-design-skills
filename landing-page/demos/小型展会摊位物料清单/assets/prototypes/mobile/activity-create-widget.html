@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>活动创建表单 Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; padding: 20px; background: #f5f5f5; }
+h2 { font-size: 16px; margin-bottom: 15px; color: #333; }
+.widget-container { background: #fff; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.form-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+.form-group { margin-bottom: 15px; }
+.form-label { font-size: 13px; color: #666; margin-bottom: 6px; display: block; }
+.required { color: #f5222d; }
+.form-input { width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; transition: border 0.3s; }
+.form-input:focus { outline: none; border-color: #07c160; }
+.form-textarea { width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; resize: vertical; min-height: 60px; }
+.date-row { display: flex; gap: 8px; align-items: center; }
+.date-sep { color: #999; font-size: 12px; }
+.create-mode { display: flex; gap: 10px; margin-top: 8px; }
+.mode-card { flex: 1; padding: 15px; border: 2px solid #e5e5e5; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s; }
+.mode-card.selected { border-color: #07c160; background: #f6ffed; }
+.mode-icon { font-size: 28px; margin-bottom: 6px; }
+.mode-name { font-size: 13px; font-weight: 600; color: #333; }
+.mode-desc { font-size: 11px; color: #999; margin-top: 3px; }
+.form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-cancel { background: #f5f5f5; color: #666; }
+.btn-submit { background: #07c160; color: #fff; }
+.btn-submit:hover { background: #06ad56; }
+.hint-text { font-size: 11px; color: #999; margin-top: 5px; }
+.upgrade-hint { background: #fff7e6; border: 1px solid #ffd591; padding: 8px; border-radius: 5px; font-size: 11px; color: #fa8c16; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h2>🎯 活动创建表单 Widget</h2>
+<div class="widget-container">
+  <div class="form-title">创建新活动</div>
+  <div class="form-group">
+    <label class="form-label">活动名称 <span class="required">*</span></label>
+    <input class="form-input" placeholder="请输入活动名称（2-50字）" value="秋季招聘会">
+    <div class="hint-text">建议包含活动类型，如"XX招聘会""XX展会"</div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">活动日期 <span class="required">*</span></label>
+    <div class="date-row">
+      <input class="form-input" type="date" value="2026-09-15">
+      <span class="date-sep">至</span>
+      <input class="form-input" type="date" value="2026-09-16">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">活动地点</label>
+    <input class="form-input" placeholder="请输入活动地点" value="会展中心B馆">
+  </div>
+  <div class="form-group">
+    <label class="form-label">创建方式 <span class="required">*</span></label>
+    <div class="create-mode">
+      <div class="mode-card selected">
+        <div class="mode-icon">📝</div>
+        <div class="mode-name">空白创建</div>
+        <div class="mode-desc">从零开始配置</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-icon">📋</div>
+        <div class="mode-name">模板创建</div>
+        <div class="mode-desc">基于历史模板</div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">活动备注</label>
+    <textarea class="form-textarea" placeholder="可选，输入活动备注信息"></textarea>
+  </div>
+  <div class="upgrade-hint">💡 免费版可创建 3 个活动模板，当前已使用 3/3，升级专业版享无限模板</div>
+  <div class="form-actions">
+    <button class="btn btn-cancel">取消</button>
+    <button class="btn btn-submit">确认创建活动</button>
+  </div>
+</div>
+</body>
+</html>

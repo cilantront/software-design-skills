@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老师端小程序 - 全站点原型</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .prototype-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .prototype-subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .phone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .phone-frame {
+            background: #fff;
+            border-radius: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .phone-header {
+            background: #1976d2;
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .phone-header-title {
+            font-weight: 500;
+        }
+
+        .phone-content {
+            height: 600px;
+            overflow-y: auto;
+            background: #f8f8f8;
+        }
+
+        .page-label {
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 8px 15px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Login Page */
+        .login-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            padding: 40px 20px;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: #fff;
+            color: #1976d2;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Home Page */
+        .home-header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: #fff;
+            padding: 20px;
+        }
+
+        .home-date {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .home-greeting {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .home-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            background: #fff;
+            margin: -20px 15px 15px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .home-stat-item {
+            text-align: center;
+        }
+
+        .home-stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+
+        .home-stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .home-quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 15px;
+        }
+
+        .home-action-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .home-action-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 12px;
+            background: #e3f2fd;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .home-action-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .home-action-desc {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .home-alert {
+            background: #fff3e0;
+            margin: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #ff9800;
+        }
+
+        .home-alert-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 8px;
+        }
+
+        .home-alert-content {
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* Scan Page */
+        .scan-page {
+            background: #000;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scan-viewfinder {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .scan-frame {
+            width: 250px;
+            height: 250px;
+            border: 3px solid #1976d2;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .scan-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #fff;
+        }
+
+        .scan-corner-tl {
+            top: -3px;
+            left: -3px;
+            border-right: none;
+            border-bottom: none;
+            border-top-left-radius: 20px;
+        }
+
+        .scan-corner-tr {
+            top: -3px;
+            right: -3px;
+            border-left: none;
+            border-bottom: none;
+            border-top-right-radius: 20px;
+        }
+
+        .scan-corner-bl {
+            bottom: -3px;
+            left: -3px;
+            border-right: none;
+            border-top: none;
+            border-bottom-left-radius: 20px;
+        }
+
+        .scan-corner-br {
+            bottom: -3px;
+            right: -3px;
+            border-left: none;
+            border-top: none;
+            border-bottom-right-radius: 20px;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #1976d2;
+            box-shadow: 0 0 10px #1976d2;
+            animation: scan 2s infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .scan-tip {
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .scan-manual-btn {
+            margin: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        /* Status Page */
+        .status-tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .status-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .status-tab.active {
+            color: #1976d2;
+            border-bottom-color: #1976d2;
+            font-weight: 500;
+        }
+
+        .status-list {
+            background: #fff;
+        }
+
+        .status-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+
+        .status-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-right: 15px;
+        }
+
+        .status-info {
+            flex: 1;
+        }
+
+        .status-name {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .status-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-arrived {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-absent {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-leave {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-late {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        /* Exception Page */
+        .exception-list {
+            background: #fff;
+        }
+
+        .exception-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .exception-item:hover {
+            background: #f8f8f8;
+        }
+
+        .exception-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .exception-type {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .type-urgent {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .type-warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .type-info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .exception-time {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .exception-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .exception-desc {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .exception-action {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .exception-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .exception-btn-primary {
+            background: #1976d2;
+            color: #fff;
+        }
+
+        .exception-btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        /* Confirm Page */
+        .confirm-page {
+            padding: 20px;
+        }
+
+        .confirm-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .confirm-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .confirm-student {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .confirm-student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .confirm-student-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .confirm-student-class {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .confirm-auth-list {
+            margin-bottom: 20px;
+        }
+
+        .confirm-auth-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .confirm-auth-item {
+            padding: 12px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .confirm-auth-item.selected {
+            background: #e3f2fd;
+            border: 2px solid #1976d2;
+        }
+
+        .confirm-auth-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .confirm-auth-name {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .confirm-auth-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+        }
+
+        .confirm-auth-item.selected .confirm-auth-radio {
+            border-color: #1976d2;
+            background: #1976d2;
+        }
+
+        .confirm-btn {
+            width: 100%;
+            padding: 15px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .confirm-btn-warning {
+            background: #ff9800;
+        }
+
+        /* Profile Page */
+        .profile-header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: #fff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 15px;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .profile-role {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: #fff;
+            margin: -20px 15px 15px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat-number {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .profile-stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .profile-menu {
+            background: #fff;
+            margin: 15px;
+            border-radius: 12px;
+        }
+
+        .profile-menu-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .profile-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-menu-text {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .profile-menu-arrow {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="prototype-title">老师端小程序 - 全站点原型</h1>
+    <p class="prototype-subtitle">微信小程序 | 老师使用 | 9个核心页面</p>
+
+    <div class="phone-grid">
+        <!-- 1. 登录页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">微信</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">1. 登录页</div>
+            <div class="phone-content">
+                <div class="login-page">
+                    <div class="login-logo">👩‍🏫</div>
+                    <div class="login-title">接送管理</div>
+                    <div class="login-subtitle">老师工作台</div>
+                    <div class="login-form">
+                        <input type="tel" class="login-input" placeholder="手机号" value="13800138000">
+                        <input type="text" class="login-input" placeholder="邀请码" value="ABC123">
+                        <button class="login-btn">登录</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 首页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">首页</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">2. 首页</div>
+            <div class="phone-content">
+                <div class="home-header">
+                    <div class="home-date">2026年6月26日 星期五</div>
+                    <div class="home-greeting">早上好，李老师</div>
+                </div>
+                <div class="home-stats">
+                    <div class="home-stat-item">
+                        <div class="home-stat-number">28</div>
+                        <div class="home-stat-label">已到校</div>
+                    </div>
+                    <div class="home-stat-item">
+                        <div class="home-stat-number">2</div>
+                        <div class="home-stat-number">未到校</div>
+                        <div class="home-stat-label">未到校</div>
+                    </div>
+                    <div class="home-stat-item">
+                        <div class="home-stat-number">1</div>
+                        <div class="home-stat-label">异常</div>
+                    </div>
+                </div>
+                <div class="home-quick-actions">
+                    <div class="home-action-card">
+                        <div class="home-action-icon">📷</div>
+                        <div class="home-action-text">到校签到</div>
+                        <div class="home-action-desc">扫码签到</div>
+                    </div>
+                    <div class="home-action-card">
+                        <div class="home-action-icon">🚪</div>
+                        <div class="home-action-text">离校签退</div>
+                        <div class="home-action-desc">扫码交接</div>
+                    </div>
+                    <div class="home-action-card">
+                        <div class="home-action-icon">📊</div>
+                        <div class="home-action-text">状态监控</div>
+                        <div class="home-action-desc">实时查看</div>
+                    </div>
+                    <div class="home-action-card">
+                        <div class="home-action-icon">⚠️</div>
+                        <div class="home-action-text">异常处理</div>
+                        <div class="home-action-desc">1条待处理</div>
+                    </div>
+                </div>
+                <div class="home-alert">
+                    <div class="home-alert-title">⚠️ 异常提醒</div>
+                    <div class="home-alert-content">小明（09:15）未按时到校，请及时关注</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 扫码签到页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">到校签到</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">3. 扫码签到页</div>
+            <div class="phone-content">
+                <div class="scan-page">
+                    <div class="scan-viewfinder">
+                        <div class="scan-frame">
+                            <div class="scan-corner scan-corner-tl"></div>
+                            <div class="scan-corner scan-corner-tr"></div>
+                            <div class="scan-corner scan-corner-bl"></div>
+                            <div class="scan-corner scan-corner-br"></div>
+                            <div class="scan-line"></div>
+                        </div>
+                    </div>
+                    <div class="scan-tip">将学生二维码放入框内，自动扫描</div>
+                    <button class="scan-manual-btn">手动签到</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 状态监控页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">状态监控</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">4. 状态监控页</div>
+            <div class="phone-content">
+                <div class="status-tabs">
+                    <div class="status-tab active">全部(30)</div>
+                    <div class="status-tab">已到校(28)</div>
+                    <div class="status-tab">未到校(2)</div>
+                </div>
+                <div class="status-list">
+                    <div class="status-item">
+                        <div class="status-avatar">👦</div>
+                        <div class="status-info">
+                            <div class="status-name">小明</div>
+                            <div class="status-time">09:15 迟到</div>
+                        </div>
+                        <div class="status-badge badge-late">迟到</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-avatar">👧</div>
+                        <div class="status-info">
+                            <div class="status-name">小红</div>
+                            <div class="status-time">08:20 已到校</div>
+                        </div>
+                        <div class="status-badge badge-arrived">已到校</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-avatar">👦</div>
+                        <div class="status-info">
+                            <div class="status-name">小刚</div>
+                            <div class="status-time">08:25 已到校</div>
+                        </div>
+                        <div class="status-badge badge-arrived">已到校</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-avatar">👧</div>
+                        <div class="status-info">
+                            <div class="status-name">小丽</div>
+                            <div class="status-time">未到校</div>
+                        </div>
+                        <div class="status-badge badge-absent">未到校</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-avatar">👦</div>
+                        <div class="status-info">
+                            <div class="status-name">小强</div>
+                            <div class="status-time">未到校</div>
+                        </div>
+                        <div class="status-badge badge-absent">未到校</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 离校签退确认页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">离校交接</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">5. 离校签退确认页</div>
+            <div class="phone-content">
+                <div class="confirm-page">
+                    <div class="confirm-card">
+                        <div class="confirm-title">学生信息</div>
+                        <div class="confirm-student">
+                            <div class="confirm-student-avatar">👦</div>
+                            <div>
+                                <div class="confirm-student-name">小明</div>
+                                <div class="confirm-student-class">向日葵班 | 离校时间 17:30</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="confirm-card">
+                        <div class="confirm-auth-list">
+                            <div class="confirm-auth-title">选择接送人</div>
+                            <div class="confirm-auth-item selected">
+                                <div class="confirm-auth-avatar">👵</div>
+                                <div class="confirm-auth-name">王美丽（奶奶）</div>
+                                <div class="confirm-auth-radio"></div>
+                            </div>
+                            <div class="confirm-auth-item">
+                                <div class="confirm-auth-avatar">👨</div>
+                                <div class="confirm-auth-name">张强（爸爸）</div>
+                                <div class="confirm-auth-radio"></div>
+                            </div>
+                            <div class="confirm-auth-item">
+                                <div class="confirm-auth-avatar">👩</div>
+                                <div class="confirm-auth-name">李芳（妈妈）</div>
+                                <div class="confirm-auth-radio"></div>
+                            </div>
+                        </div>
+                        <button class="confirm-btn">确认交接</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 异常处理页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">异常处理</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">6. 异常处理页</div>
+            <div class="phone-content">
+                <div class="exception-list">
+                    <div class="exception-item">
+                        <div class="exception-header">
+                            <span class="exception-type type-urgent">紧急</span>
+                            <span class="exception-time">09:15</span>
+                        </div>
+                        <div class="exception-title">小明未按时到校</div>
+                        <div class="exception-desc">超过规定到校时间15分钟，家长未请假</div>
+                        <div class="exception-action">
+                            <button class="exception-btn exception-btn-primary">联系家长</button>
+                            <button class="exception-btn exception-btn-secondary">标记已处理</button>
+                        </div>
+                    </div>
+                    <div class="exception-item">
+                        <div class="exception-header">
+                            <span class="exception-type type-warning">待确认</span>
+                            <span class="exception-time">17:20</span>
+                        </div>
+                        <div class="exception-title">非授权接送人</div>
+                        <div class="exception-desc">张三要接走小红，不在授权名单中，等待家长确认</div>
+                        <div class="exception-action">
+                            <button class="exception-btn exception-btn-primary">查看进度</button>
+                            <button class="exception-btn exception-btn-secondary">取消交接</button>
+                        </div>
+                    </div>
+                    <div class="exception-item">
+                        <div class="exception-header">
+                            <span class="exception-type type-info">已处理</span>
+                            <span class="exception-time">昨天 08:45</span>
+                        </div>
+                        <div class="exception-title">小丽迟到</div>
+                        <div class="exception-desc">已联系家长，确认交通堵塞</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 临时授权页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">临时授权</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">7. 临时授权页</div>
+            <div class="phone-content">
+                <div class="confirm-page">
+                    <div class="confirm-card">
+                        <div class="confirm-title">⚠️ 非授权接送人</div>
+                        <div class="confirm-student">
+                            <div class="confirm-student-avatar">👧</div>
+                            <div>
+                                <div class="confirm-student-name">小红</div>
+                                <div class="confirm-student-class">向日葵班</div>
+                            </div>
+                        </div>
+                        <div style="background: #ffebee; padding: 12px; border-radius: 8px; margin-top: 15px;">
+                            <div style="font-size: 13px; color: #c62828; font-weight: 500;">接送人：张三（叔叔）</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">该人员不在授权名单中</div>
+                        </div>
+                    </div>
+                    <div class="confirm-card">
+                        <div class="confirm-title">拍照记录</div>
+                        <div style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 14px;">
+                            📷 点击拍照
+                        </div>
+                    </div>
+                    <button class="confirm-btn confirm-btn-warning">发起临时授权确认</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. 个人中心页 -->
+        <div class="phone-frame">
+            <div class="phone-header">
+                <span>9:41</span>
+                <span class="phone-header-title">个人中心</span>
+                <span>⋯ ○</span>
+            </div>
+            <div class="page-label">8. 个人中心页</div>
+            <div class="phone-content">
+                <div class="profile-header">
+                    <div class="profile-avatar">👩‍🏫</div>
+                    <div class="profile-name">李老师</div>
+                    <div class="profile-role">向日葵班 | 班主任</div>
+                </div>
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <div class="profile-stat-number">156</div>
+                        <div class="profile-stat-label">本周签到</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-number">12</div>
+                        <div class="profile-stat-label">异常处理</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-number">30</div>
+                        <div class="profile-stat-label">管辖学生</div>
+                    </div>
+                </div>
+                <div class="profile-menu">
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">工作统计</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">我的班级</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">异常处理记录</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">消息通知设置</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                    <div class="profile-menu-item">
+                        <span class="profile-menu-text">关于我们</span>
+                        <span class="profile-menu-arrow">›</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

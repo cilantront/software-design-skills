@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>牙科复诊与术后随访助手 - 患者H5端</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f5f5f5; color: #333; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
+.phone-frame { width: 375px; min-height: 700px; background: #fff; border-radius: 32px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.15); position: relative; border: 8px solid #1a1a1a; }
+.phone-header { height: 44px; background: #1890ff; display: flex; align-items: center; padding: 0 16px; color: #fff; font-size: 14px; }
+.phone-header .back { font-size: 20px; cursor: pointer; margin-right: 12px; }
+.phone-header .title { font-weight: 500; flex: 1; text-align: center; margin-right: 20px; }
+.phone-screen { padding-bottom: 20px; overflow-y: auto; max-height: 80vh; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* Common Styles */
+.section-title { font-size: 16px; font-weight: 600; padding: 16px; display: flex; align-items: center; gap: 8px; }
+.card { background: #fff; margin: 0 16px 12px; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; text-align: center; }
+.btn-primary { background: #1890ff; color: #fff; }
+.btn-outline { background: #fff; color: #1890ff; border: 1px solid #1890ff; }
+.btn-secondary { background: #f0f0f0; color: #666; }
+.btn-row { display: flex; gap: 12px; padding: 16px; }
+.btn-row .btn { flex: 1; }
+.divider { height: 8px; background: #f5f5f5; }
+
+/* Page Navigation Bar */
+.page-nav { position: fixed; top: 20px; right: 20px; background: #fff; border-radius: 12px; padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 100; width: 160px; }
+.page-nav h4 { font-size: 12px; color: #666; margin-bottom: 8px; }
+.page-nav button { display: block; width: 100%; padding: 6px 8px; margin-bottom: 4px; border: none; background: #f0f7ff; color: #1890ff; border-radius: 6px; font-size: 12px; cursor: pointer; text-align: left; }
+.page-nav button:hover { background: #1890ff; color: #fff; }
+.page-nav button.active { background: #1890ff; color: #fff; }
+
+/* ===== Home Page ===== */
+.home-hero { background: linear-gradient(135deg, #1890ff, #36cfc9); padding: 24px 16px; color: #fff; text-align: center; }
+.home-hero .greeting { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.home-hero .sub { font-size: 14px; opacity: 0.9; }
+.home-hero .treatment-info { margin-top: 12px; font-size: 13px; opacity: 0.8; background: rgba(255,255,255,0.15); border-radius: 8px; padding: 8px; }
+
+.task-card { background: #fff; margin: 12px 16px; border-radius: 12px; padding: 16px; border: 1px solid #f0f0f0; }
+.task-card.urgent { border-left: 3px solid #ff4d4f; }
+.task-card.normal { border-left: 3px solid #1890ff; }
+.task-icon { font-size: 28px; margin-bottom: 8px; }
+.task-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.task-desc { font-size: 13px; color: #666; margin-bottom: 12px; }
+.task-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-bottom: 8px; }
+.task-tag.urgent { background: #fff2f0; color: #ff4d4f; }
+.task-tag.info { background: #e6f7ff; color: #1890ff; }
+
+/* Timeline */
+.timeline { padding: 0 16px; }
+.timeline-item { display: flex; gap: 12px; padding-bottom: 16px; position: relative; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-line { position: relative; display: flex; flex-direction: column; align-items: center; width: 20px; }
+.timeline-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #1890ff; background: #fff; z-index: 1; }
+.timeline-dot.done { background: #52c41a; border-color: #52c41a; }
+.timeline-dot.current { background: #1890ff; border-color: #1890ff; box-shadow: 0 0 0 4px rgba(24,144,255,0.2); }
+.timeline-dot.pending { border-color: #d9d9d9; }
+.timeline-connector { position: absolute; top: 14px; bottom: -16px; width: 2px; background: #f0f0f0; left: 50%; transform: translateX(-50%); }
+.timeline-item:last-child .timeline-connector { display: none; }
+.timeline-content { flex: 1; }
+.timeline-day { font-size: 14px; font-weight: 600; }
+.timeline-status { font-size: 12px; margin-top: 2px; }
+.timeline-status.done { color: #52c41a; }
+.timeline-status.current { color: #1890ff; }
+.timeline-status.pending { color: #999; }
+
+/* Tips */
+.tips-card { background: #fff7e6; border: 1px solid #ffd591; margin: 0 16px 16px; border-radius: 12px; padding: 16px; }
+.tips-title { font-size: 14px; font-weight: 600; color: #d46b08; margin-bottom: 8px; }
+.tips-list { font-size: 13px; color: #666; line-height: 2; }
+
+/* ===== Questionnaire Page ===== */
+.question-container { padding: 16px; }
+.question { margin-bottom: 24px; }
+.question-label { font-size: 15px; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 4px; }
+.question-label .required { color: #ff4d4f; }
+.question-hint { font-size: 12px; color: #999; margin-bottom: 8px; }
+
+/* Slider */
+.slider-container { padding: 8px 0; }
+.slider-track { position: relative; height: 6px; background: #f0f0f0; border-radius: 3px; margin: 20px 0; }
+.slider-fill { height: 100%; background: linear-gradient(90deg, #52c41a, #faad14, #ff4d4f); border-radius: 3px; width: 80%; }
+.slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: #999; }
+.slider-value { text-align: center; font-size: 28px; font-weight: 600; color: #ff4d4f; margin-top: 4px; }
+
+/* Checkbox/Radio */
+.option-list { display: flex; flex-direction: column; gap: 8px; }
+.option-item { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.option-item:hover { border-color: #1890ff; }
+.option-item.selected { border-color: #1890ff; background: #e6f7ff; }
+.option-item.danger { border-color: #ffccc7; background: #fff2f0; }
+.option-check { width: 20px; height: 20px; border: 2px solid #d9d9d9; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.option-check.checked { border-color: #1890ff; background: #1890ff; }
+.option-check.checked::after { content: '✓'; color: #fff; font-size: 12px; }
+.option-check.checkbox { border-radius: 4px; }
+.option-check.checkbox.checked::after { content: '✓'; }
+
+/* Textarea */
+.text-input { width: 100%; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; font-size: 14px; min-height: 100px; resize: none; }
+.text-input:focus { border-color: #1890ff; outline: none; }
+.char-count { text-align: right; font-size: 12px; color: #999; margin-top: 4px; }
+
+/* ===== Photo Upload Page ===== */
+.photo-guide { background: #e6f7ff; border: 1px solid #91d5ff; margin: 16px; border-radius: 12px; padding: 16px; }
+.photo-guide-title { font-size: 14px; font-weight: 600; color: #1890ff; margin-bottom: 8px; }
+.photo-guide-list { font-size: 13px; color: #666; line-height: 1.8; }
+.photo-example { width: 100%; height: 120px; background: #f0f0f0; border-radius: 8px; margin-top: 12px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; }
+
+.photo-uploaded { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px; }
+.photo-thumb { width: 80px; height: 80px; border-radius: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 24px; position: relative; overflow: hidden; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-add { width: 80px; height: 80px; border: 2px dashed #d9d9d9; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; cursor: pointer; font-size: 12px; gap: 4px; }
+.photo-add .plus { font-size: 24px; }
+
+.photo-actions { display: flex; gap: 12px; padding: 16px; }
+.photo-btn { flex: 1; padding: 12px; border: 1px solid #f0f0f0; border-radius: 10px; text-align: center; cursor: pointer; font-size: 14px; }
+
+/* ===== Appointment Page ===== */
+.appointment-info { background: #f6ffed; border: 1px solid #b7eb8f; margin: 16px; border-radius: 12px; padding: 16px; }
+.appointment-info .label { font-size: 13px; color: #666; margin-bottom: 4px; }
+.appointment-info .value { font-size: 15px; font-weight: 500; }
+
+.date-group { margin: 0 16px 16px; }
+.date-title { font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 8px; }
+.time-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.time-slot { padding: 12px; border: 1px solid #f0f0f0; border-radius: 8px; text-align: center; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+.time-slot:hover { border-color: #1890ff; }
+.time-slot.selected { border-color: #1890ff; background: #e6f7ff; color: #1890ff; font-weight: 500; }
+.time-slot.disabled { background: #f5f5f5; color: #ccc; cursor: not-allowed; }
+
+/* ===== Satisfaction Page ===== */
+.rating-section { margin: 0 16px 16px; }
+.rating-label { font-size: 15px; font-weight: 500; margin-bottom: 12px; }
+.stars { display: flex; gap: 8px; }
+.star { font-size: 32px; cursor: pointer; color: #e8e8e8; transition: color 0.2s; }
+.star.active { color: #faad14; }
+.rating-text { font-size: 13px; color: #faad14; margin-top: 4px; }
+
+/* ===== History Page ===== */
+.history-item { background: #fff; margin: 0 16px 12px; border-radius: 12px; padding: 16px; border: 1px solid #f0f0f0; }
+.history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.history-day { font-size: 15px; font-weight: 600; }
+.history-status { font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+.history-status.done { background: #f6ffed; color: #52c41a; }
+.history-status.pending { background: #e6f7ff; color: #1890ff; }
+.history-status.alert { background: #fff2f0; color: #ff4d4f; }
+.history-status.waiting { background: #fff7e6; color: #fa8c16; }
+.history-details { font-size: 13px; color: #666; line-height: 1.8; }
+.history-detail-item { display: flex; justify-content: space-between; }
+.history-actions { margin-top: 8px; display: flex; gap: 8px; }
+
+/* Success page */
+.success-page { text-align: center; padding: 60px 16px; }
+.success-icon { font-size: 64px; margin-bottom: 16px; }
+.success-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.success-desc { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 24px; }
+
+/* Bottom safe area */
+.safe-bottom { height: 34px; }
+
+/* Contact bar */
+.contact-bar { background: #fafafa; border-top: 1px solid #f0f0f0; padding: 12px 16px; text-align: center; font-size: 12px; color: #999; }
+.contact-bar a { color: #1890ff; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- Page Navigation (for demo) -->
+<div class="page-nav">
+  <h4>📱 患者H5页面导航</h4>
+  <button class="active" onclick="showH5Page('home')">1. 随访首页</button>
+  <button onclick="showH5Page('questionnaire')">2. 恢复问卷</button>
+  <button onclick="showH5Page('photo')">3. 照片上传</button>
+  <button onclick="showH5Page('appointment')">4. 复诊预约</button>
+  <button onclick="showH5Page('satisfaction')">5. 满意度评价</button>
+  <button onclick="showH5Page('history')">6. 随访历史</button>
+  <button onclick="showH5Page('success')">7. 提交成功</button>
+</div>
+
+<!-- Phone Frame -->
+<div class="phone-frame">
+
+  <!-- ===== HOME PAGE ===== -->
+  <div class="page active" id="h5-home">
+    <div class="phone-header" style="background:linear-gradient(135deg,#1890ff,#36cfc9)">
+      <span style="font-size:16px;font-weight:500;flex:1;text-align:center">🏥 优特口腔 · 术后随访</span>
+    </div>
+    <div class="phone-screen">
+      <div class="home-hero">
+        <div class="greeting">王女士，您好！</div>
+        <div class="sub">祝您早日康复 🌸</div>
+        <div class="treatment-info">
+          您于 2026-06-23 进行了 <strong>种植牙手术</strong><br>
+          主治医生：李医生
+        </div>
+      </div>
+
+      <div class="section-title">📋 今日待完成</div>
+
+      <div class="task-card urgent">
+        <div class="task-tag urgent">🔴 今日必做</div>
+        <div class="task-icon">📝</div>
+        <div class="task-title">术后恢复问卷</div>
+        <div class="task-desc">Day3 随访 | 预计耗时：3分钟</div>
+        <button class="btn btn-primary" onclick="showH5Page('questionnaire')" style="border-radius:8px">立即填写</button>
+      </div>
+
+      <div class="task-card normal">
+        <div class="task-tag info">📷 需要拍照</div>
+        <div class="task-icon">📷</div>
+        <div class="task-title">上传术后照片</div>
+        <div class="task-desc">请按指引拍摄种植区域</div>
+        <button class="btn btn-outline" onclick="showH5Page('photo')" style="border-radius:8px">去拍照</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-title">📅 随访时间轴</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-line">
+            <div class="timeline-dot done"></div>
+            <div class="timeline-connector"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-day">Day1 术后第1天</div>
+            <div class="timeline-status done">✅ 已完成 06-24</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-line">
+            <div class="timeline-dot done"></div>
+            <div class="timeline-connector"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-day">Day3 术后第3天</div>
+            <div class="timeline-status done">✅ 已完成 06-26</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-line">
+            <div class="timeline-dot current"></div>
+            <div class="timeline-connector"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-day">Day7 拆线复查</div>
+            <div class="timeline-status current">🔵 待完成 06-30</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-line">
+            <div class="timeline-dot pending"></div>
+            <div class="timeline-connector"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-day">Day30 骨结合期复查</div>
+            <div class="timeline-status pending">⏸ 待开始 07-23</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-line">
+            <div class="timeline-dot pending"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-day">Day90 中期复查</div>
+            <div class="timeline-status pending">⏸ 待开始 09-21</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="tips-card">
+        <div class="tips-title">💬 术后注意事项</div>
+        <div class="tips-list">
+          1. 术后24小时内不要用力漱口<br>
+          2. 避免用手术侧咀嚼食物<br>
+          3. 如有轻微肿胀属正常反应，可冷敷缓解<br>
+          4. 按时服用消炎药物<br>
+          5. 如出现持续出血、高热请及时就医
+        </div>
+      </div>
+
+      <div class="contact-bar">
+        📞 如有疑问请联系: 优特口腔 <a href="tel:02088886666">020-8888-6666</a>
+      </div>
+      <div class="safe-bottom"></div>
+    </div>
+  </div>
+
+  <!-- ===== QUESTIONNAIRE PAGE ===== -->
+  <div class="page" id="h5-questionnaire">
+    <div class="phone-header">
+      <span class="back" onclick="showH5Page('home')">←</span>
+      <span class="title">📝 术后恢复问卷</span>
+    </div>
+    <div class="phone-screen">
+      <div style="padding:16px;background:#e6f7ff;margin:0 0 12px">
+        <div style="font-size:15px;font-weight:500;color:#1890ff">Day3 随访 - 术后第3天</div>
+        <div style="font-size:13px;color:#666;margin-top:4px">请填写您目前的恢复情况（带 * 为必填）</div>
+      </div>
+
+      <div class="question-container">
+        <!-- Q1 -->
+        <div class="question">
+          <div class="question-label">
+            <span class="required">*</span> 1. 术后疼痛程度如何？
+          </div>
+          <div class="question-hint">1分=无痛，10分=剧痛</div>
+          <div class="slider-container">
+            <div class="slider-value">8</div>
+            <div class="slider-track">
+              <div class="slider-fill"></div>
+            </div>
+            <div class="slider-labels">
+              <span>1 无痛</span>
+              <span>5 中等</span>
+              <span>10 剧痛</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question">
+          <div class="question-label">
+            <span class="required">*</span> 2. 手术部位是否有以下情况？（多选）
+          </div>
+          <div class="option-list">
+            <div class="option-item" onclick="this.classList.toggle('selected')">
+              <div class="option-check checkbox"></div>
+              <span>无明显异常</span>
+            </div>
+            <div class="option-item danger" onclick="this.classList.toggle('selected')">
+              <div class="option-check checkbox checked"></div>
+              <span>持续渗血 <span style="color:#ff4d4f;font-size:12px">⚠️</span></span>
+            </div>
+            <div class="option-item selected" onclick="this.classList.toggle('selected')">
+              <div class="option-check checkbox checked"></div>
+              <span>明显肿胀</span>
+            </div>
+            <div class="option-item" onclick="this.classList.toggle('selected')">
+              <div class="option-check checkbox"></div>
+              <span>异常分泌物 <span style="color:#ff4d4f;font-size:12px">⚠️</span></span>
+            </div>
+            <div class="option-item" onclick="this.classList.toggle('selected')">
+              <div class="option-check checkbox"></div>
+              <span>种植体松动 <span style="color:#ff4d4f;font-size:12px">⚠️</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question">
+          <div class="question-label">
+            <span class="required">*</span> 3. 您目前的体温是多少？
+          </div>
+          <div class="option-list">
+            <div class="option-item" onclick="selectRadio(this)">
+              <div class="option-check"></div>
+              <span>36.0-37.0°C（正常）</span>
+            </div>
+            <div class="option-item" onclick="selectRadio(this)">
+              <div class="option-check"></div>
+              <span>37.1-38.0°C（低热）</span>
+            </div>
+            <div class="option-item selected" onclick="selectRadio(this)">
+              <div class="option-check checked"></div>
+              <span>38.1-38.5°C（中热）</span>
+            </div>
+            <div class="option-item" onclick="selectRadio(this)">
+              <div class="option-check"></div>
+              <span>38.5°C以上（高热）<span style="color:#ff4d4f;font-size:12px"> ⚠️</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="question">
+          <div class="question-label">4. 其他需要告知医生的情况</div>
+          <textarea class="text-input" placeholder="请描述您的情况...">术后第三天还是有点出血，疼痛也比较明显，特别是晚上，吃了止痛药才能睡着。</textarea>
+          <div class="char-count">52/200</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary">暂存</button>
+        <button class="btn btn-primary" onclick="showH5Page('photo')">提交问卷</button>
+      </div>
+      <div class="safe-bottom"></div>
+    </div>
+  </div>
+
+  <!-- ===== PHOTO UPLOAD PAGE ===== -->
+  <div class="page" id="h5-photo">
+    <div class="phone-header">
+      <span class="back" onclick="showH5Page('questionnaire')">←</span>
+      <span class="title">📷 上传术后照片</span>
+    </div>
+    <div class="phone-screen">
+      <div class="photo-guide">
+        <div class="photo-guide-title">📋 拍照指引</div>
+        <div class="photo-guide-list">
+          请拍摄种植区域正面照片，确保：<br>
+          • 光线充足，避免逆光<br>
+          • 嘴巴张大，清晰暴露手术部位<br>
+          • 请勿使用美颜滤镜
+        </div>
+        <div class="photo-example">[ 示例照片 ]</div>
+      </div>
+
+      <div style="padding:0 16px">
+        <div style="font-size:14px;font-weight:500;margin-bottom:8px">已上传照片：</div>
+      </div>
+      <div class="photo-uploaded">
+        <div class="photo-thumb" style="background:#e8f5e9;font-size:12px;color:#4caf50">照片1 ✓</div>
+        <div class="photo-thumb" style="background:#e3f2fd;font-size:12px;color:#2196f3">照片2 ✓</div>
+        <div class="photo-add">
+          <span class="plus">+</span>
+          <span>添加</span>
+        </div>
+      </div>
+
+      <div style="padding:16px">
+        <div style="width:100%;height:200px;border:2px dashed #d9d9d9;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#999;cursor:pointer">
+          <div style="font-size:36px">📷</div>
+          <div style="font-size:14px">点击拍照</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="showH5Page('questionnaire')">从相册选择</button>
+        <button class="btn btn-primary" onclick="showH5Page('home')">上传完成</button>
+      </div>
+
+      <div style="margin:0 16px;padding:12px;background:#fff7e6;border-radius:8px;font-size:12px;color:#d46b08;line-height:1.6">
+        💡 温馨提示:<br>
+        • 请在光线充足的环境拍摄<br>
+        • 请勿使用美颜滤镜<br>
+        • 照片仅医生可见，请放心上传
+      </div>
+      <div class="safe-bottom"></div>
+    </div>
+  </div>
+
+  <!-- ===== APPOINTMENT PAGE ===== -->
+  <div class="page" id="h5-appointment">
+    <div class="phone-header">
+      <span class="back" onclick="showH5Page('home')">←</span>
+      <span class="title">📅 预约复诊</span>
+    </div>
+    <div class="phone-screen">
+      <div class="appointment-info">
+        <div class="label">随访项目</div>
+        <div class="value">种植牙 Day7 拆线复查</div>
+        <div style="margin-top:8px">
+          <div class="label">主治医生</div>
+          <div class="value">李医生</div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="label">建议复诊日期</div>
+          <div class="value">2026-07-03</div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 8px;font-size:15px;font-weight:500">请选择复诊时间：</div>
+
+      <div class="date-group">
+        <div class="date-title">2026-07-03 周五</div>
+        <div class="time-slots">
+          <div class="time-slot" onclick="selectTime(this)">09:00-10:00</div>
+          <div class="time-slot" onclick="selectTime(this)">10:00-11:00</div>
+          <div class="time-slot disabled">11:00-12:00<br><small>已约满</small></div>
+          <div class="time-slot selected" onclick="selectTime(this)">14:00-15:00</div>
+          <div class="time-slot" onclick="selectTime(this)">15:00-16:00</div>
+          <div class="time-slot" onclick="selectTime(this)">16:00-17:00</div>
+        </div>
+      </div>
+
+      <div class="date-group">
+        <div class="date-title">2026-07-04 周六</div>
+        <div class="time-slots">
+          <div class="time-slot" onclick="selectTime(this)">09:00-10:00</div>
+          <div class="time-slot" onclick="selectTime(this)">10:00-11:00</div>
+          <div class="time-slot disabled">14:00-15:00<br><small>已约满</small></div>
+          <div class="time-slot" onclick="selectTime(this)">15:00-16:00</div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 16px">
+        <div style="font-size:14px;font-weight:500;margin-bottom:8px">备注（选填）：</div>
+        <textarea class="text-input" placeholder="如有特殊需求请备注..." style="min-height:60px"></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showH5Page('success')">确认预约</button>
+      </div>
+      <div class="safe-bottom"></div>
+    </div>
+  </div>
+
+  <!-- ===== SATISFACTION PAGE ===== -->
+  <div class="page" id="h5-satisfaction">
+    <div class="phone-header">
+      <span class="back" onclick="showH5Page('home')">←</span>
+      <span class="title">⭐ 满意度评价</span>
+    </div>
+    <div class="phone-screen">
+      <div style="text-align:center;padding:24px 16px 16px">
+        <div style="font-size:40px;margin-bottom:8px">🎉</div>
+        <div style="font-size:16px;font-weight:500">感谢您完成本次随访！</div>
+        <div style="font-size:13px;color:#666;margin-top:4px">请对我们的服务进行评价</div>
+      </div>
+
+      <div class="rating-section">
+        <div class="card">
+          <div class="rating-label">整体满意度</div>
+          <div class="stars">
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+          </div>
+          <div class="rating-text">5.0 非常满意</div>
+        </div>
+      </div>
+
+      <div class="rating-section">
+        <div class="card">
+          <div class="rating-label">随访提醒及时性</div>
+          <div class="stars">
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rating-section">
+        <div class="card">
+          <div class="rating-label">术后关怀感受</div>
+          <div class="stars">
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star" style="color:#e8e8e8">★</span>
+          </div>
+          <div class="rating-text">4.0 满意</div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 16px">
+        <div style="font-size:14px;font-weight:500;margin-bottom:8px">您的意见与建议：</div>
+        <textarea class="text-input" placeholder="请分享您的感受和建议...">医生很专业，随访提醒很及时，感觉很贴心！就是有时候晚上疼得比较厉害，希望能有24小时咨询电话。</textarea>
+        <div class="char-count">68/500</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showH5Page('success')">提交评价</button>
+      </div>
+      <div class="safe-bottom"></div>
+    </div>
+  </div>
+
+  <!-- ===== HISTORY PAGE ===== -->
+  <div class="page" id="h5-history">
+    <div class="phone-header">
+      <span class="back" onclick="showH5Page('home')">←</span>
+      <span class="title">📋 随访历史</span>
+    </div>
+    <div class="phone-screen">
+      <div style="padding:16px;font-size:14px;color:#666;background:#fafafa">
+        种植牙治疗 (2026-06-23) | 主治：李医生
+      </div>
+
+      <div class="history-item">
+        <div class="history-header">
+          <span class="history-day">📍 Day7 拆线复查</span>
+          <span class="history-status pending">🔵 待完成</span>
+        </div>
+        <div class="history-details">
+          <div>计划日期：2026-06-30</div>
+          <div>需要填写问卷 + 上传照片</div>
+        </div>
+        <div class="history-actions">
+          <button class="btn btn-primary btn-sm" style="flex:1;padding:8px;border-radius:6px;font-size:13px" onclick="showH5Page('questionnaire')">去填写</button>
+        </div>
+      </div>
+
+      <div class="history-item">
+        <div class="history-header">
+          <span class="history-day">📍 Day3 早期检查</span>
+          <span class="history-status alert">🔴 高风险</span>
+        </div>
+        <div class="history-details">
+          <div class="history-detail-item"><span>完成时间</span><span>06-26</span></div>
+          <div class="history-detail-item"><span>疼痛评分</span><span style="color:#ff4d4f;font-weight:500">8分 🔴</span></div>
+          <div class="history-detail-item"><span>手术部位</span><span style="color:#ff4d4f">持续渗血</span></div>
+          <div class="history-detail-item"><span>体温</span><span>37.2°C</span></div>
+          <div class="history-detail-item"><span>照片</span><span>2张</span></div>
+          <div class="history-detail-item"><span>回访状态</span><span style="color:#52c41a">李医生已回访 ✅</span></div>
+        </div>
+        <div class="history-actions">
+          <button class="btn btn-outline btn-sm" style="flex:1;padding:8px;border-radius:6px;font-size:13px">查看详情</button>
+        </div>
+      </div>
+
+      <div class="history-item">
+        <div class="history-header">
+          <span class="history-day">📍 Day1 术后首日</span>
+          <span class="history-status done">✅ 已完成</span>
+        </div>
+        <div class="history-details">
+          <div class="history-detail-item"><span>完成时间</span><span>06-24</span></div>
+          <div class="history-detail-item"><span>疼痛评分</span><span>6分</span></div>
+          <div class="history-detail-item"><span>手术部位</span><span>轻微肿胀</span></div>
+          <div class="history-detail-item"><span>体温</span><span>37.0°C</span></div>
+          <div class="history-detail-item"><span>照片</span><span>2张</span></div>
+          <div class="history-detail-item"><span>风险判定</span><span style="color:#52c41a">🟢 低风险</span></div>
+        </div>
+        <div class="history-actions">
+          <button class="btn btn-outline btn-sm" style="flex:1;padding:8px;border-radius:6px;font-size:13px">查看详情</button>
+        </div>
+      </div>
+
+      <div class="history-item" style="opacity:0.6">
+        <div class="history-header">
+          <span class="history-day">📍 Day30 骨结合期复查</span>
+          <span class="history-status waiting">⏸ 未开始</span>
+        </div>
+        <div class="history-details">
+          <div>计划日期：2026-07-23</div>
+        </div>
+      </div>
+
+      <div class="history-item" style="opacity:0.6">
+        <div class="history-header">
+          <span class="history-day">📍 Day90 中期复查</span>
+          <span class="history-status waiting">⏸ 未开始</span>
+        </div>
+        <div class="history-details">
+          <div>计划日期：2026-09-21</div>
+        </div>
+      </div>
+
+      <div class="safe-bottom"></div>
+    </div>
+  </div>
+
+  <!-- ===== SUCCESS PAGE ===== -->
+  <div class="page" id="h5-success">
+    <div class="phone-header" style="background:#52c41a">
+      <span style="font-size:16px;font-weight:500;flex:1;text-align:center">提交成功</span>
+    </div>
+    <div class="phone-screen">
+      <div class="success-page">
+        <div class="success-icon">✅</div>
+        <div class="success-title">提交成功！</div>
+        <div class="success-desc">
+          您的术后反馈已提交成功<br>
+          医生已收到您的反馈信息<br>
+          如有紧急情况请及时联系诊所
+        </div>
+        <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:12px;padding:16px;text-align:left;margin-bottom:24px">
+          <div style="font-size:14px;font-weight:500;margin-bottom:8px;color:#389e0d">📋 后续安排</div>
+          <div style="font-size:13px;color:#666;line-height:1.8">
+            • 医生将在 24 小时内查看您的反馈<br>
+            • 如需回访，医生会主动联系您<br>
+            • 下次随访时间：Day7 (06-30)<br>
+            • 系统将在随访日期前发送提醒
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="showH5Page('home')" style="margin-bottom:12px">返回首页</button>
+        <button class="btn btn-outline" onclick="showH5Page('history')">查看随访历史</button>
+      </div>
+      <div class="contact-bar">
+        📞 优特口腔 <a href="tel:02088886666">020-8888-6666</a>
+      </div>
+      <div class="safe-bottom"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showH5Page(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('h5-' + page).classList.add('active');
+
+  // Update nav
+  document.querySelectorAll('.page-nav button').forEach(b => b.classList.remove('active'));
+  const navMap = { home: 0, questionnaire: 1, photo: 2, appointment: 3, satisfaction: 4, history: 5, success: 6 };
+  const buttons = document.querySelectorAll('.page-nav button');
+  if (navMap[page] !== undefined && buttons[navMap[page]]) {
+    buttons[navMap[page]].classList.add('active');
+  }
+}
+
+function selectRadio(el) {
+  const parent = el.closest('.option-list');
+  parent.querySelectorAll('.option-item').forEach(item => {
+    item.classList.remove('selected');
+    item.querySelector('.option-check').classList.remove('checked');
+  });
+  el.classList.add('selected');
+  el.querySelector('.option-check').classList.add('checked');
+}
+
+function selectTime(el) {
+  if (el.classList.contains('disabled')) return;
+  document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+
+</body>
+</html>

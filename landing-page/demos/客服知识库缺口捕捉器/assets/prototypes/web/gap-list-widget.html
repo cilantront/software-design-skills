@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>缺口清单 - Widget 原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    padding: 24px;
+    color: #1f2937;
+  }
+  .widget-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 24px;
+  }
+
+  /* Header toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .widget-title {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* Search and filters */
+  .search-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 6px 12px;
+    background: #fff;
+    min-width: 200px;
+  }
+  .search-box input {
+    border: none;
+    outline: none;
+    font-size: 13px;
+    width: 100%;
+    margin-left: 6px;
+  }
+  .filter-select {
+    padding: 7px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 13px;
+    background: #fff;
+    cursor: pointer;
+    color: #374151;
+  }
+  .view-toggle {
+    display: flex;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .view-toggle button {
+    padding: 6px 12px;
+    border: none;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    color: #6b7280;
+  }
+  .view-toggle button.active {
+    background: #3b82f6;
+    color: #fff;
+  }
+
+  /* Batch bar */
+  .batch-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #eff6ff;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #1e40af;
+  }
+  .batch-bar .btn-sm {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-blue { background: #3b82f6; color: #fff; }
+  .btn-blue:hover { background: #2563eb; }
+  .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db !important; }
+  .btn-outline:hover { background: #f9fafb; }
+
+  /* Gap list */
+  .gap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gap-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .gap-item:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.08);
+  }
+  .gap-item-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .gap-checkbox {
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #3b82f6;
+  }
+  .gap-main {
+    flex: 1;
+  }
+  .gap-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .gap-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  .priority-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .priority-tag.p0 { background: #fef2f2; color: #dc2626; }
+  .priority-tag.p1 { background: #fff7ed; color: #ea580c; }
+  .priority-tag.p2 { background: #eff6ff; color: #2563eb; }
+  .score-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+  .gap-summary-text {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .gap-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 10px;
+  }
+  .gap-stats span { display: flex; align-items: center; gap: 4px; }
+
+  /* Evidence preview */
+  .evidence-preview {
+    border-left: 3px solid #e5e7eb;
+    padding: 8px 12px;
+    background: #f9fafb;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 10px;
+  }
+  .evidence-label {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .evidence-item {
+    font-size: 12px;
+    color: #374151;
+    line-height: 1.5;
+    padding: 4px 0;
+    border-bottom: 1px dashed #e5e7eb;
+  }
+  .evidence-item:last-child { border-bottom: none; }
+  .evidence-role {
+    font-weight: 600;
+    color: #3b82f6;
+  }
+  .evidence-role.agent { color: #10b981; }
+
+  /* Actions */
+  .gap-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-ghost { background: transparent; color: #6b7280; border: 1px solid #d1d5db; }
+  .btn-ghost:hover { background: #f9fafb; }
+  .btn-danger-ghost { background: transparent; color: #ef4444; border: 1px solid #fecaca; }
+  .btn-danger-ghost:hover { background: #fef2f2; }
+
+  /* Status tag */
+  .status-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .status-unprocessed { background: #f3f4f6; color: #6b7280; }
+  .status-draft { background: #eff6ff; color: #2563eb; }
+  .status-ignored { background: #fef2f2; color: #dc2626; }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .pagination button {
+    padding: 4px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    color: #374151;
+  }
+  .pagination button.active {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+  }
+  .pagination-info { font-size: 12px; color: #9ca3af; margin-right: auto; }
+</style>
+</head>
+<body>
+
+<div class="widget-container">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="widget-title">
+        🔍 缺口清单
+        <span class="badge">47 条</span>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <div class="search-box">
+        <span>🔎</span>
+        <input type="text" placeholder="搜索缺口..." />
+      </div>
+      <select class="filter-select">
+        <option>全部批次</option>
+        <option>2026-06-26 批次</option>
+        <option>2026-06-20 批次</option>
+      </select>
+      <select class="filter-select">
+        <option>全部状态</option>
+        <option>未处理</option>
+        <option>已生成草稿</option>
+        <option>已忽略</option>
+      </select>
+      <select class="filter-select">
+        <option>优先级排序 ↓</option>
+        <option>频次排序 ↓</option>
+        <option>影响用户数 ↓</option>
+        <option>最近出现 ↓</option>
+      </select>
+      <div class="view-toggle">
+        <button class="active" title="列表视图">☰</button>
+        <button title="卡片视图">▦</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch action bar -->
+  <div class="batch-bar">
+    <input type="checkbox" class="gap-checkbox" checked onchange="alert('全选/取消全选')"/>
+    已选择 <strong>3</strong> 条缺口
+    <button class="btn-sm btn-blue" onclick="alert('批量生成 3 条 FAQ 草稿')">📝 批量生成草稿</button>
+    <button class="btn-sm btn-outline" onclick="alert('批量标记忽略')">🚫 批量忽略</button>
+  </div>
+
+  <!-- Gap list -->
+  <div class="gap-list">
+    <!-- Gap 1 -->
+    <div class="gap-item">
+      <div class="gap-item-top">
+        <input type="checkbox" class="gap-checkbox" checked/>
+        <div class="gap-main">
+          <div class="gap-header">
+            <span class="gap-title">退款流程不明确，用户反复追问退款到账时间</span>
+            <span class="priority-tag p0">P0</span>
+            <span class="score-badge">得分 1470</span>
+            <span class="status-tag status-unprocessed">未处理</span>
+          </div>
+          <div class="gap-summary-text">
+            用户咨询退款后到账时间，客服回复模糊（"预计几天""帮您查询"），无标准时间说明，导致用户反复追问，平均每个对话追问 3.2 次。
+          </div>
+          <div class="gap-stats">
+            <span>📈 出现 <strong>42 次</strong></span>
+            <span>👥 影响 <strong>35 人</strong></span>
+            <span>📅 首次: 06-18</span>
+            <span>📅 最近: 06-26</span>
+          </div>
+          <div class="evidence-preview">
+            <div class="evidence-label">💬 对话证据（2/12 条）</div>
+            <div class="evidence-item">
+              <span class="evidence-role">[用户]</span> 我昨天申请的退款，什么时候能到账？
+              <span class="evidence-role agent">[客服]</span> 您好，退款一般需要几个工作日到账，请您耐心等待~
+              <span class="evidence-role">[用户]</span> 几个工作日是几天？能给个准确时间吗？
+            </div>
+            <div class="evidence-item">
+              <span class="evidence-role">[用户]</span> 退款都3天了还没到，怎么回事？
+              <span class="evidence-role agent">[客服]</span> 我帮您查一下，请稍等...
+            </div>
+          </div>
+          <div class="gap-actions">
+            <button class="btn btn-primary" onclick="alert('跳转到 FAQ 编辑器生成草稿')">📝 生成 FAQ 草稿</button>
+            <button class="btn btn-ghost" onclick="alert('查看缺口详情')">📖 查看详情</button>
+            <button class="btn btn-danger-ghost" onclick="alert('确认标记忽略？')">🚫 忽略</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gap 2 -->
+    <div class="gap-item">
+      <div class="gap-item-top">
+        <input type="checkbox" class="gap-checkbox" checked/>
+        <div class="gap-main">
+          <div class="gap-header">
+            <span class="gap-title">用户询问能否导出 PDF 报告，客服无标准答案</span>
+            <span class="priority-tag p0">P0</span>
+            <span class="score-badge">得分 616</span>
+            <span class="status-tag status-unprocessed">未处理</span>
+          </div>
+          <div class="gap-summary-text">
+            每周都有用户询问是否可以导出 PDF 格式的报告。客服回复不统一（有的说"不支持"，有的建议"截图保存"），该问题从未被写进 FAQ。
+          </div>
+          <div class="gap-stats">
+            <span>📈 出现 <strong>28 次</strong></span>
+            <span>👥 影响 <strong>22 人</strong></span>
+            <span>📅 首次: 06-05</span>
+            <span>📅 最近: 06-25</span>
+          </div>
+          <div class="evidence-preview">
+            <div class="evidence-label">💬 对话证据（2/8 条）</div>
+            <div class="evidence-item">
+              <span class="evidence-role">[用户]</span> 请问能把月度分析报告导出为 PDF 吗？
+              <span class="evidence-role agent">[客服]</span> 目前暂不支持 PDF 导出，您可以截图保存~
+            </div>
+            <div class="evidence-item">
+              <span class="evidence-role">[用户]</span> 有没有 PDF 下载功能？老板要看 PDF 版的
+              <span class="evidence-role agent">[客服]</span> 这个功能暂时没有呢，我帮您反馈给产品团队
+            </div>
+          </div>
+          <div class="gap-actions">
+            <button class="btn btn-primary">📝 生成 FAQ 草稿</button>
+            <button class="btn btn-ghost">📖 查看详情</button>
+            <button class="btn btn-danger-ghost">🚫 忽略</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gap 3 -->
+    <div class="gap-item">
+      <div class="gap-item-top">
+        <input type="checkbox" class="gap-checkbox" checked/>
+        <div class="gap-main">
+          <div class="gap-header">
+            <span class="gap-title">618 大促新增 SKU 售后政策变更未同步到知识库</span>
+            <span class="priority-tag p0">P0</span>
+            <span class="score-badge">得分 342</span>
+            <span class="status-tag status-draft">已生成草稿</span>
+          </div>
+          <div class="gap-summary-text">
+            618 大促期间新增 20+ SKU 和部分退换货政策变更，但知识库仍为大促前版本。客服多次@主管确认新政策，回复口径不一致。
+          </div>
+          <div class="gap-stats">
+            <span>📈 出现 <strong>19 次</strong></span>
+            <span>👥 影响 <strong>18 人</strong></span>
+            <span>📅 首次: 06-18</span>
+            <span>📅 最近: 06-24</span>
+          </div>
+          <div class="evidence-preview">
+            <div class="evidence-label">💬 对话证据（2/6 条）</div>
+            <div class="evidence-item">
+              <span class="evidence-role">[用户]</span> 618 买的这个新款耳机，7天无理由退货吗？
+              <span class="evidence-role agent">[客服]</span> 呃，这个我需要帮您确认一下，请稍等...@主管
+            </div>
+          </div>
+          <div class="gap-actions">
+            <button class="btn btn-ghost">📝 查看草稿</button>
+            <button class="btn btn-primary">📋 提交到看板</button>
+            <button class="btn btn-danger-ghost">🚫 忽略</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <span class="pagination-info">共 47 条缺口，显示第 1-10 条</span>
+    <button>‹</button>
+    <button class="active">1</button>
+    <button>2</button>
+    <button>3</button>
+    <button>4</button>
+    <button>5</button>
+    <button>›</button>
+  </div>
+</div>
+
+</body>
+</html>

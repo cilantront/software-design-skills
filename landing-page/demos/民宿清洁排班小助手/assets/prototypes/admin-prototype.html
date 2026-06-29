@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>民宿清洁排班小助手 · 管理端小程序原型</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf3 100%);
+    padding: 32px 16px;
+    color: #222;
+  }
+  .page-header {
+    max-width: 1280px;
+    margin: 0 auto 28px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 26px;
+    color: #1f2937;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .page-header p {
+    font-size: 14px;
+    color: #6b7280;
+  }
+  .grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+  }
+  .screen-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .screen-label {
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #4b5563;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .phone {
+    width: 280px;
+    height: 560px;
+    background: #fff;
+    border-radius: 32px;
+    border: 8px solid #1f2937;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .wx-bar {
+    height: 32px;
+    background: #ededed;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    font-size: 12px;
+    color: #333;
+    flex-shrink: 0;
+    border-bottom: 1px solid #d8d8d8;
+  }
+  .wx-bar .dots { color: #555; font-size: 14px; }
+  .wx-bar .close { color: #555; font-size: 13px; }
+  .status-bar {
+    height: 20px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    font-size: 11px;
+    color: #333;
+    flex-shrink: 0;
+  }
+  .app-bar {
+    height: 44px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .app-bar .back {
+    position: absolute;
+    left: 12px;
+    color: #3b82f6;
+    font-size: 18px;
+  }
+  .screen-body {
+    flex: 1;
+    overflow-y: auto;
+    background: #f3f4f6;
+    padding: 12px;
+  }
+  .screen-body::-webkit-scrollbar { width: 0; }
+
+  /* ===== Common Components ===== */
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .btn {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-success { background: #10b981; color: #fff; }
+  .btn-danger { background: #ef4444; color: #fff; }
+  .btn-ghost { background: #f3f4f6; color: #374151; }
+  .btn-block { display: block; width: 100%; }
+
+  .status-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tag-pending { background: #f3f4f6; color: #6b7280; }
+  .tag-cleaning { background: #dbeafe; color: #1d4ed8; }
+  .tag-done { background: #d1fae5; color: #065f46; }
+  .tag-abnormal { background: #fee2e2; color: #991b1b; }
+
+  /* ===== Screen 1: Login ===== */
+  .login-screen {
+    background: linear-gradient(180deg, #dbeafe 0%, #fff 60%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 20px;
+    flex: 1;
+  }
+  .login-logo {
+    width: 80px;
+    height: 80px;
+    background: #3b82f6;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 36px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px rgba(59,130,246,0.3);
+  }
+  .login-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .login-sub { font-size: 12px; color: #6b7280; margin-bottom: 30px; }
+  .role-card {
+    width: 100%;
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .role-card.selected { border-color: #3b82f6; background: #eff6ff; }
+  .role-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #fff;
+  }
+  .role-card h4 { font-size: 14px; margin-bottom: 2px; }
+  .role-card p { font-size: 11px; color: #6b7280; }
+  .wx-login-btn {
+    width: 100%;
+    background: #07c160;
+    color: #fff;
+    padding: 12px;
+    border-radius: 22px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 20px;
+  }
+
+  /* ===== Screen 2: Board (Home) ===== */
+  .date-switch {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+  }
+  .date-chip {
+    padding: 6px 12px;
+    background: #fff;
+    border-radius: 16px;
+    font-size: 12px;
+    color: #4b5563;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .date-chip.active { background: #3b82f6; color: #fff; }
+  .summary-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .summary-item {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .summary-item .num { font-size: 18px; font-weight: 700; }
+  .summary-item .lbl { font-size: 10px; color: #6b7280; }
+
+  .board-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 4px solid;
+  }
+  .board-card.pending { border-left-color: #9ca3af; }
+  .board-card.cleaning { border-left-color: #3b82f6; }
+  .board-card.done { border-left-color: #10b981; }
+  .board-card.abnormal { border-left-color: #ef4444; background: #fef2f2; }
+  .board-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .board-card-head h4 { font-size: 14px; }
+  .board-card-meta { font-size: 11px; color: #6b7280; line-height: 1.6; }
+
+  /* ===== Screen 3/4: Property ===== */
+  .prop-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .prop-info h4 { font-size: 14px; margin-bottom: 4px; }
+  .prop-info p { font-size: 11px; color: #6b7280; line-height: 1.6; }
+
+  .form-row { margin-bottom: 14px; }
+  .form-row label {
+    display: block;
+    font-size: 12px;
+    color: #4b5563;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .form-row input, .form-row select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 13px;
+    background: #fff;
+  }
+  .form-row .hint { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+  /* ===== Screen 5/6: Order ===== */
+  .order-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .order-card-head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .order-card h4 { font-size: 14px; }
+  .order-card .row { font-size: 11px; color: #6b7280; line-height: 1.8; }
+  .order-card .row span { color: #1f2937; font-weight: 500; }
+
+  /* ===== Screen 7: Dispatch ===== */
+  .task-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .task-card .urgency {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .urgency.high { background: #fee2e2; color: #991b1b; }
+  .urgency.normal { background: #e0e7ff; color: #3730a3; }
+  .task-card h4 { font-size: 13px; margin: 6px 0 4px; }
+  .task-card .deadline { font-size: 11px; color: #ef4444; font-weight: 500; }
+
+  /* ===== Screen 8: Timeline ===== */
+  .timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px; top: 4px; bottom: 4px;
+    width: 2px;
+    background: #dbeafe;
+  }
+  .tl-item {
+    position: relative;
+    padding-bottom: 14px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -18px; top: 4px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dbeafe;
+  }
+  .tl-item.done::before { background: #10b981; box-shadow: 0 0 0 2px #d1fae5; }
+  .tl-item.warn::before { background: #f59e0b; box-shadow: 0 0 0 2px #fef3c7; }
+  .tl-time { font-size: 11px; color: #6b7280; }
+  .tl-title { font-size: 13px; font-weight: 500; margin: 2px 0; }
+  .tl-desc { font-size: 11px; color: #6b7280; line-height: 1.5; }
+
+  /* ===== Screen 10: Cleaner list ===== */
+  .cleaner-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cleaner-left { display: flex; gap: 10px; align-items: center; }
+  .cleaner-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #fbbf24;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+  }
+  .cleaner-name { font-size: 14px; font-weight: 500; }
+  .cleaner-phone { font-size: 11px; color: #6b7280; }
+  .task-count {
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* ===== Screen 12: Notification ===== */
+  .notice-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+  }
+  .notice-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .notice-body { flex: 1; }
+  .notice-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .notice-desc { font-size: 11px; color: #6b7280; line-height: 1.5; }
+  .notice-time { font-size: 10px; color: #9ca3af; margin-top: 3px; }
+
+  /* ===== Bottom Tabs ===== */
+  .tab-bar {
+    height: 50px;
+    background: #fff;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-shrink: 0;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #6b7280;
+    gap: 2px;
+  }
+  .tab-item.active { color: #3b82f6; }
+  .tab-icon {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    background: currentColor;
+    opacity: 0.15;
+  }
+  .tab-item.active .tab-icon { opacity: 0.3; }
+
+  .fab {
+    position: absolute;
+    right: 14px; bottom: 60px;
+    width: 44px; height: 44px;
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 10px rgba(59,130,246,0.4);
+  }
+
+  /* ===== Modal ===== */
+  .modal {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: #fff;
+    border-radius: 14px 14px 0 0;
+    padding: 16px;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+  }
+  .modal h4 { font-size: 14px; margin-bottom: 10px; }
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .photo-box {
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🏡 民宿清洁排班小助手 · 管理端</h1>
+  <p>小程序端全站点原型 · 房东 / 管理员使用</p>
+</div>
+
+<div class="grid">
+
+  <!-- Screen 1: Login -->
+  <div class="screen-wrap">
+    <div class="screen-label">① 登录 / 角色选择</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>民宿清洁排班</span><span class="close">○</span></div>
+      <div class="status-bar"><span>09:41</span><span>📶 🔋</span></div>
+      <div class="login-screen">
+        <div class="login-logo">🏡</div>
+        <div class="login-title">民宿清洁排班小助手</div>
+        <div class="login-sub">退房→清洁→入住，一手掌握</div>
+
+        <div class="role-card selected">
+          <div class="role-icon" style="background:#3b82f6">🏠</div>
+          <div>
+            <h4>我是房东 / 管理员</h4>
+            <p>管理房源、订单、保洁员</p>
+          </div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon" style="background:#f59e0b">🧹</div>
+          <div>
+            <h4>我是保洁员</h4>
+            <p>接单、打卡、反馈异常</p>
+          </div>
+        </div>
+
+        <div class="wx-login-btn">微信授权登录</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 2: Board Home -->
+  <div class="screen-wrap">
+    <div class="screen-label">② 首页 · 清洁状态看板</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>清洁看板</span><span class="close">○</span></div>
+      <div class="status-bar"><span>09:42</span><span>📶 🔋</span></div>
+      <div class="app-bar">
+        今日清洁看板
+      </div>
+      <div class="screen-body">
+        <div class="date-switch">
+          <div class="date-chip">昨天</div>
+          <div class="date-chip active">今天 06/26</div>
+          <div class="date-chip">明天</div>
+          <div class="date-chip">06/29</div>
+        </div>
+
+        <div class="summary-row">
+          <div class="summary-item" style="background:#f3f4f6">
+            <div class="num" style="color:#6b7280">3</div>
+            <div class="lbl">待清洁</div>
+          </div>
+          <div class="summary-item" style="background:#dbeafe">
+            <div class="num" style="color:#1d4ed8">2</div>
+            <div class="lbl">清洁中</div>
+          </div>
+          <div class="summary-item" style="background:#d1fae5">
+            <div class="num" style="color:#065f46">5</div>
+            <div class="lbl">已清洁</div>
+          </div>
+          <div class="summary-item" style="background:#fee2e2">
+            <div class="num" style="color:#991b1b">1</div>
+            <div class="lbl">异常</div>
+          </div>
+        </div>
+
+        <div class="board-card abnormal">
+          <div class="board-card-head">
+            <h4>海景大床房#01</h4>
+            <span class="status-tag tag-abnormal">异常</span>
+          </div>
+          <div class="board-card-meta">
+            退房 11:00 → 入住 14:00<br/>
+            保洁员：王阿姨 · 水龙头漏水
+          </div>
+        </div>
+
+        <div class="board-card pending">
+          <div class="board-card-head">
+            <h4>园景双床房#03</h4>
+            <span class="status-tag tag-pending">待清洁</span>
+          </div>
+          <div class="board-card-meta">
+            退房 12:00 → 入住 15:00<br/>
+            待派单 · 截止 14:00
+          </div>
+        </div>
+
+        <div class="board-card cleaning">
+          <div class="board-card-head">
+            <h4>阳台套房#05</h4>
+            <span class="status-tag tag-cleaning">清洁中</span>
+          </div>
+          <div class="board-card-meta">
+            退房 10:30 → 入住 13:30<br/>
+            保洁员：李阿姨 · 已签到
+          </div>
+        </div>
+
+        <div class="board-card done">
+          <div class="board-card-head">
+            <h4>庭院大床房#02</h4>
+            <span class="status-tag tag-done">已清洁</span>
+          </div>
+          <div class="board-card-meta">
+            退房 09:00 → 入住 14:00<br/>
+            保洁员：张阿姨 · 待验收
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item active"><div class="tab-icon"></div>看板</div>
+        <div class="tab-item"><div class="tab-icon"></div>订单</div>
+        <div class="tab-item"><div class="tab-icon"></div>派单</div>
+        <div class="tab-item"><div class="tab-icon"></div>我的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 3: Property List -->
+  <div class="screen-wrap">
+    <div class="screen-label">③ 房源列表</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>房源管理</span><span class="close">○</span></div>
+      <div class="status-bar"><span>09:45</span><span>📶 🔋</span></div>
+      <div class="app-bar">
+        房源管理
+        <span style="position:absolute; right:12px; font-size:12px; color:#3b82f6; font-weight:400">搜索</span>
+      </div>
+      <div class="screen-body">
+        <div class="prop-card">
+          <div class="prop-info">
+            <h4>海景大床房 #01</h4>
+            <p>蓝湾小区 A栋 1201<br/>大床房 · 清洁 30min · 缓冲 60min</p>
+          </div>
+          <span class="status-tag tag-abnormal">异常</span>
+        </div>
+
+        <div class="prop-card">
+          <div class="prop-info">
+            <h4>庭院大床房 #02</h4>
+            <p>蓝湾小区 A栋 1202<br/>大床房 · 清洁 30min · 缓冲 60min</p>
+          </div>
+          <span class="status-tag tag-done">已清洁</span>
+        </div>
+
+        <div class="prop-card">
+          <div class="prop-info">
+            <h4>园景双床房 #03</h4>
+            <p>蓝湾小区 B栋 805<br/>双床房 · 清洁 40min · 缓冲 60min</p>
+          </div>
+          <span class="status-tag tag-pending">待清洁</span>
+        </div>
+
+        <div class="prop-card">
+          <div class="prop-info">
+            <h4>亲子套房 #04</h4>
+            <p>海天一色 C栋 1506<br/>套房 · 清洁 50min · 缓冲 90min</p>
+          </div>
+          <span class="status-tag tag-done">已清洁</span>
+        </div>
+
+        <div class="prop-card">
+          <div class="prop-info">
+            <h4>阳台套房 #05</h4>
+            <p>海天一色 C栋 1601<br/>套房 · 清洁 45min · 缓冲 60min</p>
+          </div>
+          <span class="status-tag tag-cleaning">清洁中</span>
+        </div>
+      </div>
+      <div class="fab">+</div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon"></div>看板</div>
+        <div class="tab-item active"><div class="tab-icon"></div>房源</div>
+        <div class="tab-item"><div class="tab-icon"></div>订单</div>
+        <div class="tab-item"><div class="tab-icon"></div>我的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 4: Property Edit -->
+  <div class="screen-wrap">
+    <div class="screen-label">④ 新增 / 编辑房源</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>房源详情</span><span class="close">○</span></div>
+      <div class="status-bar"><span>09:48</span><span>📶 🔋</span></div>
+      <div class="app-bar">
+        <span class="back">‹</span>
+        编辑房源
+      </div>
+      <div class="screen-body">
+        <div class="card">
+          <div class="form-row">
+            <label>房源名称</label>
+            <input value="海景大床房#01" />
+          </div>
+          <div class="form-row">
+            <label>房源地址</label>
+            <input value="蓝湾小区 A栋 1201" />
+          </div>
+          <div class="form-row">
+            <label>房型</label>
+            <select>
+              <option selected>大床房</option>
+              <option>双床房</option>
+              <option>套房</option>
+              <option>家庭房</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>清洁标准时长（分钟）</label>
+            <input type="number" value="30" />
+            <div class="hint">预估完成清洁所需时间</div>
+          </div>
+          <div class="form-row">
+            <label>缓冲时间（分钟）</label>
+            <input type="number" value="60" />
+            <div class="hint">退房后到下一位入住前的预留时间</div>
+          </div>
+          <button class="btn btn-primary btn-block">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 5: Order List -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑤ 订单列表</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>订单管理</span><span class="close">○</span></div>
+      <div class="status-bar"><span>09:52</span><span>📶 🔋</span></div>
+      <div class="app-bar">
+        今日订单
+        <span style="position:absolute; right:12px; font-size:12px; color:#3b82f6; font-weight:400">筛选</span>
+      </div>
+      <div class="screen-body">
+        <div class="order-card">
+          <div class="order-card-head">
+            <h4>海景大床房 #01</h4>
+            <span class="status-tag tag-abnormal">异常</span>
+          </div>
+          <div class="row">住客：<span>张三</span></div>
+          <div class="row">退房：<span>11:00</span> → 入住：<span>14:00</span></div>
+          <div class="row">清洁任务：<span>王阿姨 · 异常挂起</span></div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-card-head">
+            <h4>园景双床房 #03</h4>
+            <span class="status-tag tag-pending">待派单</span>
+          </div>
+          <div class="row">住客：<span>李四</span></div>
+          <div class="row">退房：<span>12:00</span> → 入住：<span>15:00</span></div>
+          <div class="row">清洁任务：<span>待指派 · 截止 14:00</span></div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-card-head">
+            <h4>阳台套房 #05</h4>
+            <span class="status-tag tag-cleaning">清洁中</span>
+          </div>
+          <div class="row">住客：<span>王五</span></div>
+          <div class="row">退房：<span>10:30</span> → 入住：<span>13:30</span></div>
+          <div class="row">清洁任务：<span>李阿姨 · 清洁中</span></div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-card-head">
+            <h4>庭院大床房 #02</h4>
+            <span class="status-tag tag-done">已清洁</span>
+          </div>
+          <div class="row">住客：<span>赵六</span></div>
+          <div class="row">退房：<span>09:00</span> → 入住：<span>14:00</span></div>
+          <div class="row">清洁任务：<span>张阿姨 · 待验收</span></div>
+        </div>
+      </div>
+      <div class="fab">+</div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon"></div>看板</div>
+        <div class="tab-item active"><div class="tab-icon"></div>订单</div>
+        <div class="tab-item"><div class="tab-icon"></div>派单</div>
+        <div class="tab-item"><div class="tab-icon"></div>我的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 6: New Order -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑥ 新增订单</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>新增订单</span><span class="close">○</span></div>
+      <div class="status-bar"><span>09:55</span><span>📶 🔋</span></div>
+      <div class="app-bar">
+        <span class="back">‹</span>
+        新增订单
+      </div>
+      <div class="screen-body">
+        <div class="card">
+          <div class="form-row">
+            <label>选择房源</label>
+            <select>
+              <option>海景大床房 #01</option>
+              <option>庭院大床房 #02</option>
+              <option selected>园景双床房 #03</option>
+              <option>亲子套房 #04</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>住客姓名</label>
+            <input placeholder="请输入住客姓名" value="李四" />
+          </div>
+          <div class="form-row">
+            <label>退房时间</label>
+            <input type="datetime-local" value="2026-06-26T12:00" />
+          </div>
+          <div class="form-row">
+            <label>入住时间</label>
+            <input type="datetime-local" value="2026-06-26T15:00" />
+          </div>
+          <div class="card" style="background:#eff6ff; border:1px dashed #3b82f6">
+            <div style="font-size:12px; color:#1d4ed8; line-height:1.7">
+              ✅ 系统将自动生成清洁任务<br/>
+              ⏰ 最晚完成时间：<b>14:00</b><br/>
+              🧹 清洁标准：<b>40 分钟</b>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block">保存订单</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 7: Dispatch -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑦ 派单管理</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>派单管理</span><span class="close">○</span></div>
+      <div class="status-bar"><span>10:02</span><span>📶 🔋</span></div>
+      <div class="app-bar">待派单任务</div>
+      <div class="screen-body">
+        <div class="task-card">
+          <span class="urgency high">紧急</span>
+          <h4>园景双床房 #03</h4>
+          <div style="font-size:11px; color:#6b7280; line-height:1.6">
+            退房 12:00 → 入住 15:00<br/>
+            清洁标准：40 分钟
+          </div>
+          <div class="deadline">⏰ 截止 14:00 · 剩余 2h05m</div>
+          <div style="display:flex; gap:6px; margin-top:10px">
+            <button class="btn btn-primary" style="flex:1">指派保洁员</button>
+            <button class="btn btn-ghost" style="flex:1">稍后</button>
+          </div>
+        </div>
+
+        <div style="font-size:12px; color:#6b7280; margin:10px 0 6px">指派保洁员</div>
+        <div class="cleaner-card">
+          <div class="cleaner-left">
+            <div class="cleaner-avatar" style="background:#f59e0b">王</div>
+            <div>
+              <div class="cleaner-name">王阿姨</div>
+              <div class="cleaner-phone">138****5678</div>
+            </div>
+          </div>
+          <div class="task-count">2 进行中</div>
+        </div>
+        <div class="cleaner-card">
+          <div class="cleaner-left">
+            <div class="cleaner-avatar" style="background:#10b981">李</div>
+            <div>
+              <div class="cleaner-name">李阿姨</div>
+              <div class="cleaner-phone">139****2345</div>
+            </div>
+          </div>
+          <div class="task-count">1 进行中</div>
+        </div>
+        <div class="cleaner-card">
+          <div class="cleaner-left">
+            <div class="cleaner-avatar" style="background:#8b5cf6">张</div>
+            <div>
+              <div class="cleaner-name">张阿姨</div>
+              <div class="cleaner-phone">137****8901</div>
+            </div>
+          </div>
+          <div class="task-count" style="background:#e5e7eb; color:#6b7280">空闲</div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon"></div>看板</div>
+        <div class="tab-item"><div class="tab-icon"></div>订单</div>
+        <div class="tab-item active"><div class="tab-icon"></div>派单</div>
+        <div class="tab-item"><div class="tab-icon"></div>我的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 8: Task Timeline -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑧ 任务时间线</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>任务详情</span><span class="close">○</span></div>
+      <div class="status-bar"><span>10:10</span><span>📶 🔋</span></div>
+      <div class="app-bar">
+        <span class="back">‹</span>
+        海景大床房 #01
+      </div>
+      <div class="screen-body">
+        <div class="card">
+          <div style="font-size:13px; font-weight:600; margin-bottom:6px">订单信息</div>
+          <div style="font-size:11px; color:#6b7280; line-height:1.7">
+            住客：张三<br/>
+            退房：11:00 → 入住：14:00<br/>
+            最晚完成：<span style="color:#ef4444; font-weight:600">13:00</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:13px; font-weight:600; margin-bottom:10px">执行时间线</div>
+          <div class="timeline">
+            <div class="tl-item done">
+              <div class="tl-time">10:52</div>
+              <div class="tl-title">任务已指派</div>
+              <div class="tl-desc">指派给保洁员王阿姨</div>
+            </div>
+            <div class="tl-item done">
+              <div class="tl-time">10:55</div>
+              <div class="tl-title">保洁员已接单</div>
+              <div class="tl-desc">王阿姨确认接单</div>
+            </div>
+            <div class="tl-item done">
+              <div class="tl-time">11:10</div>
+              <div class="tl-title">到达签到</div>
+              <div class="tl-desc">GPS 定位：蓝湾小区 A栋</div>
+            </div>
+            <div class="tl-item warn">
+              <div class="tl-time">11:35</div>
+              <div class="tl-title">上报异常</div>
+              <div class="tl-desc">🔴 设施损坏 · 水龙头漏水<br/>已通知房东</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-time">11:42</div>
+              <div class="tl-title">等待房东处理</div>
+              <div class="tl-desc">任务挂起中</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 9: Acceptance Modal -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑨ 验收清洁（弹窗）</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>清洁看板</span><span class="close">○</span></div>
+      <div class="status-bar"><span>10:25</span><span>📶 🔋</span></div>
+      <div class="app-bar">今日清洁看板</div>
+      <div class="screen-body" style="opacity:0.4">
+        <div class="board-card done">
+          <div class="board-card-head">
+            <h4>庭院大床房 #02</h4>
+            <span class="status-tag tag-done">已清洁</span>
+          </div>
+          <div class="board-card-meta">张阿姨 · 待验收</div>
+        </div>
+      </div>
+      <div class="modal">
+        <h4>验收清洁 · 庭院大床房 #02</h4>
+        <div style="font-size:11px; color:#6b7280; margin-bottom:8px">
+          保洁员：张阿姨 · 完成时间 10:20
+        </div>
+        <div style="font-size:12px; font-weight:500; margin-bottom:6px">清洁成果照片</div>
+        <div class="photo-grid">
+          <div class="photo-box">🛏</div>
+          <div class="photo-box">🛁</div>
+          <div class="photo-box">🪑</div>
+        </div>
+        <div style="font-size:12px; font-weight:500; margin-bottom:6px">清洁备注</div>
+        <div style="font-size:11px; color:#6b7280; margin-bottom:12px; background:#f3f4f6; padding:8px; border-radius:6px">
+          床品已更换，卫生间已消毒，地板已拖净。
+        </div>
+        <div style="display:flex; gap:6px">
+          <button class="btn btn-ghost" style="flex:1">要求返工</button>
+          <button class="btn btn-success" style="flex:1">✓ 验收通过</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 10: Cleaner List -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑩ 保洁员列表</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>我的</span><span class="close">○</span></div>
+      <div class="status-bar"><span>10:30</span><span>📶 🔋</span></div>
+      <div class="app-bar">保洁员管理</div>
+      <div class="screen-body">
+        <div class="cleaner-card">
+          <div class="cleaner-left">
+            <div class="cleaner-avatar" style="background:#f59e0b">王</div>
+            <div>
+              <div class="cleaner-name">王阿姨</div>
+              <div class="cleaner-phone">138****5678 · 已关联</div>
+            </div>
+          </div>
+          <div class="task-count">2 进行中</div>
+        </div>
+        <div class="cleaner-card">
+          <div class="cleaner-left">
+            <div class="cleaner-avatar" style="background:#10b981">李</div>
+            <div>
+              <div class="cleaner-name">李阿姨</div>
+              <div class="cleaner-phone">139****2345 · 已关联</div>
+            </div>
+          </div>
+          <div class="task-count">1 进行中</div>
+        </div>
+        <div class="cleaner-card">
+          <div class="cleaner-left">
+            <div class="cleaner-avatar" style="background:#8b5cf6">张</div>
+            <div>
+              <div class="cleaner-name">张阿姨</div>
+              <div class="cleaner-phone">137****8901 · 已关联</div>
+            </div>
+          </div>
+          <div class="task-count" style="background:#e5e7eb; color:#6b7280">空闲</div>
+        </div>
+        <div class="cleaner-card">
+          <div class="cleaner-left">
+            <div class="cleaner-avatar" style="background:#ef4444">陈</div>
+            <div>
+              <div class="cleaner-name">陈阿姨</div>
+              <div class="cleaner-phone">135****4567 · 待关联</div>
+            </div>
+          </div>
+          <div class="task-count" style="background:#fef3c7; color:#92400e">待登录</div>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:12px">+ 添加保洁员</button>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon"></div>看板</div>
+        <div class="tab-item"><div class="tab-icon"></div>订单</div>
+        <div class="tab-item"><div class="tab-icon"></div>派单</div>
+        <div class="tab-item active"><div class="tab-icon"></div>我的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 11: Add Cleaner -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑪ 添加保洁员</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>添加保洁员</span><span class="close">○</span></div>
+      <div class="status-bar"><span>10:35</span><span>📶 🔋</span></div>
+      <div class="app-bar">
+        <span class="back">‹</span>
+        添加保洁员
+      </div>
+      <div class="screen-body">
+        <div class="card">
+          <div class="form-row">
+            <label>保洁员姓名</label>
+            <input placeholder="请输入姓名" />
+          </div>
+          <div class="form-row">
+            <label>手机号</label>
+            <input placeholder="请输入手机号" />
+            <div class="hint">系统将用手机号关联保洁员的小程序账号</div>
+          </div>
+          <div class="card" style="background:#eff6ff; border:1px dashed #3b82f6">
+            <div style="font-size:11px; color:#1d4ed8; line-height:1.7">
+              💡 添加后，请通知保洁员打开小程序登录，系统将自动关联账号。
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 12: Notification -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑫ 通知中心</div>
+    <div class="phone">
+      <div class="wx-bar"><span class="dots">···</span><span>消息通知</span><span class="close">○</span></div>
+      <div class="status-bar"><span>10:42</span><span>📶 🔋</span></div>
+      <div class="app-bar">
+        <span class="back">‹</span>
+        消息通知
+      </div>
+      <div class="screen-body">
+        <div class="notice-card">
+          <div class="notice-icon" style="background:#fee2e2; color:#ef4444">⚠</div>
+          <div class="notice-body">
+            <div class="notice-title">异常反馈</div>
+            <div class="notice-desc">海景大床房#01 王阿姨上报：水龙头漏水</div>
+            <div class="notice-time">2 分钟前</div>
+          </div>
+        </div>
+        <div class="notice-card">
+          <div class="notice-icon" style="background:#fef3c7; color:#f59e0b">⏰</div>
+          <div class="notice-body">
+            <div class="notice-title">超时预警</div>
+            <div class="notice-desc">园景双床房#03 清洁任务即将截止（剩余 40 分钟）</div>
+            <div class="notice-time">15 分钟前</div>
+          </div>
+        </div>
+        <div class="notice-card">
+          <div class="notice-icon" style="background:#d1fae5; color:#10b981">✓</div>
+          <div class="notice-body">
+            <div class="notice-title">清洁完成</div>
+            <div class="notice-desc">庭院大床房#02 张阿姨已完成清洁，请验收</div>
+            <div class="notice-time">20 分钟前</div>
+          </div>
+        </div>
+        <div class="notice-card">
+          <div class="notice-icon" style="background:#dbeafe; color:#1d4ed8">📋</div>
+          <div class="notice-body">
+            <div class="notice-title">接单通知</div>
+            <div class="notice-desc">阳台套房#05 李阿姨已接单</div>
+            <div class="notice-time">35 分钟前</div>
+          </div>
+        </div>
+        <div class="notice-card">
+          <div class="notice-icon" style="background:#e0e7ff; color:#4f46e5">🆕</div>
+          <div class="notice-body">
+            <div class="notice-title">新任务已生成</div>
+            <div class="notice-desc">园景双床房#03 系统已生成清洁任务</div>
+            <div class="notice-time">42 分钟前</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="max-width:1280px; margin:32px auto 0; text-align:center; color:#9ca3af; font-size:12px">
+  民宿清洁排班小助手 · 管理端小程序全站点原型 · V1.0 · 共 12 个核心页面
+</div>
+
+</body>
+</html>

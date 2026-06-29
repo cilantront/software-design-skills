@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>归还审核与异常处理 - Widget原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+.phone-frame { width: 375px; height: 720px; background: #fff; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: 8px solid #1a1a1a; }
+.nav-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f0f0f0; position: relative; }
+.nav-back { position: absolute; left: 16px; font-size: 20px; color: #333; cursor: pointer; }
+.nav-title { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+.content { padding: 16px; overflow-y: auto; height: calc(100% - 44px); }
+.section-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 10px; }
+.photo-compare { display: flex; gap: 10px; margin-bottom: 20px; }
+.photo-box { flex: 1; border-radius: 12px; overflow: hidden; border: 1px solid #f0f0f0; }
+.photo-label { font-size: 11px; color: #999; text-align: center; padding: 6px 0; background: #fafafa; }
+.photo-img { height: 120px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+.info-card { background: #fafafa; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+.info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+.info-label { color: #999; }
+.info-value { color: #333; font-weight: 500; }
+.signature-preview { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 16px; }
+.sig-name { font-size: 22px; font-style: italic; color: #333; font-weight: 600; transform: rotate(-3deg); display: inline-block; }
+.btn-group { display: flex; gap: 10px; margin-top: 16px; }
+.btn-confirm { flex: 1; height: 44px; background: #388e3c; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.btn-abnormal { flex: 1; height: 44px; background: #fff; color: #e74c3c; border: 2px solid #e74c3c; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.abnormal-form { background: #fce4ec; border-radius: 12px; padding: 14px; margin-top: 12px; display: none; }
+.abnormal-form textarea { width: 100%; height: 80px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; font-size: 13px; resize: none; margin-bottom: 10px; }
+.abnormal-form .btn-submit { width: 100%; height: 40px; background: #e74c3c; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="nav-bar">
+    <span class="nav-back">‹</span>
+    <span class="nav-title">归还审核</span>
+  </div>
+  <div class="content">
+    <div class="info-card">
+      <div class="info-row">
+        <span class="info-label">物品</span>
+        <span class="info-value">🔑 B栋配电房门钥匙 (#K002)</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">借用人</span>
+        <span class="info-value">赵大勇</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">借出时间</span>
+        <span class="info-value">2026-06-20 09:00</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">应还时间</span>
+        <span class="info-value">2026-06-22 18:00</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">归还时间</span>
+        <span class="info-value">2026-06-24 16:30</span>
+      </div>
+    </div>
+
+    <div class="section-title">📷 照片对比</div>
+    <div class="photo-compare">
+      <div class="photo-box">
+        <div class="photo-label">借出时</div>
+        <div class="photo-img">🔑</div>
+      </div>
+      <div class="photo-box">
+        <div class="photo-label">归还时</div>
+        <div class="photo-img">🔑</div>
+      </div>
+    </div>
+
+    <div class="section-title">✍️ 借用人签名</div>
+    <div class="signature-preview">
+      <span class="sig-name">赵大勇</span>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-confirm">✓ 确认归还</button>
+      <button class="btn-abnormal">✕ 标记异常</button>
+    </div>
+
+    <div class="abnormal-form">
+      <textarea placeholder="请填写异常说明，如：归还物品与借出物品不一致..."></textarea>
+      <button class="btn-submit">提交异常标记</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

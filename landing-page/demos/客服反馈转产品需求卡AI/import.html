@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客服反馈转产品需求卡AI - 数据导入</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; }
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: #001529; color: #fff; padding-top: 20px; z-index: 100; }
+        .sidebar .logo { padding: 0 20px 20px; font-size: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar .logo span { color: #1890ff; }
+        .sidebar nav { padding: 12px 0; }
+        .sidebar nav a { display: flex; align-items: center; padding: 12px 20px; color: rgba(255,255,255,0.65); text-decoration: none; font-size: 14px; transition: all 0.3s; }
+        .sidebar nav a:hover, .sidebar nav a.active { color: #fff; background: #1890ff; }
+        .sidebar nav a .icon { margin-right: 10px; font-size: 16px; }
+        .main { margin-left: 220px; padding: 24px; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .header h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; }
+
+        /* 步骤条 */
+        .steps { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .step { display: flex; align-items: center; gap: 8px; }
+        .step .num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+        .step.active .num { background: #1890ff; color: #fff; }
+        .step.done .num { background: #52c41a; color: #fff; }
+        .step.inactive .num { background: #e8e8e8; color: #999; }
+        .step .text { font-size: 14px; }
+        .step.active .text { color: #1890ff; font-weight: 600; }
+        .step.done .text { color: #52c41a; }
+        .step.inactive .text { color: #999; }
+        .step-line { width: 60px; height: 2px; background: #e8e8e8; margin: 0 12px; }
+        .step-line.done { background: #52c41a; }
+
+        /* 上传区域 */
+        .upload-section { background: #fff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center; }
+        .upload-zone { border: 2px dashed #d9d9d9; border-radius: 8px; padding: 60px 40px; cursor: pointer; transition: all 0.3s; }
+        .upload-zone:hover { border-color: #1890ff; background: #f0f7ff; }
+        .upload-zone .icon { font-size: 48px; color: #1890ff; margin-bottom: 16px; }
+        .upload-zone h3 { font-size: 16px; color: #333; margin-bottom: 8px; }
+        .upload-zone p { font-size: 14px; color: #999; margin-bottom: 16px; }
+        .upload-zone .btn-upload { display: inline-block; padding: 8px 24px; background: #1890ff; color: #fff; border-radius: 4px; font-size: 14px; }
+        .upload-tip { margin-top: 16px; font-size: 13px; color: #999; }
+        .upload-tip a { color: #1890ff; text-decoration: none; }
+
+        /* 预览区域 */
+        .preview-section { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 20px; display: none; }
+        .preview-section.show { display: block; }
+        .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .preview-header h3 { font-size: 16px; }
+        .preview-info { display: flex; gap: 16px; font-size: 13px; color: #666; margin-bottom: 16px; }
+        .preview-info .item { background: #f5f5f5; padding: 4px 12px; border-radius: 4px; }
+
+        /* 表格 */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th { background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #f0f0f0; color: #666; }
+        .data-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+        .data-table tr:hover { background: #fafafa; }
+
+        /* 按钮 */
+        .btn { padding: 8px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; transition: all 0.3s; }
+        .btn:hover { border-color: #1890ff; color: #1890ff; }
+        .btn-primary { background: #1890ff; color: #fff; border-color: #1890ff; }
+        .btn-primary:hover { background: #40a9ff; }
+        .btn-group { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+
+        /* 进度 */
+        .progress-section { background: #fff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 20px; display: none; text-align: center; }
+        .progress-section.show { display: block; }
+        .progress-bar-wrap { width: 100%; height: 8px; background: #f0f0f0; border-radius: 4px; margin: 20px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #1890ff, #52c41a); border-radius: 4px; transition: width 0.3s; }
+        .progress-text { font-size: 14px; color: #666; }
+        .progress-stats { display: flex; justify-content: center; gap: 32px; margin-top: 16px; }
+        .progress-stats .stat { text-align: center; }
+        .progress-stats .stat .num { font-size: 24px; font-weight: 700; }
+        .progress-stats .stat .label { font-size: 12px; color: #999; margin-top: 4px; }
+        .stat-success .num { color: #52c41a; }
+        .stat-fail .num { color: #ff4d4f; }
+        .stat-total .num { color: #1890ff; }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="logo"><span>AI</span> 需求卡</div>
+        <nav>
+            <a href="index.html"><span class="icon">&#9632;</span> 首页概览</a>
+            <a href="import.html" class="active"><span class="icon">&#8679;</span> 数据导入</a>
+            <a href="cards.html"><span class="icon">&#9776;</span> 需求卡片</a>
+            <a href="report.html"><span class="icon">&#9783;</span> 周报中心</a>
+        </nav>
+    </div>
+
+    <!-- 主内容 -->
+    <div class="main">
+        <div class="header">
+            <h1>数据导入</h1>
+        </div>
+
+        <!-- 步骤条 -->
+        <div class="steps">
+            <div class="step active" id="step1">
+                <div class="num">1</div>
+                <div class="text">上传文件</div>
+            </div>
+            <div class="step-line" id="line1"></div>
+            <div class="step inactive" id="step2">
+                <div class="num">2</div>
+                <div class="text">数据预览</div>
+            </div>
+            <div class="step-line" id="line2"></div>
+            <div class="step inactive" id="step3">
+                <div class="num">3</div>
+                <div class="text">导入处理</div>
+            </div>
+        </div>
+
+        <!-- 上传区域 -->
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-zone" id="dropZone">
+                <div class="icon">&#8679;</div>
+                <h3>拖拽CSV文件到此处，或点击上传</h3>
+                <p>支持 .csv 格式，单文件不超过10MB</p>
+                <div class="btn-upload">选择文件</div>
+            </div>
+            <div class="upload-tip">
+                <p>CSV文件需包含以下列：ticket_id（工单ID）、content（工单内容）</p>
+                <p>可选列：customer_id（客户ID）、created_at（创建时间）、channel（来源渠道）</p>
+                <p><a href="#">下载CSV模板文件</a></p>
+            </div>
+        </div>
+
+        <!-- 预览区域 -->
+        <div class="preview-section" id="previewSection">
+            <div class="preview-header">
+                <h3>数据预览</h3>
+                <div class="preview-info">
+                    <div class="item">文件：sample_tickets.csv</div>
+                    <div class="item">大小：2.3MB</div>
+                    <div class="item">共 356 条工单</div>
+                </div>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>工单ID</th>
+                        <th>客户ID</th>
+                        <th>工单内容</th>
+                        <th>创建时间</th>
+                        <th>渠道</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>T-10234</td>
+                        <td>C-5678</td>
+                        <td>批量导出的功能在哪里？找了好久都没找到</td>
+                        <td>2026-06-20 14:23</td>
+                        <td>在线聊天</td>
+                    </tr>
+                    <tr>
+                        <td>T-10235</td>
+                        <td>C-5679</td>
+                        <td>系统报错"权限不足"，但是我是管理员账号</td>
+                        <td>2026-06-20 15:01</td>
+                        <td>工单</td>
+                    </tr>
+                    <tr>
+                        <td>T-10236</td>
+                        <td>C-5680</td>
+                        <td>价格太贵了，小团队用不起，有没有更便宜的方案</td>
+                        <td>2026-06-21 09:15</td>
+                        <td>电话</td>
+                    </tr>
+                    <tr>
+                        <td>T-10237</td>
+                        <td>C-5681</td>
+                        <td>希望增加API接口，方便我们和其他系统集成</td>
+                        <td>2026-06-21 10:33</td>
+                        <td>邮件</td>
+                    </tr>
+                    <tr>
+                        <td>T-10238</td>
+                        <td>C-5682</td>
+                        <td>报表页面加载太慢了，每次都要等十几秒</td>
+                        <td>2026-06-22 11:45</td>
+                        <td>在线聊天</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="btn-group">
+                <button class="btn" onclick="resetUpload()">重新上传</button>
+                <button class="btn btn-primary" onclick="startImport()">确认导入</button>
+            </div>
+        </div>
+
+        <!-- 导入进度 -->
+        <div class="progress-section" id="progressSection">
+            <h3 style="margin-bottom: 8px;">AI分类处理中...</h3>
+            <p class="progress-text">正在对工单数据进行智能分类、场景提取和情绪分析</p>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <p class="progress-text" id="progressLabel">已处理 0 / 356 条</p>
+            <div class="progress-stats">
+                <div class="stat stat-total">
+                    <div class="num" id="totalCount">356</div>
+                    <div class="label">总工单数</div>
+                </div>
+                <div class="stat stat-success">
+                    <div class="num" id="successCount">0</div>
+                    <div class="label">成功处理</div>
+                </div>
+                <div class="stat stat-fail">
+                    <div class="num" id="failCount">0</div>
+                    <div class="label">处理失败</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟上传流程
+        function simulateUpload() {
+            document.getElementById('step1').className = 'step done';
+            document.getElementById('line1').className = 'step-line done';
+            document.getElementById('step2').className = 'step active';
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('previewSection').className = 'preview-section show';
+        }
+
+        function resetUpload() {
+            document.getElementById('step1').className = 'step active';
+            document.getElementById('line1').className = 'step-line';
+            document.getElementById('step2').className = 'step inactive';
+            document.getElementById('step3').className = 'step inactive';
+            document.getElementById('line2').className = 'step-line';
+            document.getElementById('uploadSection').style.display = '';
+            document.getElementById('previewSection').className = 'preview-section';
+            document.getElementById('progressSection').className = 'progress-section';
+        }
+
+        function startImport() {
+            document.getElementById('step2').className = 'step done';
+            document.getElementById('line2').className = 'step-line done';
+            document.getElementById('step3').className = 'step active';
+            document.getElementById('previewSection').className = 'preview-section';
+            document.getElementById('progressSection').className = 'progress-section show';
+            animateProgress();
+        }
+
+        function animateProgress() {
+            let progress = 0;
+            const total = 356;
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 15) + 5;
+                if (progress >= total) {
+                    progress = total;
+                    clearInterval(interval);
+                    document.getElementById('progressLabel').textContent = '导入完成！已生成 93 张需求卡片';
+                    document.querySelector('.progress-section h3').textContent = '导入完成';
+                }
+                const pct = Math.round(progress / total * 100);
+                document.getElementById('progressBar').style.width = pct + '%';
+                document.getElementById('progressLabel').textContent = `已处理 ${progress} / ${total} 条`;
+                document.getElementById('successCount').textContent = progress - Math.floor(progress * 0.02);
+                document.getElementById('failCount').textContent = Math.floor(progress * 0.02);
+            }, 200);
+        }
+
+        // 点击上传区域模拟上传
+        document.getElementById('dropZone').addEventListener('click', simulateUpload);
+    </script>
+</body>
+</html>

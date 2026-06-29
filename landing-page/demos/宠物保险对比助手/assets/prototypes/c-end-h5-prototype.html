@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C端H5端 - 全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; padding: 20px; }
+.site-header { text-align: center; margin-bottom: 30px; }
+.site-title { font-size: 24px; font-weight: 700; color: #333; }
+.site-desc { font-size: 14px; color: #999; margin-top: 8px; }
+.diff-note { max-width: 1100px; margin: 0 auto 20px; padding: 16px; background: #FFF3E0; border-radius: 8px; border-left: 4px solid #FF8C42; font-size: 13px; color: #666; }
+.screen-grid { display: grid; grid-template-columns: repeat(3, 375px); gap: 30px; justify-content: center; padding: 20px; }
+.phone { width: 375px; height: 750px; background: #fff; border-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); overflow: hidden; border: 8px solid #1a1a1a; position: relative; }
+.phone-label { text-align: center; margin-top: 12px; font-size: 14px; font-weight: 600; color: #333; }
+.phone-sublabel { text-align: center; font-size: 12px; color: #999; }
+.status-bar { height: 44px; background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #fff; font-size: 12px; }
+.status-bar.white { background: #fff; color: #333; }
+.nav-bar { height: 50px; background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%); display: flex; align-items: center; padding: 0 16px; color: #fff; }
+.nav-back { font-size: 24px; cursor: pointer; margin-right: 12px; }
+.nav-title { font-size: 17px; font-weight: 600; }
+.bottom-tab { position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: #fff; display: flex; border-top: 1px solid #f0f0f0; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #999; cursor: pointer; }
+.tab-item.active { color: #FF8C42; }
+.tab-icon { font-size: 20px; margin-bottom: 2px; }
+
+.home-content { padding: 12px 16px; background: #f5f5f5; }
+.search-bar { display: flex; align-items: center; background: #fff; border-radius: 20px; padding: 10px 16px; margin-bottom: 16px; }
+.search-bar input { flex: 1; border: none; outline: none; font-size: 14px; }
+.quick-entry { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.quick-item { text-align: center; }
+.quick-icon { font-size: 28px; margin-bottom: 4px; }
+.quick-label { font-size: 11px; color: #666; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.section-title { font-size: 16px; font-weight: 600; }
+.section-more { font-size: 12px; color: #999; }
+.product-card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.product-header { display: flex; align-items: center; margin-bottom: 8px; }
+.product-icon { width: 40px; height: 40px; border-radius: 10px; background: #FFF5EE; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 10px; }
+.product-name { font-size: 15px; font-weight: 600; }
+.product-company { font-size: 12px; color: #999; }
+.product-tags { display: flex; gap: 6px; margin-top: 8px; }
+.product-tag { padding: 2px 8px; background: #FFF5EE; color: #FF6B35; font-size: 11px; border-radius: 10px; }
+.product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f5f5f5; }
+.product-price { font-size: 16px; font-weight: 700; color: #FF6B35; }
+.product-price small { font-size: 11px; color: #999; font-weight: normal; }
+.btn-small { padding: 4px 12px; background: #FF8C42; color: #fff; border-radius: 12px; font-size: 12px; border: none; cursor: pointer; }
+
+/* Login - H5 style */
+.h5-login { padding: 40px 24px; text-align: center; height: calc(100% - 44px); }
+.h5-logo { font-size: 60px; margin-bottom: 16px; }
+.h5-app-name { font-size: 22px; font-weight: 600; color: #333; }
+.h5-app-desc { font-size: 14px; color: #999; margin-top: 8px; }
+.phone-input { width: 100%; height: 48px; border: 1px solid #e0e0e0; border-radius: 12px; padding: 0 16px; font-size: 15px; margin-top: 30px; }
+.code-row { display: flex; gap: 10px; margin-top: 12px; }
+.code-row input { flex: 1; height: 48px; border: 1px solid #e0e0e0; border-radius: 12px; padding: 0 16px; font-size: 15px; }
+.send-code-btn { width: 120px; height: 48px; background: #FF8C42; color: #fff; border: none; border-radius: 12px; font-size: 14px; cursor: pointer; }
+.h5-login-btn { width: 100%; height: 48px; background: #FF8C42; border: none; border-radius: 24px; color: #fff; font-size: 16px; font-weight: 500; margin-top: 20px; cursor: pointer; }
+.share-btn { margin-top: 16px; color: #FF8C42; font-size: 14px; text-decoration: underline; cursor: pointer; }
+
+.profile-card { background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%); padding: 20px 16px 30px; color: #fff; }
+.profile-info { display: flex; align-items: center; }
+.profile-avatar { width: 56px; height: 56px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-right: 12px; }
+.profile-name { font-size: 18px; font-weight: 600; }
+.profile-phone { font-size: 13px; opacity: 0.9; margin-top: 2px; }
+.menu-list { margin: -12px 16px 12px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.menu-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f5f5f5; }
+.menu-icon { width: 28px; height: 28px; border-radius: 6px; background: #FFF5EE; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 12px; }
+.menu-label { flex: 1; font-size: 14px; color: #333; }
+.menu-arrow { color: #ccc; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="site-title">🐾 宠物保险对比助手 - C端H5端</div>
+  <div class="site-desc">全站点原型 · 宫格布局 · 与小程序端核心功能一致，登录与分享方式有差异</div>
+</div>
+
+<div class="diff-note">
+  <strong>🔑 与小程序端的核心差异：</strong><br>
+  1. <strong>登录方式</strong>：H5端使用手机号+验证码登录（或微信H5授权），非微信一键授权<br>
+  2. <strong>分享方式</strong>：H5端支持链接分享（浏览器/社交媒体），非微信分享<br>
+  3. <strong>支付方式</strong>：H5端使用微信H5支付/支付宝，非微信支付JSAPI<br>
+  4. <strong>推送方式</strong>：H5端使用短信通知，非微信订阅消息<br>
+  5. 其余功能模块（宠物档案、保险对比、理赔指引、个人中心）与小程序端完全一致
+</div>
+
+<div class="screen-grid">
+
+  <!-- Screen 1: Home -->
+  <div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="nav-bar"><span class="nav-title" style="margin-left:8px">🐾 宠物保险对比助手</span></div>
+      <div class="home-content" style="height: calc(100% - 94px - 60px); overflow-y: auto;">
+        <div class="search-bar">🔍 <input placeholder="搜索保险产品..."></div>
+        <div class="quick-entry">
+          <div class="quick-item"><div class="quick-icon">🤖</div><div class="quick-label">AI推荐</div></div>
+          <div class="quick-item"><div class="quick-icon">📊</div><div class="quick-label">产品对比</div></div>
+          <div class="quick-item"><div class="quick-icon">🏥</div><div class="quick-label">理赔指引</div></div>
+          <div class="quick-item"><div class="quick-icon">🐾</div><div class="quick-label">宠物档案</div></div>
+        </div>
+        <div class="section-header"><div class="section-title">🔥 热门推荐</div><div class="section-more">分享链接给好友 ›</div></div>
+        <div class="product-card">
+          <div class="product-header"><div class="product-icon">🛡️</div><div><div class="product-name">众安宠物综合医保</div><div class="product-company">众安保险</div></div></div>
+          <div class="product-tags"><span class="product-tag">综合保障</span><span class="product-tag">赔付90%</span></div>
+          <div class="product-footer"><div class="product-price">¥52<small>/月起</small></div><button class="btn-small">查看详情</button></div>
+        </div>
+        <div class="product-card">
+          <div class="product-header"><div class="product-icon">🏥</div><div><div class="product-name">平安萌宠保</div><div class="product-company">平安财险</div></div></div>
+          <div class="product-tags"><span class="product-tag">低免赔200</span><span class="product-tag">赔付70%</span></div>
+          <div class="product-footer"><div class="product-price">¥45<small>/月起</small></div><button class="btn-small">查看详情</button></div>
+        </div>
+      </div>
+      <div class="bottom-tab">
+        <div class="tab-item active"><div class="tab-icon">🏠</div>首页</div>
+        <div class="tab-item"><div class="tab-icon">🔍</div>对比</div>
+        <div class="tab-item"><div class="tab-icon">🏥</div>理赔</div>
+        <div class="tab-item"><div class="tab-icon">👤</div>我的</div>
+      </div>
+    </div>
+    <div class="phone-label">1. 首页 (H5)</div>
+    <div class="phone-sublabel">支持链接分享</div>
+  </div>
+
+  <!-- Screen 2: H5 Login -->
+  <div>
+    <div class="phone">
+      <div class="status-bar white"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="h5-login">
+        <div class="h5-logo">🐾</div>
+        <div class="h5-app-name">宠物保险对比助手</div>
+        <div class="h5-app-desc">帮宠物主人选对保险、用好保险</div>
+        <input class="phone-input" placeholder="请输入手机号" value="138****8888">
+        <div class="code-row">
+          <input placeholder="请输入验证码">
+          <button class="send-code-btn">获取验证码</button>
+        </div>
+        <button class="h5-login-btn">登录 / 注册</button>
+        <div style="margin-top:16px;display:flex;gap:16px;justify-content:center">
+          <span style="font-size:13px;color:#999">其他登录方式：</span>
+          <span style="color:#07C160;font-size:13px">💬 微信授权</span>
+          <span style="color:#1677FF;font-size:13px">💳 支付宝</span>
+        </div>
+        <div class="share-btn">📤 分享给好友</div>
+        <div style="position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:11px;color:#bbb">登录即表示同意 <span style="color:#FF8C42">用户协议</span> 和 <span style="color:#FF8C42">隐私政策</span></div>
+      </div>
+    </div>
+    <div class="phone-label">2. H5登录页</div>
+    <div class="phone-sublabel">手机号+验证码登录</div>
+  </div>
+
+  <!-- Screen 3: AI Recommend -->
+  <div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="nav-bar"><span class="nav-back">‹</span><span class="nav-title">AI智能推荐</span></div>
+      <div style="background:#FFF5EE;padding:16px;height:calc(100% - 94px);overflow-y:auto">
+        <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;text-align:center">
+          <div style="font-size:48px">🤖</div>
+          <div style="font-size:18px;font-weight:700;margin-top:8px">为小橘定制推荐</div>
+          <div style="font-size:13px;color:#999;margin-top:4px">基于宠物画像智能匹配</div>
+          <button style="margin-top:16px;padding:10px 30px;background:#FF8C42;color:#fff;border-radius:20px;border:none;font-size:14px">开始需求问卷</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="font-size:15px;font-weight:600">🏆 为您匹配</span><span style="font-size:12px;color:#999">分享结果 ›</span></div>
+        <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;position:relative">
+          <span style="position:absolute;top:12px;right:12px;padding:4px 10px;background:#FF6B35;color:#fff;border-radius:12px;font-size:12px;font-weight:600">92分</span>
+          <div style="display:flex;align-items:center"><div style="width:36px;height:36px;background:#FFF5EE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-right:10px">🛡️</div><div><div style="font-size:14px;font-weight:600">众安宠物综合医保</div><div style="font-size:12px;color:#999">赔付90% · 等待期15天</div></div></div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;position:relative">
+          <span style="position:absolute;top:12px;right:12px;padding:4px 10px;background:#FF6B35;color:#fff;border-radius:12px;font-size:12px;font-weight:600">85分</span>
+          <div style="display:flex;align-items:center"><div style="width:36px;height:36px;background:#FFF5EE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-right:10px">🏥</div><div><div style="font-size:14px;font-weight:600">平安萌宠保</div><div style="font-size:12px;color:#999">免赔200元 · 赔付70%</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">3. AI智能推荐 (H5)</div>
+    <div class="phone-sublabel">功能同小程序端</div>
+  </div>
+
+  <!-- Screen 4: Compare -->
+  <div>
+    <div class="phone">
+      <div class="status-bar white"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="nav-bar" style="background:#fff;border-bottom:1px solid #f0f0f0"><span class="nav-back" style="color:#333">‹</span><span class="nav-title" style="color:#333">产品对比 (3)</span></div>
+      <div style="background:#f5f5f5;height:calc(100% - 94px);overflow-y:auto">
+        <div style="display:flex;gap:8px;padding:12px 16px;background:#fff;overflow-x:auto">
+          <div style="min-width:100px;text-align:center;padding:10px;background:#FFF5EE;border-radius:10px"><div style="font-size:24px">🛡️</div><div style="font-size:11px;margin-top:4px">众安综合医保</div></div>
+          <div style="min-width:100px;text-align:center;padding:10px;background:#FFF5EE;border-radius:10px"><div style="font-size:24px">🏥</div><div style="font-size:11px;margin-top:4px">平安萌宠保</div></div>
+          <div style="min-width:100px;text-align:center;padding:10px;background:#FFF5EE;border-radius:10px"><div style="font-size:24px">❤️</div><div style="font-size:11px;margin-top:4px">太平洋宠乐保</div></div>
+        </div>
+        <div style="background:#fff;margin:12px 16px;border-radius:12px;overflow:hidden">
+          <div style="display:flex;border-bottom:1px solid #f5f5f5"><div style="width:70px;padding:10px 8px;font-size:11px;color:#666;background:#fafafa">保额上限</div><div style="display:flex;flex:1"><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5">6万</div><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5">5万</div><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5;color:#FF6B35;font-weight:600;background:#FFF5EE">8万</div></div></div>
+          <div style="display:flex;border-bottom:1px solid #f5f5f5"><div style="width:70px;padding:10px 8px;font-size:11px;color:#666;background:#fafafa">赔付比例</div><div style="display:flex;flex:1"><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5;color:#FF6B35;font-weight:600;background:#FFF5EE">90%</div><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5">70%</div><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5">80%</div></div></div>
+          <div style="display:flex;border-bottom:1px solid #f5f5f5"><div style="width:70px;padding:10px 8px;font-size:11px;color:#666;background:#fafafa">月保费</div><div style="display:flex;flex:1"><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5">¥52</div><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5;color:#FF6B35;font-weight:600;background:#FFF5EE">¥45</div><div style="flex:1;padding:10px 4px;font-size:11px;text-align:center;border-left:1px solid #f5f5f5">¥68</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">4. 产品对比 (H5)</div>
+    <div class="phone-sublabel">支持链接分享对比结果</div>
+  </div>
+
+  <!-- Screen 5: Pet Profile -->
+  <div>
+    <div class="phone">
+      <div class="status-bar white"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="nav-bar" style="background:#fff;border-bottom:1px solid #f0f0f0"><span class="nav-back" style="color:#333">‹</span><span class="nav-title" style="color:#333">我的宠物</span></div>
+      <div style="background:#f5f5f5;padding:12px 16px;height:calc(100% - 94px);overflow-y:auto">
+        <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center">
+          <div style="width:48px;height:48px;border-radius:50%;background:#FFF5EE;display:flex;align-items:center;justify-content:center;font-size:24px;margin-right:12px">🐱</div>
+          <div><div style="font-size:16px;font-weight:600">小橘</div><div style="font-size:12px;color:#999;margin-top:4px">田园猫 · 2岁 · ♂</div></div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center">
+          <div style="width:48px;height:48px;border-radius:50%;background:#FFF5EE;display:flex;align-items:center;justify-content:center;font-size:24px;margin-right:12px">🐶</div>
+          <div><div style="font-size:16px;font-weight:600">旺财</div><div style="font-size:12px;color:#999;margin-top:4px">金毛 · 3岁 · ♂</div></div>
+        </div>
+        <button style="width:100%;padding:12px;background:#FF8C42;color:#fff;border:none;border-radius:10px;font-size:14px;margin-top:10px">+ 添加新宠物</button>
+      </div>
+    </div>
+    <div class="phone-label">5. 宠物档案 (H5)</div>
+    <div class="phone-sublabel">功能同小程序端</div>
+  </div>
+
+  <!-- Screen 6: Claim Guide -->
+  <div>
+    <div class="phone">
+      <div class="status-bar white"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="nav-bar" style="background:#fff;border-bottom:1px solid #f0f0f0"><span class="nav-back" style="color:#333">‹</span><span class="nav-title" style="color:#333">理赔指引</span></div>
+      <div style="background:#f5f5f5;padding:16px;height:calc(100% - 94px);overflow-y:auto">
+        <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px">
+          <div style="font-size:15px;font-weight:600;margin-bottom:12px">📋 理赔流程步骤</div>
+          <div style="display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f5f5f5"><div style="width:24px;height:24px;border-radius:50%;background:#4CAF50;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;margin-right:10px">✓</div><div><div style="font-size:14px;font-weight:500">Step 1: 电话报案</div><div style="font-size:12px;color:#999">拨打 95***</div></div></div>
+          <div style="display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f5f5f5"><div style="width:24px;height:24px;border-radius:50%;background:#FF8C42;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;margin-right:10px">2</div><div><div style="font-size:14px;font-weight:500">Step 2: 提交材料</div></div></div>
+          <div style="display:flex;align-items:flex-start;padding:10px 0"><div style="width:24px;height:24px;border-radius:50%;background:#FF8C42;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;margin-right:10px">3</div><div><div style="font-size:14px;font-weight:500">Step 3: 等待审核</div></div></div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:16px">
+          <div style="font-size:15px;font-weight:600;margin-bottom:12px">📎 所需材料</div>
+          <div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5"><div style="width:28px;height:28px;background:#E8F5E9;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-right:10px;font-size:12px">✓</div><div style="flex:1;font-size:13px">理赔申请书</div><div style="font-size:11px;color:#4CAF50">已上传</div></div>
+          <div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5"><div style="width:28px;height:28px;background:#FFF3E0;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-right:10px;font-size:12px">📷</div><div style="flex:1;font-size:13px">医疗发票</div><div style="font-size:11px;color:#FF8C42">待上传</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">6. 理赔指引 (H5)</div>
+    <div class="phone-sublabel">功能同小程序端</div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>模板管理 Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; padding: 20px; background: #f5f5f5; }
+h2 { font-size: 16px; margin-bottom: 15px; color: #333; }
+.widget-container { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+.widget-title { font-size: 16px; font-weight: 600; color: #333; }
+.create-btn { padding: 6px 12px; background: #07c160; color: #fff; border: none; border-radius: 5px; font-size: 12px; cursor: pointer; }
+
+.template-card { border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
+.template-card:hover { border-color: #07c160; box-shadow: 0 2px 8px rgba(7,193,96,0.15); }
+.template-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.template-name { font-size: 14px; font-weight: 600; color: #333; }
+.template-count { font-size: 11px; color: #999; }
+.template-tags { display: flex; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; }
+.template-tag { padding: 2px 8px; background: #e6f7ff; color: #1890ff; border-radius: 3px; font-size: 10px; }
+.template-meta { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-bottom: 10px; }
+.template-actions { display: flex; gap: 8px; }
+.action-btn { flex: 1; padding: 6px; background: #f5f5f5; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.action-btn:hover { background: #e5e5e5; }
+.action-btn.primary { background: #07c160; color: #fff; }
+.action-btn.primary:hover { background: #06ad56; }
+
+.usage-stats { background: #f8f8f8; border-radius: 6px; padding: 10px; margin-bottom: 15px; display: flex; justify-content: space-around; text-align: center; }
+.stat-item { }
+.stat-num { font-size: 18px; font-weight: 700; color: #07c160; }
+.stat-label { font-size: 11px; color: #666; margin-top: 3px; }
+
+.upgrade-hint { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 8px; padding: 12px; margin-bottom: 15px; }
+.upgrade-title { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 3px; }
+.upgrade-desc { font-size: 11px; color: #666; margin-bottom: 8px; }
+.upgrade-btn { padding: 6px 15px; background: #333; color: #ffd700; border: none; border-radius: 15px; font-size: 11px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+<h2>📋 模板管理 Widget</h2>
+<div class="widget-container">
+  <div class="widget-header">
+    <div class="widget-title">我的模板</div>
+    <button class="create-btn">+ 新建模板</button>
+  </div>
+
+  <div class="usage-stats">
+    <div class="stat-item">
+      <div class="stat-num">3</div>
+      <div class="stat-label">模板总数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">78</div>
+      <div class="stat-label">物料项总数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">15</div>
+      <div class="stat-label">累计使用次数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">95%</div>
+      <div class="stat-label">平均完整率</div>
+    </div>
+  </div>
+
+  <div class="upgrade-hint">
+    <div class="upgrade-title">💎 已用满 3/3 个模板配额</div>
+    <div class="upgrade-desc">升级专业版，享无限模板 + 智能推荐 + 历史复盘</div>
+    <button class="upgrade-btn">立即升级 ¥29/月</button>
+  </div>
+
+  <div class="template-card">
+    <div class="template-header">
+      <div class="template-name">招聘会标准清单</div>
+      <div class="template-count">20 项物料</div>
+    </div>
+    <div class="template-tags">
+      <span class="template-tag">招聘</span>
+      <span class="template-tag">常用</span>
+      <span class="template-tag">⭐ 优秀</span>
+    </div>
+    <div class="template-meta">
+      <span>上次使用: 2026-06-20</span>
+      <span>使用次数: 3</span>
+    </div>
+    <div class="template-actions">
+      <button class="action-btn primary">使用此模板</button>
+      <button class="action-btn">预览</button>
+      <button class="action-btn">编辑</button>
+      <button class="action-btn">删除</button>
+    </div>
+  </div>
+
+  <div class="template-card">
+    <div class="template-header">
+      <div class="template-name">展会标准清单</div>
+      <div class="template-count">35 项物料</div>
+    </div>
+    <div class="template-tags">
+      <span class="template-tag">展会</span>
+      <span class="template-tag">全面</span>
+    </div>
+    <div class="template-meta">
+      <span>上次使用: 2026-05-15</span>
+      <span>使用次数: 5</span>
+    </div>
+    <div class="template-actions">
+      <button class="action-btn primary">使用此模板</button>
+      <button class="action-btn">预览</button>
+      <button class="action-btn">编辑</button>
+      <button class="action-btn">删除</button>
+    </div>
+  </div>
+
+  <div class="template-card">
+    <div class="template-header">
+      <div class="template-name">市集轻量清单</div>
+      <div class="template-count">15 项物料</div>
+    </div>
+    <div class="template-tags">
+      <span class="template-tag">市集</span>
+      <span class="template-tag">精简</span>
+      <span class="template-tag">🏆 100%</span>
+    </div>
+    <div class="template-meta">
+      <span>上次使用: 2026-06-10</span>
+      <span>使用次数: 2</span>
+    </div>
+    <div class="template-actions">
+      <button class="action-btn primary">使用此模板</button>
+      <button class="action-btn">预览</button>
+      <button class="action-btn">编辑</button>
+      <button class="action-btn">删除</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

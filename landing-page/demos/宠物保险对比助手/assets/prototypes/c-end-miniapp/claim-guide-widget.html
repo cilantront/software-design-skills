@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>理赔流程指引 - Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+.phone-frame { width: 375px; height: 750px; background: #fff; border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden; border: 8px solid #1a1a1a; }
+.status-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #333; font-size: 12px; }
+.nav-bar { height: 50px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+.nav-back { font-size: 20px; cursor: pointer; margin-right: 12px; }
+.nav-title { font-size: 17px; font-weight: 600; }
+.claim-container { padding: 16px; overflow-y: auto; height: calc(100% - 94px); }
+.selectors { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.selector-row { display: flex; align-items: center; padding: 14px 16px; background: #f9f9f9; border-radius: 10px; }
+.selector-label { font-size: 13px; color: #666; width: 80px; }
+.selector-value { flex: 1; font-size: 14px; color: #333; font-weight: 500; }
+.selector-arrow { color: #ccc; font-size: 16px; }
+.claim-types { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+.type-btn { padding: 14px; border-radius: 10px; border: 1px solid #e0e0e0; background: #fff; text-align: center; cursor: pointer; }
+.type-btn.active { border-color: #FF8C42; background: #FFF5EE; }
+.type-btn .icon { font-size: 24px; }
+.type-btn .label { font-size: 13px; color: #333; margin-top: 4px; }
+.material-section { }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.material-list { margin-bottom: 16px; }
+.material-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.material-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 10px; }
+.material-icon.done { background: #E8F5E9; }
+.material-icon.pending { background: #FFF3E0; }
+.material-icon.missing { background: #FFEBEE; }
+.material-info { flex: 1; }
+.material-name { font-size: 14px; color: #333; }
+.material-status { font-size: 11px; }
+.material-status.done { color: #4CAF50; }
+.material-status.pending { color: #FF8C42; }
+.material-status.missing { color: #F44336; }
+.material-action { font-size: 12px; color: #FF8C42; cursor: pointer; }
+.bottom-btn { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 16px 30px; background: #fff; }
+.btn-primary { width: 100%; height: 48px; border-radius: 24px; border: none; background: #FF8C42; color: #fff; font-size: 16px; font-weight: 500; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="status-bar"><span>9:41</span><span>📶 📡 🔋</span></div>
+  <div class="nav-bar"><span class="nav-back">‹</span><span class="nav-title">理赔指引</span></div>
+  <div class="claim-container">
+    <div class="selectors">
+      <div class="selector-row"><span class="selector-label">宠物</span><span class="selector-value">🐱 小橘</span><span class="selector-arrow">›</span></div>
+      <div class="selector-row"><span class="selector-label">保单</span><span class="selector-value">众安宠物综合医保</span><span class="selector-arrow">›</span></div>
+    </div>
+    <div class="section-title">选择理赔类型</div>
+    <div class="claim-types">
+      <div class="type-btn active"><div class="icon">🏥</div><div class="label">门诊</div></div>
+      <div class="type-btn"><div class="icon">🛏️</div><div class="label">住院</div></div>
+      <div class="type-btn"><div class="icon">🔪</div><div class="label">手术</div></div>
+      <div class="type-btn"><div class="icon">🕊️</div><div class="label">死亡</div></div>
+    </div>
+    <div class="section-title">所需材料清单</div>
+    <div class="material-list">
+      <div class="material-item">
+        <div class="material-icon done">✓</div>
+        <div class="material-info"><div class="material-name">理赔申请书</div><div class="material-status done">已上传</div></div>
+      </div>
+      <div class="material-item">
+        <div class="material-icon done">✓</div>
+        <div class="material-info"><div class="material-name">身份证明</div><div class="material-status done">已上传</div></div>
+      </div>
+      <div class="material-item">
+        <div class="material-icon pending">📷</div>
+        <div class="material-info"><div class="material-name">门诊病历</div><div class="material-status pending">待上传</div></div>
+        <span class="material-action">上传 ›</span>
+      </div>
+      <div class="material-item">
+        <div class="material-icon missing">!</div>
+        <div class="material-info"><div class="material-name">医疗发票</div><div class="material-status missing">缺失 · 必需</div></div>
+        <span class="material-action">上传 ›</span>
+      </div>
+      <div class="material-item">
+        <div class="material-icon pending">📷</div>
+        <div class="material-info"><div class="material-name">费用清单</div><div class="material-status pending">待上传</div></div>
+        <span class="material-action">上传 ›</span>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-btn"><button class="btn-primary">生成理赔指引单</button></div>
+</div>
+</body>
+</html>

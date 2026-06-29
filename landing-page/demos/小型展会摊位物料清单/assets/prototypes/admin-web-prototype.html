@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小型展会摊位物料清单 - 管理后台全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; }
+
+.layout { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 220px; background: #001529; color: #fff; padding-top: 20px; position: fixed; height: 100vh; overflow-y: auto; }
+.logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.logo-title { font-size: 16px; font-weight: 700; }
+.logo-subtitle { font-size: 11px; opacity: 0.6; margin-top: 3px; }
+.nav-menu { margin-top: 15px; }
+.nav-item { padding: 12px 20px; display: flex; align-items: center; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.3s; font-size: 13px; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.nav-item.active { background: #1890ff; color: #fff; }
+.nav-icon { margin-right: 10px; font-size: 16px; }
+.nav-badge { margin-left: auto; background: #f5222d; color: #fff; padding: 1px 6px; border-radius: 8px; font-size: 10px; }
+
+/* Main Content */
+.main { margin-left: 220px; flex: 1; }
+.header { height: 50px; background: #fff; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.breadcrumb { font-size: 13px; color: #666; }
+.breadcrumb-current { color: #333; font-weight: 500; }
+.header-right { display: flex; align-items: center; gap: 15px; }
+.header-icon { font-size: 16px; color: #666; cursor: pointer; }
+.user-info { display: flex; align-items: center; gap: 8px; }
+.user-avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 12px; }
+.user-name { font-size: 13px; color: #333; }
+
+.content { padding: 20px; }
+.page { display: none; }
+.page.active { display: block; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.page-title { font-size: 18px; font-weight: 600; color: #333; }
+
+/* Dashboard Page */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat-card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.stat-title { font-size: 13px; color: #666; }
+.stat-icon { font-size: 20px; }
+.stat-value { font-size: 28px; font-weight: 700; color: #333; }
+.stat-trend { font-size: 11px; margin-top: 5px; }
+.trend-up { color: #52c41a; }
+.trend-down { color: #f5222d; }
+
+.chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+.chart-card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.chart-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 15px; }
+.chart-mock { height: 200px; background: linear-gradient(180deg, #e6f7ff 0%, transparent 100%); border-radius: 4px; position: relative; display: flex; align-items: flex-end; padding: 0 10px 10px; gap: 10px; }
+.chart-bar { flex: 1; background: linear-gradient(180deg, #1890ff 0%, #69c0ff 100%); border-radius: 3px 3px 0 0; min-height: 20px; }
+.pie-mock { height: 200px; display: flex; justify-content: center; align-items: center; }
+.pie-circle { width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(#52c41a 0% 45%, #1890ff 45% 70%, #fa8c16 70% 85%, #f5222d 85% 100%); position: relative; }
+.pie-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: #fff; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.pie-value { font-size: 20px; font-weight: 700; color: #333; }
+.pie-label { font-size: 10px; color: #666; }
+.pie-legend { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Table Styles */
+.table-card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.table-toolbar { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.search-box { display: flex; gap: 8px; }
+.search-input { padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; width: 200px; }
+.btn { padding: 6px 15px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.btn-primary { background: #1890ff; color: #fff; }
+.btn-default { background: #fff; color: #333; border: 1px solid #d9d9d9; }
+.btn-success { background: #52c41a; color: #fff; }
+.btn-danger { background: #f5222d; color: #fff; }
+
+table { width: 100%; border-collapse: collapse; }
+th { background: #fafafa; padding: 12px; text-align: left; font-size: 12px; color: #666; font-weight: 600; border-bottom: 1px solid #e8e8e8; }
+td { padding: 12px; font-size: 12px; color: #333; border-bottom: 1px solid #f0f0f0; }
+tr:hover td { background: #fafafa; }
+.tag { padding: 2px 8px; border-radius: 3px; font-size: 11px; }
+.tag-blue { background: #e6f7ff; color: #1890ff; }
+.tag-green { background: #f6ffed; color: #52c41a; }
+.tag-orange { background: #fff7e6; color: #fa8c16; }
+.tag-red { background: #fff1f0; color: #f5222d; }
+.tag-gray { background: #f0f0f0; color: #666; }
+.action-link { color: #1890ff; cursor: pointer; margin-right: 10px; font-size: 12px; }
+.action-link:hover { text-decoration: underline; }
+
+/* Pagination */
+.pagination { display: flex; justify-content: flex-end; align-items: center; margin-top: 15px; gap: 5px; }
+.page-btn { padding: 4px 10px; border: 1px solid #d9d9d9; background: #fff; border-radius: 3px; font-size: 12px; cursor: pointer; }
+.page-btn.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+.page-info { font-size: 12px; color: #666; margin-right: 10px; }
+
+/* Member page */
+.member-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.member-card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.member-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.member-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; justify-content: center; align-items: center; color: #fff; font-size: 20px; }
+.member-name { font-size: 15px; font-weight: 600; color: #333; }
+.member-role { font-size: 12px; color: #666; }
+.member-stats { display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; margin-bottom: 12px; }
+.stat-item { text-align: center; }
+.stat-num { font-size: 16px; font-weight: 700; color: #1890ff; }
+.stat-label { font-size: 10px; color: #666; margin-top: 3px; }
+.member-actions { display: flex; gap: 8px; }
+
+/* Template center */
+.template-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.template-card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 2px solid transparent; cursor: pointer; transition: all 0.3s; }
+.template-card:hover { border-color: #1890ff; transform: translateY(-2px); }
+.template-icon { font-size: 36px; margin-bottom: 10px; }
+.template-name { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 5px; }
+.template-desc { font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.5; }
+.template-meta { display: flex; justify-content: space-between; font-size: 11px; color: #999; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+.template-tag { display: inline-block; padding: 2px 6px; background: #e6f7ff; color: #1890ff; border-radius: 3px; font-size: 10px; margin-right: 4px; }
+
+/* Settings */
+.settings-section { background: #fff; padding: 20px; border-radius: 6px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.section-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+.form-row { display: flex; align-items: center; margin-bottom: 15px; }
+.form-label { width: 120px; font-size: 13px; color: #666; }
+.form-control { flex: 1; }
+.form-input { width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+.switch { position: relative; width: 40px; height: 20px; background: #ccc; border-radius: 10px; cursor: pointer; }
+.switch.on { background: #1890ff; }
+.switch-handle { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: all 0.3s; }
+.switch.on .switch-handle { left: 22px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-title">📋 物料清单</div>
+      <div class="logo-subtitle">管理后台 v1.0</div>
+    </div>
+    <div class="nav-menu">
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> 数据看板
+      </div>
+      <div class="nav-item" onclick="showPage('activities')">
+        <span class="nav-icon">📅</span> 活动管理
+      </div>
+      <div class="nav-item" onclick="showPage('members')">
+        <span class="nav-icon">👥</span> 团队成员
+      </div>
+      <div class="nav-item" onclick="showPage('templates')">
+        <span class="nav-icon">📋</span> 模板中心
+      </div>
+      <div class="nav-item" onclick="showPage('settings')">
+        <span class="nav-icon">⚙️</span> 系统设置
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="header">
+      <div class="breadcrumb">
+        首页 / <span class="breadcrumb-current" id="breadcrumb">数据看板</span>
+      </div>
+      <div class="header-right">
+        <span class="header-icon">🔔</span>
+        <span class="header-icon">💬</span>
+        <div class="user-info">
+          <div class="user-avatar">👤</div>
+          <div class="user-name">管理员</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Page 1: Dashboard -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div class="page-title">数据看板</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-default">最近30天</button>
+            <button class="btn btn-primary">📥 导出报表</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-title">总活动数</div>
+              <div class="stat-icon">📅</div>
+            </div>
+            <div class="stat-value">28</div>
+            <div class="stat-trend trend-up">↑ 12% 较上月</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-title">进行中活动</div>
+              <div class="stat-icon">▶️</div>
+            </div>
+            <div class="stat-value">5</div>
+            <div class="stat-trend">当前活跃</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-title">平均完整率</div>
+              <div class="stat-icon">🎯</div>
+            </div>
+            <div class="stat-value">92.5%</div>
+            <div class="stat-trend trend-up">↑ 5.2% 较上月</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-title">物料缺失率</div>
+              <div class="stat-icon">⚠️</div>
+            </div>
+            <div class="stat-value">4.2%</div>
+            <div class="stat-trend trend-up">↓ 1.8% 目标达成</div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">📈 物料完整率趋势（最近12个月）</div>
+            <div class="chart-mock">
+              <div class="chart-bar" style="height:60%"></div>
+              <div class="chart-bar" style="height:75%"></div>
+              <div class="chart-bar" style="height:65%"></div>
+              <div class="chart-bar" style="height:80%"></div>
+              <div class="chart-bar" style="height:85%"></div>
+              <div class="chart-bar" style="height:78%"></div>
+              <div class="chart-bar" style="height:88%"></div>
+              <div class="chart-bar" style="height:92%"></div>
+              <div class="chart-bar" style="height:90%"></div>
+              <div class="chart-bar" style="height:95%"></div>
+              <div class="chart-bar" style="height:93%"></div>
+              <div class="chart-bar" style="height:98%"></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">📊 物料分类占比</div>
+            <div class="pie-mock">
+              <div class="pie-circle">
+                <div class="pie-center">
+                  <div class="pie-value">562</div>
+                  <div class="pie-label">总物料</div>
+                </div>
+              </div>
+            </div>
+            <div class="pie-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#52c41a"></div>展架 45%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#1890ff"></div>宣传 25%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#fa8c16"></div>样品 15%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#f5222d"></div>其他 15%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="chart-title">🏆 团队成员任务完成情况（本月）</div>
+          <table>
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>成员</th>
+                <th>负责活动数</th>
+                <th>负责物料数</th>
+                <th>完成任务</th>
+                <th>按时完成率</th>
+                <th>物料完整率</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>🥇 1</td>
+                <td>张三</td>
+                <td>8</td>
+                <td>45</td>
+                <td>45</td>
+                <td><span class="tag tag-green">100%</span></td>
+                <td><span class="tag tag-green">98%</span></td>
+              </tr>
+              <tr>
+                <td>🥈 2</td>
+                <td>李四</td>
+                <td>6</td>
+                <td>38</td>
+                <td>37</td>
+                <td><span class="tag tag-green">97%</span></td>
+                <td><span class="tag tag-green">95%</span></td>
+              </tr>
+              <tr>
+                <td>🥉 3</td>
+                <td>王五</td>
+                <td>5</td>
+                <td>32</td>
+                <td>30</td>
+                <td><span class="tag tag-orange">94%</span></td>
+                <td><span class="tag tag-green">93%</span></td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>赵六</td>
+                <td>4</td>
+                <td>25</td>
+                <td>23</td>
+                <td><span class="tag tag-orange">92%</span></td>
+                <td><span class="tag tag-orange">88%</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Page 2: Activities -->
+      <div class="page" id="page-activities">
+        <div class="page-header">
+          <div class="page-title">活动管理</div>
+          <button class="btn btn-primary">+ 新建活动</button>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div class="search-box">
+              <input class="search-input" placeholder="搜索活动名称...">
+              <select class="search-input" style="width:120px;">
+                <option>全部状态</option>
+                <option>待准备</option>
+                <option>进行中</option>
+                <option>已完成</option>
+              </select>
+              <button class="btn btn-default">🔍 搜索</button>
+            </div>
+            <div>
+              <button class="btn btn-default">📥 导出</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>活动名称</th>
+                <th>时间</th>
+                <th>地点</th>
+                <th>负责人</th>
+                <th>物料数</th>
+                <th>状态</th>
+                <th>完整率</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>春季招聘会</strong></td>
+                <td>2026-06-28</td>
+                <td>会展中心A馆</td>
+                <td>张三</td>
+                <td>20</td>
+                <td><span class="tag tag-blue">进行中</span></td>
+                <td><span class="tag tag-green">75%</span></td>
+                <td>
+                  <span class="action-link">查看</span>
+                  <span class="action-link">编辑</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>科技创新展</strong></td>
+                <td>2026-07-05</td>
+                <td>科技园展厅</td>
+                <td>李四</td>
+                <td>35</td>
+                <td><span class="tag tag-gray">待准备</span></td>
+                <td><span class="tag tag-orange">30%</span></td>
+                <td>
+                  <span class="action-link">查看</span>
+                  <span class="action-link">编辑</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>品牌市集</strong></td>
+                <td>2026-06-20</td>
+                <td>文化广场</td>
+                <td>王五</td>
+                <td>15</td>
+                <td><span class="tag tag-green">已完成</span></td>
+                <td><span class="tag tag-green">95%</span></td>
+                <td>
+                  <span class="action-link">查看</span>
+                  <span class="action-link">复盘</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>校园招聘会</strong></td>
+                <td>2026-06-15</td>
+                <td>大学城体育馆</td>
+                <td>赵六</td>
+                <td>25</td>
+                <td><span class="tag tag-green">已完成</span></td>
+                <td><span class="tag tag-orange">88%</span></td>
+                <td>
+                  <span class="action-link">查看</span>
+                  <span class="action-link">复盘</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>行业博览会</strong></td>
+                <td>2026-06-10</td>
+                <td>国际展览中心</td>
+                <td>张三</td>
+                <td>50</td>
+                <td><span class="tag tag-green">已完成</span></td>
+                <td><span class="tag tag-green">92%</span></td>
+                <td>
+                  <span class="action-link">查看</span>
+                  <span class="action-link">复盘</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="page-info">共 28 条</span>
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">›</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page 3: Members -->
+      <div class="page" id="page-members">
+        <div class="page-header">
+          <div class="page-title">团队成员</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-default">📤 邀请成员</button>
+            <button class="btn btn-primary">+ 添加成员</button>
+          </div>
+        </div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="member-header">
+              <div class="member-avatar">👨</div>
+              <div>
+                <div class="member-name">张三</div>
+                <div class="member-role">负责人 · 市场运营经理</div>
+              </div>
+            </div>
+            <div class="member-stats">
+              <div class="stat-item">
+                <div class="stat-num">8</div>
+                <div class="stat-label">负责活动</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-num">45</div>
+                <div class="stat-label">负责物料</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-num">98%</div>
+                <div class="stat-label">完整率</div>
+              </div>
+            </div>
+            <div class="member-actions">
+              <button class="btn btn-default" style="flex:1;">编辑</button>
+              <button class="btn btn-default" style="flex:1;">权限</button>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="member-header">
+              <div class="member-avatar">👩</div>
+              <div>
+                <div class="member-name">李四</div>
+                <div class="member-role">执行人 · 市场专员</div>
+              </div>
+            </div>
+            <div class="member-stats">
+              <div class="stat-item">
+                <div class="stat-num">6</div>
+                <div class="stat-label">负责活动</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-num">38</div>
+                <div class="stat-label">负责物料</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-num">95%</div>
+                <div class="stat-label">完整率</div>
+              </div>
+            </div>
+            <div class="member-actions">
+              <button class="btn btn-default" style="flex:1;">编辑</button>
+              <button class="btn btn-default" style="flex:1;">权限</button>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="member-header">
+              <div class="member-avatar">👨</div>
+              <div>
+                <div class="member-name">王五</div>
+                <div class="member-role">执行人 · 销售专员</div>
+              </div>
+            </div>
+            <div class="member-stats">
+              <div class="stat-item">
+                <div class="stat-num">5</div>
+                <div class="stat-label">负责活动</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-num">32</div>
+                <div class="stat-label">负责物料</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-num">93%</div>
+                <div class="stat-label">完整率</div>
+              </div>
+            </div>
+            <div class="member-actions">
+              <button class="btn btn-default" style="flex:1;">编辑</button>
+              <button class="btn btn-default" style="flex:1;">权限</button>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="member-header">
+              <div class="member-avatar">👩</div>
+              <div>
+                <div class="member-name">赵六</div>
+                <div class="member-role">执行人 · 志愿者</div>
+              </div>
+            </div>
+            <div class="member-stats">
+              <div class="stat-item">
+                <div class="stat-num">4</div>
+                <div class="stat-label">负责活动</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-num">25</div>
+                <div class="stat-label">负责物料</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-num">88%</div>
+                <div class="stat-label">完整率</div>
+              </div>
+            </div>
+            <div class="member-actions">
+              <button class="btn btn-default" style="flex:1;">编辑</button>
+              <button class="btn btn-default" style="flex:1;">权限</button>
+            </div>
+          </div>
+
+          <div class="member-card" style="border: 2px dashed #d9d9d9; display:flex; justify-content:center; align-items:center; min-height:200px; cursor:pointer;">
+            <div style="text-align:center; color:#999;">
+              <div style="font-size:36px; margin-bottom:8px;">➕</div>
+              <div style="font-size:13px;">邀请新成员</div>
+              <div style="font-size:11px; margin-top:5px;">通过微信或手机号邀请</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page 4: Templates -->
+      <div class="page" id="page-templates">
+        <div class="page-header">
+          <div class="page-title">模板中心</div>
+          <div style="display:flex; gap:8px;">
+            <input class="search-input" placeholder="搜索模板..." style="width:200px;">
+            <button class="btn btn-primary">+ 创建模板</button>
+          </div>
+        </div>
+        <div style="font-size:13px; color:#666; margin-bottom:15px;">🏷️ 系统推荐模板</div>
+        <div class="template-grid" style="margin-bottom:20px;">
+          <div class="template-card">
+            <div class="template-icon">💼</div>
+            <div class="template-name">招聘会标准清单</div>
+            <div class="template-desc">适用于各类招聘会场景，包含展架、易拉宝、宣传册、名片、表格、笔等常用物料</div>
+            <div style="margin-bottom:8px;">
+              <span class="template-tag">招聘</span>
+              <span class="template-tag">20项</span>
+            </div>
+            <div class="template-meta">
+              <span>🏆 推荐使用</span>
+              <span>使用 128 次</span>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-icon">🎪</div>
+            <div class="template-name">展会标准清单</div>
+            <div class="template-desc">适用于大型展会场景，包含展位搭建、样品陈列、宣传资料、赠品等完整物料</div>
+            <div style="margin-bottom:8px;">
+              <span class="template-tag">展会</span>
+              <span class="template-tag">35项</span>
+            </div>
+            <div class="template-meta">
+              <span>🏆 推荐使用</span>
+              <span>使用 96 次</span>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-icon">🎨</div>
+            <div class="template-name">市集轻量清单</div>
+            <div class="template-desc">适用于小型市集、创意集市，包含摊位装饰、商品展示、收款工具等基础物料</div>
+            <div style="margin-bottom:8px;">
+              <span class="template-tag">市集</span>
+              <span class="template-tag">15项</span>
+            </div>
+            <div class="template-meta">
+              <span>⭐ 热门</span>
+              <span>使用 85 次</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:13px; color:#666; margin-bottom:15px;">📁 我的模板</div>
+        <div class="template-grid">
+          <div class="template-card">
+            <div class="template-icon">📋</div>
+            <div class="template-name">品牌活动专属清单</div>
+            <div class="template-desc">针对品牌推广活动定制，包含品牌VI物料、互动道具、礼品等</div>
+            <div style="margin-bottom:8px;">
+              <span class="template-tag">品牌</span>
+              <span class="template-tag">28项</span>
+            </div>
+            <div class="template-meta">
+              <span>完整率 95%</span>
+              <span>使用 3 次</span>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-icon">🎓</div>
+            <div class="template-name">校园招聘清单</div>
+            <div class="template-desc">校园招聘会专用，精简实用，适合快速部署</div>
+            <div style="margin-bottom:8px;">
+              <span class="template-tag">招聘</span>
+              <span class="template-tag">18项</span>
+            </div>
+            <div class="template-meta">
+              <span>完整率 100%</span>
+              <span>使用 2 次</span>
+            </div>
+          </div>
+          <div class="template-card" style="border: 2px dashed #d9d9d9; display:flex; justify-content:center; align-items:center; min-height:180px; cursor:pointer;">
+            <div style="text-align:center; color:#999;">
+              <div style="font-size:36px; margin-bottom:8px;">➕</div>
+              <div style="font-size:13px;">创建新模板</div>
+              <div style="font-size:11px; margin-top:5px;">基于现有活动保存</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page 5: Settings -->
+      <div class="page" id="page-settings">
+        <div class="page-header">
+          <div class="page-title">系统设置</div>
+        </div>
+        <div class="settings-section">
+          <div class="section-title">🏢 公司信息</div>
+          <div class="form-row">
+            <div class="form-label">公司名称</div>
+            <div class="form-control">
+              <input class="form-input" value="某品牌科技有限公司">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">联系人</div>
+            <div class="form-control">
+              <input class="form-input" value="张小明">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">联系电话</div>
+            <div class="form-control">
+              <input class="form-input" value="138****8888">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">公司地址</div>
+            <div class="form-control">
+              <input class="form-input" value="某市某区某路88号">
+            </div>
+          </div>
+          <button class="btn btn-primary">保存修改</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-title">🔔 通知设置</div>
+          <div class="form-row">
+            <div class="form-label">微信通知</div>
+            <div class="form-control">
+              <div class="switch on"><div class="switch-handle"></div></div>
+              <span style="margin-left:10px; font-size:12px; color:#666;">开启后通过微信模板消息接收提醒</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">短信通知</div>
+            <div class="form-control">
+              <div class="switch on"><div class="switch-handle"></div></div>
+              <span style="margin-left:10px; font-size:12px; color:#666;">开启后通过短信接收重要提醒</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">邮件通知</div>
+            <div class="form-control">
+              <div class="switch"><div class="switch-handle"></div></div>
+              <span style="margin-left:10px; font-size:12px; color:#666;">关闭</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">提醒时机</div>
+            <div class="form-control">
+              <select class="form-input" style="width:200px;">
+                <option>活动前1天 + 前2小时</option>
+                <option>活动前1天</option>
+                <option>活动前2小时</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-title">💎 会员信息</div>
+          <div style="background:linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%); padding:15px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:14px; font-weight:600;">🎯 免费版</div>
+              <div style="font-size:12px; color:#666; margin-top:5px;">已使用 3/3 个模板 · 562/不限 物料</div>
+            </div>
+            <button class="btn btn-primary">升级到专业版 ¥29/月</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  const names = {
+    'dashboard': '数据看板',
+    'activities': '活动管理',
+    'members': '团队成员',
+    'templates': '模板中心',
+    'settings': '系统设置'
+  };
+  document.getElementById('breadcrumb').textContent = names[pageId];
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>

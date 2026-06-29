@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>物料清单管理 Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; padding: 20px; background: #f5f5f5; }
+h2 { font-size: 16px; margin-bottom: 15px; color: #333; }
+.widget-container { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.widget-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+.stats-summary { display: flex; gap: 10px; font-size: 11px; }
+.stat-item { padding: 3px 8px; border-radius: 10px; }
+.stat-ready { background: #f6ffed; color: #52c41a; }
+.stat-missing { background: #fff1f0; color: #f5222d; }
+.stat-pending { background: #fff7e6; color: #fa8c16; }
+
+.filter-tabs { display: flex; gap: 6px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+.filter-tab { padding: 5px 12px; background: #f5f5f5; border-radius: 15px; font-size: 11px; color: #666; cursor: pointer; white-space: nowrap; }
+.filter-tab.active { background: #07c160; color: #fff; }
+
+.category-section { margin-bottom: 15px; }
+.category-title { font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.category-count { font-size: 10px; color: #999; }
+
+.material-item { display: flex; align-items: center; padding: 10px; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 6px; transition: all 0.3s; }
+.material-item:hover { border-color: #07c160; background: #f6ffed; }
+.material-checkbox { width: 18px; height: 18px; border: 2px solid #d9d9d9; border-radius: 4px; margin-right: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.material-checkbox.checked { background: #07c160; border-color: #07c160; color: #fff; font-size: 10px; }
+.material-icon { width: 32px; height: 32px; background: #f0f0f0; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 18px; margin-right: 10px; }
+.material-info { flex: 1; }
+.material-name { font-size: 13px; font-weight: 500; color: #333; }
+.material-meta { font-size: 11px; color: #999; margin-top: 2px; }
+.material-status { font-size: 11px; padding: 3px 8px; border-radius: 10px; }
+.ms-ready { background: #f6ffed; color: #52c41a; }
+.ms-missing { background: #fff1f0; color: #f5222d; }
+.ms-pending { background: #fff7e6; color: #fa8c16; }
+
+.action-bar { display: flex; gap: 8px; margin-bottom: 15px; padding: 10px; background: #f8f8f8; border-radius: 6px; }
+.action-btn { flex: 1; padding: 8px; background: #fff; border: 1px solid #e5e5e5; border-radius: 5px; font-size: 11px; cursor: pointer; text-align: center; }
+.action-btn:hover { border-color: #07c160; color: #07c160; }
+.action-btn.primary { background: #07c160; color: #fff; border-color: #07c160; }
+
+.add-material { width: 100%; padding: 10px; background: #fff; color: #07c160; border: 1px dashed #07c160; border-radius: 6px; font-size: 12px; cursor: pointer; margin-top: 10px; }
+.add-material:hover { background: #f6ffed; }
+
+.batch-bar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e5e5e5; padding: 10px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
+.batch-info { font-size: 12px; color: #666; }
+.batch-info strong { color: #07c160; }
+.batch-actions { display: flex; gap: 8px; }
+</style>
+</head>
+<body>
+<h2>📦 物料清单管理 Widget</h2>
+<div class="widget-container">
+  <div class="widget-title">
+    <span>春季招聘会 - 物料清单</span>
+    <div class="stats-summary">
+      <span class="stat-item stat-ready">✓ 15</span>
+      <span class="stat-item stat-missing">✗ 3</span>
+      <span class="stat-item stat-pending">? 2</span>
+    </div>
+  </div>
+
+  <div class="filter-tabs">
+    <div class="filter-tab active">全部 (20)</div>
+    <div class="filter-tab">展架 (3)</div>
+    <div class="filter-tab">宣传 (5)</div>
+    <div class="filter-tab">样品 (4)</div>
+    <div class="filter-tab">赠品 (3)</div>
+    <div class="filter-tab">其他 (5)</div>
+  </div>
+
+  <div class="action-bar">
+    <div class="action-btn">🔍 搜索</div>
+    <div class="action-btn">🔤 排序</div>
+    <div class="action-btn">📷 扫码</div>
+    <div class="action-btn primary">+ 添加物料</div>
+  </div>
+
+  <div class="category-section">
+    <div class="category-title">
+      🖼️ 展架类 <span class="category-count">(3项)</span>
+    </div>
+    <div class="material-item">
+      <div class="material-checkbox checked">✓</div>
+      <div class="material-icon">🖼️</div>
+      <div class="material-info">
+        <div class="material-name">易拉宝 ×2</div>
+        <div class="material-meta">负责人: 张三</div>
+      </div>
+      <div class="material-status ms-ready">已准备</div>
+    </div>
+    <div class="material-item">
+      <div class="material-checkbox"></div>
+      <div class="material-icon">🪧</div>
+      <div class="material-info">
+        <div class="material-name">展架 ×1</div>
+        <div class="material-meta">负责人: 李四</div>
+      </div>
+      <div class="material-status ms-ready">已准备</div>
+    </div>
+  </div>
+
+  <div class="category-section">
+    <div class="category-title">
+      📄 宣传类 <span class="category-count">(5项)</span>
+    </div>
+    <div class="material-item">
+      <div class="material-checkbox"></div>
+      <div class="material-icon">📄</div>
+      <div class="material-info">
+        <div class="material-name">宣传册 ×100</div>
+        <div class="material-meta">负责人: 王五</div>
+      </div>
+      <div class="material-status ms-missing">缺失</div>
+    </div>
+    <div class="material-item">
+      <div class="material-checkbox checked">✓</div>
+      <div class="material-icon">💳</div>
+      <div class="material-info">
+        <div class="material-name">名片 ×200</div>
+        <div class="material-meta">负责人: 赵六</div>
+      </div>
+      <div class="material-status ms-ready">已准备</div>
+    </div>
+    <div class="material-item">
+      <div class="material-checkbox"></div>
+      <div class="material-icon">📋</div>
+      <div class="material-info">
+        <div class="material-name">登记表 ×10</div>
+        <div class="material-meta">负责人: 张三</div>
+      </div>
+      <div class="material-status ms-pending">待确认</div>
+    </div>
+  </div>
+
+  <button class="add-material">+ 添加新物料</button>
+
+  <div class="batch-bar">
+    <div class="batch-info">已选择 <strong>2</strong> 项物料</div>
+    <div class="batch-actions">
+      <button style="padding:6px 12px; background:#f5f5f5; border:none; border-radius:4px; font-size:11px; cursor:pointer;">取消选择</button>
+      <button style="padding:6px 12px; background:#07c160; color:#fff; border:none; border-radius:4px; font-size:11px; cursor:pointer;">批量确认</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

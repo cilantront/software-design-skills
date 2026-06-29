@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原型07 - 导出弹窗</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #F5F7FA; color: #333; }
+        .navbar { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+        .navbar .logo { font-size: 18px; font-weight: 600; color: #4096FF; display: flex; align-items: center; gap: 8px; }
+        .navbar .logo-icon { width: 28px; height: 28px; background: #4096FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
+        .navbar .nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .btn-primary { background: #4096FF; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn-secondary { background: #fff; color: #666; border: 1px solid #D9D9D9; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .quota-badge { background: #F0F5FF; color: #4096FF; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: #E6F4FF; display: flex; align-items: center; justify-content: center; color: #4096FF; font-size: 14px; }
+
+        .main { margin-top: 56px; padding: 24px; }
+        .proto-banner { background: #FFF7E6; border: 1px dashed #FA8C16; padding: 8px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; color: #D46B08; max-width: 1000px; margin-left: auto; margin-right: auto; }
+
+        /* Overlay */
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 200; display: flex; align-items: center; justify-content: center; }
+
+        /* Modal */
+        .modal { background: #fff; border-radius: 12px; width: 520px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #F0F0F0; }
+        .modal-header h2 { font-size: 17px; font-weight: 500; }
+        .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #999; padding: 4px; }
+        .modal-close:hover { color: #333; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid #F0F0F0; display: flex; justify-content: flex-end; gap: 12px; }
+
+        /* Format Selection */
+        .format-label { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+        .format-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+        .format-option { border: 2px solid #F0F0F0; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .format-option:hover { border-color: #4096FF; }
+        .format-option.selected { border-color: #4096FF; background: #F0F5FF; }
+        .format-option .format-icon { font-size: 28px; margin-bottom: 8px; }
+        .format-option .format-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+        .format-option .format-desc { font-size: 12px; color: #999; }
+        .format-option.locked { opacity: 0.6; }
+        .format-option .lock-badge { display: inline-block; background: #FFF7E6; color: #D46B08; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-top: 4px; }
+
+        /* PDF Settings */
+        .settings-section { border-top: 1px solid #F5F5F5; padding-top: 20px; margin-top: 4px; }
+        .settings-section h4 { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+        .setting-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+        .setting-item .setting-label { font-size: 14px; }
+        .setting-item .setting-desc { font-size: 12px; color: #999; }
+        .checkbox { width: 16px; height: 16px; accent-color: #4096FF; }
+
+        /* Success State */
+        .success-section { text-align: center; padding: 20px 0; }
+        .success-icon { font-size: 48px; margin-bottom: 12px; }
+        .success-title { font-size: 16px; font-weight: 500; margin-bottom: 16px; color: #52C41A; }
+        .download-btn { display: inline-flex; align-items: center; gap: 8px; background: #4096FF; color: #fff; padding: 10px 24px; border-radius: 6px; font-size: 14px; text-decoration: none; margin-bottom: 16px; }
+        .download-btn:hover { background: #1677FF; }
+        .file-info { font-size: 12px; color: #999; margin-bottom: 24px; }
+
+        .link-section { text-align: left; background: #FAFAFA; border-radius: 8px; padding: 16px; margin-top: 16px; }
+        .link-section h4 { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+        .link-box { display: flex; gap: 8px; align-items: center; }
+        .link-box input { flex: 1; padding: 8px 12px; border: 1px solid #D9D9D9; border-radius: 4px; font-size: 13px; color: #666; background: #fff; }
+        .copy-btn { background: #4096FF; color: #fff; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+        .copy-btn:hover { background: #1677FF; }
+
+        .qr-section { text-align: center; margin-top: 16px; }
+        .qr-code { width: 120px; height: 120px; background: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 40px; }
+        .qr-hint { font-size: 12px; color: #999; }
+
+        /* Two-column layout for demo */
+        .demo-layout { display: flex; gap: 32px; max-width: 1100px; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+        .demo-col { flex: 1; min-width: 520px; }
+        .demo-label { text-align: center; font-size: 13px; color: #999; margin-bottom: 8px; font-weight: 500; }
+
+        /* Modal non-overlay version for side-by-side demo */
+        .modal-static { background: #fff; border-radius: 12px; width: 520px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); border: 1px solid #F0F0F0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><div class="logo-icon">📋</div> 课程讲义转练习卡</div>
+        <div class="nav-right">
+            <span class="quota-badge">剩余配额: 3次</span>
+            <div class="avatar">张</div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="proto-banner">
+            🎨 UI原型 — 导出弹窗（两个状态） | 来源：<a href="prototype_06_manage.html">练习卡管理</a> · 升级引导：<a href="prototype_08_pricing.html">定价页</a>
+        </div>
+
+        <div class="demo-layout">
+            <!-- 状态1: 导出配置 -->
+            <div class="demo-col">
+                <div class="demo-label">状态1：导出配置</div>
+                <div class="modal-static">
+                    <div class="modal-header">
+                        <h2>📤 导出练习卡</h2>
+                        <button class="modal-close">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="format-label">选择导出格式：</div>
+                        <div class="format-grid">
+                            <div class="format-option selected">
+                                <div class="format-icon">📱</div>
+                                <div class="format-name">小程序练习页</div>
+                                <div class="format-desc">生成在线练习链接</div>
+                            </div>
+                            <div class="format-option">
+                                <div class="format-icon">📄</div>
+                                <div class="format-name">PDF题册</div>
+                                <div class="format-desc">生成可下载PDF</div>
+                            </div>
+                            <div class="format-option locked">
+                                <div class="format-icon">🔗</div>
+                                <div class="format-name">飞书同步</div>
+                                <div class="format-desc">同步至飞书文档</div>
+                                <span class="lock-badge">🔒 订阅版</span>
+                            </div>
+                            <div class="format-option locked">
+                                <div class="format-icon">📝</div>
+                                <div class="format-name">Notion同步</div>
+                                <div class="format-desc">同步至Notion数据库</div>
+                                <span class="lock-badge">🔒 订阅版</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h4>📄 PDF导出设置</h4>
+                            <div class="setting-item">
+                                <div>
+                                    <div class="setting-label">包含答案页</div>
+                                    <div class="setting-desc">在题目后附加答案页</div>
+                                </div>
+                                <input type="checkbox" class="checkbox" checked>
+                            </div>
+                            <div class="setting-item">
+                                <div>
+                                    <div class="setting-label">包含答案解析</div>
+                                    <div class="setting-desc">在答案页中显示详细解析</div>
+                                </div>
+                                <input type="checkbox" class="checkbox" checked>
+                            </div>
+                            <div class="setting-item">
+                                <div>
+                                    <div class="setting-label">添加自定义页眉页脚</div>
+                                    <div class="setting-desc">品牌模板功能，仅订阅版可用</div>
+                                </div>
+                                <input type="checkbox" class="checkbox">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary">取消</button>
+                        <button class="btn-primary">确认导出</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 状态2: 导出成功 -->
+            <div class="demo-col">
+                <div class="demo-label">状态2：导出成功</div>
+                <div class="modal-static">
+                    <div class="modal-header">
+                        <h2>✅ 导出成功</h2>
+                        <button class="modal-close">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="success-section">
+                            <div class="success-icon">🎉</div>
+                            <div class="success-title">PDF题册已生成！</div>
+                            <a href="#" class="download-btn">📥 下载PDF文件</a>
+                            <div class="file-info">文件大小：2.3 MB &nbsp;|&nbsp; 有效期：24小时</div>
+                        </div>
+
+                        <div class="link-section">
+                            <h4>📱 小程序练习页</h4>
+                            <div class="link-box">
+                                <input type="text" value="https://xxx.com/p/abc123" readonly>
+                                <button class="copy-btn">复制链接</button>
+                            </div>
+                        </div>
+
+                        <div class="qr-section">
+                            <div class="qr-code">📱</div>
+                            <div class="qr-hint">扫码即可进入练习页面</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-primary">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 格式选择
+        document.querySelectorAll('.format-option:not(.locked)').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.format-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        document.querySelectorAll('.format-option.locked').forEach(opt => {
+            opt.addEventListener('click', function() {
+                alert('🔒 该功能为订阅版专属，请先升级订阅方案');
+            });
+        });
+    </script>
+</body>
+</html>

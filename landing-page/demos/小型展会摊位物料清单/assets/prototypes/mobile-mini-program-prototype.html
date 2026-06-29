@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小型展会摊位物料清单 - 移动端小程序全站点原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f5; padding: 20px; }
+h1 { text-align: center; color: #333; margin-bottom: 10px; font-size: 24px; }
+.subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.phone-frame {
+  width: 100%;
+  background: #000;
+  border-radius: 30px;
+  padding: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.phone-screen {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 9/19.5;
+}
+
+.status-bar {
+  height: 30px;
+  background: #f8f8f8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  font-size: 11px;
+  color: #333;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.page-title {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.screen-content {
+  padding: 10px;
+  overflow-y: auto;
+  height: calc(100% - 30px - 45px);
+}
+
+.tab-bar {
+  height: 45px;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 10px;
+  color: #666;
+}
+
+.tab-item.active { color: #07c160; }
+.tab-icon { font-size: 18px; margin-bottom: 2px; }
+
+.screen-label {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Page specific styles */
+.login-page { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; }
+.login-logo { font-size: 40px; margin-bottom: 10px; }
+.login-title { font-size: 18px; font-weight: 600; margin-bottom: 5px; }
+.login-subtitle { font-size: 12px; opacity: 0.8; margin-bottom: 30px; }
+.login-btn { background: #fff; color: #07c160; border: none; padding: 12px 40px; border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.login-agreement { margin-top: 20px; font-size: 10px; opacity: 0.7; }
+
+.activity-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+.activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.activity-name { font-size: 13px; font-weight: 600; color: #333; }
+.activity-status { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+.status-pending { background: #f0f0f0; color: #666; }
+.status-active { background: #e6f7ff; color: #1890ff; }
+.status-done { background: #f6ffed; color: #52c41a; }
+.activity-info { font-size: 11px; color: #999; margin-bottom: 5px; }
+.progress-bar { height: 4px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #07c160; border-radius: 2px; }
+.progress-text { font-size: 10px; color: #999; margin-top: 3px; }
+
+.filter-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+.filter-tab { padding: 5px 10px; background: #f5f5f5; border-radius: 15px; font-size: 11px; color: #666; cursor: pointer; }
+.filter-tab.active { background: #07c160; color: #fff; }
+
+.fab-btn { position: absolute; bottom: 60px; right: 15px; width: 45px; height: 45px; background: #07c160; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 24px; box-shadow: 0 4px 12px rgba(7,193,96,0.4); cursor: pointer; }
+
+.form-group { margin-bottom: 12px; }
+.form-label { font-size: 12px; color: #666; margin-bottom: 4px; display: block; }
+.form-input { width: 100%; padding: 8px; border: 1px solid #e5e5e5; border-radius: 5px; font-size: 12px; }
+.form-btn { width: 100%; padding: 10px; background: #07c160; color: #fff; border: none; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+
+.material-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0; }
+.material-icon { width: 30px; height: 30px; background: #f0f0f0; border-radius: 5px; display: flex; justify-content: center; align-items: center; font-size: 16px; margin-right: 8px; }
+.material-info { flex: 1; }
+.material-name { font-size: 12px; font-weight: 500; color: #333; }
+.material-meta { font-size: 10px; color: #999; }
+.material-status { font-size: 10px; padding: 2px 6px; border-radius: 8px; }
+.ms-ready { background: #f6ffed; color: #52c41a; }
+.ms-missing { background: #fff1f0; color: #f5222d; }
+.ms-pending { background: #fff7e6; color: #fa8c16; }
+
+.scan-area { background: #000; height: 200px; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 10px; border-radius: 8px; }
+.scan-frame { width: 150px; height: 150px; border: 2px solid #07c160; border-radius: 8px; position: relative; }
+.scan-corner { position: absolute; width: 20px; height: 20px; border: 3px solid #07c160; }
+.scan-corner.tl { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+.scan-corner.tr { top: -3px; right: -3px; border-left: none; border-bottom: none; }
+.scan-corner.bl { bottom: -3px; left: -3px; border-right: none; border-top: none; }
+.scan-corner.br { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+.scan-hint { text-align: center; font-size: 11px; color: #666; margin-bottom: 10px; }
+
+.material-card { background: #f8f8f8; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+.mc-name { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.mc-row { display: flex; justify-content: space-between; font-size: 11px; color: #666; margin-bottom: 3px; }
+
+.status-btns { display: flex; gap: 8px; margin-top: 10px; }
+.status-btn { flex: 1; padding: 8px; border: none; border-radius: 5px; font-size: 12px; font-weight: 500; cursor: pointer; }
+.btn-ok { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.btn-miss { background: #fff1f0; color: #f5222d; border: 1px solid #ffa39e; }
+.btn-damage { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+
+.template-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+.template-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.template-meta { font-size: 10px; color: #999; }
+.template-tag { display: inline-block; padding: 2px 6px; background: #e6f7ff; color: #1890ff; border-radius: 3px; font-size: 9px; margin-right: 4px; }
+
+.report-summary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
+.report-score { font-size: 36px; font-weight: 700; }
+.report-label { font-size: 11px; opacity: 0.9; }
+.report-badge { display: inline-block; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 10px; font-size: 10px; margin-top: 5px; }
+
+.report-section { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+.rs-title { font-size: 12px; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
+.rs-count { font-size: 11px; color: #f5222d; }
+.rs-item { font-size: 11px; color: #666; padding: 4px 0; border-bottom: 1px solid #f5f5f5; }
+
+.profile-header { text-align: center; padding: 15px 0; }
+.avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 20px; margin: 0 auto 8px; }
+.profile-name { font-size: 14px; font-weight: 600; }
+.profile-role { font-size: 11px; color: #999; }
+
+.menu-list { margin-top: 15px; }
+.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+.menu-item:hover { background: #f8f8f8; }
+.menu-label { font-size: 12px; color: #333; }
+.menu-arrow { color: #ccc; }
+.menu-badge { background: #f5222d; color: #fff; padding: 1px 6px; border-radius: 8px; font-size: 9px; }
+
+.membership-card { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 8px; padding: 12px; margin-bottom: 10px; color: #333; }
+.mc-level { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.mc-expire { font-size: 10px; opacity: 0.8; }
+.mc-upgrade { background: #333; color: #ffd700; border: none; padding: 6px 15px; border-radius: 15px; font-size: 11px; font-weight: 600; margin-top: 8px; cursor: pointer; }
+
+.benefit-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+.benefit-icon { font-size: 16px; margin-right: 8px; }
+.benefit-text { flex: 1; font-size: 11px; }
+.benefit-check { color: #07c160; font-weight: 700; }
+
+.empty-state { text-align: center; padding: 30px 10px; }
+.empty-icon { font-size: 40px; margin-bottom: 8px; opacity: 0.3; }
+.empty-text { font-size: 12px; color: #999; margin-bottom: 10px; }
+.empty-btn { padding: 6px 15px; background: #07c160; color: #fff; border: none; border-radius: 15px; font-size: 11px; cursor: pointer; }
+
+.bottom-sheet { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; border-top-left-radius: 12px; border-top-right-radius: 12px; padding: 15px; box-shadow: 0 -4px 12px rgba(0,0,0,0.1); }
+.sheet-handle { width: 30px; height: 3px; background: #ddd; border-radius: 2px; margin: 0 auto 10px; }
+.sheet-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<h1>📱 小型展会摊位物料清单 - 小程序端全站点原型</h1>
+<p class="subtitle">MVP 移动端核心页面交互原型 | 宫格布局展示 12 个核心页面</p>
+
+<div class="grid">
+  <!-- 1. 登录页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="login-page">
+          <div class="login-logo">📋</div>
+          <div class="login-title">展会物料清单</div>
+          <div class="login-subtitle">展前准备 · 现场交接 · 撤展复盘</div>
+          <button class="login-btn">微信授权登录</button>
+          <div class="login-agreement">登录即同意《用户协议》和《隐私政策》</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">1. 登录页</div>
+  </div>
+
+  <!-- 2. 首页/活动列表 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">我的活动</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="filter-tabs">
+            <div class="filter-tab active">全部</div>
+            <div class="filter-tab">待准备</div>
+            <div class="filter-tab">进行中</div>
+            <div class="filter-tab">已完成</div>
+          </div>
+          <div class="activity-card">
+            <div class="activity-header">
+              <div class="activity-name">春季招聘会</div>
+              <div class="activity-status status-active">进行中</div>
+            </div>
+            <div class="activity-info">📅 2026-06-28 · 📍 会展中心A馆</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+            <div class="progress-text">物料完成率 75% (15/20)</div>
+          </div>
+          <div class="activity-card">
+            <div class="activity-header">
+              <div class="activity-name">科技创新展</div>
+              <div class="activity-status status-pending">待准备</div>
+            </div>
+            <div class="activity-info">📅 2026-07-05 · 📍 科技园展厅</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+            <div class="progress-text">物料完成率 30% (6/20)</div>
+          </div>
+          <div class="activity-card">
+            <div class="activity-header">
+              <div class="activity-name">品牌市集</div>
+              <div class="activity-status status-done">已完成</div>
+            </div>
+            <div class="activity-info">📅 2026-06-20 · 📍 文化广场</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+            <div class="progress-text">物料完整率 95% 评级：优秀</div>
+          </div>
+        </div>
+        <div class="fab-btn">+</div>
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">2. 首页/活动列表</div>
+  </div>
+
+  <!-- 3. 创建活动页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">创建新活动</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="form-group">
+            <label class="form-label">活动名称 *</label>
+            <input class="form-input" placeholder="请输入活动名称" value="秋季招聘会">
+          </div>
+          <div class="form-group">
+            <label class="form-label">活动日期 *</label>
+            <div style="display:flex; gap:5px;">
+              <input class="form-input" placeholder="开始日期" value="2026-09-15">
+              <input class="form-input" placeholder="结束日期" value="2026-09-16">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">活动地点</label>
+            <input class="form-input" placeholder="请输入活动地点" value="会展中心B馆">
+          </div>
+          <div class="form-group">
+            <label class="form-label">创建方式</label>
+            <div style="display:flex; gap:8px;">
+              <div style="flex:1; padding:10px; border:1px solid #07c160; border-radius:5px; background:#f6ffed; text-align:center;">
+                <div style="font-size:20px;">📝</div>
+                <div style="font-size:11px; color:#07c160; font-weight:600;">空白创建</div>
+              </div>
+              <div style="flex:1; padding:10px; border:1px solid #e5e5e5; border-radius:5px; text-align:center;">
+                <div style="font-size:20px;">📋</div>
+                <div style="font-size:11px; color:#666;">模板创建</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">活动备注</label>
+            <textarea class="form-input" rows="2" placeholder="可选，输入活动备注信息"></textarea>
+          </div>
+          <button class="form-btn">确认创建活动</button>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">3. 创建活动页</div>
+  </div>
+
+  <!-- 4. 模板选择页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">选择模板</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="template-card">
+            <div class="template-name">招聘会标准清单</div>
+            <div class="template-meta">
+              <span class="template-tag">招聘</span>
+              <span class="template-tag">20项物料</span>
+              <span>上次使用: 2026-06-20</span>
+            </div>
+            <div style="margin-top:6px; display:flex; gap:5px;">
+              <button style="flex:1; padding:4px; background:#07c160; color:#fff; border:none; border-radius:3px; font-size:10px;">使用此模板</button>
+              <button style="flex:1; padding:4px; background:#f5f5f5; color:#666; border:none; border-radius:3px; font-size:10px;">预览</button>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-name">展会标准清单</div>
+            <div class="template-meta">
+              <span class="template-tag">展会</span>
+              <span class="template-tag">35项物料</span>
+              <span>上次使用: 2026-05-15</span>
+            </div>
+            <div style="margin-top:6px; display:flex; gap:5px;">
+              <button style="flex:1; padding:4px; background:#07c160; color:#fff; border:none; border-radius:3px; font-size:10px;">使用此模板</button>
+              <button style="flex:1; padding:4px; background:#f5f5f5; color:#666; border:none; border-radius:3px; font-size:10px;">预览</button>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-name">市集轻量清单</div>
+            <div class="template-meta">
+              <span class="template-tag">市集</span>
+              <span class="template-tag">15项物料</span>
+              <span>上次使用: 2026-06-10</span>
+            </div>
+            <div style="margin-top:6px; display:flex; gap:5px;">
+              <button style="flex:1; padding:4px; background:#07c160; color:#fff; border:none; border-radius:3px; font-size:10px;">使用此模板</button>
+              <button style="flex:1; padding:4px; background:#f5f5f5; color:#666; border:none; border-radius:3px; font-size:10px;">预览</button>
+            </div>
+          </div>
+          <div style="text-align:center; padding:10px; font-size:11px; color:#999;">已展示全部 3 个模板 (免费版限制)</div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item active"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">4. 模板选择页</div>
+  </div>
+
+  <!-- 5. 活动详情页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">活动详情</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="activity-card" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:#fff; border:none;">
+            <div class="activity-name" style="color:#fff; font-size:15px;">春季招聘会</div>
+            <div class="activity-info" style="color:rgba(255,255,255,0.9);">📅 2026-06-28 · 📍 会展中心A馆</div>
+            <div style="display:flex; justify-content:space-around; margin-top:10px;">
+              <div style="text-align:center;"><div style="font-size:20px; font-weight:700;">20</div><div style="font-size:10px; opacity:0.9;">总物料</div></div>
+              <div style="text-align:center;"><div style="font-size:20px; font-weight:700;">15</div><div style="font-size:10px; opacity:0.9;">已准备</div></div>
+              <div style="text-align:center;"><div style="font-size:20px; font-weight:700;">3</div><div style="font-size:10px; opacity:0.9;">缺失</div></div>
+              <div style="text-align:center;"><div style="font-size:20px; font-weight:700;">2</div><div style="font-size:10px; opacity:0.9;">损坏</div></div>
+            </div>
+          </div>
+          <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <button style="flex:1; padding:8px; background:#07c160; color:#fff; border:none; border-radius:5px; font-size:11px;">📷 扫码确认</button>
+            <button style="flex:1; padding:8px; background:#fff; color:#07c160; border:1px solid #07c160; border-radius:5px; font-size:11px;">✓ 批量确认</button>
+          </div>
+          <div style="font-size:12px; font-weight:600; margin-bottom:6px;">物料清单 (15/20)</div>
+          <div class="material-item">
+            <div class="material-icon">🖼️</div>
+            <div class="material-info">
+              <div class="material-name">易拉宝 ×2</div>
+              <div class="material-meta">负责人: 张三</div>
+            </div>
+            <div class="material-status ms-ready">已准备</div>
+          </div>
+          <div class="material-item">
+            <div class="material-icon">📄</div>
+            <div class="material-info">
+              <div class="material-name">宣传册 ×100</div>
+              <div class="material-meta">负责人: 李四</div>
+            </div>
+            <div class="material-status ms-missing">缺失</div>
+          </div>
+          <div class="material-item">
+            <div class="material-icon">🎁</div>
+            <div class="material-info">
+              <div class="material-name">赠品 ×50</div>
+              <div class="material-meta">负责人: 王五</div>
+            </div>
+            <div class="material-status ms-pending">待确认</div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">5. 活动详情页</div>
+  </div>
+
+  <!-- 6. 物料清单页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">物料清单</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="filter-tabs">
+            <div class="filter-tab active">全部</div>
+            <div class="filter-tab">展架</div>
+            <div class="filter-tab">样品</div>
+            <div class="filter-tab">赠品</div>
+          </div>
+          <div style="font-size:11px; color:#666; margin-bottom:5px; font-weight:600;">🖼️ 展架类 (3项)</div>
+          <div class="material-item">
+            <div class="material-icon">🖼️</div>
+            <div class="material-info">
+              <div class="material-name">易拉宝 ×2</div>
+              <div class="material-meta">张三</div>
+            </div>
+            <div class="material-status ms-ready">✓</div>
+          </div>
+          <div class="material-item">
+            <div class="material-icon">🪧</div>
+            <div class="material-info">
+              <div class="material-name">展架 ×1</div>
+              <div class="material-meta">李四</div>
+            </div>
+            <div class="material-status ms-ready">✓</div>
+          </div>
+          <div style="font-size:11px; color:#666; margin:8px 0 5px; font-weight:600;">📄 宣传类 (5项)</div>
+          <div class="material-item">
+            <div class="material-icon">📄</div>
+            <div class="material-info">
+              <div class="material-name">宣传册 ×100</div>
+              <div class="material-meta">王五</div>
+            </div>
+            <div class="material-status ms-missing">!</div>
+          </div>
+          <div class="material-item">
+            <div class="material-icon">💳</div>
+            <div class="material-info">
+              <div class="material-name">名片 ×200</div>
+              <div class="material-meta">赵六</div>
+            </div>
+            <div class="material-status ms-ready">✓</div>
+          </div>
+          <button style="width:100%; padding:8px; background:#f8f8f8; color:#07c160; border:1px dashed #07c160; border-radius:5px; font-size:11px; margin-top:10px;">+ 添加物料</button>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">6. 物料清单页</div>
+  </div>
+
+  <!-- 7. 添加物料弹窗 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">物料清单</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content" style="opacity:0.3; height:calc(50% - 30px);">
+          <div class="material-item"><div class="material-icon">🖼️</div><div class="material-info"><div class="material-name">易拉宝 ×2</div></div></div>
+          <div class="material-item"><div class="material-icon">📄</div><div class="material-info"><div class="material-name">宣传册 ×100</div></div></div>
+        </div>
+        <div class="bottom-sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-title">添加物料</div>
+          <div class="form-group">
+            <label class="form-label">物料名称 *</label>
+            <input class="form-input" placeholder="请输入物料名称" value="展台模型">
+          </div>
+          <div style="display:flex; gap:5px;">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">分类</label>
+              <select class="form-input"><option>样品</option></select>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">数量</label>
+              <input class="form-input" type="number" value="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">负责人</label>
+            <select class="form-input"><option>选择团队成员</option></select>
+          </div>
+          <div style="display:flex; gap:5px;">
+            <button style="flex:1; padding:8px; background:#f5f5f5; color:#666; border:none; border-radius:5px; font-size:12px;">取消</button>
+            <button style="flex:1; padding:8px; background:#07c160; color:#fff; border:none; border-radius:5px; font-size:12px;">确认添加</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">7. 添加物料弹窗</div>
+  </div>
+
+  <!-- 8. 扫码确认页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">扫码确认</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="scan-area">
+            <div class="scan-frame">
+              <div class="scan-corner tl"></div>
+              <div class="scan-corner tr"></div>
+              <div class="scan-corner bl"></div>
+              <div class="scan-corner br"></div>
+            </div>
+          </div>
+          <div class="scan-hint">将二维码放入框内，即可自动扫描</div>
+          <div class="material-card">
+            <div class="mc-name">易拉宝</div>
+            <div class="mc-row"><span>数量:</span><span>2</span></div>
+            <div class="mc-row"><span>分类:</span><span>展架</span></div>
+            <div class="mc-row"><span>负责人:</span><span>张三</span></div>
+            <div class="mc-row"><span>当前状态:</span><span style="color:#fa8c16;">待确认</span></div>
+          </div>
+          <div class="status-btns">
+            <button class="status-btn btn-ok">✓ 正常</button>
+            <button class="status-btn btn-miss">✗ 缺失</button>
+            <button class="status-btn btn-damage">⚠ 损坏</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">8. 扫码确认页</div>
+  </div>
+
+  <!-- 9. 模板中心页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">模板中心</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <button style="width:100%; padding:10px; background:#07c160; color:#fff; border:none; border-radius:5px; font-size:12px; font-weight:600; margin-bottom:10px;">+ 创建新模板</button>
+          <div class="template-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="template-name">招聘会标准清单</div>
+              <div style="font-size:10px; color:#999;">20项</div>
+            </div>
+            <div style="margin-top:4px;">
+              <span class="template-tag">招聘</span>
+              <span style="font-size:10px; color:#999;">使用 3 次 · 完整率 95%</span>
+            </div>
+            <div style="margin-top:6px; display:flex; gap:5px;">
+              <button style="flex:1; padding:4px; background:#f5f5f5; color:#666; border:none; border-radius:3px; font-size:10px;">编辑</button>
+              <button style="flex:1; padding:4px; background:#f5f5f5; color:#666; border:none; border-radius:3px; font-size:10px;">删除</button>
+            </div>
+          </div>
+          <div class="template-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="template-name">展会标准清单</div>
+              <div style="font-size:10px; color:#999;">35项</div>
+            </div>
+            <div style="margin-top:4px;">
+              <span class="template-tag">展会</span>
+              <span style="font-size:10px; color:#999;">使用 5 次 · 完整率 88%</span>
+            </div>
+            <div style="margin-top:6px; display:flex; gap:5px;">
+              <button style="flex:1; padding:4px; background:#f5f5f5; color:#666; border:none; border-radius:3px; font-size:10px;">编辑</button>
+              <button style="flex:1; padding:4px; background:#f5f5f5; color:#666; border:none; border-radius:3px; font-size:10px;">删除</button>
+            </div>
+          </div>
+          <div class="template-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="template-name">市集轻量清单</div>
+              <div style="font-size:10px; color:#999;">15项</div>
+            </div>
+            <div style="margin-top:4px;">
+              <span class="template-tag">市集</span>
+              <span style="font-size:10px; color:#999;">使用 2 次 · 完整率 100%</span>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item active"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">9. 模板中心页</div>
+  </div>
+
+  <!-- 10. 复盘报告页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">复盘报告</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="report-summary">
+            <div class="report-label">物料完整率</div>
+            <div class="report-score">95%</div>
+            <div class="report-badge">⭐ 优秀</div>
+          </div>
+          <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <button style="flex:1; padding:6px; background:#fff; color:#333; border:1px solid #e5e5e5; border-radius:5px; font-size:11px;">📥 导出PDF</button>
+            <button style="flex:1; padding:6px; background:#fff; color:#333; border:1px solid #e5e5e5; border-radius:5px; font-size:11px;">💾 保存为模板</button>
+          </div>
+          <div class="report-section">
+            <div class="rs-title">
+              <span>📊 数据统计</span>
+            </div>
+            <div style="display:flex; justify-content:space-around; text-align:center;">
+              <div><div style="font-size:18px; font-weight:700; color:#07c160;">19</div><div style="font-size:10px; color:#666;">已回收</div></div>
+              <div><div style="font-size:18px; font-weight:700; color:#f5222d;">1</div><div style="font-size:10px; color:#666;">缺失</div></div>
+              <div><div style="font-size:18px; font-weight:700; color:#fa8c16;">0</div><div style="font-size:10px; color:#666;">损坏</div></div>
+              <div><div style="font-size:18px; font-weight:700; color:#1890ff;">20</div><div style="font-size:10px; color:#666;">总数</div></div>
+            </div>
+          </div>
+          <div class="report-section">
+            <div class="rs-title"><span>⚠️ 缺失清单</span><span class="rs-count">1 项</span></div>
+            <div class="rs-item">📄 宣传册 ×10 · 负责人: 王五</div>
+          </div>
+          <div class="report-section">
+            <div class="rs-title"><span>🏆 完成情况排行</span></div>
+            <div class="rs-item">🥇 张三 · 5项 · 100%完成</div>
+            <div class="rs-item">🥈 李四 · 4项 · 100%完成</div>
+            <div class="rs-item">🥉 赵六 · 3项 · 100%完成</div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">10. 复盘报告页</div>
+  </div>
+
+  <!-- 11. 个人中心页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">个人中心</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="profile-header">
+            <div class="avatar">👤</div>
+            <div class="profile-name">张小明</div>
+            <div class="profile-role">某品牌市场运营</div>
+          </div>
+          <div class="membership-card">
+            <div class="mc-level">🎯 免费版</div>
+            <div class="mc-expire">已使用 3/3 个模板 · 32/50 项物料</div>
+            <button class="mc-upgrade">升级到专业版 ¥29/月</button>
+          </div>
+          <div class="menu-list">
+            <div class="menu-item">
+              <span class="menu-label">📊 我的活动</span>
+              <span class="menu-arrow">›</span>
+            </div>
+            <div class="menu-item">
+              <span class="menu-label">👥 我的团队</span>
+              <span class="menu-badge">3人</span>
+            </div>
+            <div class="menu-item">
+              <span class="menu-label">🔔 消息通知</span>
+              <span class="menu-badge">2</span>
+            </div>
+            <div class="menu-item">
+              <span class="menu-label">💎 会员中心</span>
+              <span class="menu-arrow">›</span>
+            </div>
+            <div class="menu-item">
+              <span class="menu-label">⚙️ 设置</span>
+              <span class="menu-arrow">›</span>
+            </div>
+            <div class="menu-item">
+              <span class="menu-label">❓ 帮助中心</span>
+              <span class="menu-arrow">›</span>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item active"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">11. 个人中心页</div>
+  </div>
+
+  <!-- 12. 会员中心页 -->
+  <div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="page-title">会员中心</span>
+          <span>📶 🔋</span>
+        </div>
+        <div class="screen-content">
+          <div class="membership-card" style="background:linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);">
+            <div class="mc-level">🎯 当前：免费版</div>
+            <div class="mc-expire">已用 3/3 个模板 · 32/50 项物料</div>
+          </div>
+          <div style="background:linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius:8px; padding:12px; margin-bottom:10px;">
+            <div style="font-size:13px; font-weight:700; color:#333;">💎 升级到专业版</div>
+            <div style="font-size:20px; font-weight:700; color:#333; margin:5px 0;">¥29<span style="font-size:11px;">/月</span></div>
+            <button style="background:#333; color:#ffd700; border:none; padding:8px 20px; border-radius:15px; font-size:12px; font-weight:600;">立即升级</button>
+          </div>
+          <div style="font-size:12px; font-weight:600; margin-bottom:8px;">功能权益对比</div>
+          <div class="benefit-item">
+            <div class="benefit-icon">📋</div>
+            <div class="benefit-text">活动模板数量</div>
+            <div style="font-size:10px;"><span style="color:#999;">3个</span> → <span style="color:#07c160; font-weight:600;">无限</span></div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">📦</div>
+            <div class="benefit-text">物料项数上限</div>
+            <div style="font-size:10px;"><span style="color:#999;">50项</span> → <span style="color:#07c160; font-weight:600;">无限</span></div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">👥</div>
+            <div class="benefit-text">多人协作</div>
+            <div class="benefit-check">✓</div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">📸</div>
+            <div class="benefit-text">照片记录</div>
+            <div class="benefit-check">✓</div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">📊</div>
+            <div class="benefit-text">历史复盘</div>
+            <div class="benefit-check">✓</div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">📥</div>
+            <div class="benefit-text">采购清单导出</div>
+            <div class="benefit-check">✓</div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon">🏠</div>首页</div>
+          <div class="tab-item"><div class="tab-icon">📋</div>模板</div>
+          <div class="tab-item active"><div class="tab-icon">👤</div>我的</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">12. 会员中心页</div>
+  </div>
+</div>
+
+<div style="text-align:center; margin-top:30px; padding:20px; color:#666; font-size:12px;">
+  <p>📱 小型展会摊位物料清单 - 小程序端全站点原型</p>
+  <p>涵盖登录、活动管理、物料管理、扫码确认、模板管理、复盘报告、会员体系 12 个核心页面</p>
+  <p style="margin-top:10px; color:#999;">MVP v1.0 · 2026-06-26</p>
+</div>
+</body>
+</html>
