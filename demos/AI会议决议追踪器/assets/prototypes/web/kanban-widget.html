@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>待办跟进看板 Widget</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f3f4f6; padding: 24px; }
+.widget-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #374151; padding-bottom: 8px; border-bottom: 2px solid #6366f1; display: inline-block; }
+.stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+.mini-stat { background: white; border-radius: 8px; border: 1px solid #e5e7eb; padding: 12px; text-align: center; }
+.mini-stat .label { font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+.mini-stat .value { font-size: 20px; font-weight: 700; }
+.mini-stat.danger .value { color: #ef4444; }
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-bar select { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; background: white; }
+.kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; min-height: 400px; }
+.kanban-column { background: #f9fafb; border-radius: 10px; padding: 10px; }
+.col-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 6px; margin-bottom: 10px; }
+.col-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.col-count { background: #e5e7eb; color: #6b7280; font-size: 11px; padding: 1px 7px; border-radius: 10px; }
+.col-count.danger { background: #fecaca; color: #b91c1c; }
+.kanban-card { background: white; border-radius: 8px; border: 1px solid #e5e7eb; padding: 10px; margin-bottom: 8px; cursor: grab; transition: all 0.2s; }
+.kanban-card:hover { border-color: #6366f1; box-shadow: 0 2px 8px rgba(99,102,241,0.1); transform: translateY(-1px); }
+.kanban-card.overdue { border-left: 3px solid #ef4444; }
+.kanban-card .card-title { font-size: 13px; font-weight: 500; margin-bottom: 8px; line-height: 1.4; }
+.kanban-card .card-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #6b7280; }
+.avatar-sm { width: 18px; height: 18px; border-radius: 50%; background: #818cf8; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; }
+.card-assignee { display: flex; align-items: center; gap: 4px; }
+.card-due { display: flex; align-items: center; gap: 3px; }
+.card-due.urgent { color: #ef4444; font-weight: 500; }
+.card-source { font-size: 10px; color: #9ca3af; margin-top: 6px; padding-top: 6px; border-top: 1px solid #f3f4f6; }
+.drag-hint { font-size: 11px; color: #9ca3af; text-align: center; padding: 8px; }
+</style>
+</head>
+<body>
+<div class="widget-title">📋 待办跟进看板 Widget</div>
+
+<div class="stats-row">
+  <div class="mini-stat">
+    <div class="label">总待办</div>
+    <div class="value">47</div>
+  </div>
+  <div class="mini-stat">
+    <div class="label">待开始</div>
+    <div class="value" style="color:#6b7280;">12</div>
+  </div>
+  <div class="mini-stat">
+    <div class="label">进行中</div>
+    <div class="value" style="color:#1d4ed8;">18</div>
+  </div>
+  <div class="mini-stat">
+    <div class="label">已完成</div>
+    <div class="value" style="color:#047857;">12</div>
+  </div>
+  <div class="mini-stat danger">
+    <div class="label">已逾期</div>
+    <div class="value">5</div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <select><option>全部负责人</option><option>张明</option><option>王磊</option><option>刘芳</option><option>陈杰</option></select>
+  <select><option>全部来源</option><option>产品周会_0628</option><option>技术评审_0627</option></select>
+  <select><option>全部截止日期</option><option>今天</option><option>本周</option><option>已逾期</option></select>
+</div>
+
+<div class="kanban-board">
+  <!-- 待开始 -->
+  <div class="kanban-column">
+    <div class="col-header">
+      <div class="col-title">⏳ 待开始 <span class="col-count">3</span></div>
+    </div>
+    <div class="kanban-card">
+      <div class="card-title">完成暗色模式设计稿</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">王</span> 王磊</div>
+        <div class="card-due">📅 7月3日</div>
+      </div>
+      <div class="card-source">📄 产品周会_0628</div>
+    </div>
+    <div class="kanban-card">
+      <div class="card-title">更新设计规范文档</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">王</span> 王磊</div>
+        <div class="card-due">📅 7月3日</div>
+      </div>
+      <div class="card-source">📄 产品周会_0628</div>
+    </div>
+    <div class="kanban-card">
+      <div class="card-title">更新定价页面和用户引导</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">李</span> 李华</div>
+        <div class="card-due">📅 7月1日</div>
+      </div>
+      <div class="card-source">📄 产品周会_0628</div>
+    </div>
+    <div class="drag-hint">↕ 拖拽卡片到其他列变更状态</div>
+  </div>
+
+  <!-- 进行中 -->
+  <div class="kanban-column">
+    <div class="col-header">
+      <div class="col-title">🔄 进行中 <span class="col-count">4</span></div>
+    </div>
+    <div class="kanban-card">
+      <div class="card-title">完成模型切换技术方案</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">刘</span> 刘芳</div>
+        <div class="card-due">📅 6月30日</div>
+      </div>
+      <div class="card-source">📄 产品周会_0628</div>
+    </div>
+    <div class="kanban-card">
+      <div class="card-title">钉钉API同步对接</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">陈</span> 陈杰</div>
+        <div class="card-due urgent">📅 明天</div>
+      </div>
+      <div class="card-source">📄 技术评审_0627</div>
+    </div>
+    <div class="kanban-card">
+      <div class="card-title">用户反馈分析报告</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">李</span> 李华</div>
+        <div class="card-due">📅 7月2日</div>
+      </div>
+      <div class="card-source">📄 客户需求沟通_0626</div>
+    </div>
+    <div class="kanban-card">
+      <div class="card-title">Notion API对接</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">陈</span> 陈杰</div>
+        <div class="card-due">📅 7月5日</div>
+      </div>
+      <div class="card-source">📄 产品周会_0628</div>
+    </div>
+  </div>
+
+  <!-- 已完成 -->
+  <div class="kanban-column">
+    <div class="col-header">
+      <div class="col-title">✅ 已完成 <span class="col-count">3</span></div>
+    </div>
+    <div class="kanban-card" style="opacity:0.7;">
+      <div class="card-title">用户反馈系统改版</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">李</span> 李华</div>
+        <div class="card-due">✅ 6月27日</div>
+      </div>
+      <div class="card-source">📄 技术评审_0627</div>
+    </div>
+    <div class="kanban-card" style="opacity:0.7;">
+      <div class="card-title">飞书API同步对接</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">陈</span> 陈杰</div>
+        <div class="card-due">✅ 6月28日</div>
+      </div>
+      <div class="card-source">📄 技术评审_0627</div>
+    </div>
+    <div class="kanban-card" style="opacity:0.7;">
+      <div class="card-title">AI提取Prompt优化</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">刘</span> 刘芳</div>
+        <div class="card-due">✅ 6月26日</div>
+      </div>
+      <div class="card-source">📄 技术评审_0627</div>
+    </div>
+  </div>
+
+  <!-- 已逾期 -->
+  <div class="kanban-column">
+    <div class="col-header">
+      <div class="col-title">🚨 已逾期 <span class="col-count danger">2</span></div>
+    </div>
+    <div class="kanban-card overdue">
+      <div class="card-title">数据库性能优化</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">陈</span> 陈杰</div>
+        <div class="card-due urgent">📅 逾期3天</div>
+      </div>
+      <div class="card-source">📄 技术评审_0627</div>
+    </div>
+    <div class="kanban-card overdue">
+      <div class="card-title">安全合规审查报告</div>
+      <div class="card-meta">
+        <div class="card-assignee"><span class="avatar-sm">刘</span> 刘芳</div>
+        <div class="card-due urgent">📅 逾期1天</div>
+      </div>
+      <div class="card-source">📄 产品周会_0628</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
