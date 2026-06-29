@@ -77,7 +77,9 @@
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-container">
       <button class="modal-close" id="modalClose">&times;</button>
-      <button class="modal-fullscreen" id="modalFullscreen" title="全屏">⛶</button>
+      <button class="modal-fullscreen" id="modalFullscreen" title="全屏">
+        <iconify-icon icon="mingcute:fullscreen-2-fill" width="20" height="20"></iconify-icon>
+      </button>
       <div class="modal-body">
         <div class="modal-sidebar" id="modalSidebar"></div>
         <div class="modal-content">
@@ -88,6 +90,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@2/dist/iconify-icon.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script>mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'})</script>

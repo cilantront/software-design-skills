@@ -71,7 +71,7 @@ var observer=new IntersectionObserver(function(entries){entries.forEach(function
 document.querySelectorAll(".demo-card").forEach(function(card){observer.observe(card)})}
 modalPanel.addEventListener("click",function(e){var a=e.target.closest("a");if(!a||!a.href||!currentDemo)return;var href=a.getAttribute("href");if(!href)return;var proto=currentDemo.prototypes.find(function(p){return href.indexOf(p.url.split("/").pop())!==-1||href===p.url});if(proto){e.preventDefault();var idx=currentDemo.prototypes.indexOf(proto);switchTab(currentDemo,"proto",idx)}});
 modalClose.addEventListener("click",closeModal);
-modalFullscreen.addEventListener("click",function(){modalOverlay.classList.toggle("fullscreen");modalFullscreen.textContent=modalOverlay.classList.contains("fullscreen")?"✕":"⛶"});
+modalFullscreen.addEventListener("click",function(){modalOverlay.classList.toggle("fullscreen");var icon=modalFullscreen.querySelector("iconify-icon");icon.icon=modalOverlay.classList.contains("fullscreen")?"mingcute:fullscreen-exit-2-fill":"mingcute:fullscreen-2-fill"});
 modalOverlay.addEventListener("click",function(e){if(e.target===modalOverlay) closeModal()});
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&modalOverlay.classList.contains("active")) closeModal()});
 initFilters();
