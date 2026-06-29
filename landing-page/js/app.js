@@ -1,4 +1,4 @@
-(function(){var filterBar=document.getElementById("filterBar");var galleryGrid=document.getElementById("galleryGrid");var modalOverlay=document.getElementById("modalOverlay");var modalClose=document.getElementById("modalClose");var modalSidebar=document.getElementById("modalSidebar");var modalTabs=document.getElementById("modalTabs");var modalPanel=document.getElementById("modalPanel");var currentDemo=null;var currentTab=null;function initFilters(){var tags=new Set();DEMOS.forEach(function(d){d.tags.forEach(function(t){tags.add(t)})});var allBtn=document.createElement("button");allBtn.className="filter-tag active";allBtn.textContent="全部";allBtn.dataset.tag="all";allBtn.addEventListener("click",function(){setActiveFilter("all");renderCards("all")});filterBar.appendChild(allBtn);tags.forEach(function(t){var btn=document.createElement("button");btn.className="filter-tag";btn.textContent=t;btn.dataset.tag=t;btn.addEventListener("click",function(){setActiveFilter(t);renderCards(t)});filterBar.appendChild(btn)})}function setActiveFilter(tag){
+(function(){var filterBar=document.getElementById("filterBar");var galleryGrid=document.getElementById("galleryGrid");var modalOverlay=document.getElementById("modalOverlay");var modalClose=document.getElementById("modalClose");var modalFullscreen=document.getElementById("modalFullscreen");var modalSidebar=document.getElementById("modalSidebar");var modalTabs=document.getElementById("modalTabs");var modalPanel=document.getElementById("modalPanel");var currentDemo=null;var currentTab=null;function initFilters(){var tags=new Set();DEMOS.forEach(function(d){d.tags.forEach(function(t){tags.add(t)})});var allBtn=document.createElement("button");allBtn.className="filter-tag active";allBtn.textContent="全部";allBtn.dataset.tag="all";allBtn.addEventListener("click",function(){setActiveFilter("all");renderCards("all")});filterBar.appendChild(allBtn);tags.forEach(function(t){var btn=document.createElement("button");btn.className="filter-tag";btn.textContent=t;btn.dataset.tag=t;btn.addEventListener("click",function(){setActiveFilter(t);renderCards(t)});filterBar.appendChild(btn)})}function setActiveFilter(tag){
 var btns=filterBar.querySelectorAll(".filter-tag");
 btns.forEach(function(b){b.classList.toggle("active",b.dataset.tag===tag)})}
 function renderCards(filterTag){
@@ -43,7 +43,19 @@ if(type==="urs"||type==="prd"){
 var url=type==="urs"?demo.urs:demo.prd;
 fetch(url).then(function(r){return r.text()}).then(function(md){
 var html=marked.parse(md);
-modalPanel.innerHTML="<div class='md-content'>"+html+"</div>"
+modalPanel.innerHTML="<div class='md-content'>"+html+"</div>";
+setTimeout(function(){
+if(typeof mermaid!=="undefined"){
+var els=modalPanel.querySelectorAll(".language-mermaid");
+els.forEach(function(el){
+try{
+var code=el.textContent;
+el.outerHTML="<div class='mermaid'>"+code+"</div>"
+}catch(e){}
+});
+mermaid.run({querySelector:".mermaid"})
+}
+},100)
 }).catch(function(){modalPanel.innerHTML="<div class='loading' style='color:#ef4444'>Failed to load document</div>"})
 }else if(type==="proto"){
 var proto=demo.prototypes[index];
@@ -57,7 +69,9 @@ currentDemo=null}
 function initScrollAnimation(){
 var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");observer.unobserve(e.target)}})},{threshold:0.1});
 document.querySelectorAll(".demo-card").forEach(function(card){observer.observe(card)})}
+modalPanel.addEventListener("click",function(e){var a=e.target.closest("a");if(!a||!a.href||!currentDemo)return;var href=a.getAttribute("href");if(!href)return;var proto=currentDemo.prototypes.find(function(p){return href.indexOf(p.url.split("/").pop())!==-1||href===p.url});if(proto){e.preventDefault();var idx=currentDemo.prototypes.indexOf(proto);switchTab(currentDemo,"proto",idx)}});
 modalClose.addEventListener("click",closeModal);
+modalFullscreen.addEventListener("click",function(){modalOverlay.classList.toggle("fullscreen");modalFullscreen.textContent=modalOverlay.classList.contains("fullscreen")?"✕":"⛶"});
 modalOverlay.addEventListener("click",function(e){if(e.target===modalOverlay) closeModal()});
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&modalOverlay.classList.contains("active")) closeModal()});
 initFilters();
