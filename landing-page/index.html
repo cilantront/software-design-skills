@@ -518,7 +518,7 @@
     <div class="cases-modal-container">
       <button class="cases-modal-close" id="casesModalClose">×</button>
       <button class="cases-modal-fullscreen" id="casesModalFullscreen" title="全屏">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <iconify-icon icon="mingcute:fullscreen-2-fill" width="18" height="18"></iconify-icon>
       </button>
       <div class="cases-modal-body">
         <div class="cases-modal-sidebar" id="casesModalSidebar"></div>
@@ -903,6 +903,7 @@
   </footer>
 
   <!-- Cases: Markdown & Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@2/dist/iconify-icon.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script>mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'});</script>
@@ -1360,6 +1361,8 @@
       closeBtn.addEventListener('click', closeModal);
       fsBtn.addEventListener('click', function(){
         overlay.classList.toggle('fullscreen');
+        var icon = fsBtn.querySelector('iconify-icon');
+        icon.icon = overlay.classList.contains('fullscreen') ? 'mingcute:fullscreen-exit-2-fill' : 'mingcute:fullscreen-2-fill';
       });
       overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
       document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && overlay.classList.contains('active')) closeModal(); });
