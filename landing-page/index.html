@@ -1992,23 +1992,42 @@
 
         if(type === 'urs' || type === 'prd') {
           var url = type === 'urs' ? demo.urs : demo.prd;
-          fetch(url).then(function(r){ return r.text(); }).then(function(md){
-            var html = marked.parse(md);
-            panel.innerHTML = '<div class="md-content">' + html + '</div>';
-            setTimeout(function(){
-              if(typeof mermaid !== 'undefined') {
-                var els = panel.querySelectorAll('.language-mermaid');
-                els.forEach(function(el){
-                  try {
-                    var code = el.textContent;
-                    el.outerHTML = '<div class="mermaid">' + code + '</div>';
-                  } catch(e){}
-                });
-                mermaid.run({querySelector:'.mermaid'});
-              }
-            }, 100);
-          }).catch(function(){ panel.innerHTML = '<div class="loading" style="color:#ef4444">文档加载失败</div>'; });
-        panel.addEventListener("click",function(e){var a=e.target.closest("a");if(!a||!a.href||!currentDemo)return;var href=a.getAttribute("href");if(!href)return;var proto=currentDemo.prototypes.find(function(p){return href.indexOf(p.url.split("/").pop())!==-1||href===p.url});if(proto){e.preventDefault();e.stopPropagation();var idx=currentDemo.prototypes.indexOf(proto);switchTab(currentDemo,"proto",idx)}},{once:false});
+          var linkInterceptor = function(e){
+            var a = e.target.closest('a');
+            if(!a || !a.href || !currentDemo) return;
+            var href = a.getAttribute('href');
+            if(!href) return;
+            var proto = currentDemo.prototypes.find(function(p){
+              return href.indexOf(p.url.split('/').pop()) !== -1 || href === p.url;
+            });
+            if(proto){ e.preventDefault(); e.stopPropagation(); switchTab(currentDemo, 'proto', currentDemo.prototypes.indexOf(proto)); }
+          };
+
+          if(location.protocol === 'file:') {
+            // file:// 下 fetch 会被 CORS 拦截，用 iframe 直接展示原始文档（纯文本，无报错）
+            panel.innerHTML = '<iframe class="prototype-frame" src="' + url + '"></iframe>';
+          } else {
+            fetch(url).then(function(r){ return r.text(); }).then(function(md){
+              var html = marked.parse(md);
+              panel.innerHTML = '<div class="md-content">' + html + '</div>';
+              panel.addEventListener('click', linkInterceptor);
+              setTimeout(function(){
+                if(typeof mermaid !== 'undefined') {
+                  var els = panel.querySelectorAll('.language-mermaid');
+                  els.forEach(function(el){
+                    try {
+                      var code = el.textContent;
+                      el.outerHTML = '<div class="mermaid">' + code + '</div>';
+                    } catch(e){}
+                  });
+                  mermaid.run({querySelector:'.mermaid'});
+                }
+              }, 100);
+            }).catch(function(){
+              // 兜底：fetch 失败时退化为 iframe 展示原始文档
+              panel.innerHTML = '<iframe class="prototype-frame" src="' + url + '"></iframe>';
+            });
+          }
         } else if(type === 'proto') {
           var proto = demo.prototypes[index];
           panel.innerHTML = '<iframe class="prototype-frame" src="' + proto.url + '"></iframe>';
