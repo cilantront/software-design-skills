@@ -76,7 +76,11 @@
     }
 
     /* ===== 案例展示 ===== */
-    .cases-filter-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-bottom: 3rem; }
+    .cases-filters { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem; align-items: flex-start; }
+    .cases-filter-group { display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem; width: 100%; }
+    .cases-filter-label { font-size: 1.05rem; font-weight: 800; color: #475569; flex-shrink: 0; }
+    .dark .cases-filter-label { color: #CBD5E1; }
+    .cases-filter-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-start; }
     .cases-filter-tag {
       padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 600;
       color: #64748B; background: rgba(241,245,249,0.8);
@@ -132,6 +136,23 @@
       border: 1px solid rgba(225,29,72,0.15); border-radius: 4px;
     }
     .dark .case-card-tag { color: #FB7185; background: rgba(225,29,72,0.15); border-color: rgba(251,113,133,0.2); }
+
+    /* 主分类徽章（二次交叉比对归纳） */
+    .case-card-cat {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.25rem 0.75rem; margin-bottom: 0.7rem;
+      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em;
+      color: #fff; border-radius: 9999px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    /* 端类型徽章 */
+    .case-card-ends { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.55rem; }
+    .case-card-end {
+      padding: 0.15rem 0.55rem; font-size: 0.68rem; font-weight: 600;
+      color: #475569; background: rgba(100,116,139,0.1);
+      border: 1px solid rgba(100,116,139,0.2); border-radius: 4px;
+    }
+    .dark .case-card-end { color: #94A3B8; background: rgba(100,116,139,0.18); border-color: rgba(100,116,139,0.3); }
 
     /* Modal */
     .cases-modal-overlay {
@@ -507,7 +528,20 @@
         <p class="text-[15px] text-slate-500 dark:text-slate-400 max-w-lg mx-auto">来自真实场景的 68 个案例，覆盖保险、教育、医疗、物业、零售等行业</p>
         <div class="section-divider bg-gradient-to-r from-rose-500 to-blue-500 mt-6"></div>
       </div>
-      <div class="cases-filter-bar" id="casesFilterBar"></div>
+      <div class="cases-filters" id="casesFilters">
+        <div class="cases-filter-group">
+          <span class="cases-filter-label">领域</span>
+          <div class="cases-filter-tags" data-dim="domain"></div>
+        </div>
+        <div class="cases-filter-group">
+          <span class="cases-filter-label">场景</span>
+          <div class="cases-filter-tags" data-dim="scenario"></div>
+        </div>
+        <div class="cases-filter-group">
+          <span class="cases-filter-label">端</span>
+          <div class="cases-filter-tags" data-dim="end"></div>
+        </div>
+      </div>
       <div class="cases-grid" id="casesGrid"></div>
     </div>
   </section>
@@ -1784,10 +1818,87 @@
     ]
   }
 ];
+
+    // 端类型：来自 demos-meta.md 的「包括端类型」列（web / mobile / mini-program）
+    var ENDS_BY_ID = {
+      'pet-insurance': ['web','mini-program','mobile'],
+      'children-class-shuttle': ['web','mini-program'],
+      'delivery-risk-check': ['web'],
+      'cs-feedback-to-card': ['web'],
+      'kb-gap-catcher': ['web'],
+      'course-to-exercise': ['web'],
+      'bnb-cleaning': ['web','mobile'],
+      'community-qa-asset': ['web'],
+      'photo-selection': ['web','mobile'],
+      'expo-material': ['web','mobile','mini-program'],
+      'dental-followup': ['web','mobile'],
+      'drug-inventory': ['mini-program'],
+      'key-access-a': ['web','mini-program'],
+      'key-access-b': ['web','mini-program'],
+      'booking-supply': ['web'],
+      'video-teaser': ['web'],
+      'rental-handover': ['web'],
+      'ai-knowledge-fragments': ['web','mobile'],
+      'project-cost-calc': ['web'],
+      'moving-checklist': ['web','mini-program'],
+      'freelancer-contract-reminder': ['web'],
+      'podcast-clip-editor': ['web'],
+      'podcast-shownotes-generator': ['web'],
+      'pet-store-member-management': ['web'],
+      'pet-foster-matching': ['web','mini-program'],
+      'pet-foster-handover': ['web'],
+      'creator-unified-inbox': ['web'],
+      'creator-comment-scripts': ['web'],
+      'ecommerce-review-insights': ['web'],
+      'coffee-shop-inventory': ['web'],
+      'musician-release-calendar': ['web'],
+      'yoga-coach-scheduling': ['web'],
+      'short-video-comment-extractor': ['web'],
+      'creator-publish-calendar': ['web'],
+      'elderly-care-scheduling': ['web'],
+      'used-car-inventory': ['web'],
+      'contract-risk-scanner': ['web','mini-program'],
+      'flower-shop-stocking': ['web'],
+      'gym-class-management': ['web'],
+      'script-to-storyboard': ['web'],
+      'video-to-notes': ['web'],
+      'elderly-digital-legacy': ['web'],
+      'neighborhood-tool-sharing': ['web'],
+      'carpool-cost-split': ['web'],
+      'cross-platform-content-adapter': ['web'],
+      'ttrpg-activity-manager': ['web'],
+      'community-swap-record': ['web'],
+      'community-group-buying': ['web'],
+      'photographer-client-selection': ['web'],
+      'tattoo-clinic-booking': ['web'],
+      'restaurant-ingredient-purchase': ['web'],
+      'xiaohongshu-seo-optimizer': ['web'],
+      'workshop-order-scheduling': ['web'],
+      'app-developer-refund-alerts': ['web'],
+      'livestream-clip-tool': ['web'],
+      'social-media-approval-workflow': ['web'],
+      'freelancer-quote-generator': ['web'],
+      'freelancer-quote-acceptance': ['web'],
+      'freelancer-payment-reconciliation': ['web'],
+      'freelancer-client-communication': ['web'],
+      'freelancer-proposal-packager': ['web'],
+      'freelancer-project-retro': ['web'],
+      'ai-contract-risk-review': ['web'],
+      'ai-meeting-resolution-tracker': ['web'],
+      'ai-screenshot-organizer': ['web'],
+      'ai-interview-coach': ['web'],
+      'ai-aso-material-generator': ['web'],
+      'ai-rental-contract-risk': ['web']
+    };
+    CASES_DEMOS.forEach(function(d){ d.ends = ENDS_BY_ID[d.id] || ['web']; });
   </script>
   <script>
     (function(){
-      var filterBar = document.getElementById('casesFilterBar');
+      var filterEls = {
+        domain: document.querySelector('#casesFilters .cases-filter-tags[data-dim="domain"]'),
+        scenario: document.querySelector('#casesFilters .cases-filter-tags[data-dim="scenario"]'),
+        end: document.querySelector('#casesFilters .cases-filter-tags[data-dim="end"]')
+      };
       var grid = document.getElementById('casesGrid');
       var overlay = document.getElementById('casesModalOverlay');
       var closeBtn = document.getElementById('casesModalClose');
@@ -1800,44 +1911,107 @@
       // 不参与分类筛选的标签
       var EXCLUDED_FILTER_TAGS = ['需求分析', '产品设计'];
 
+      // 主分类映射：把现有领域标签归纳成更高层级（二次交叉比对）
+      var TAG_TO_PRIMARY = {
+        '金融保险': '金融',
+        '教育': '教育',
+        '医疗': '医疗健康',
+        '企业服务': '企业服务', '物业': '企业服务', '零售': '企业服务', '电商': '企业服务', '房产': '企业服务', '客服': '企业服务', '展会': '企业服务',
+        '内容创作': '内容创作', '创作': '内容创作', '摄影': '内容创作', '音乐': '内容创作', '知识管理': '内容创作', '知识付费': '内容创作', 'AI工具': '内容创作',
+        '生活工具': '生活服务', '家庭': '生活服务', '社区': '生活服务', '宠物': '生活服务', '餐饮': '生活服务', '花艺': '生活服务', '健身': '生活服务', '自由职业': '生活服务'
+      };
+      // 主分类配色
+      var PRIMARY_COLORS = {
+        '金融': 'linear-gradient(135deg,#E11D48,#FB7185)',
+        '教育': 'linear-gradient(135deg,#0EA5E9,#38BDF8)',
+        '医疗健康': 'linear-gradient(135deg,#10B981,#34D399)',
+        '企业服务': 'linear-gradient(135deg,#F59E0B,#FBBF24)',
+        '内容创作': 'linear-gradient(135deg,#8B5CF6,#A78BFA)',
+        '生活服务': 'linear-gradient(135deg,#14B8A6,#2DD4BF)'
+      };
+      // 交叉比对：依据卡片的细分标签推导出主分类（取首个命中的细分标签所属主分类）
+      function getPrimaryCategory(demo) {
+        var primary = '其他';
+        for (var i = 0; i < demo.tags.length; i++) {
+          var t = demo.tags[i];
+          if (EXCLUDED_FILTER_TAGS.indexOf(t) !== -1) continue;
+          if (TAG_TO_PRIMARY[t]) { primary = TAG_TO_PRIMARY[t]; break; }
+        }
+        return primary;
+      }
+
+      // 筛选状态（三维：领域 / 场景 / 端）
+      var selected = { domain: 'all', scenario: 'all', end: 'all' };
+      var END_OPTIONS = [
+        { value: 'web', label: 'Web端' },
+        { value: 'mobile', label: '移动端' },
+        { value: 'mini-program', label: '小程序' }
+      ];
+      var END_LABELS = { 'web': 'Web端', 'mobile': '移动端', 'mini-program': '小程序' };
+
+      function domainOptions() {
+        var set = {};
+        CASES_DEMOS.forEach(function(d){ var p = getPrimaryCategory(d); if (p) set[p] = 1; });
+        return Object.keys(set);
+      }
+      function scenarioOptions() {
+        var set = {};
+        CASES_DEMOS.forEach(function(d){ d.tags.forEach(function(t){ if (EXCLUDED_FILTER_TAGS.indexOf(t) === -1) set[t] = 1; }); });
+        return Object.keys(set);
+      }
+
       // Init filters
       function initFilters() {
-        var tagSet = new Set();
-        CASES_DEMOS.forEach(function(d){ d.tags.forEach(function(t){ if (EXCLUDED_FILTER_TAGS.indexOf(t) === -1) tagSet.add(t); }); });
-        var allBtn = document.createElement('button');
-        allBtn.className = 'cases-filter-tag active';
-        allBtn.textContent = '全部';
-        allBtn.dataset.tag = 'all';
-        allBtn.addEventListener('click', function(){ setFilter('all'); render('all'); });
-        filterBar.appendChild(allBtn);
-        tagSet.forEach(function(t){
+        buildDim('domain', [['all','全部']].concat(domainOptions().map(function(v){ return [v, v]; })));
+        buildDim('scenario', [['all','全部']].concat(scenarioOptions().map(function(v){ return [v, v]; })));
+        buildDim('end', [['all','全部']].concat(END_OPTIONS.map(function(o){ return [o.value, o.label]; })));
+      }
+
+      function buildDim(dim, options) {
+        var container = filterEls[dim];
+        container.innerHTML = '';
+        options.forEach(function(opt){
+          var value = opt[0], label = opt[1];
           var btn = document.createElement('button');
-          btn.className = 'cases-filter-tag';
-          btn.textContent = t;
-          btn.dataset.tag = t;
-          btn.addEventListener('click', function(){ setFilter(t); render(t); });
-          filterBar.appendChild(btn);
+          btn.className = 'cases-filter-tag' + (selected[dim] === value ? ' active' : '');
+          btn.textContent = label;
+          btn.addEventListener('click', function(){
+            selected[dim] = value;
+            container.querySelectorAll('.cases-filter-tag').forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+            render();
+          });
+          container.appendChild(btn);
         });
       }
 
-      function setFilter(tag) {
-        filterBar.querySelectorAll('.cases-filter-tag').forEach(function(b){
-          b.classList.toggle('active', b.dataset.tag === tag);
-        });
+      // 三维交叉比对：三个维度同时命中（AND）
+      function matches(demo) {
+        if (selected.domain !== 'all' && getPrimaryCategory(demo) !== selected.domain) return false;
+        if (selected.scenario !== 'all' && demo.tags.indexOf(selected.scenario) === -1) return false;
+        if (selected.end !== 'all' && (demo.ends || []).indexOf(selected.end) === -1) return false;
+        return true;
       }
 
-      function render(filterTag) {
+      function render() {
         grid.innerHTML = '';
-        var filtered = filterTag === 'all' ? CASES_DEMOS : CASES_DEMOS.filter(function(d){ return d.tags.indexOf(filterTag) !== -1; });
+        var filtered = CASES_DEMOS.filter(matches);
         filtered.forEach(function(demo){
           var card = document.createElement('div');
           card.className = 'case-card';
+          var primary = getPrimaryCategory(demo);
+          var primaryColor = PRIMARY_COLORS[primary] || 'linear-gradient(135deg,#64748B,#94A3B8)';
+          var endBadges = (demo.ends || []).map(function(e){
+            return '<span class="case-card-end">' + (END_LABELS[e] || e) + '</span>';
+          }).join('');
           card.innerHTML =
             '<div class="case-card-thumb"><iframe src="' + demo.thumbnail + '" loading="lazy"></iframe></div>' +
             '<div class="case-card-body">' +
+              '<span class="case-card-cat" style="background:' + primaryColor + '">' + primary + '</span>' +
               '<div class="case-card-name">' + demo.name + '</div>' +
               '<div class="case-card-desc">' + demo.description + '</div>' +
               '<div class="case-card-tags">' + demo.tags.filter(function(t){ return EXCLUDED_FILTER_TAGS.indexOf(t) === -1; }).map(function(t){ return '<span class="case-card-tag">' + t + '</span>'; }).join('') + '</div>' +
+              '<div class="case-card-ends">' + endBadges + '</div>' +
             '</div>';
           card.addEventListener('click', function(){ openModal(demo); });
           grid.appendChild(card);
@@ -1857,7 +2031,9 @@
         sidebar.innerHTML =
           '<h2>' + demo.name + '</h2>' +
           '<p class="desc">' + demo.description + '</p>' +
-          '<div class="meta-section"><div class="meta-label">标签</div><div class="meta-tags">' + demo.tags.map(function(t){ return '<span class="meta-tag">' + t + '</span>'; }).join('') + '</div></div>' +
+          '<div class="meta-section"><div class="meta-label">领域</div><div class="meta-tags"><span class="meta-tag">' + getPrimaryCategory(demo) + '</span></div></div>' +
+          '<div class="meta-section"><div class="meta-label">场景</div><div class="meta-tags">' + demo.tags.filter(function(t){ return EXCLUDED_FILTER_TAGS.indexOf(t) === -1; }).map(function(t){ return '<span class="meta-tag">' + t + '</span>'; }).join('') + '</div></div>' +
+          '<div class="meta-section"><div class="meta-label">端</div><div class="meta-tags">' + (demo.ends || []).map(function(e){ return '<span class="meta-tag">' + (END_LABELS[e] || e) + '</span>'; }).join('') + '</div></div>' +
           '<div class="meta-section"><div class="meta-label">文档</div><ul class="doc-list">' +
             (demo.urs ? '<li>URS需求文档</li>' : '') +
             (demo.prd ? '<li>PRD产品文档</li>' : '') +
@@ -1934,7 +2110,7 @@
 
       // Init
       initFilters();
-      render('all');
+      render();
     })();
   </script>
 
