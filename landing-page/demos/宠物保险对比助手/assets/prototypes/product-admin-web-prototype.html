@@ -6,23 +6,20 @@
 <title>产品管理后台 - 全站点原型</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; padding: 20px; }
-.site-header { text-align: center; margin-bottom: 30px; }
-.site-title { font-size: 24px; font-weight: 700; color: #333; }
-.site-desc { font-size: 14px; color: #999; margin-top: 8px; }
-.admin-demo { width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); overflow: hidden; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+.admin-demo { width: 100%; height: 100vh; margin: 0; background: #fff; display: flex; flex-direction: column; overflow: hidden; }
 .admin-header { height: 56px; background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; padding: 0 24px; }
 .admin-logo { font-size: 16px; font-weight: 700; color: #4CAF50; margin-right: 24px; }
 .admin-nav { display: flex; gap: 24px; margin-right: auto; }
 .admin-nav-item { font-size: 14px; color: #666; cursor: pointer; padding: 16px 0; }
 .admin-nav-item.active { color: #4CAF50; border-bottom: 2px solid #4CAF50; }
 .admin-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; }
-.admin-body { display: flex; min-height: 600px; }
+.admin-body { display: flex; flex: 1; min-height: 0; }
 .admin-sidebar { width: 200px; background: #fafafa; border-right: 1px solid #f0f0f0; padding: 16px 0; }
 .sidebar-item { display: flex; align-items: center; padding: 12px 24px; font-size: 14px; color: #666; cursor: pointer; }
 .sidebar-item:hover, .sidebar-item.active { background: #E8F5E9; color: #4CAF50; }
 .sidebar-icon { margin-right: 10px; font-size: 16px; }
-.admin-content { flex: 1; padding: 24px; }
+.admin-content { flex: 1; padding: 24px; overflow-y: auto; }
 .page-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; }
 .filter-input { height: 32px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 240px; }
@@ -55,11 +52,6 @@ td { padding: 12px; border-bottom: 1px solid #f5f5f5; color: #333; }
 </style>
 </head>
 <body>
-
-<div class="site-header">
-  <div class="site-title">🖥️ 产品管理后台 - 全站点原型</div>
-  <div class="site-desc">WEB端 · 单体应用全屏布局 · 保险产品录入与维护</div>
-</div>
 
 <div class="admin-demo">
   <div class="admin-header">

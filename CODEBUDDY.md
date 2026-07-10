@@ -62,6 +62,21 @@
 
 > 改造要点：把原单页/多页原型里每个独立页面拆为独立的 `.phone` / `.phone-screen` 块，复制各自的 HTML 与样式到同一文件；状态栏/导航按上述两端规范补齐；内容超高的页面让内层滚动即可。
 
+## ⭐ Web 端原型「铺满屏幕」规则（后台管理类）
+
+Web 端后台 / 管理类原型（如运营后台、产品管理后台）应**铺满整个浏览器视口**，并以应用自身的顶栏/侧边栏体现信息架构；**不得保留外围的「站点标题 + 说明」装饰块**（如 `🖥️ XXX - 全站点原型` / `WEB端 · 单体应用全屏布局 …` 这类站点级标题条），让原型直接进入产品界面本身。
+
+**参考范例**：`landing-page/demos/客服知识库缺口捕捉器/assets/prototypes/kb-gap-catcher-prototype.html`（标题为纯产品名「KB-Gap Catcher 全站点原型」，无外围装饰标题，主体 `100vh` 铺满、侧边栏+主区布局）。
+
+### 改造要点
+1. **去掉外围标题块**：删除 HTML 中的 `.site-header`（含 `.site-title` / `.site-desc`）整段，以及对应 CSS。原型首屏直接是应用自身的顶栏/导航，不额外加「站点名+端类型说明」横幅。
+2. **body 撑满视口**：`body { margin:0; height:100vh; overflow:hidden; }`，去掉原 `padding` 与居中留白背景。
+3. **容器占满全屏**：把原 `width:1200px; margin:0 auto; border-radius:8px; box-shadow:…`（居中卡片式）改为 `width:100%; height:100vh; display:flex; flex-direction:column;`，去掉圆角与外阴影，让应用贴边铺满。
+4. **内部滚动**：外层 flex 列布局下，顶栏固定高度，内容区 `flex:1; min-height:0; overflow-y:auto`（如 `.admin-content { flex:1; overflow-y:auto; }`），内容过长时**仅在内容区滚动**，不撑高整页。
+5. **保留产品内自身信息**：应用内顶栏的 Logo、导航、用户区、侧边栏菜单等照常保留——被移除的只是「站点级装饰标题」，不是产品自身的标题栏。
+
+> 改造后效果：打开原型即全屏看到后台界面，与「客服知识库缺口捕捉器」的铺满风格一致；`landing-page/index.html` 弹窗里 iframe 嵌入时也能完整利用窗口宽度。
+
 ## 常用命令
 
 - **本地预览**：直接用浏览器打开 `landing-page/index.html` 即可（无需构建）。若 `iframe` 原型因 `file://` 受限，可在 `landing-page/` 起静态服务：`python -m http.server 8080`，再访问 `http://localhost:8080`。
