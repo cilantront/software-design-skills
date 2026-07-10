@@ -19,7 +19,7 @@
 | [搬家物品清单与进度跟踪器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/搬家物品清单与进度跟踪器) | ✅ |  | web, mini-program |
 | [播客Shownotes自动生成器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/播客Shownotes自动生成器) | ✅ |  | web |
 | [播客精彩片段剪辑助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/播客精彩片段剪辑助手) | ✅ |  | web |
-| [宠物保险对比助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/宠物保险对比助手) | ✅ |  | web, mobile, mini-program |
+| [宠物保险对比助手](d:/DataZone/产品方案部/45-OPC 平台\产品推广工作室\projects\优特云-Skills 推广与运营/demos/宠物保险对比助手) | ✅ | ❌ | web, mobile, mini-program |
 | [宠物店会员与寄养周期管理助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/宠物店会员与寄养周期管理助手) | ✅ |  | web, mini-program |
 | [宠物短期家庭寄养匹配助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/宠物短期家庭寄养匹配助手) | ✅ |  | web, mini-program |
 | [宠物家庭寄养交接与日志助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/宠物家庭寄养交接与日志助手) | ✅ |  | web, mini-program |
