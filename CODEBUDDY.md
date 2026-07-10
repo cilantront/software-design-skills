@@ -54,11 +54,9 @@
 
 ### 小程序（WeChat Mini-Program）
 - **手机外壳无厚边框**：`.phone-screen { width:375px; height:750px; border-radius:12px; overflow:hidden; }`，再套一层白色圆角卡片 `.phone-wrapper { background:#fff; border-radius:20px; padding:20px; box-shadow:…; }`。
-- **状态栏 + 微信导航栏一体化**：`background:#07c160`（微信绿）；上方状态栏时间，下方 `.wechat-nav` 居中标题 + 左返回 `←` + 右 `···`。
-- **标题标签放手机上方**：白卡内的 `.phone-label`（绿色小标签）。
-- **底部 home-indicator**：模拟小程序底部「返回首页」手势条（黑底横条）。
+- **状态栏 + 微信导航栏一体化**：上方状态栏时间，下方 `.wechat-nav` 居中标题 + 左返回 `←` + 右 `···`。
+- **标题标签放手机上方**：白卡内的 `.phone-label`（小标签）。
 - **网格布局**：响应式 `grid-template-columns: repeat(4, 1fr); max-width:1800px; margin:0 auto;`，断点 `1600/1200/800px` 依次降为 `3/2/1` 列。
-- **主色统一微信绿 `#07c160`**（按钮、标签、激活态均用此色）。
 
 > 改造要点：把原单页/多页原型里每个独立页面拆为独立的 `.phone` / `.phone-screen` 块，复制各自的 HTML 与样式到同一文件；状态栏/导航按上述两端规范补齐；内容超高的页面让内层滚动即可。
 
