@@ -1797,10 +1797,13 @@
       var panel = document.getElementById('casesModalPanel');
       var currentDemo = null;
 
+      // 不参与分类筛选的标签
+      var EXCLUDED_FILTER_TAGS = ['需求分析', '产品设计'];
+
       // Init filters
       function initFilters() {
         var tagSet = new Set();
-        CASES_DEMOS.forEach(function(d){ d.tags.forEach(function(t){ tagSet.add(t); }); });
+        CASES_DEMOS.forEach(function(d){ d.tags.forEach(function(t){ if (EXCLUDED_FILTER_TAGS.indexOf(t) === -1) tagSet.add(t); }); });
         var allBtn = document.createElement('button');
         allBtn.className = 'cases-filter-tag active';
         allBtn.textContent = '全部';
@@ -1834,7 +1837,7 @@
             '<div class="case-card-body">' +
               '<div class="case-card-name">' + demo.name + '</div>' +
               '<div class="case-card-desc">' + demo.description + '</div>' +
-              '<div class="case-card-tags">' + demo.tags.map(function(t){ return '<span class="case-card-tag">' + t + '</span>'; }).join('') + '</div>' +
+              '<div class="case-card-tags">' + demo.tags.filter(function(t){ return EXCLUDED_FILTER_TAGS.indexOf(t) === -1; }).map(function(t){ return '<span class="case-card-tag">' + t + '</span>'; }).join('') + '</div>' +
             '</div>';
           card.addEventListener('click', function(){ openModal(demo); });
           grid.appendChild(card);
