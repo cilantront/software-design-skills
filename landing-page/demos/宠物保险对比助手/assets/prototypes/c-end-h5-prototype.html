@@ -11,13 +11,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft
 .site-title { font-size: 24px; font-weight: 700; color: #333; }
 .site-desc { font-size: 14px; color: #999; margin-top: 8px; }
 .diff-note { max-width: 1100px; margin: 0 auto 20px; padding: 16px; background: #FFF3E0; border-radius: 8px; border-left: 4px solid #FF8C42; font-size: 13px; color: #666; }
-.screen-grid { display: grid; grid-template-columns: repeat(3, 375px); gap: 30px; justify-content: center; padding: 20px; }
-.phone { width: 375px; height: 750px; background: #fff; border-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); overflow: hidden; border: 8px solid #1a1a1a; position: relative; }
+.screen-grid { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 1800px; margin: 0 auto; gap: 30px; padding: 20px; }
+.phone { width: 375px; height: 750px; margin: 0 auto; background: #fff; border-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); overflow: hidden; border: 8px solid #1a1a1a; position: relative; }
 .phone-label { text-align: center; margin-top: 12px; font-size: 14px; font-weight: 600; color: #333; }
 .phone-sublabel { text-align: center; font-size: 12px; color: #999; }
-.status-bar { height: 44px; background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #fff; font-size: 12px; }
+.status-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #333; font-size: 12px; }
 .status-bar.white { background: #fff; color: #333; }
-.nav-bar { height: 50px; background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%); display: flex; align-items: center; padding: 0 16px; color: #fff; }
+.nav-bar { height: 50px; background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; padding: 0 16px; color: #333; }
 .nav-back { font-size: 24px; cursor: pointer; margin-right: 12px; }
 .nav-title { font-size: 17px; font-weight: 600; }
 .bottom-tab { position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: #fff; display: flex; border-top: 1px solid #f0f0f0; }

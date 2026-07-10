@@ -50,13 +50,13 @@
 - **状态栏（iOS 风格）**：`background:#fff`，左时间（如 `9:41`）、右信号/电池图标，加粗小字。
 - **导航**：`.nav-header`（左返回箭头 + 标题 + 右上信息，白底下边框）**或** 底部 `.tab-bar`（白底上边框，图标+文字，active 项高亮主色）。
 - **标题标签放手机下方**：`.phone-wrap` 内先放 `.phone`、再放 `.phone-label` / `.phone-sublabel`。
-- **网格布局**：`grid-template-columns: repeat(3, 375px); justify-content:center; gap:30px;`（固定 3 列居中，不随视口收窄折叠；页宽不足时出现横向滚动）。
+- **网格布局**（与小程序端统一）：`grid-template-columns: repeat(3, 1fr); max-width:1800px; margin:0 auto; gap:30px;`（最多 3 列、随视口收窄折叠；断点 `1200/800px` 依次降为 `2/1` 列）；`.phone` 加 `margin:0 auto` 在列内居中。
 
 ### 小程序（WeChat Mini-Program）
-- **手机外壳无厚边框**：`.phone-screen { width:375px; height:750px; border-radius:12px; overflow:hidden; }`，再套一层白色圆角卡片 `.phone-wrapper { background:#fff; border-radius:20px; padding:20px; box-shadow:…; }`。
+- **手机外壳带边框**（同移动端 line 49，统一一套外壳）：`.phone { width:375px; height:750px; border-radius:40px; border:8px solid #1F2937; box-shadow:…; overflow:hidden; }`，内部 `display:flex; flex-direction:column`；不另用 `.phone-screen` / `.phone-wrapper`。
 - **状态栏 + 微信导航栏一体化**：上方状态栏时间，下方 `.wechat-nav` 居中标题 + 左返回 `←` + 右 `···`。
 - **标题标签放手机上方**：白卡内的 `.phone-label`（小标签）。
-- **网格布局**：响应式 `grid-template-columns: repeat(4, 1fr); max-width:1800px; margin:0 auto;`，断点 `1600/1200/800px` 依次降为 `3/2/1` 列。
+- **网格布局**（与移动端统一）：`grid-template-columns: repeat(3, 1fr); max-width:1800px; margin:0 auto; gap:30px;`，断点 `1200/800px` 依次降为 `2/1` 列；`.phone` 加 `margin:0 auto` 在列内居中。
 
 > 改造要点：把原单页/多页原型里每个独立页面拆为独立的 `.phone` / `.phone-screen` 块，复制各自的 HTML 与样式到同一文件；状态栏/导航按上述两端规范补齐；内容超高的页面让内层滚动即可。
 
