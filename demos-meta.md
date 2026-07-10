@@ -38,7 +38,7 @@
 | [合同条款风险扫描助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/合同条款风险扫描助手) | ✅ |  | web, mini-program |
 | [花店鲜花备货助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/花店鲜花备货助手) | ✅ |  | web, mini-program |
 | [健身房私教课消课与续课提醒助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/健身房私教课消课与续课提醒助手) | ✅ |  | web, mini-program |
-| [交付前资料风险确认台](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/交付前资料风险确认台) | ✅ |  | web |
+| [交付前资料风险确认台](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/交付前资料风险确认台) | ✅ | ✅ | web |
 | [客服反馈转产品需求卡AI](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/客服反馈转产品需求卡AI) | ✅ |  | web |
 | [客服知识库缺口捕捉器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/客服知识库缺口捕捉器) | ✅ |  | web |
 | [课程讲义转练习卡](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/课程讲义转练习卡) | ✅ |  | web, mini-program |
