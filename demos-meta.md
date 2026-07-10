@@ -32,7 +32,7 @@
 | [短视频评论区精华提取器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/短视频评论区精华提取器) | ✅ |  | web |
 | [多平台创作者发布日历与选题看板](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/多平台创作者发布日历与选题看板) | ✅ |  | web |
 | [多子女父母照护排班协作助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/demos/多子女父母照护排班协作助手) | ✅ | ❌ | mini-program |
-| [儿童兴趣班接送交接表](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/儿童兴趣班接送交接表) | ✅ |  | web, mini-program |
+| [儿童兴趣班接送交接表](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/儿童兴趣班接送交接表) | ✅ | ✅ | web, mini-program |
 | [二手车商库存周转管理工具](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/二手车商库存周转管理工具) | ✅ |  | web |
 | [个人项目成本核算器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/个人项目成本核算器) | ✅ |  | web |
 | [合同条款风险扫描助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/合同条款风险扫描助手) | ✅ |  | web, mini-program |
