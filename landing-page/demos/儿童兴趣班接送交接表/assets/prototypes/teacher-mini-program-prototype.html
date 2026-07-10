@@ -34,18 +34,24 @@
 
         .phone-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-            max-width: 1400px;
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 1800px;
             margin: 0 auto;
+            gap: 30px;
         }
 
-        .phone-frame {
+        .phone {
+            width: 375px;
+            height: 750px;
+            margin: 0 auto;
             background: #fff;
             border-radius: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
             overflow: hidden;
+            border: 8px solid #1a1a1a;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .phone-header {
@@ -56,6 +62,7 @@
             justify-content: space-between;
             align-items: center;
             font-size: 14px;
+            flex-shrink: 0;
         }
 
         .phone-header-title {
@@ -63,7 +70,8 @@
         }
 
         .phone-content {
-            height: 600px;
+            flex: 1;
+            min-height: 0;
             overflow-y: auto;
             background: #f8f8f8;
         }
@@ -728,7 +736,7 @@
 
     <div class="phone-grid">
         <!-- 1. 登录页 -->
-        <div class="phone-frame">
+        <div class="phone">
             <div class="phone-header">
                 <span>9:41</span>
                 <span class="phone-header-title">微信</span>
@@ -750,7 +758,7 @@
         </div>
 
         <!-- 2. 首页 -->
-        <div class="phone-frame">
+        <div class="phone">
             <div class="phone-header">
                 <span>9:41</span>
                 <span class="phone-header-title">首页</span>
@@ -807,7 +815,7 @@
         </div>
 
         <!-- 3. 扫码签到页 -->
-        <div class="phone-frame">
+        <div class="phone">
             <div class="phone-header">
                 <span>9:41</span>
                 <span class="phone-header-title">到校签到</span>
@@ -832,7 +840,7 @@
         </div>
 
         <!-- 4. 状态监控页 -->
-        <div class="phone-frame">
+        <div class="phone">
             <div class="phone-header">
                 <span>9:41</span>
                 <span class="phone-header-title">状态监控</span>
@@ -891,7 +899,7 @@
         </div>
 
         <!-- 5. 离校签退确认页 -->
-        <div class="phone-frame">
+        <div class="phone">
             <div class="phone-header">
                 <span>9:41</span>
                 <span class="phone-header-title">离校交接</span>
@@ -936,7 +944,7 @@
         </div>
 
         <!-- 6. 异常处理页 -->
-        <div class="phone-frame">
+        <div class="phone">
             <div class="phone-header">
                 <span>9:41</span>
                 <span class="phone-header-title">异常处理</span>
@@ -982,7 +990,7 @@
         </div>
 
         <!-- 7. 临时授权页 -->
-        <div class="phone-frame">
+        <div class="phone">
             <div class="phone-header">
                 <span>9:41</span>
                 <span class="phone-header-title">临时授权</span>
@@ -1017,7 +1025,7 @@
         </div>
 
         <!-- 8. 个人中心页 -->
-        <div class="phone-frame">
+        <div class="phone">
             <div class="phone-header">
                 <span>9:41</span>
                 <span class="phone-header-title">个人中心</span>

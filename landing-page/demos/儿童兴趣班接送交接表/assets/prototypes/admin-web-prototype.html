@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理后台 - 全站点原型</title>
+    <title>阳光少儿教育中心 - 管理后台原型</title>
     <style>
         * {
             margin: 0;
@@ -13,32 +13,17 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            margin: 0;
             background: #f0f2f5;
-        }
-
-        .prototype-title {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin: 30px 0 10px;
-        }
-
-        .prototype-subtitle {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 30px;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .admin-container {
             display: flex;
-            min-height: 600px;
-            max-width: 1400px;
-            margin: 0 auto 30px;
+            width: 100%;
+            height: 100vh;
             background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
@@ -98,6 +83,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-width: 0;
         }
 
         .admin-header {
@@ -136,6 +122,14 @@
             flex: 1;
             padding: 24px;
             overflow-y: auto;
+        }
+
+        /* SPA page sections */
+        .page-section {
+            display: none;
+        }
+        .page-section.active {
+            display: block;
         }
 
         .page-title-section {
@@ -380,10 +374,10 @@
             border: 1px solid #b7eb8f;
         }
 
-        .tag-inactive {
-            background: #f5f5f5;
-            color: #999;
-            border: 1px solid #d9d9d9;
+        .tag-out {
+            background: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
         }
 
         .table-actions {
@@ -539,31 +533,14 @@
             border-color: #1890ff;
         }
 
-        .page-label {
-            background: #001529;
-            color: #fff;
-            padding: 12px 20px;
-            text-align: center;
+        .placeholder-tip {
             font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .page-label-tag {
-            background: #1890ff;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
         }
     </style>
 </head>
 <body>
-    <h1 class="prototype-title">管理后台 - 全站点原型</h1>
-    <p class="prototype-subtitle">WEB端 | 机构管理员使用 | 14个核心页面</p>
-
-    <!-- 1. 工作台 -->
     <div class="admin-container">
         <div class="admin-sidebar">
             <div class="sidebar-logo">
@@ -571,498 +548,427 @@
                 <div class="sidebar-logo-text">阳光少儿教育中心</div>
             </div>
             <div class="sidebar-menu">
-                <div class="sidebar-menu-item active">
+                <div class="sidebar-menu-item active" data-page="dashboard" onclick="switchPage('dashboard', this)">
                     <span class="sidebar-menu-icon">📊</span>
                     <span class="sidebar-menu-text">工作台</span>
                 </div>
-                <div class="sidebar-menu-item">
+                <div class="sidebar-menu-item" data-page="org" onclick="switchPage('org', this)">
                     <span class="sidebar-menu-icon">🏢</span>
                     <span class="sidebar-menu-text">机构管理</span>
                 </div>
-                <div class="sidebar-menu-item">
+                <div class="sidebar-menu-item" data-page="classes" onclick="switchPage('classes', this)">
                     <span class="sidebar-menu-icon">👥</span>
                     <span class="sidebar-menu-text">班级管理</span>
                 </div>
-                <div class="sidebar-menu-item">
+                <div class="sidebar-menu-item" data-page="students" onclick="switchPage('students', this)">
                     <span class="sidebar-menu-icon">👶</span>
                     <span class="sidebar-menu-text">学生管理</span>
                 </div>
-                <div class="sidebar-menu-item">
+                <div class="sidebar-menu-item" data-page="teachers" onclick="switchPage('teachers', this)">
                     <span class="sidebar-menu-icon">👩‍🏫</span>
                     <span class="sidebar-menu-text">老师管理</span>
                 </div>
-                <div class="sidebar-menu-item">
+                <div class="sidebar-menu-item" data-page="records" onclick="switchPage('records', this)">
                     <span class="sidebar-menu-icon">📋</span>
                     <span class="sidebar-menu-text">记录查询</span>
                 </div>
-                <div class="sidebar-menu-item">
+                <div class="sidebar-menu-item" data-page="settings" onclick="switchPage('settings', this)">
                     <span class="sidebar-menu-icon">⚙️</span>
                     <span class="sidebar-menu-text">系统设置</span>
                 </div>
             </div>
         </div>
         <div class="admin-main">
-            <div class="page-label">
-                <span>页面 1: 工作台（Dashboard）</span>
-                <span class="page-label-tag">数据概览</span>
-            </div>
             <div class="admin-header">
-                <div class="admin-breadcrumb">首页 / 工作台</div>
+                <div class="admin-breadcrumb" id="breadcrumb">首页 / 工作台</div>
                 <div class="admin-user">
                     <span>管理员</span>
                     <div class="admin-avatar">👤</div>
                 </div>
             </div>
             <div class="admin-content">
-                <div class="dashboard-stats">
-                    <div class="stat-card">
-                        <div class="stat-number">156</div>
-                        <div class="stat-label">在校学生</div>
-                        <div class="stat-trend">↑ 12% 较上月</div>
+
+                <!-- 1. 工作台 -->
+                <section class="page-section active" id="page-dashboard">
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">156</div>
+                            <div class="stat-label">在校学生</div>
+                            <div class="stat-trend">↑ 12% 较上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">28</div>
+                            <div class="stat-label">今日到校</div>
+                            <div class="stat-trend">到校率 93%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">今日异常</div>
+                            <div class="stat-trend">↓ 25% 较昨日</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">12</div>
+                            <div class="stat-label">授课老师</div>
+                            <div class="stat-trend">全部在岗</div>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number">28</div>
-                        <div class="stat-label">今日到校</div>
-                        <div class="stat-trend">到校率 93%</div>
+                    <div class="dashboard-section">
+                        <div class="content-card">
+                            <div class="card-title">待办事项</div>
+                            <ul class="todo-list">
+                                <li class="todo-item">
+                                    <div class="todo-icon"></div>
+                                    <div class="todo-text">审核家长提交的新增接送人申请（3条）</div>
+                                    <div class="todo-time">10分钟前</div>
+                                </li>
+                                <li class="todo-item">
+                                    <div class="todo-icon"></div>
+                                    <div class="todo-text">处理异常事件：小明未按时到校</div>
+                                    <div class="todo-time">30分钟前</div>
+                                </li>
+                                <li class="todo-item">
+                                    <div class="todo-icon" style="background: #52c41a;"></div>
+                                    <div class="todo-text">为新入职王老师分配班级权限</div>
+                                    <div class="todo-time">1小时前</div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="content-card">
+                            <div class="card-title">快捷操作</div>
+                            <div class="quick-actions">
+                                <button class="quick-action-btn">
+                                    <div class="quick-action-icon">➕</div>
+                                    <div class="quick-action-text">新增学生</div>
+                                </button>
+                                <button class="quick-action-btn">
+                                    <div class="quick-action-icon">📱</div>
+                                    <div class="quick-action-text">生成二维码</div>
+                                </button>
+                                <button class="quick-action-btn">
+                                    <div class="quick-action-icon">📊</div>
+                                    <div class="quick-action-text">导出记录</div>
+                                </button>
+                                <button class="quick-action-btn">
+                                    <div class="quick-action-icon">👥</div>
+                                    <div class="quick-action-text">邀请老师</div>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number">3</div>
-                        <div class="stat-label">今日异常</div>
-                        <div class="stat-trend">↓ 25% 较昨日</div>
+                </section>
+
+                <!-- 机构管理（占位） -->
+                <section class="page-section" id="page-org">
+                    <div class="page-title-section">
+                        <div class="page-title">机构管理</div>
+                        <div class="page-desc">维护机构基本信息、校区设置与办学资质</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number">12</div>
-                        <div class="stat-label">授课老师</div>
-                        <div class="stat-trend">全部在岗</div>
-                    </div>
-                </div>
-                <div class="dashboard-section">
                     <div class="content-card">
-                        <div class="card-title">待办事项</div>
-                        <ul class="todo-list">
-                            <li class="todo-item">
-                                <div class="todo-icon"></div>
-                                <div class="todo-text">审核家长提交的新增接送人申请（3条）</div>
-                                <div class="todo-time">10分钟前</div>
-                            </li>
-                            <li class="todo-item">
-                                <div class="todo-icon"></div>
-                                <div class="todo-text">处理异常事件：小明未按时到校</div>
-                                <div class="todo-time">30分钟前</div>
-                            </li>
-                            <li class="todo-item">
-                                <div class="todo-icon" style="background: #52c41a;"></div>
-                                <div class="todo-text">为新入职王老师分配班级权限</div>
-                                <div class="todo-time">1小时前</div>
-                            </li>
-                        </ul>
+                        <div class="card-title">模块说明</div>
+                        <p class="placeholder-tip">该模块用于维护机构基本信息、校区与资质。本原型聚焦核心接送流程，此模块交互细节后续补充。</p>
+                    </div>
+                </section>
+
+                <!-- 班级管理（占位） -->
+                <section class="page-section" id="page-classes">
+                    <div class="page-title-section">
+                        <div class="page-title">班级管理</div>
+                        <div class="page-desc">维护班级信息、课程安排与带班老师</div>
                     </div>
                     <div class="content-card">
-                        <div class="card-title">快捷操作</div>
-                        <div class="quick-actions">
-                            <button class="quick-action-btn">
-                                <div class="quick-action-icon">➕</div>
-                                <div class="quick-action-text">新增学生</div>
-                            </button>
-                            <button class="quick-action-btn">
-                                <div class="quick-action-icon">📱</div>
-                                <div class="quick-action-text">生成二维码</div>
-                            </button>
-                            <button class="quick-action-btn">
-                                <div class="quick-action-icon">📊</div>
-                                <div class="quick-action-text">导出记录</div>
-                            </button>
-                            <button class="quick-action-btn">
-                                <div class="quick-action-icon">👥</div>
-                                <div class="quick-action-text">邀请老师</div>
-                            </button>
+                        <div class="card-title">模块说明</div>
+                        <p class="placeholder-tip">该模块用于创建班级、排课与分配带班老师。本原型聚焦核心接送流程，此模块交互细节后续补充。</p>
+                    </div>
+                </section>
+
+                <!-- 2. 学生列表页 -->
+                <section class="page-section" id="page-students">
+                    <div class="page-title-section">
+                        <div class="page-title">学生管理</div>
+                        <div class="page-desc">管理机构内所有学生信息、授权接送人、特殊注意事项</div>
+                    </div>
+                    <div class="content-card">
+                        <div class="table-toolbar">
+                            <div class="table-filters">
+                                <input type="text" class="filter-input" placeholder="搜索学生姓名" style="width: 200px;">
+                                <select class="filter-input">
+                                    <option>全部班级</option>
+                                    <option>向日葵班</option>
+                                    <option>月亮班</option>
+                                    <option>星星班</option>
+                                </select>
+                                <button class="filter-btn">查询</button>
+                            </div>
+                            <div>
+                                <button class="action-btn">+ 新增学生</button>
+                                <button class="filter-btn" style="margin-left: 8px; background: #52c41a;">批量导入</button>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>学生信息</th>
+                                    <th>班级</th>
+                                    <th>家长信息</th>
+                                    <th>授权接送人</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="table-avatar">👦</span>小明</td>
+                                    <td>向日葵班</td>
+                                    <td>李芳（妈妈）<br>136****9876</td>
+                                    <td>3人</td>
+                                    <td><span class="status-tag tag-active">在读</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button class="table-action-btn btn-view" onclick="switchPage('student-detail', document.querySelector('.sidebar-menu-item[data-page=students]'))">查看</button>
+                                            <button class="table-action-btn btn-edit">编辑</button>
+                                            <button class="table-action-btn btn-delete">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="table-avatar">👧</span>小红</td>
+                                    <td>月亮班</td>
+                                    <td>王丽（妈妈）<br>139****5432</td>
+                                    <td>2人</td>
+                                    <td><span class="status-tag tag-active">在读</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button class="table-action-btn btn-view" onclick="switchPage('student-detail', document.querySelector('.sidebar-menu-item[data-page=students]'))">查看</button>
+                                            <button class="table-action-btn btn-edit">编辑</button>
+                                            <button class="table-action-btn btn-delete">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="table-avatar">👦</span>小刚</td>
+                                    <td>星星班</td>
+                                    <td>张伟（爸爸）<br>138****8765</td>
+                                    <td>4人</td>
+                                    <td><span class="status-tag tag-active">在读</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button class="table-action-btn btn-view" onclick="switchPage('student-detail', document.querySelector('.sidebar-menu-item[data-page=students]'))">查看</button>
+                                            <button class="table-action-btn btn-edit">编辑</button>
+                                            <button class="table-action-btn btn-delete">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination">
+                            <div class="pagination-info">共 156 条记录</div>
+                            <button class="page-btn">&lt;</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn">&gt;</button>
                         </div>
                     </div>
-                </div>
+                </section>
+
+                <!-- 老师管理（占位） -->
+                <section class="page-section" id="page-teachers">
+                    <div class="page-title-section">
+                        <div class="page-title">老师管理</div>
+                        <div class="page-desc">维护授课老师信息、账号与权限</div>
+                    </div>
+                    <div class="content-card">
+                        <div class="card-title">模块说明</div>
+                        <p class="placeholder-tip">该模块用于维护老师档案、登录账号与接送权限。本原型聚焦核心接送流程，此模块交互细节后续补充。</p>
+                    </div>
+                </section>
+
+                <!-- 3. 学生详情页 -->
+                <section class="page-section" id="page-student-detail">
+                    <div class="page-title-section">
+                        <div class="page-title">小明 - 学生详情</div>
+                        <div class="page-desc">查看和编辑学生基本信息、家长信息、授权接送人</div>
+                    </div>
+                    <div class="content-card">
+                        <div class="tabs">
+                            <div class="tab active">基本信息</div>
+                            <div class="tab">授权接送人</div>
+                            <div class="tab">接送记录</div>
+                            <div class="tab">请假记录</div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-item">
+                                <label class="form-label"><span class="required">*</span>学生姓名</label>
+                                <input type="text" class="form-input" value="小明">
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label"><span class="required">*</span>性别</label>
+                                <select class="form-input">
+                                    <option selected>男</option>
+                                    <option>女</option>
+                                </select>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label"><span class="required">*</span>出生日期</label>
+                                <input type="date" class="form-input" value="2020-05-15">
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label"><span class="required">*</span>所属班级</label>
+                                <select class="form-input">
+                                    <option selected>向日葵班</option>
+                                    <option>月亮班</option>
+                                    <option>星星班</option>
+                                </select>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label"><span class="required">*</span>家长姓名</label>
+                                <input type="text" class="form-input" value="李芳">
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label"><span class="required">*</span>家长手机号</label>
+                                <input type="tel" class="form-input" value="13698765432">
+                            </div>
+                            <div class="form-item full-width">
+                                <label class="form-label">特殊注意事项</label>
+                                <textarea class="form-textarea">对花生过敏，不能接触花生类食品。每日需服用维生素D滴剂。</textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-default">取消</button>
+                            <button class="btn-primary">保存</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. 记录查询页 -->
+                <section class="page-section" id="page-records">
+                    <div class="page-title-section">
+                        <div class="page-title">接送记录查询</div>
+                        <div class="page-desc">按学生、班级、日期查询到校/离校详细记录</div>
+                    </div>
+                    <div class="content-card">
+                        <div class="table-toolbar">
+                            <div class="table-filters">
+                                <select class="filter-input">
+                                    <option>全部学生</option>
+                                    <option>小明</option>
+                                    <option>小红</option>
+                                </select>
+                                <select class="filter-input">
+                                    <option>全部班级</option>
+                                    <option>向日葵班</option>
+                                    <option>月亮班</option>
+                                </select>
+                                <input type="date" class="filter-input" value="2026-06-26">
+                                <input type="date" class="filter-input" value="2026-06-26">
+                                <button class="filter-btn">查询</button>
+                            </div>
+                            <button class="action-btn">导出Excel</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>学生</th>
+                                    <th>班级</th>
+                                    <th>类型</th>
+                                    <th>时间</th>
+                                    <th>接送人</th>
+                                    <th>交接老师</th>
+                                    <th>备注</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2026-06-26</td>
+                                    <td>小明</td>
+                                    <td>向日葵班</td>
+                                    <td><span class="status-tag tag-active">到校</span></td>
+                                    <td>08:25</td>
+                                    <td>-</td>
+                                    <td>李老师</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>2026-06-26</td>
+                                    <td>小明</td>
+                                    <td>向日葵班</td>
+                                    <td><span class="status-tag tag-out">离校</span></td>
+                                    <td>17:30</td>
+                                    <td>王美丽（奶奶）</td>
+                                    <td>王老师</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>2026-06-25</td>
+                                    <td>小红</td>
+                                    <td>月亮班</td>
+                                    <td><span class="status-tag tag-active">到校</span></td>
+                                    <td>08:20</td>
+                                    <td>-</td>
+                                    <td>张老师</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination">
+                            <div class="pagination-info">共 312 条记录</div>
+                            <button class="page-btn">&lt;</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn">&gt;</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 系统设置（占位） -->
+                <section class="page-section" id="page-settings">
+                    <div class="page-title-section">
+                        <div class="page-title">系统设置</div>
+                        <div class="page-desc">配置通知、安全策略与角色权限</div>
+                    </div>
+                    <div class="content-card">
+                        <div class="card-title">模块说明</div>
+                        <p class="placeholder-tip">该模块用于配置消息通知、安全策略与角色权限。本原型聚焦核心接送流程，此模块交互细节后续补充。</p>
+                    </div>
+                </section>
+
             </div>
         </div>
     </div>
 
-    <!-- 2. 学生列表页 -->
-    <div class="admin-container">
-        <div class="admin-sidebar">
-            <div class="sidebar-logo">
-                <div class="sidebar-logo-icon">🏫</div>
-                <div class="sidebar-logo-text">阳光少儿教育中心</div>
-            </div>
-            <div class="sidebar-menu">
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">📊</span>
-                    <span class="sidebar-menu-text">工作台</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">🏢</span>
-                    <span class="sidebar-menu-text">机构管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">👥</span>
-                    <span class="sidebar-menu-text">班级管理</span>
-                </div>
-                <div class="sidebar-menu-item active">
-                    <span class="sidebar-menu-icon">👶</span>
-                    <span class="sidebar-menu-text">学生管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">👩‍🏫</span>
-                    <span class="sidebar-menu-text">老师管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">📋</span>
-                    <span class="sidebar-menu-text">记录查询</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">⚙️</span>
-                    <span class="sidebar-menu-text">系统设置</span>
-                </div>
-            </div>
-        </div>
-        <div class="admin-main">
-            <div class="page-label">
-                <span>页面 2: 学生列表页</span>
-                <span class="page-label-tag">数据管理</span>
-            </div>
-            <div class="admin-header">
-                <div class="admin-breadcrumb">首页 / 学生管理 / 学生列表</div>
-                <div class="admin-user">
-                    <span>管理员</span>
-                    <div class="admin-avatar">👤</div>
-                </div>
-            </div>
-            <div class="admin-content">
-                <div class="page-title-section">
-                    <div class="page-title">学生管理</div>
-                    <div class="page-desc">管理机构内所有学生信息、授权接送人、特殊注意事项</div>
-                </div>
-                <div class="content-card">
-                    <div class="table-toolbar">
-                        <div class="table-filters">
-                            <input type="text" class="filter-input" placeholder="搜索学生姓名" style="width: 200px;">
-                            <select class="filter-input">
-                                <option>全部班级</option>
-                                <option>向日葵班</option>
-                                <option>月亮班</option>
-                                <option>星星班</option>
-                            </select>
-                            <button class="filter-btn">查询</button>
-                        </div>
-                        <div>
-                            <button class="action-btn">+ 新增学生</button>
-                            <button class="filter-btn" style="margin-left: 8px; background: #52c41a;">批量导入</button>
-                        </div>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>学生信息</th>
-                                <th>班级</th>
-                                <th>家长信息</th>
-                                <th>授权接送人</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><span class="table-avatar">👦</span>小明</td>
-                                <td>向日葵班</td>
-                                <td>李芳（妈妈）<br>136****9876</td>
-                                <td>3人</td>
-                                <td><span class="status-tag tag-active">在读</span></td>
-                                <td>
-                                    <div class="table-actions">
-                                        <button class="table-action-btn btn-view">查看</button>
-                                        <button class="table-action-btn btn-edit">编辑</button>
-                                        <button class="table-action-btn btn-delete">删除</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="table-avatar">👧</span>小红</td>
-                                <td>月亮班</td>
-                                <td>王丽（妈妈）<br>139****5432</td>
-                                <td>2人</td>
-                                <td><span class="status-tag tag-active">在读</span></td>
-                                <td>
-                                    <div class="table-actions">
-                                        <button class="table-action-btn btn-view">查看</button>
-                                        <button class="table-action-btn btn-edit">编辑</button>
-                                        <button class="table-action-btn btn-delete">删除</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="table-avatar">👦</span>小刚</td>
-                                <td>星星班</td>
-                                <td>张伟（爸爸）<br>138****8765</td>
-                                <td>4人</td>
-                                <td><span class="status-tag tag-active">在读</span></td>
-                                <td>
-                                    <div class="table-actions">
-                                        <button class="table-action-btn btn-view">查看</button>
-                                        <button class="table-action-btn btn-edit">编辑</button>
-                                        <button class="table-action-btn btn-delete">删除</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="pagination">
-                        <div class="pagination-info">共 156 条记录</div>
-                        <button class="page-btn">&lt;</button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <button class="page-btn">&gt;</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script>
+        var BREADCRUMBS = {
+            'dashboard': '首页 / 工作台',
+            'org': '首页 / 机构管理',
+            'classes': '首页 / 班级管理',
+            'students': '首页 / 学生管理 / 学生列表',
+            'teachers': '首页 / 老师管理',
+            'student-detail': '首页 / 学生管理 / 学生详情',
+            'records': '首页 / 记录查询',
+            'settings': '首页 / 系统设置'
+        };
 
-    <!-- 3. 学生详情页 -->
-    <div class="admin-container">
-        <div class="admin-sidebar">
-            <div class="sidebar-logo">
-                <div class="sidebar-logo-icon">🏫</div>
-                <div class="sidebar-logo-text">阳光少儿教育中心</div>
-            </div>
-            <div class="sidebar-menu">
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">📊</span>
-                    <span class="sidebar-menu-text">工作台</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">🏢</span>
-                    <span class="sidebar-menu-text">机构管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">👥</span>
-                    <span class="sidebar-menu-text">班级管理</span>
-                </div>
-                <div class="sidebar-menu-item active">
-                    <span class="sidebar-menu-icon">👶</span>
-                    <span class="sidebar-menu-text">学生管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">👩‍🏫</span>
-                    <span class="sidebar-menu-text">老师管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">📋</span>
-                    <span class="sidebar-menu-text">记录查询</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">⚙️</span>
-                    <span class="sidebar-menu-text">系统设置</span>
-                </div>
-            </div>
-        </div>
-        <div class="admin-main">
-            <div class="page-label">
-                <span>页面 3: 学生详情页</span>
-                <span class="page-label-tag">详细信息</span>
-            </div>
-            <div class="admin-header">
-                <div class="admin-breadcrumb">首页 / 学生管理 / 学生详情</div>
-                <div class="admin-user">
-                    <span>管理员</span>
-                    <div class="admin-avatar">👤</div>
-                </div>
-            </div>
-            <div class="admin-content">
-                <div class="page-title-section">
-                    <div class="page-title">小明 - 学生详情</div>
-                    <div class="page-desc">查看和编辑学生基本信息、家长信息、授权接送人</div>
-                </div>
-                <div class="content-card">
-                    <div class="tabs">
-                        <div class="tab active">基本信息</div>
-                        <div class="tab">授权接送人</div>
-                        <div class="tab">接送记录</div>
-                        <div class="tab">请假记录</div>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-item">
-                            <label class="form-label"><span class="required">*</span>学生姓名</label>
-                            <input type="text" class="form-input" value="小明">
-                        </div>
-                        <div class="form-item">
-                            <label class="form-label"><span class="required">*</span>性别</label>
-                            <select class="form-input">
-                                <option selected>男</option>
-                                <option>女</option>
-                            </select>
-                        </div>
-                        <div class="form-item">
-                            <label class="form-label"><span class="required">*</span>出生日期</label>
-                            <input type="date" class="form-input" value="2020-05-15">
-                        </div>
-                        <div class="form-item">
-                            <label class="form-label"><span class="required">*</span>所属班级</label>
-                            <select class="form-input">
-                                <option selected>向日葵班</option>
-                                <option>月亮班</option>
-                                <option>星星班</option>
-                            </select>
-                        </div>
-                        <div class="form-item">
-                            <label class="form-label"><span class="required">*</span>家长姓名</label>
-                            <input type="text" class="form-input" value="李芳">
-                        </div>
-                        <div class="form-item">
-                            <label class="form-label"><span class="required">*</span>家长手机号</label>
-                            <input type="tel" class="form-input" value="13698765432">
-                        </div>
-                        <div class="form-item full-width">
-                            <label class="form-label">特殊注意事项</label>
-                            <textarea class="form-textarea">对花生过敏，不能接触花生类食品。每日需服用维生素D滴剂。</textarea>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn-default">取消</button>
-                        <button class="btn-primary">保存</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4. 记录查询页 -->
-    <div class="admin-container">
-        <div class="admin-sidebar">
-            <div class="sidebar-logo">
-                <div class="sidebar-logo-icon">🏫</div>
-                <div class="sidebar-logo-text">阳光少儿教育中心</div>
-            </div>
-            <div class="sidebar-menu">
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">📊</span>
-                    <span class="sidebar-menu-text">工作台</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">🏢</span>
-                    <span class="sidebar-menu-text">机构管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">👥</span>
-                    <span class="sidebar-menu-text">班级管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">👶</span>
-                    <span class="sidebar-menu-text">学生管理</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">👩‍🏫</span>
-                    <span class="sidebar-menu-text">老师管理</span>
-                </div>
-                <div class="sidebar-menu-item active">
-                    <span class="sidebar-menu-icon">📋</span>
-                    <span class="sidebar-menu-text">记录查询</span>
-                </div>
-                <div class="sidebar-menu-item">
-                    <span class="sidebar-menu-icon">⚙️</span>
-                    <span class="sidebar-menu-text">系统设置</span>
-                </div>
-            </div>
-        </div>
-        <div class="admin-main">
-            <div class="page-label">
-                <span>页面 4: 记录查询页</span>
-                <span class="page-label-tag">数据查询</span>
-            </div>
-            <div class="admin-header">
-                <div class="admin-breadcrumb">首页 / 记录查询</div>
-                <div class="admin-user">
-                    <span>管理员</span>
-                    <div class="admin-avatar">👤</div>
-                </div>
-            </div>
-            <div class="admin-content">
-                <div class="page-title-section">
-                    <div class="page-title">接送记录查询</div>
-                    <div class="page-desc">按学生、班级、日期查询到校/离校详细记录</div>
-                </div>
-                <div class="content-card">
-                    <div class="table-toolbar">
-                        <div class="table-filters">
-                            <select class="filter-input">
-                                <option>全部学生</option>
-                                <option>小明</option>
-                                <option>小红</option>
-                            </select>
-                            <select class="filter-input">
-                                <option>全部班级</option>
-                                <option>向日葵班</option>
-                                <option>月亮班</option>
-                            </select>
-                            <input type="date" class="filter-input" value="2026-06-26">
-                            <input type="date" class="filter-input" value="2026-06-26">
-                            <button class="filter-btn">查询</button>
-                        </div>
-                        <button class="action-btn">导出Excel</button>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>学生</th>
-                                <th>班级</th>
-                                <th>类型</th>
-                                <th>时间</th>
-                                <th>接送人</th>
-                                <th>交接老师</th>
-                                <th>备注</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2026-06-26</td>
-                                <td>小明</td>
-                                <td>向日葵班</td>
-                                <td><span class="status-tag tag-active">到校</span></td>
-                                <td>08:25</td>
-                                <td>-</td>
-                                <td>李老师</td>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <td>2026-06-26</td>
-                                <td>小明</td>
-                                <td>向日葵班</td>
-                                <td><span class="status-tag" style="background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff;">离校</span></td>
-                                <td>17:30</td>
-                                <td>王美丽（奶奶）</td>
-                                <td>王老师</td>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <td>2026-06-25</td>
-                                <td>小红</td>
-                                <td>月亮班</td>
-                                <td><span class="status-tag tag-active">到校</span></td>
-                                <td>08:20</td>
-                                <td>-</td>
-                                <td>张老师</td>
-                                <td>-</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="pagination">
-                        <div class="pagination-info">共 312 条记录</div>
-                        <button class="page-btn">&lt;</button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <button class="page-btn">&gt;</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        function switchPage(pageId, navEl) {
+            // 隐藏全部页面
+            document.querySelectorAll('.page-section').forEach(function (p) {
+                p.classList.remove('active');
+            });
+            // 显示目标页面
+            var target = document.getElementById('page-' + pageId);
+            if (target) target.classList.add('active');
+            // 同步侧边栏高亮
+            if (navEl) {
+                document.querySelectorAll('.sidebar-menu-item').forEach(function (i) {
+                    i.classList.remove('active');
+                });
+                navEl.classList.add('active');
+            }
+            // 更新面包屑
+            var bc = document.getElementById('breadcrumb');
+            if (bc && BREADCRUMBS[pageId]) bc.textContent = BREADCRUMBS[pageId];
+        }
+    </script>
 </body>
 </html>
