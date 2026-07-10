@@ -28,10 +28,10 @@
 | [电商商品差评洞察分析器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/电商商品差评洞察分析器) | ✅ |  | web |
 | [独立咖啡店原料损耗管理工具](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/独立咖啡店原料损耗管理工具) | ✅ |  | web, mini-program |
 | [独立音乐人发行日历管理](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/独立音乐人发行日历管理) | ✅ |  | web |
-| [独立瑜伽健身教练排课与学生管理助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/独立瑜伽健身教练排课与学生管理助手) | ✅ |  | mini-program |
+| [独立瑜伽健身教练排课与学生管理助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/demos/独立瑜伽健身教练排课与学生管理助手) | ✅ | ❌ | mini-program |
 | [短视频评论区精华提取器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/短视频评论区精华提取器) | ✅ |  | web |
 | [多平台创作者发布日历与选题看板](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/多平台创作者发布日历与选题看板) | ✅ |  | web |
-| [多子女父母照护排班协作助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/多子女父母照护排班协作助手) | ✅ |  | mini-program |
+| [多子女父母照护排班协作助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/demos/多子女父母照护排班协作助手) | ✅ | ❌ | mini-program |
 | [儿童兴趣班接送交接表](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/儿童兴趣班接送交接表) | ✅ |  | web, mini-program |
 | [二手车商库存周转管理工具](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/二手车商库存周转管理工具) | ✅ |  | web |
 | [个人项目成本核算器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/个人项目成本核算器) | ✅ |  | web |
@@ -46,8 +46,8 @@
 | [口播视频转图文笔记工具](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/口播视频转图文笔记工具) | ✅ |  | web |
 | [老年人数字遗产管家](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/老年人数字遗产管家) | ✅ |  | web, mobile, mini-program |
 | [邻里工具共享与借用管理](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/邻里工具共享与借用管理) | ✅ |  | web, mini-program |
-| [邻里拼车费用分摊助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/邻里拼车费用分摊助手) | ✅ |  | mini-program |
-| [民宿清洁排班小助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/民宿清洁排班小助手) | ✅ |  | mini-program |
+| [邻里拼车费用分摊助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/demos/邻里拼车费用分摊助手) | ✅ | ❌ | mini-program |
+| [民宿清洁排班小助手](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/demos/民宿清洁排班小助手) | ✅ | ❌ | mini-program |
 | [内容跨平台格式适配工具](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/内容跨平台格式适配工具) | ✅ |  | web |
 | [跑团活动记录与财务管理器](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/跑团活动记录与财务管理器) | ✅ |  | mini-program |
 | [社区旧物置换记录簿](d:/DataZone/产品方案部/45-OPC 平台/产品推广工作室/projects/优特云-Skills 推广与运营/landing-page/demos/社区旧物置换记录簿) | ✅ |  | web, mini-program |
