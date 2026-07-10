@@ -31,6 +31,37 @@
 
 > 逆向即「精选通过」流程：把 `demos/<name>` 移入 `landing-page/demos/`，在 `CASES_DEMOS` 与 `ENDS_BY_ID` 补回条目，meta 表「通过精选」记 ✅、链接指向 `landing-page/demos/`，并 +1 更新案例总数。
 
+## ⭐ 原型「宫格展示」重构规则（移动端 / 小程序）
+
+当某 demo 的 URS/PRD 含「移动端（App/H5）」或「小程序」原型，且原型是**单页长滚 / 多页切换**形式时，应改造成「宫格展示」单文件：把该端所有核心页面并列摆在同一屏，方便一页看全、对比与演示。
+
+**参考范例**：
+- 移动端：`landing-page/demos/独立咖啡店原料损耗管理工具/咖损管家-移动端原型.html`（`title` 已标注「宫格展示」）
+- 小程序：`demos/邻里拼车费用分摊助手/assets/prototypes/mini-program-prototype.html`（标题「小程序原型 - 宫格展示版」）
+
+### 共同规则（两端通用）
+1. **一个 HTML 展示一端的全部核心页面**：每个页面 = 一台「手机」，用 CSS Grid 多列并排，纯静态无需 JS 即可浏览。
+2. **屏幕尺寸统一**：每台手机屏幕固定 `width:375px; height:750px`，外层 `overflow:hidden`，内层内容区单独 `overflow-y:auto` 滚动（内容过多时**只在屏内滚动**，绝不撑高整页破坏网格）。
+3. **页面标题标签**：每台手机配一个标签，含「序号 + 页面名 + emoji」（如 `🏠 1. 首页`）。
+4. **直接在原文件上修改**：宫格展示是对原型的重构，**不另起新文件**，直接改原 HTML 即可。仅当原文件同时包含多个端（如移动端 + 小程序同文件）需要拆分时，才按 `<产品名>-xxx端原型.html` 方式新建对应文件。
+
+### 移动端（App / H5）
+- **手机外壳带边框**：`.phone { border-radius:40px; border:8px solid #1F2937; box-shadow:…; overflow:hidden; }` 模拟真机外观；内部 `display:flex; flex-direction:column`。
+- **状态栏（iOS 风格）**：`background:#fff`，左时间（如 `9:41`）、右信号/电池图标，加粗小字。
+- **导航**：`.nav-header`（左返回箭头 + 标题 + 右上信息，白底下边框）**或** 底部 `.tab-bar`（白底上边框，图标+文字，active 项高亮主色）。
+- **标题标签放手机下方**：`.phone-wrap` 内先放 `.phone`、再放 `.phone-label` / `.phone-sublabel`。
+- **网格布局**：`grid-template-columns: repeat(3, 375px); justify-content:center; gap:30px;`（固定 3 列居中，不随视口收窄折叠；页宽不足时出现横向滚动）。
+
+### 小程序（WeChat Mini-Program）
+- **手机外壳无厚边框**：`.phone-screen { width:375px; height:750px; border-radius:12px; overflow:hidden; }`，再套一层白色圆角卡片 `.phone-wrapper { background:#fff; border-radius:20px; padding:20px; box-shadow:…; }`。
+- **状态栏 + 微信导航栏一体化**：`background:#07c160`（微信绿）；上方状态栏时间，下方 `.wechat-nav` 居中标题 + 左返回 `←` + 右 `···`。
+- **标题标签放手机上方**：白卡内的 `.phone-label`（绿色小标签）。
+- **底部 home-indicator**：模拟小程序底部「返回首页」手势条（黑底横条）。
+- **网格布局**：响应式 `grid-template-columns: repeat(4, 1fr); max-width:1800px; margin:0 auto;`，断点 `1600/1200/800px` 依次降为 `3/2/1` 列。
+- **主色统一微信绿 `#07c160`**（按钮、标签、激活态均用此色）。
+
+> 改造要点：把原单页/多页原型里每个独立页面拆为独立的 `.phone` / `.phone-screen` 块，复制各自的 HTML 与样式到同一文件；状态栏/导航按上述两端规范补齐；内容超高的页面让内层滚动即可。
+
 ## 常用命令
 
 - **本地预览**：直接用浏览器打开 `landing-page/index.html` 即可（无需构建）。若 `iframe` 原型因 `file://` 受限，可在 `landing-page/` 起静态服务：`python -m http.server 8080`，再访问 `http://localhost:8080`。
