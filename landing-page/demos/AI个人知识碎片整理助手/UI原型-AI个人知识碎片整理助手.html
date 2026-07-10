@@ -1366,7 +1366,7 @@ body {
 
 <div class="prototype-showcase">
   <h1 class="showcase-title">FragmentMind · AI个人知识碎片整理助手</h1>
-  <p class="showcase-subtitle">产品UI原型 · V1.1 | 页面/视图切换已整合至左侧边栏导航</p>
+  <p class="showcase-subtitle">产品UI原型 · V1.2 | 收藏视图已补齐，侧边栏导航项保持一致</p>
 
   <!-- ========== 视图1: 收件箱 ========== -->
   <div class="view-container active" id="view-inbox">
@@ -1419,7 +1419,7 @@ body {
                 知识图谱
                 <span class="pro-tag">PRO</span>
               </div>
-              <div class="nav-item">
+              <div class="nav-item" data-view="favorites">
                 <span class="nav-icon">⭐</span>
                 收藏
                 <span class="nav-count">12</span>
@@ -1746,7 +1746,7 @@ body {
               <div class="nav-item active" data-view="knowledge"><span class="nav-icon">📚</span>知识库<span class="nav-count">247</span></div>
               <div class="nav-item" data-view="search"><span class="nav-icon">🔍</span>搜索与问答</div>
               <div class="nav-item" data-view="graph"><span class="nav-icon">🌐</span>知识图谱<span class="pro-tag">PRO</span></div>
-              <div class="nav-item"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
+              <div class="nav-item" data-view="favorites"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
               <div class="nav-item" data-view="account"><span class="nav-icon">⚙️</span>账户设置</div>
               <div class="nav-item" data-view="extension"><span class="nav-icon">🧩</span>浏览器插件</div>
             </div>
@@ -1909,7 +1909,7 @@ body {
               <div class="nav-item" data-view="knowledge"><span class="nav-icon">📚</span>知识库<span class="nav-count">247</span></div>
               <div class="nav-item active" data-view="search"><span class="nav-icon">🔍</span>搜索与问答</div>
               <div class="nav-item" data-view="graph"><span class="nav-icon">🌐</span>知识图谱<span class="pro-tag">PRO</span></div>
-              <div class="nav-item"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
+              <div class="nav-item" data-view="favorites"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
               <div class="nav-item" data-view="account"><span class="nav-icon">⚙️</span>账户设置</div>
               <div class="nav-item" data-view="extension"><span class="nav-icon">🧩</span>浏览器插件</div>
             </div>
@@ -2063,7 +2063,7 @@ body {
               <div class="nav-item" data-view="knowledge"><span class="nav-icon">📚</span>知识库<span class="nav-count">247</span></div>
               <div class="nav-item" data-view="search"><span class="nav-icon">🔍</span>搜索与问答</div>
               <div class="nav-item active" data-view="graph"><span class="nav-icon">🌐</span>知识图谱<span class="pro-tag">PRO</span></div>
-              <div class="nav-item"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
+              <div class="nav-item" data-view="favorites"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
               <div class="nav-item" data-view="account"><span class="nav-icon">⚙️</span>账户设置</div>
               <div class="nav-item" data-view="extension"><span class="nav-icon">🧩</span>浏览器插件</div>
             </div>
@@ -2201,7 +2201,137 @@ body {
     </div>
   </div>
 
-  <!-- ========== 视图5: 账户设置 ========== -->
+  <!-- ========== 视图5: 收藏 ========== -->
+  <div class="view-container" id="view-favorites">
+    <div class="browser-frame">
+      <div class="browser-bar">
+        <div class="browser-dot red"></div>
+        <div class="browser-dot yellow"></div>
+        <div class="browser-dot green"></div>
+        <div class="browser-url">https://fragmentmind.app/favorites</div>
+      </div>
+      <div style="display: flex; flex-direction: column; height: 680px;">
+        <div class="top-bar">
+          <div class="logo"><div class="logo-icon">F</div>FragmentMind</div>
+          <div class="global-search">搜索你的收藏笔记...</div>
+          <div class="top-bar-actions">
+            <div class="icon-btn">🔔<div class="notification-badge"></div></div>
+            <div class="user-avatar">陈</div>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="sidebar">
+            <div class="quick-add-btn"><span>⚡</span> 快速收集</div>
+            <div class="nav-section">
+              <div class="nav-item" data-view="inbox"><span class="nav-icon">📥</span>收件箱<span class="nav-badge">3</span></div>
+              <div class="nav-item" data-view="knowledge"><span class="nav-icon">📚</span>知识库<span class="nav-count">247</span></div>
+              <div class="nav-item" data-view="search"><span class="nav-icon">🔍</span>搜索与问答</div>
+              <div class="nav-item" data-view="graph"><span class="nav-icon">🌐</span>知识图谱<span class="pro-tag">PRO</span></div>
+              <div class="nav-item active" data-view="favorites"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
+              <div class="nav-item" data-view="account"><span class="nav-icon">⚙️</span>账户设置</div>
+              <div class="nav-item" data-view="extension"><span class="nav-icon">🧩</span>浏览器插件</div>
+            </div>
+            <div class="nav-section">
+              <div class="nav-section-title">收藏筛选</div>
+              <div class="nav-item active" style="font-size:12px;"><span class="nav-icon">⭐</span>全部收藏<span class="nav-count">12</span></div>
+              <div class="nav-item" style="font-size:12px;"><span class="nav-icon">🔥</span>高频引用<span class="nav-count">5</span></div>
+              <div class="nav-item" style="font-size:12px;"><span class="nav-icon">🕒</span>最近收藏<span class="nav-count">7</span></div>
+            </div>
+          </div>
+
+          <div class="workspace">
+            <div class="workspace-header">
+              <div class="workspace-title-row">
+                <div>
+                  <div class="workspace-title">⭐ 收藏 / 重要笔记</div>
+                  <div class="workspace-stats">12 条收藏笔记 · 最近收藏于 5 分钟前</div>
+                </div>
+                <div class="workspace-actions">
+                  <div class="filter-chip active">⭐ 全部收藏</div>
+                  <div class="filter-chip">🏷️ 按标签</div>
+                  <div class="filter-chip">⏰ 最近收藏</div>
+                  <div class="view-toggle">
+                    <div class="view-toggle-btn">☰</div>
+                    <div class="view-toggle-btn active">▦</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding: 16px 24px; background:#fff8e1; border-bottom:1px solid #fdd663; display:flex; align-items:center; justify-content:space-between; gap:16px;">
+              <div>
+                <div style="font-size:13px; font-weight:600; color:#b06000; margin-bottom:2px;">收藏用于沉淀高价值内容</div>
+                <div style="font-size:12px; color:#5f6368;">点击任意笔记卡片右上角星标可加入/移出收藏；收藏视图仅展示被标记为重要的笔记。</div>
+              </div>
+              <button style="padding:8px 14px; background:#fbbc04; color:#202124; border:none; border-radius:18px; cursor:pointer; font-size:12px; font-weight:600; white-space:nowrap;">管理收藏规则</button>
+            </div>
+
+            <div class="notes-grid-view" style="padding-top:18px;">
+              <div class="note-card">
+                <div class="note-card-header">
+                  <div class="note-status processing"></div>
+                  <div class="note-card-title">⭐ GPT-5 发布：多模态能力再次跃升</div>
+                </div>
+                <div class="note-card-summary">收藏原因：大模型趋势跟踪。OpenAI 正式发布 GPT-5，在推理、多模态理解、长上下文处理等方面实现显著提升...</div>
+                <div class="note-card-footer">
+                  <span class="note-tag tech">AI</span>
+                  <span class="note-tag tech">大模型</span>
+                  <div class="note-card-time">5分钟前收藏</div>
+                </div>
+              </div>
+
+              <div class="note-card">
+                <div class="note-card-header">
+                  <div class="note-status processed"></div>
+                  <div class="note-card-title">⭐ 远程办公3年总结：高效团队的5个核心习惯</div>
+                </div>
+                <div class="note-card-summary">收藏原因：报告引用素材。异步沟通优先、深度工作时段保护、文档驱动决策等经验可直接复用...</div>
+                <div class="note-card-footer">
+                  <span class="note-tag biz">管理</span>
+                  <span class="note-tag">远程办公</span>
+                  <div class="note-card-time">今天 10:30</div>
+                </div>
+              </div>
+
+              <div class="note-card">
+                <div class="note-card-header">
+                  <div class="note-status processed"></div>
+                  <div class="note-card-title">⭐ 产品设计中的“峰终定律”应用案例</div>
+                </div>
+                <div class="note-card-summary">收藏原因：创作素材。通过宜家、星巴克、Apple Store案例解析如何设计关键体验记忆点...</div>
+                <div class="note-card-footer">
+                  <span class="note-tag design">用户体验</span>
+                  <span class="note-tag design">心理学</span>
+                  <div class="note-card-time">今天 09:20</div>
+                </div>
+              </div>
+
+              <div class="note-card">
+                <div class="note-card-header">
+                  <div class="note-status processed"></div>
+                  <div class="note-card-title">⭐ 如何构建个人的第二大脑</div>
+                </div>
+                <div class="note-card-summary">收藏原因：方法论沉淀。Tiago Forte 分享 CODE 方法论，强调知识管理应服务于表达和行动...</div>
+                <div class="note-card-footer">
+                  <span class="note-tag learning">知识管理</span>
+                  <span class="note-tag learning">方法论</span>
+                  <div class="note-card-time">昨天 18:10</div>
+                </div>
+              </div>
+
+              <div style="border:1px dashed #dadce0; border-radius:10px; padding:24px; text-align:center; color:#5f6368; background:#fafafa; min-height:176px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div style="font-size:28px; margin-bottom:8px;">☆</div>
+                <div style="font-size:14px; font-weight:600; color:#3c4043; margin-bottom:4px;">继续收藏重要笔记</div>
+                <div style="font-size:12px; line-height:1.5;">在收件箱、知识库或搜索结果中点击星标，内容会自动出现在这里。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 视图6: 账户设置 ========== -->
   <div class="view-container" id="view-account">
     <div class="browser-frame">
       <div class="browser-bar">
@@ -2227,6 +2357,7 @@ body {
               <div class="nav-item" data-view="knowledge"><span class="nav-icon">📚</span>知识库<span class="nav-count">247</span></div>
               <div class="nav-item" data-view="search"><span class="nav-icon">🔍</span>搜索与问答</div>
               <div class="nav-item" data-view="graph"><span class="nav-icon">🌐</span>知识图谱<span class="pro-tag">PRO</span></div>
+              <div class="nav-item" data-view="favorites"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
               <div class="nav-item active" data-view="account"><span class="nav-icon">⚙️</span>账户设置</div>
               <div class="nav-item" data-view="extension"><span class="nav-icon">🧩</span>浏览器插件</div>
             </div>
@@ -2361,7 +2492,7 @@ body {
     </div>
   </div>
 
-  <!-- ========== 视图6: 浏览器插件 ========== -->
+  <!-- ========== 视图7: 浏览器插件 ========== -->
   <div class="view-container" id="view-extension">
     <div class="browser-frame">
       <div class="browser-bar">
@@ -2387,6 +2518,7 @@ body {
               <div class="nav-item" data-view="knowledge"><span class="nav-icon">📚</span>知识库<span class="nav-count">247</span></div>
               <div class="nav-item" data-view="search"><span class="nav-icon">🔍</span>搜索与问答</div>
               <div class="nav-item" data-view="graph"><span class="nav-icon">🌐</span>知识图谱<span class="pro-tag">PRO</span></div>
+              <div class="nav-item" data-view="favorites"><span class="nav-icon">⭐</span>收藏<span class="nav-count">12</span></div>
               <div class="nav-item" data-view="account"><span class="nav-icon">⚙️</span>账户设置</div>
               <div class="nav-item active" data-view="extension"><span class="nav-icon">🧩</span>浏览器插件</div>
             </div>
